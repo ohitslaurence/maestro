@@ -1,6 +1,7 @@
 use tauri::Manager;
 
 mod sessions;
+mod terminal;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -27,10 +28,10 @@ pub fn run() {
             sessions::list_sessions,
             sessions::spawn_session,
             sessions::stop_session,
-            sessions::terminal_open,
-            sessions::terminal_write,
-            sessions::terminal_resize,
-            sessions::terminal_close,
+            terminal::terminal_open,
+            terminal::terminal_write,
+            terminal::terminal_resize,
+            terminal::terminal_close,
             sessions::get_git_status,
             sessions::get_git_diffs,
             sessions::get_git_log,

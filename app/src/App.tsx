@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { listSessions } from "./services/tauri";
+import { useResizablePanels, ResizeHandle } from "./features/layout";
 
 function App() {
   const [sessions, setSessions] = useState<string[]>([]);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const { sidebarWidth, isResizing, onSidebarResizeStart } = useResizablePanels();
 
   useEffect(() => {
     // Fetch sessions on mount
@@ -11,8 +13,8 @@ function App() {
   }, []);
 
   return (
-    <div className="container">
-      <aside className="sidebar">
+    <div className={`container ${isResizing ? "container--resizing" : ""}`}>
+      <aside className="sidebar" style={{ width: sidebarWidth }}>
         <div className="sidebar-header">
           <h1>Orchestrator</h1>
         </div>
@@ -35,6 +37,7 @@ function App() {
           )}
         </nav>
       </aside>
+      <ResizeHandle onMouseDown={onSidebarResizeStart} isResizing={isResizing} />
       <main className="main-panel">
         {selectedSession ? (
           <div className="session-view">

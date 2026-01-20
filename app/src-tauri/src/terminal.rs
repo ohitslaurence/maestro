@@ -4,7 +4,7 @@ use std::sync::{Arc, LazyLock};
 
 use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use serde::Serialize;
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 use tokio::sync::Mutex;
 
 static TERMINAL_SESSIONS: LazyLock<Mutex<HashMap<String, Arc<TerminalSession>>>> =

@@ -14,6 +14,8 @@ export type TerminalSession = {
   id: string;
 };
 
+export type TerminalStatus = "idle" | "connecting" | "ready" | "error";
+
 export type GitFileStatus = {
   path: string;
   status: string;
