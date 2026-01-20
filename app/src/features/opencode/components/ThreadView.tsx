@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useOpenCodeThread } from "../hooks/useOpenCodeThread";
 import { useOpenCodeSession } from "../hooks/useOpenCodeSession";
 import { useOpenCodeConnection } from "../hooks/useOpenCodeConnection";
@@ -88,6 +88,21 @@ export function ThreadView({ workspaceId }: ThreadViewProps) {
   const handleConnect = useCallback(() => {
     void connect();
   }, [connect]);
+
+  // Track previous status to detect transitions
+  const prevStatusRef = useRef(status);
+
+  // Clear pending messages when turn completes (status: processing → idle)
+  useEffect(() => {
+    const wasProcessing = prevStatusRef.current === "processing";
+    const nowIdle = status === "idle";
+    prevStatusRef.current = status;
+
+    // If we transitioned from processing to idle, clear pending messages
+    if (wasProcessing && nowIdle && pendingUserMessages.length > 0) {
+      setPendingUserMessages([]);
+    }
+  }, [status, pendingUserMessages.length]);
 
   const isProcessing = status === "processing" || isPrompting;
   const canStop = status === "processing";

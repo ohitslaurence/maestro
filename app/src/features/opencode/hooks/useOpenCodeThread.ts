@@ -100,6 +100,16 @@ export function useOpenCodeThread({
   // Track previous items for efficient updates
   const prevItemsRef = useRef<OpenCodeThreadItem[]>([]);
 
+  // Refs for values accessed in event handlers to avoid stale closures
+  const processingStartedAtRef = useRef(processingStartedAt);
+  const pendingUserMessagesRef = useRef(pendingUserMessages);
+  useEffect(() => {
+    processingStartedAtRef.current = processingStartedAt;
+  }, [processingStartedAt]);
+  useEffect(() => {
+    pendingUserMessagesRef.current = pendingUserMessages;
+  }, [pendingUserMessages]);
+
   // Convert tracked message to thread items
   const convertMessageToItems = useCallback((msg: TrackedMessage): OpenCodeThreadItem[] => {
     const result: OpenCodeThreadItem[] = [];
@@ -284,10 +294,15 @@ export function useOpenCodeThread({
     rebuildItemsRef.current = rebuildItems;
   }, [rebuildItems]);
 
-  // Rebuild when pending messages change
+  // Rebuild when pending messages change and set immediate processing state
   useEffect(() => {
     if (pendingUserMessages.length > 0) {
       rebuildItemsRef.current();
+      // Set processing immediately when user sends a message (before events arrive)
+      setStatus("processing");
+      if (!processingStartedAtRef.current) {
+        setProcessingStartedAt(Date.now());
+      }
     }
   }, [pendingUserMessages]);
 
@@ -374,6 +389,43 @@ export function useOpenCodeThread({
         const errProps = props as { error?: string } | undefined;
         setError(errProps?.error || "Unknown error");
         setStatus("error");
+        return;
+      }
+
+      // Handle session.status - provides immediate processing feedback
+      if (eventType === "session.status") {
+        const statusProps = props as { sessionID?: string; status?: { type?: string } } | undefined;
+        // Filter by session if we have one
+        if (sessionId && statusProps?.sessionID !== sessionId) {
+          return;
+        }
+        const statusType = statusProps?.status?.type;
+        if (statusType === "busy") {
+          setStatus("processing");
+          if (!processingStartedAtRef.current) {
+            setProcessingStartedAt(Date.now());
+          }
+        } else if (statusType === "idle") {
+          // Only set to idle if we don't have pending messages
+          if (pendingUserMessagesRef.current.length === 0) {
+            setStatus("idle");
+            setProcessingStartedAt(null);
+          }
+        }
+        return;
+      }
+
+      // Handle session.idle - alternative idle signal
+      if (eventType === "session.idle") {
+        const idleProps = props as { sessionID?: string } | undefined;
+        if (sessionId && idleProps?.sessionID !== sessionId) {
+          return;
+        }
+        if (pendingUserMessagesRef.current.length === 0) {
+          setStatus("idle");
+          setProcessingStartedAt(null);
+        }
+        return;
       }
       // Ignore other event types: server.heartbeat, session.created, session.updated, etc.
     });
