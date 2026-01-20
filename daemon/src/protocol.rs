@@ -232,12 +232,14 @@ pub struct GitLogResult {
 // --- OpenCode response types ---
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OpenCodeConnectResult {
     pub workspace_id: String,
     pub base_url: String,
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OpenCodeStatusResult {
     pub connected: bool,
     pub base_url: Option<String>,
