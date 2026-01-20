@@ -41,31 +41,32 @@ See `specs/TASKS/` for detailed task specs:
 - `007-research-claude-code-sdk.md` - Claude Code programmatic interface
 - `008-research-opencode-server.md` - Open Code server protocol
 
-## Phase 2: Core Infrastructure (Current)
-- [ ] Feature-sliced architecture (Task 005)
-- [ ] Tauri IPC wrapper (Task 002)
-- [ ] Event hub pattern (Task 003)
-- [ ] Resizable panels (Task 006)
-- [ ] Basic layout (sidebar + main panel)
+## Phase 2: Core Infrastructure (Complete)
+- [x] Feature-sliced architecture (Task 005)
+- [x] Tauri IPC wrapper (Task 002)
+- [x] Event hub pattern (Task 003)
+- [x] Resizable panels (Task 006)
+- [x] Basic layout (sidebar + main panel)
 
-## Phase 3: Terminal Integration
-- [ ] Terminal implementation (Task 004)
-- [ ] PTY management in Rust backend
-- [ ] xterm.js frontend integration
-- [ ] Bidirectional streaming
+## Phase 3: Terminal Integration (Complete)
+- [x] Terminal implementation (Task 004)
+- [x] PTY management in Rust backend
+- [x] xterm.js frontend integration
+- [x] Bidirectional streaming
 - [ ] Session switching with buffer restore
 
-## Phase 4: Git Integration
-- [ ] Daemon: Git status per session
-- [ ] Daemon: Git diff (staged/unstaged)
-- [ ] Daemon: Git log
-- [ ] Frontend: Diff viewer with `@pierre/diffs`
+## Phase 4: Git Integration (Current)
+- [x] Backend: Git status per session (Task 012)
+- [x] Backend: Git diff (staged/unstaged)
+- [x] Backend: Git log with ahead/behind
+- [x] Frontend: GitStatusPanel component
+- [x] Frontend: DiffViewer component
 - [ ] Frontend: Commit history panel
 - [ ] Frontend: File tree with change indicators
 
 ## Phase 5: Agent Protocol Integration
-- [ ] Research Claude Code SDK (Task 007)
-- [ ] Research Open Code server protocol (Task 008)
+- [x] Research Claude Code SDK (Task 007)
+- [x] Research Open Code server protocol (Task 008)
 - [ ] Implement Claude Code harness
 - [ ] Implement Open Code harness
 - [ ] Spawn agents from UI
@@ -81,11 +82,10 @@ See `specs/TASKS/` for detailed task specs:
 
 ## Immediate Next Steps
 
-1. **Research tasks** - Run Task 007 (Claude Code) and Task 008 (Open Code)
-2. **Feature-sliced architecture** - Restructure app per Task 005
-3. **Tauri IPC wrapper** - Implement per Task 002
-4. **Event hub** - Implement per Task 003
-5. **Terminal** - Implement per Task 004
+1. **Git UI polish** - Commit history panel, file tree with indicators
+2. **Session buffer restore** - Persist terminal state across session switches
+3. **Agent harness implementation** - Start with Claude Code based on Task 007 research
+4. **Wire git panels** - Connect GitStatusPanel/DiffViewer to session selection
 
 ## Commands Reference
 
@@ -94,8 +94,11 @@ See `specs/TASKS/` for detailed task specs:
 git subtree pull --prefix=reference/codex-monitor https://github.com/Dimillian/CodexMonitor.git main --squash
 
 # Run Tauri dev
-npm run tauri dev
+bun run tauri:dev
 
 # Build Tauri app
-npm run tauri build
+bun run tauri build
+
+# Type check
+bun run typecheck
 ```
