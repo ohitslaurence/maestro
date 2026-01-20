@@ -26,6 +26,15 @@ export type DaemonStatus = {
   port?: number;
 };
 
+export type DaemonConnectionProfile = {
+  id: string;
+  name?: string;
+  host: string;
+  port: number;
+  token: string;
+  lastUsedAt?: number;
+};
+
 /** Session info from daemon's list_sessions */
 export type SessionInfo = {
   path: string;

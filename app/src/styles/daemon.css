@@ -40,6 +40,106 @@
   color: var(--status-error);
 }
 
+.sidebar-footer .connection-status {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.connection-menu {
+  position: relative;
+  width: 100%;
+}
+
+.connection-menu__popover {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + var(--space-2));
+  min-width: 240px;
+  background: var(--surface-popover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  z-index: 10;
+}
+
+.connection-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.connection-menu__empty {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.connection-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.connection-menu__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.connection-menu__item:hover:not(:disabled) {
+  background: var(--surface-card-hover);
+}
+
+.connection-menu__item:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.connection-menu__item--active {
+  border-color: var(--accent-primary-muted);
+}
+
+.connection-menu__item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.connection-menu__item-label {
+  color: var(--text-primary);
+}
+
+.connection-menu__item-subtitle {
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+}
+
+.connection-menu__item-action {
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+}
+
+.connection-menu__shortcut {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -164,6 +264,91 @@
   margin-bottom: var(--space-4);
 }
 
+.saved-connections {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-4);
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.saved-connections__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.saved-connections__header h3 {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.saved-connections__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.saved-connections__toggle input {
+  accent-color: var(--accent-primary);
+}
+
+.saved-connections__empty {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.saved-connections__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.saved-connections__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.saved-connections__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.saved-connections__host {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.saved-connections__host-sub {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.saved-connections__hint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.saved-connections__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 /* =============================================================================
    Buttons
    ============================================================================= */
@@ -195,6 +380,15 @@
 
 .btn--primary:hover:not(:disabled) {
   background: var(--accent-primary-hover);
+}
+
+.btn--xs {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.btn--block {
+  width: 100%;
 }
 
 .btn--secondary {

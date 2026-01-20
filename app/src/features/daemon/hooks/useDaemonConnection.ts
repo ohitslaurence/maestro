@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { DaemonConnectionStatus, DaemonStatus } from "../../../types";
 import {
   daemonConfigure,
@@ -28,6 +28,7 @@ export function useDaemonConnection(): DaemonConnectionState {
   const [host, setHost] = useState<string | undefined>();
   const [port, setPort] = useState<number | undefined>();
   const [error, setError] = useState<string | undefined>();
+  const autoConnectPendingRef = useRef(true);
 
   const refresh = useCallback(async () => {
     try {
@@ -74,6 +75,7 @@ export function useDaemonConnection(): DaemonConnectionState {
   const configure = useCallback(
     async (newHost: string, newPort: number, token: string) => {
       try {
+        autoConnectPendingRef.current = false;
         await daemonConfigure(newHost, newPort, token);
         setHost(newHost);
         setPort(newPort);
@@ -91,6 +93,22 @@ export function useDaemonConnection(): DaemonConnectionState {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (!autoConnectPendingRef.current) {
+      return;
+    }
+
+    if (status === "connected" || status === "connecting" || status === "error") {
+      autoConnectPendingRef.current = false;
+      return;
+    }
+
+    if (status === "disconnected" && host && port) {
+      autoConnectPendingRef.current = false;
+      void connect();
+    }
+  }, [status, host, port, connect]);
 
   // Subscribe to daemon connection events
   useEffect(() => {

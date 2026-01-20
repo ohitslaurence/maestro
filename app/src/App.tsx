@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useResizablePanels, ResizeHandle, TabBar } from "./features/layout";
 import type { Tab } from "./features/layout";
 import { useSessions, SessionList } from "./features/sessions";
@@ -6,7 +6,8 @@ import { useTerminalSession, TerminalPanel } from "./features/terminal";
 import { GitPanel } from "./features/git";
 import {
   useDaemonConnection,
-  ConnectionStatus,
+  useDaemonProfiles,
+  ConnectionMenu,
   SettingsModal,
 } from "./features/daemon";
 
@@ -34,6 +35,17 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [activeTab, setActiveTab] = useState<MainPanelTab>("terminal");
   const isConnected = connectionStatus === "connected";
+  const autoRestoreRef = useRef(false);
+
+  const {
+    profiles,
+    rememberLastUsed,
+    lastUsedProfile,
+    upsertProfile,
+    removeProfile,
+    markLastUsed,
+    setRememberLastUsed,
+  } = useDaemonProfiles();
 
   // Session management - only fetch when connected
   const {
@@ -80,6 +92,36 @@ function App() {
     setShowSettings(true);
   }, []);
 
+  const handleConnectProfile = useCallback(
+    async (profile: {
+      name?: string;
+      host: string;
+      port: number;
+      token: string;
+    }) => {
+      await configure(profile.host, profile.port, profile.token);
+      await connect();
+      const saved = upsertProfile(profile);
+      markLastUsed(saved.id);
+    },
+    [configure, connect, upsertProfile, markLastUsed],
+  );
+
+  const handleSaveProfile = useCallback(
+    (input: {
+      id?: string | null;
+      name?: string;
+      host: string;
+      port: number;
+      token: string;
+    }) => {
+      const saved = upsertProfile(input, input.id ?? null);
+      markLastUsed(saved.id);
+      return saved;
+    },
+    [upsertProfile, markLastUsed],
+  );
+
   const handleCloseSettings = useCallback(() => {
     setShowSettings(false);
   }, []);
@@ -88,17 +130,42 @@ function App() {
     setActiveTab(tabId as MainPanelTab);
   }, []);
 
+  useEffect(() => {
+    if (autoRestoreRef.current) {
+      return;
+    }
+
+    if (!rememberLastUsed || !lastUsedProfile) {
+      autoRestoreRef.current = true;
+      return;
+    }
+
+    if (connectionStatus !== "disconnected") {
+      autoRestoreRef.current = true;
+      return;
+    }
+
+    if (host || port) {
+      autoRestoreRef.current = true;
+      return;
+    }
+
+    autoRestoreRef.current = true;
+    void handleConnectProfile(lastUsedProfile);
+  }, [
+    rememberLastUsed,
+    lastUsedProfile,
+    connectionStatus,
+    host,
+    port,
+    handleConnectProfile,
+  ]);
+
   return (
     <div className={`container ${isResizing ? "container--resizing" : ""}`}>
       <aside className="sidebar" style={{ width: sidebarWidth }}>
         <div className="sidebar-header">
-          <h1>Orchestrator</h1>
-          <ConnectionStatus
-            status={connectionStatus}
-            host={host}
-            port={port}
-            onClick={handleConnectionClick}
-          />
+          <h1>Maestro</h1>
         </div>
         <SessionList
           sessions={sessions}
@@ -108,6 +175,17 @@ function App() {
           disabled={!isConnected}
           onSelectSession={selectSession}
         />
+        <div className="sidebar-footer">
+          <ConnectionMenu
+            status={connectionStatus}
+            host={host}
+            port={port}
+            profiles={profiles}
+            onConnectProfile={handleConnectProfile}
+            onDisconnect={disconnect}
+            onManage={handleConnectionClick}
+          />
+        </div>
       </aside>
       <ResizeHandle onMouseDown={onSidebarResizeStart} isResizing={isResizing} />
       <main className="main-panel">
@@ -147,13 +225,14 @@ function App() {
           </div>
         ) : (
           <div className="welcome">
-            <h2>Welcome to Orchestrator</h2>
+            <h2>Welcome to Maestro</h2>
             <p>Select a session from the sidebar to view it.</p>
           </div>
         )}
       </main>
 
       <SettingsModal
+        key={showSettings ? "settings-open" : "settings-closed"}
         isOpen={showSettings}
         onClose={handleCloseSettings}
         status={connectionStatus}
@@ -163,6 +242,12 @@ function App() {
         onConfigure={configure}
         onConnect={connect}
         onDisconnect={disconnect}
+        profiles={profiles}
+        rememberLastUsed={rememberLastUsed}
+        onRememberLastUsedChange={setRememberLastUsed}
+        onConnectProfile={handleConnectProfile}
+        onRemoveProfile={removeProfile}
+        onSaveProfile={handleSaveProfile}
       />
     </div>
   );

@@ -34,7 +34,7 @@
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--space-3);
   /* Make header draggable like title bar */
   -webkit-app-region: drag;
@@ -53,6 +53,18 @@
 .sidebar-header button,
 .sidebar-header a {
   -webkit-app-region: no-drag;
+}
+
+/* =============================================================================
+   Sidebar Footer
+   ============================================================================= */
+
+.sidebar-footer {
+  padding: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /* =============================================================================
