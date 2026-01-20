@@ -238,8 +238,8 @@ fn parse_log_output(output: &[u8]) -> Vec<GitLogEntry> {
 
 /// List active tmux sessions (interim discovery method)
 /// In the future, this will query the daemon for proper session tracking
-#[tauri::command]
-pub async fn list_sessions() -> Result<Vec<String>, String> {
+#[allow(dead_code)]
+pub async fn list_sessions_local() -> Result<Vec<String>, String> {
     // For now, list tmux sessions as a starting point
     let output = Command::new("tmux")
         .args(["list-sessions", "-F", "#{session_name}"])
@@ -283,8 +283,8 @@ pub async fn stop_session(_session_id: String) -> Result<(), String> {
     Ok(())
 }
 
-#[tauri::command]
-pub async fn get_git_status(session_id: String) -> Result<GitStatus, String> {
+#[allow(dead_code)]
+pub async fn get_git_status_local(session_id: String) -> Result<GitStatus, String> {
     let repo_path = get_session_path(&session_id)?;
 
     // Check if we're in a git repo
@@ -382,8 +382,8 @@ pub async fn get_git_status(session_id: String) -> Result<GitStatus, String> {
     })
 }
 
-#[tauri::command]
-pub async fn get_git_diffs(session_id: String) -> Result<Vec<GitFileDiff>, String> {
+#[allow(dead_code)]
+pub async fn get_git_diffs_local(session_id: String) -> Result<Vec<GitFileDiff>, String> {
     let repo_path = get_session_path(&session_id)?;
 
     // Check if we're in a git repo
@@ -460,8 +460,8 @@ pub async fn get_git_diffs(session_id: String) -> Result<Vec<GitFileDiff>, Strin
     Ok(diffs)
 }
 
-#[tauri::command]
-pub async fn get_git_log(
+#[allow(dead_code)]
+pub async fn get_git_log_local(
     session_id: String,
     limit: Option<u32>,
 ) -> Result<GitLogResponse, String> {
@@ -547,6 +547,47 @@ pub async fn get_git_log(
         behind_entries,
         upstream,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{parse_log_output, parse_numstat, parse_porcelain_status};
+
+    #[test]
+    fn parse_porcelain_status_splits_staged_and_unstaged() {
+        let input = b"M  staged.txt\n M unstaged.txt\nAM both.txt\n?? new.txt\n";
+        let (staged, unstaged) = parse_porcelain_status(input);
+
+        assert_eq!(staged.len(), 2);
+        assert!(staged.iter().any(|file| file.path == "staged.txt"));
+        assert!(staged.iter().any(|file| file.path == "both.txt"));
+
+        assert_eq!(unstaged.len(), 3);
+        assert!(unstaged.iter().any(|file| file.path == "unstaged.txt"));
+        assert!(unstaged.iter().any(|file| file.path == "both.txt"));
+        assert!(unstaged.iter().any(|file| file.path == "new.txt"));
+    }
+
+    #[test]
+    fn parse_numstat_handles_missing_numbers() {
+        let input = b"10\t2\tfoo.rs\n-\t-\tbin.dat\n";
+        let stats = parse_numstat(input);
+
+        assert_eq!(stats.get("foo.rs"), Some(&(10, 2)));
+        assert_eq!(stats.get("bin.dat"), Some(&(0, 0)));
+    }
+
+    #[test]
+    fn parse_log_output_reads_entries() {
+        let input = b"abc123\0Fix bug\0Jane\01699999999\nxyz789\0Add feature\0Joe\01680000000\n";
+        let entries = parse_log_output(input);
+
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].sha, "abc123");
+        assert_eq!(entries[0].summary, "Fix bug");
+        assert_eq!(entries[0].author, "Jane");
+        assert_eq!(entries[0].timestamp, 1699999999);
+    }
 }
 
 // Future commands:

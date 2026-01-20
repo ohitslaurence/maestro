@@ -65,8 +65,9 @@ fn spawn_terminal_reader(
     });
 }
 
-#[tauri::command]
-pub(crate) async fn terminal_open(
+// Local terminal implementation (not used when connected to daemon)
+#[allow(dead_code)]
+pub(crate) async fn terminal_open_local(
     session_id: String,
     terminal_id: String,
     cols: u16,
@@ -149,8 +150,8 @@ pub(crate) async fn terminal_open(
     })
 }
 
-#[tauri::command]
-pub(crate) async fn terminal_write(
+#[allow(dead_code)]
+pub(crate) async fn terminal_write_local(
     session_id: String,
     terminal_id: String,
     data: String,
@@ -170,8 +171,8 @@ pub(crate) async fn terminal_write(
     Ok(())
 }
 
-#[tauri::command]
-pub(crate) async fn terminal_resize(
+#[allow(dead_code)]
+pub(crate) async fn terminal_resize_local(
     session_id: String,
     terminal_id: String,
     cols: u16,
@@ -195,8 +196,8 @@ pub(crate) async fn terminal_resize(
     Ok(())
 }
 
-#[tauri::command]
-pub(crate) async fn terminal_close(
+#[allow(dead_code)]
+pub(crate) async fn terminal_close_local(
     session_id: String,
     terminal_id: String,
 ) -> Result<(), String> {
