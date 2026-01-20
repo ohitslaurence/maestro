@@ -73,6 +73,11 @@
   color: var(--text-primary);
 }
 
+.git-file--selected {
+  background: var(--surface-card-active);
+  color: var(--text-primary);
+}
+
 /* =============================================================================
    Git Status Badges
    ============================================================================= */
@@ -160,6 +165,16 @@
   padding: var(--space-3) var(--space-4);
   background: var(--surface-panel);
   border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.diff-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .diff-path {
@@ -187,6 +202,66 @@
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   line-height: 1.5;
+}
+
+.diff-table {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.diff-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.diff-row--header {
+  grid-template-columns: 1fr;
+  background: var(--accent-primary-muted);
+  color: var(--accent-primary);
+}
+
+.diff-header-text {
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.diff-cell {
+  display: flex;
+  min-height: 20px;
+}
+
+.diff-cell--left {
+  border-right: 1px solid var(--border-subtle);
+}
+
+.diff-cell .diff-line-number {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.diff-row--addition .diff-cell--right {
+  background: var(--status-success-muted);
+}
+
+.diff-row--addition .diff-cell--right .diff-line-number {
+  background: rgba(74, 222, 128, 0.2);
+  color: var(--status-success);
+}
+
+.diff-row--deletion .diff-cell--left {
+  background: var(--status-error-muted);
+}
+
+.diff-row--deletion .diff-cell--left .diff-line-number {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--status-error);
+}
+
+.diff-row--context .diff-cell {
+  background: transparent;
 }
 
 /* =============================================================================

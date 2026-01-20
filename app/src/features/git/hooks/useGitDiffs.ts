@@ -30,6 +30,15 @@ export function useGitDiffs({ sessionId }: UseGitDiffsOptions): GitDiffsState {
     try {
       const result = await getGitDiffs(sessionId);
       setDiffs(result);
+      setSelectedPath((previous) => {
+        if (result.length === 0) {
+          return null;
+        }
+        if (previous && result.some((diff) => diff.path === previous)) {
+          return previous;
+        }
+        return result[0].path;
+      });
       setError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

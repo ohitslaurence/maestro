@@ -5,16 +5,19 @@ type GitStatusPanelProps = {
   isLoading: boolean;
   error: string | null;
   onFileSelect?: (path: string) => void;
+  selectedPath?: string | null;
 };
 
 function FileList({
   files,
   title,
   onSelect,
+  selectedPath,
 }: {
   files: GitFileStatus[];
   title: string;
   onSelect?: (path: string) => void;
+  selectedPath?: string | null;
 }) {
   if (files.length === 0) {
     return null;
@@ -24,12 +27,14 @@ function FileList({
     <div className="git-file-list">
       <h4>{title}</h4>
       <ul>
-        {files.map((file) => (
-          <li
-            key={file.path}
-            className="git-file"
-            onClick={() => onSelect?.(file.path)}
-          >
+        {files.map((file) => {
+          const isSelected = selectedPath === file.path;
+          return (
+            <li
+              key={file.path}
+              className={`git-file${isSelected ? " git-file--selected" : ""}`}
+              onClick={() => onSelect?.(file.path)}
+            >
             <span className={`git-status-badge git-status-${file.status.toLowerCase()}`}>
               {file.status[0]}
             </span>
@@ -42,8 +47,9 @@ function FileList({
                 <span className="git-deletions">-{file.deletions}</span>
               )}
             </span>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -54,6 +60,7 @@ export function GitStatusPanel({
   isLoading,
   error,
   onFileSelect,
+  selectedPath,
 }: GitStatusPanelProps) {
   if (isLoading) {
     return (
@@ -96,12 +103,14 @@ export function GitStatusPanel({
         files={status.stagedFiles}
         title="Staged"
         onSelect={onFileSelect}
+        selectedPath={selectedPath}
       />
 
       <FileList
         files={status.unstagedFiles}
         title="Changes"
         onSelect={onFileSelect}
+        selectedPath={selectedPath}
       />
 
       {hasChanges && (
