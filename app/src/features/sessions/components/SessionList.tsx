@@ -1,9 +1,12 @@
+import type { SessionInfo } from "../../../types";
+
 type SessionListProps = {
-  sessions: string[];
+  sessions: SessionInfo[];
   selectedSession: string | null;
   isLoading: boolean;
   error: string | null;
-  onSelectSession: (sessionId: string) => void;
+  disabled?: boolean;
+  onSelectSession: (sessionPath: string) => void;
 };
 
 export function SessionList({
@@ -11,6 +14,7 @@ export function SessionList({
   selectedSession,
   isLoading,
   error,
+  disabled = false,
   onSelectSession,
 }: SessionListProps) {
   if (isLoading) {
@@ -31,6 +35,15 @@ export function SessionList({
     );
   }
 
+  if (disabled) {
+    return (
+      <nav className="session-list session-list--disabled">
+        <h2>Sessions</h2>
+        <p className="empty">Connect to daemon to view sessions</p>
+      </nav>
+    );
+  }
+
   return (
     <nav className="session-list">
       <h2>Sessions</h2>
@@ -40,11 +53,12 @@ export function SessionList({
         <ul>
           {sessions.map((session) => (
             <li
-              key={session}
-              className={selectedSession === session ? "selected" : ""}
-              onClick={() => onSelectSession(session)}
+              key={session.path}
+              className={selectedSession === session.path ? "selected" : ""}
+              onClick={() => onSelectSession(session.path)}
+              title={session.path}
             >
-              {session}
+              {session.name}
             </li>
           ))}
         </ul>

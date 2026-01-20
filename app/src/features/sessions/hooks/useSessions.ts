@@ -1,42 +1,63 @@
 import { useCallback, useEffect, useState } from "react";
+import type { SessionInfo } from "../../../types";
 import { listSessions } from "../../../services/tauri";
 
 type UseSessionsOptions = {
   pollInterval?: number;
+  enabled?: boolean;
 };
 
 export type SessionsState = {
-  sessions: string[];
+  sessions: SessionInfo[];
   selectedSession: string | null;
   isLoading: boolean;
   error: string | null;
-  selectSession: (sessionId: string | null) => void;
+  selectSession: (sessionPath: string | null) => void;
   refresh: () => Promise<void>;
 };
 
 export function useSessions(options: UseSessionsOptions = {}): SessionsState {
-  const { pollInterval } = options;
-  const [sessions, setSessions] = useState<string[]>([]);
+  const { pollInterval, enabled = true } = options;
+  const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
+    if (!enabled) {
+      setSessions([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const result = await listSessions();
       setSessions(result);
       setError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message);
+      // Don't show error for expected disconnection states
+      if (message === "daemon_disconnected" || message === "daemon_not_configured") {
+        setSessions([]);
+        setError(null);
+      } else {
+        setError(message);
+      }
     } finally {
       setIsLoading(false);
     }
+  }, [enabled]);
+
+  const selectSession = useCallback((sessionPath: string | null) => {
+    setSelectedSession(sessionPath);
   }, []);
 
-  const selectSession = useCallback((sessionId: string | null) => {
-    setSelectedSession(sessionId);
-  }, []);
+  // Reset selection when sessions change (session might have been removed)
+  useEffect(() => {
+    if (selectedSession && !sessions.some((s) => s.path === selectedSession)) {
+      setSelectedSession(null);
+    }
+  }, [sessions, selectedSession]);
 
   // Initial fetch
   useEffect(() => {
@@ -45,7 +66,7 @@ export function useSessions(options: UseSessionsOptions = {}): SessionsState {
 
   // Optional polling
   useEffect(() => {
-    if (!pollInterval) {
+    if (!pollInterval || !enabled) {
       return;
     }
     const interval = setInterval(() => {
@@ -54,7 +75,7 @@ export function useSessions(options: UseSessionsOptions = {}): SessionsState {
     return () => {
       clearInterval(interval);
     };
-  }, [pollInterval, refresh]);
+  }, [pollInterval, enabled, refresh]);
 
   return {
     sessions,

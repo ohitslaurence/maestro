@@ -6,6 +6,7 @@ import "@xterm/xterm/css/xterm.css";
 import type { TerminalStatus } from "../../../types";
 import {
   subscribeTerminalOutput,
+  subscribeTerminalExited,
   type TerminalOutputEvent,
 } from "../../../services/events";
 import {
@@ -119,7 +120,7 @@ export function useTerminalSession({
 
   // Subscribe to terminal output events
   useEffect(() => {
-    const unlisten = subscribeTerminalOutput(
+    const unlistenOutput = subscribeTerminalOutput(
       (payload: TerminalOutputEvent) => {
         const { sessionId: sid, terminalId: tid, data } = payload;
         const key = `${sid}:${tid}`;
@@ -135,8 +136,26 @@ export function useTerminalSession({
         },
       },
     );
+
+    const unlistenExited = subscribeTerminalExited(
+      (payload) => {
+        const { sessionId: sid, terminalId: tid } = payload;
+        const key = `${sid}:${tid}`;
+        // Mark as closed so we don't send more input
+        openedSessionsRef.current.delete(key);
+        // If this is the active terminal, show exit status
+        if (activeKeyRef.current === key) {
+          const exitMsg = payload.exitCode !== undefined
+            ? `\r\n[Process exited with code ${payload.exitCode}]`
+            : "\r\n[Process exited]";
+          writeToTerminal(exitMsg);
+        }
+      },
+    );
+
     return () => {
-      unlisten();
+      unlistenOutput();
+      unlistenExited();
     };
   }, [writeToTerminal]);
 

@@ -127,6 +127,18 @@ impl DaemonState {
 impl DaemonClient {
     /// Connect to the daemon and authenticate
     pub async fn connect(config: &DaemonConfig, app_handle: AppHandle) -> Result<Self, String> {
+        Self::connect_inner(config, Some(app_handle)).await
+    }
+
+    #[cfg(test)]
+    pub async fn connect_without_app(config: &DaemonConfig) -> Result<Self, String> {
+        Self::connect_inner(config, None).await
+    }
+
+    async fn connect_inner(
+        config: &DaemonConfig,
+        app_handle: Option<AppHandle>,
+    ) -> Result<Self, String> {
         let addr = format!("{}:{}", config.host, config.port);
 
         let stream = timeout(CONNECT_TIMEOUT, TcpStream::connect(&addr))
@@ -168,7 +180,7 @@ impl DaemonClient {
         mut reader: BufReader<OwnedReadHalf>,
         pending: Arc<Mutex<PendingRequests>>,
         connected: Arc<RwLock<bool>>,
-        app_handle: AppHandle,
+        app_handle: Option<AppHandle>,
     ) {
         tokio::spawn(async move {
             let mut line = String::new();
@@ -192,7 +204,7 @@ impl DaemonClient {
                                 Self::handle_response(&pending, &parsed).await;
                             } else if parsed.get("method").is_some() {
                                 // Event
-                                Self::handle_event(&app_handle, &parsed);
+                                Self::handle_event(app_handle.as_ref(), &parsed);
                             }
                         }
                     }
@@ -202,7 +214,12 @@ impl DaemonClient {
 
             // Mark as disconnected
             *connected.write().await = false;
-            let _ = app_handle.emit("daemon:disconnected", serde_json::json!({"reason": "connection_lost"}));
+            if let Some(handle) = app_handle.as_ref() {
+                let _ = handle.emit(
+                    "daemon:disconnected",
+                    serde_json::json!({"reason": "connection_lost"}),
+                );
+            }
 
             // Fail all pending requests
             let mut pending = pending.lock().await;
@@ -233,7 +250,10 @@ impl DaemonClient {
         }
     }
 
-    fn handle_event(app_handle: &AppHandle, parsed: &Value) {
+    fn handle_event(app_handle: Option<&AppHandle>, parsed: &Value) {
+        let Some(handle) = app_handle else {
+            return;
+        };
         let method = match parsed.get("method").and_then(|v| v.as_str()) {
             Some(m) => m,
             None => return,
@@ -243,10 +263,10 @@ impl DaemonClient {
 
         match method {
             EVENT_TERMINAL_OUTPUT => {
-                let _ = app_handle.emit("daemon:terminal_output", params);
+                let _ = handle.emit("daemon:terminal_output", params);
             }
             EVENT_TERMINAL_EXITED => {
-                let _ = app_handle.emit("daemon:terminal_exited", params);
+                let _ = handle.emit("daemon:terminal_exited", params);
             }
             _ => {}
         }
@@ -335,4 +355,184 @@ pub fn spawn_reconnect_task(state: Arc<DaemonState>) {
             }
         }
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::DaemonClient;
+    use crate::daemon::config::DaemonConfig;
+    use crate::daemon::protocol::{
+        GitStatusResult, SessionIdParams, SessionInfo, METHOD_GIT_STATUS, METHOD_LIST_SESSIONS,
+    };
+    use serde_json::json;
+    use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+    use tokio::net::{TcpListener, TcpStream};
+    use tokio::time::{timeout, Duration};
+
+    const TEST_TIMEOUT: Duration = Duration::from_secs(2);
+
+    async fn read_line(reader: &mut BufReader<tokio::net::tcp::OwnedReadHalf>) -> String {
+        let mut line = String::new();
+        let bytes = timeout(TEST_TIMEOUT, reader.read_line(&mut line))
+            .await
+            .expect("read timeout")
+            .expect("read line");
+        assert!(bytes > 0, "expected request");
+        line
+    }
+
+    #[test]
+    fn client_connects_and_lists_sessions() {
+        let runtime = tokio::runtime::Runtime::new().expect("runtime");
+        runtime.block_on(async {
+            let listener = TcpListener::bind("127.0.0.1:0")
+                .await
+                .expect("bind listener");
+            let addr = listener.local_addr().expect("local addr");
+
+            tokio::spawn(async move {
+                if let Ok((stream, _)) = listener.accept().await {
+                    handle_mock_server(stream).await;
+                }
+            });
+
+            let config = DaemonConfig {
+                host: "127.0.0.1".to_string(),
+                port: addr.port(),
+                token: "secret".to_string(),
+            };
+
+            let client = DaemonClient::connect_without_app(&config)
+                .await
+                .expect("connect");
+            let sessions: Vec<SessionInfo> = client
+                .call(METHOD_LIST_SESSIONS, Option::<()>::None)
+                .await
+                .expect("list sessions");
+
+            assert_eq!(sessions.len(), 1);
+            assert_eq!(sessions[0].path, "/tmp/project");
+            assert_eq!(sessions[0].name, "project");
+        });
+    }
+
+    #[test]
+    fn client_requests_git_status() {
+        let runtime = tokio::runtime::Runtime::new().expect("runtime");
+        runtime.block_on(async {
+            let listener = TcpListener::bind("127.0.0.1:0")
+                .await
+                .expect("bind listener");
+            let addr = listener.local_addr().expect("local addr");
+
+            tokio::spawn(async move {
+                if let Ok((stream, _)) = listener.accept().await {
+                    handle_mock_git_status_server(stream).await;
+                }
+            });
+
+            let config = DaemonConfig {
+                host: "127.0.0.1".to_string(),
+                port: addr.port(),
+                token: "secret".to_string(),
+            };
+
+            let client = DaemonClient::connect_without_app(&config)
+                .await
+                .expect("connect");
+            let status: GitStatusResult = client
+                .call(
+                    METHOD_GIT_STATUS,
+                    Some(SessionIdParams {
+                        session_id: "/tmp/project".to_string(),
+                    }),
+                )
+                .await
+                .expect("git status");
+
+            assert_eq!(status.branch_name, "main");
+            assert_eq!(status.staged_files.len(), 1);
+            assert_eq!(status.unstaged_files.len(), 1);
+            assert_eq!(status.total_additions, 3);
+            assert_eq!(status.total_deletions, 1);
+        });
+    }
+
+    async fn handle_mock_server(stream: TcpStream) {
+        let (reader, mut writer) = stream.into_split();
+        let mut reader = BufReader::new(reader);
+
+        let auth_line = read_line(&mut reader).await;
+        let auth_value: serde_json::Value =
+            serde_json::from_str(auth_line.trim()).expect("auth json");
+        assert_eq!(auth_value.get("method"), Some(&json!("auth")));
+
+        let auth_response = json!({"id": 1, "result": {"ok": true}}).to_string();
+        writer
+            .write_all(auth_response.as_bytes())
+            .await
+            .expect("write auth response");
+        writer.write_all(b"\n").await.expect("newline");
+
+        let list_line = read_line(&mut reader).await;
+        let list_value: serde_json::Value =
+            serde_json::from_str(list_line.trim()).expect("list json");
+        assert_eq!(list_value.get("method"), Some(&json!("list_sessions")));
+
+        let list_response = json!({
+            "id": 2,
+            "result": [{"path": "/tmp/project", "name": "project"}]
+        })
+        .to_string();
+        writer
+            .write_all(list_response.as_bytes())
+            .await
+            .expect("write list response");
+        writer.write_all(b"\n").await.expect("newline");
+    }
+
+    async fn handle_mock_git_status_server(stream: TcpStream) {
+        let (reader, mut writer) = stream.into_split();
+        let mut reader = BufReader::new(reader);
+
+        let auth_line = read_line(&mut reader).await;
+        let auth_value: serde_json::Value =
+            serde_json::from_str(auth_line.trim()).expect("auth json");
+        assert_eq!(auth_value.get("method"), Some(&json!("auth")));
+
+        let auth_response = json!({"id": 1, "result": {"ok": true}}).to_string();
+        writer
+            .write_all(auth_response.as_bytes())
+            .await
+            .expect("write auth response");
+        writer.write_all(b"\n").await.expect("newline");
+
+        let status_line = read_line(&mut reader).await;
+        let status_value: serde_json::Value =
+            serde_json::from_str(status_line.trim()).expect("status json");
+        assert_eq!(status_value.get("method"), Some(&json!("git_status")));
+        let params = status_value.get("params").expect("params");
+        assert_eq!(params.get("session_id"), Some(&json!("/tmp/project")));
+
+        let status_response = json!({
+            "id": 2,
+            "result": {
+                "branchName": "main",
+                "stagedFiles": [
+                    {"path": "src/lib.rs", "status": "modified", "additions": 2, "deletions": 1}
+                ],
+                "unstagedFiles": [
+                    {"path": "README.md", "status": "modified", "additions": 1, "deletions": 0}
+                ],
+                "totalAdditions": 3,
+                "totalDeletions": 1
+            }
+        })
+        .to_string();
+        writer
+            .write_all(status_response.as_bytes())
+            .await
+            .expect("write status response");
+        writer.write_all(b"\n").await.expect("newline");
+    }
 }

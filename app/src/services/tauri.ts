@@ -2,9 +2,13 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AgentHarness,
   AgentSession,
+  DaemonStatus,
+  GitDiffResult,
   GitFileDiff,
-  GitLogResponse,
-  GitStatus,
+  GitLogResult,
+  GitStatusResult,
+  SessionInfo,
+  SessionInfoResult,
   TerminalSession,
 } from "../types";
 
@@ -25,12 +29,45 @@ async function invokeCommand<T>(
   }
 }
 
-/** List active agent sessions. */
-export async function listSessions(): Promise<string[]> {
-  return invokeCommand<string[]>("list_sessions");
+// --- Daemon connection commands ---
+
+/** Configure daemon connection (saves to disk) */
+export async function daemonConfigure(
+  host: string,
+  port: number,
+  token: string,
+): Promise<void> {
+  return invokeCommand("daemon_configure", { host, port, token });
 }
 
-/** Spawn a new agent session for a project. */
+/** Connect to configured daemon */
+export async function daemonConnect(): Promise<{ connected: boolean }> {
+  return invokeCommand<{ connected: boolean }>("daemon_connect");
+}
+
+/** Disconnect from daemon */
+export async function daemonDisconnect(): Promise<void> {
+  return invokeCommand("daemon_disconnect");
+}
+
+/** Get daemon connection status */
+export async function daemonStatus(): Promise<DaemonStatus> {
+  return invokeCommand<DaemonStatus>("daemon_status");
+}
+
+// --- Session commands ---
+
+/** List active sessions from daemon */
+export async function listSessions(): Promise<SessionInfo[]> {
+  return invokeCommand<SessionInfo[]>("list_sessions");
+}
+
+/** Get detailed session info */
+export async function sessionInfo(sessionId: string): Promise<SessionInfoResult> {
+  return invokeCommand<SessionInfoResult>("session_info", { sessionId });
+}
+
+/** Spawn a new agent session for a project (local only) */
 export async function spawnSession(
   harness: AgentHarness,
   projectPath: string,
@@ -41,12 +78,14 @@ export async function spawnSession(
   });
 }
 
-/** Stop a running agent session. */
+/** Stop a running agent session (local only) */
 export async function stopSession(sessionId: string): Promise<void> {
   return invokeCommand("stop_session", { sessionId });
 }
 
-/** Open a terminal stream for a session. */
+// --- Terminal commands ---
+
+/** Open a terminal stream for a session */
 export async function openTerminal(
   sessionId: string,
   terminalId: string,
@@ -61,7 +100,7 @@ export async function openTerminal(
   });
 }
 
-/** Write data into a terminal stream. */
+/** Write data into a terminal stream */
 export async function writeTerminal(
   sessionId: string,
   terminalId: string,
@@ -70,7 +109,7 @@ export async function writeTerminal(
   return invokeCommand("terminal_write", { sessionId, terminalId, data });
 }
 
-/** Resize a terminal stream. */
+/** Resize a terminal stream */
 export async function resizeTerminal(
   sessionId: string,
   terminalId: string,
@@ -80,7 +119,7 @@ export async function resizeTerminal(
   return invokeCommand("terminal_resize", { sessionId, terminalId, cols, rows });
 }
 
-/** Close a terminal stream. */
+/** Close a terminal stream */
 export async function closeTerminal(
   sessionId: string,
   terminalId: string,
@@ -88,20 +127,43 @@ export async function closeTerminal(
   return invokeCommand("terminal_close", { sessionId, terminalId });
 }
 
-/** Retrieve git status for a session workspace. */
-export async function getGitStatus(sessionId: string): Promise<GitStatus> {
-  return invokeCommand<GitStatus>("get_git_status", { sessionId });
+// --- Git commands ---
+
+/** Retrieve git status for a session workspace */
+export async function gitStatus(sessionId: string): Promise<GitStatusResult> {
+  return invokeCommand<GitStatusResult>("git_status", { sessionId });
 }
 
-/** Retrieve git diffs for a session workspace. */
+/** Retrieve git diffs for a session workspace */
+export async function gitDiff(sessionId: string): Promise<GitDiffResult> {
+  return invokeCommand<GitDiffResult>("git_diff", { sessionId });
+}
+
+/** Retrieve git log entries for a session workspace */
+export async function gitLog(
+  sessionId: string,
+  limit = 40,
+): Promise<GitLogResult> {
+  return invokeCommand<GitLogResult>("git_log", { sessionId, limit });
+}
+
+// --- Deprecated commands (for backward compatibility) ---
+
+/** @deprecated Use gitStatus instead */
+export async function getGitStatus(sessionId: string): Promise<GitStatusResult> {
+  return gitStatus(sessionId);
+}
+
+/** @deprecated Use gitDiff instead */
 export async function getGitDiffs(sessionId: string): Promise<GitFileDiff[]> {
-  return invokeCommand<GitFileDiff[]>("get_git_diffs", { sessionId });
+  const result = await gitDiff(sessionId);
+  return result.files;
 }
 
-/** Retrieve git log entries for a session workspace. */
+/** @deprecated Use gitLog instead */
 export async function getGitLog(
   sessionId: string,
   limit = 40,
-): Promise<GitLogResponse> {
-  return invokeCommand<GitLogResponse>("get_git_log", { sessionId, limit });
+): Promise<GitLogResult> {
+  return gitLog(sessionId, limit);
 }

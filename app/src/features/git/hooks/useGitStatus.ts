@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import type { GitStatus } from "../../../types";
-import { getGitStatus } from "../../../services/tauri";
+import type { GitStatusResult } from "../../../types";
+import { gitStatus } from "../../../services/tauri";
 
 type UseGitStatusOptions = {
   sessionId: string | null;
@@ -8,7 +8,7 @@ type UseGitStatusOptions = {
 };
 
 export type GitStatusState = {
-  status: GitStatus | null;
+  status: GitStatusResult | null;
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -18,7 +18,7 @@ export function useGitStatus({
   sessionId,
   pollInterval,
 }: UseGitStatusOptions): GitStatusState {
-  const [status, setStatus] = useState<GitStatus | null>(null);
+  const [status, setStatus] = useState<GitStatusResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +29,7 @@ export function useGitStatus({
     }
     setIsLoading(true);
     try {
-      const result = await getGitStatus(sessionId);
+      const result = await gitStatus(sessionId);
       setStatus(result);
       setError(null);
     } catch (err) {

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tauri::State;
 
 use super::client::DaemonState;
@@ -73,12 +73,6 @@ pub async fn list_sessions(state: State<'_, Arc<DaemonState>>) -> Result<Vec<Ses
     state
         .call::<(), Vec<SessionInfo>>(METHOD_LIST_SESSIONS, None)
         .await
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SessionInfoArgs {
-    pub session_id: String,
 }
 
 #[tauri::command]

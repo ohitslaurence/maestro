@@ -11,6 +11,7 @@ pub struct Request {
     pub params: Option<Value>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Response {
@@ -18,6 +19,7 @@ pub enum Response {
     Error { id: u64, error: RpcError },
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct RpcError {
     pub code: String,
@@ -25,6 +27,7 @@ pub struct RpcError {
 }
 
 /// Server→Client event (no id field)
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct Event {
     pub method: String,
@@ -32,6 +35,7 @@ pub struct Event {
 }
 
 /// Raw incoming message - could be response or event
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum IncomingMessage {
@@ -171,6 +175,7 @@ pub struct GitLogResult {
 
 // --- Event params (for forwarding to frontend) ---
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TerminalOutputParams {
     pub session_id: String,
@@ -178,6 +183,7 @@ pub struct TerminalOutputParams {
     pub data: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TerminalExitedParams {
     pub session_id: String,

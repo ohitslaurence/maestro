@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+#[cfg(target_os = "macos")]
 use tauri::Manager;
 
 mod daemon;
@@ -22,12 +23,10 @@ pub fn run() {
             }
 
             // Get the main window and set up
+            #[cfg(target_os = "macos")]
             if let Some(window) = app.get_webview_window("main") {
-                #[cfg(target_os = "macos")]
-                {
-                    use tauri::TitleBarStyle;
-                    let _ = window.set_title_bar_style(TitleBarStyle::Overlay);
-                }
+                use tauri::TitleBarStyle;
+                let _ = window.set_title_bar_style(TitleBarStyle::Overlay);
             }
 
             // Initialize daemon state

@@ -191,3 +191,78 @@ async fn process_request(
 
     Some(handlers::dispatch(&request, state, client_id).await)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::handle_client;
+    use crate::protocol::SessionInfo;
+    use crate::state::DaemonState;
+    use serde_json::Value;
+    use std::sync::Arc;
+    use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+    use tokio::net::{TcpListener, TcpStream};
+    use tokio::time::{timeout, Duration};
+
+    const TEST_TIMEOUT: Duration = Duration::from_secs(2);
+
+    async fn read_line(reader: &mut BufReader<tokio::net::tcp::OwnedReadHalf>) -> String {
+        let mut line = String::new();
+        let bytes = timeout(TEST_TIMEOUT, reader.read_line(&mut line))
+            .await
+            .expect("read timeout")
+            .expect("read line");
+        assert!(bytes > 0, "expected response line");
+        line
+    }
+
+    #[tokio::test]
+    async fn rpc_auth_and_list_sessions_round_trip() {
+        let sessions = vec![SessionInfo {
+            path: "/tmp/project".to_string(),
+            name: "project".to_string(),
+        }];
+        let state = Arc::new(DaemonState::new(Some("secret".to_string()), sessions));
+
+        let listener = TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("bind listener");
+        let addr = listener.local_addr().expect("local addr");
+        let state_clone = state.clone();
+
+        tokio::spawn(async move {
+            if let Ok((stream, _)) = listener.accept().await {
+                handle_client(stream, state_clone).await;
+            }
+        });
+
+        let stream = timeout(TEST_TIMEOUT, TcpStream::connect(addr))
+            .await
+            .expect("connect timeout")
+            .expect("connect");
+        let (reader, mut writer) = stream.into_split();
+        let mut reader = BufReader::new(reader);
+
+        writer
+            .write_all(b"{\"id\":1,\"method\":\"auth\",\"params\":{\"token\":\"secret\"}}\n")
+            .await
+            .expect("write auth");
+
+        let auth_line = read_line(&mut reader).await;
+        let auth_value: Value = serde_json::from_str(auth_line.trim()).expect("auth json");
+        assert!(auth_value.get("result").is_some());
+
+        writer
+            .write_all(b"{\"id\":2,\"method\":\"list_sessions\",\"params\":{}}\n")
+            .await
+            .expect("write list_sessions");
+
+        let list_line = read_line(&mut reader).await;
+        let list_value: Value = serde_json::from_str(list_line.trim()).expect("list json");
+        let result = list_value
+            .get("result")
+            .and_then(|value| value.as_array())
+            .expect("session list");
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].get("path"), Some(&Value::String("/tmp/project".to_string())));
+    }
+}
