@@ -1,0 +1,106 @@
+/* =============================================================================
+   Tab Bar
+   ============================================================================= */
+
+.tab-bar {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+}
+
+.tab-bar__tab {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab-bar__tab:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--surface-card-hover);
+}
+
+.tab-bar__tab--active {
+  color: var(--text-primary);
+  background: var(--surface-card-active);
+}
+
+.tab-bar__tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =============================================================================
+   Session Header (title + tabs)
+   ============================================================================= */
+
+.session-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.session-header h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =============================================================================
+   Session Content
+   ============================================================================= */
+
+.session-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Allow flex children to shrink */
+}
+
+/* =============================================================================
+   Git Panel Layout
+   ============================================================================= */
+
+.git-panel {
+  display: flex;
+  flex: 1;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+.git-panel--empty {
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.git-panel__status {
+  width: 280px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  background: var(--surface-panel);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+}
+
+.git-panel__diff {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}

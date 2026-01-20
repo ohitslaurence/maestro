@@ -81,9 +81,9 @@ Each harness implements:
 ## Core Features
 
 ### v1 - Connect & View
-- [ ] VPS daemon: expose running agent sessions
-- [ ] List sessions with project/folder info
-- [ ] Interactive terminal (attach to existing)
+- [x] VPS daemon: expose running agent sessions
+- [x] List sessions with project/folder info
+- [x] Interactive terminal (attach to existing)
 - [ ] Git diff viewer per session (staged/unstaged)
 - [ ] Commit history (click to view diff)
 
@@ -229,8 +229,8 @@ Approach: New repo, steal liberally from CodexMonitor's:
 
 ## Next Steps
 
-1. **Research** Claude Code SDK + Open Code server
-2. **Scaffold** fresh Tauri app
-3. **Build** Rust daemon with session list + terminal attach
-4. **Integrate** `@pierre/diffs` for git viewer
-5. **Connect** to Claude Code / Open Code via their native protocols
+1. ~~**Research** Claude Code SDK + Open Code server~~ ✓
+2. ~~**Scaffold** fresh Tauri app~~ ✓
+3. ~~**Build** Rust daemon with session list + terminal attach~~ ✓
+4. **Integrate** git viewer into main UI (git status/diffs for selected session)
+5. **Connect** to Claude Code / Open Code via their native protocols (agent harnesses)

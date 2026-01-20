@@ -50,9 +50,9 @@
 
 **Note:** Current terminal/git code runs locally in Tauri. This was scaffolding to validate the UI patterns. For the real architecture, these operations must run on the VPS daemon.
 
-## Phase 3: Remote Daemon (Current - BLOCKING)
+## Phase 3: Remote Daemon (Complete)
 
-**This is the critical path.** Without the daemon, we cannot test the real architecture.
+**Critical path complete.** Daemon runs on VPS, Mac app connects as thin client.
 
 - [x] **Daemon implementation** (Task 014 - DONE)
   - [x] TCP listener with JSON-RPC protocol
@@ -68,17 +68,26 @@
   - [x] Proxy git commands to daemon
   - [x] Forward daemon events to React
 
-- [ ] **Frontend daemon integration** (Task 016 - NEXT)
-  - [ ] Update services to use new command/event names
-  - [ ] Add daemon connection hook and UI
-  - [ ] Update session/terminal hooks for new formats
-  - [ ] Settings modal for daemon configuration
+- [x] **Frontend daemon integration** (Task 016 - DONE)
+  - [x] Update services to use new command/event names
+  - [x] Add daemon connection hook and UI
+  - [x] Update session/terminal hooks for new formats
+  - [x] Settings modal for daemon configuration
 
-- [ ] **End-to-end testing**
-  - [ ] Run daemon on VPS
-  - [ ] Connect Tauri app from Mac
-  - [ ] Verify terminal works
-  - [ ] Verify git status/diff works
+- [x] **End-to-end testing**
+  - [x] Run daemon on VPS/local
+  - [x] Connect Tauri app
+  - [x] Verify terminal works
+  - [x] Verify session list works
+
+## Phase 3.5: App Shell Polish (Current)
+
+- [x] macOS glass effect (windowEffects: hudWindow)
+- [x] Design token system (surfaces, text, borders, spacing)
+- [x] Traffic light spacing fixed
+- [x] Sidebar header draggable
+- [ ] Git panel integration into main UI
+- [ ] Session info display (path, git status indicator)
 
 ## Phase 4: Git Integration Polish
 - [ ] Commit history panel
@@ -103,18 +112,19 @@
 
 ## Immediate Next Steps
 
-1. **Build daemon** (Task 014) - TCP server with terminal + git
-2. **Convert Tauri to proxy** - Forward commands to daemon
-3. **Deploy daemon to VPS** - Test real architecture
-4. **Iterate on UI** - Now that e2e works
+1. **Git panel in UI** - Show git status/diffs for selected session
+2. **Session info** - Display path, git branch indicator in sidebar
+3. **Agent harness integration** - Start implementing Claude Code harness
+4. **Spawn agents** - UI to start new agent sessions
 
 ## Task Specs
 
-Active:
-- `016-frontend-daemon-integration.md` - Frontend updates for daemon (NEXT)
-
 Completed:
-- `DONE-001` through `DONE-015` - See `specs/TASKS/`
+- `DONE-001` through `DONE-016` - See `specs/TASKS/`
+
+Next candidates:
+- Git panel integration (Phase 3.5)
+- Claude Code harness (Phase 5)
 
 ## Commands Reference
 

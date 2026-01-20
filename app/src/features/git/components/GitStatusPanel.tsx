@@ -1,7 +1,7 @@
-import type { GitStatus, GitFileStatus } from "../../../types";
+import type { GitStatusResult, GitFileStatus } from "../../../types";
 
 type GitStatusPanelProps = {
-  status: GitStatus | null;
+  status: GitStatusResult | null;
   isLoading: boolean;
   error: string | null;
   onFileSelect?: (path: string) => void;

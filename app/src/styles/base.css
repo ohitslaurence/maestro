@@ -1,14 +1,146 @@
+/* =============================================================================
+   Maestro Design Tokens
+
+   Color token naming convention:
+   - --surface-*: Background colors for panels/containers
+   - --text-*: Text colors
+   - --border-*: Border colors
+   - --accent-*: Brand/interactive colors
+   - --status-*: Semantic status colors
+   ============================================================================= */
+
 :root {
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #242424;
-  --bg-tertiary: #2d2d2d;
-  --text-primary: #ffffff;
-  --text-secondary: #888888;
-  --accent: #646cff;
-  --border: #3d3d3d;
-  --success: #4caf50;
-  --error: #f44336;
+  /* -------------------------------------------------------------------------
+     Surface Colors (semi-transparent for glass effect)
+     ------------------------------------------------------------------------- */
+  --surface-base: rgba(10, 10, 12, 0.85);
+  --surface-sidebar: rgba(18, 18, 20, 0.4);
+  --surface-panel: rgba(22, 22, 26, 0.5);
+  --surface-card: rgba(255, 255, 255, 0.04);
+  --surface-card-hover: rgba(255, 255, 255, 0.08);
+  --surface-card-active: rgba(255, 255, 255, 0.12);
+  --surface-overlay: rgba(0, 0, 0, 0.6);
+  --surface-popover: rgba(28, 28, 32, 0.98);
+
+  /* -------------------------------------------------------------------------
+     Text Colors
+     ------------------------------------------------------------------------- */
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+  --text-disabled: rgba(255, 255, 255, 0.25);
+
+  /* -------------------------------------------------------------------------
+     Border Colors
+     ------------------------------------------------------------------------- */
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.15);
+
+  /* -------------------------------------------------------------------------
+     Accent Colors
+     ------------------------------------------------------------------------- */
+  --accent-primary: #646cff;
+  --accent-primary-hover: #747bff;
+  --accent-primary-muted: rgba(100, 108, 255, 0.15);
+
+  /* -------------------------------------------------------------------------
+     Status Colors
+     ------------------------------------------------------------------------- */
+  --status-success: #4ade80;
+  --status-success-muted: rgba(74, 222, 128, 0.15);
+  --status-warning: #fbbf24;
+  --status-warning-muted: rgba(251, 191, 36, 0.15);
+  --status-error: #f87171;
+  --status-error-muted: rgba(248, 113, 113, 0.15);
+  --status-info: #60a5fa;
+  --status-info-muted: rgba(96, 165, 250, 0.15);
+
+  /* -------------------------------------------------------------------------
+     Layout Tokens
+     ------------------------------------------------------------------------- */
+  --titlebar-height: 52px;
+  --titlebar-inset-left: 72px;          /* Space for macOS traffic lights */
+  --sidebar-width: 280px;
+  --sidebar-min-width: 200px;
+  --sidebar-max-width: 400px;
+  --panel-padding: 16px;
+  --panel-padding-lg: 24px;
+
+  /* -------------------------------------------------------------------------
+     Spacing Scale
+     ------------------------------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* -------------------------------------------------------------------------
+     Border Radius
+     ------------------------------------------------------------------------- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* -------------------------------------------------------------------------
+     Typography
+     ------------------------------------------------------------------------- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --font-mono: "SF Mono", Menlo, Monaco, "Courier New", monospace;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+
+  /* -------------------------------------------------------------------------
+     Effects
+     ------------------------------------------------------------------------- */
+  --blur-sm: blur(8px);
+  --blur-md: blur(16px);
+  --blur-lg: blur(24px);
+  --blur-xl: blur(32px);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  /* -------------------------------------------------------------------------
+     Transitions
+     ------------------------------------------------------------------------- */
+  --transition-fast: 0.1s ease;
+  --transition-base: 0.15s ease;
+  --transition-slow: 0.25s ease;
 }
+
+/* =============================================================================
+   Reduced Transparency Mode (accessibility)
+   ============================================================================= */
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --surface-base: rgba(10, 10, 12, 0.98);
+    --surface-sidebar: rgba(18, 18, 20, 0.95);
+    --surface-panel: rgba(22, 22, 26, 0.95);
+    --surface-popover: rgba(28, 28, 32, 1);
+  }
+}
+
+/* =============================================================================
+   Base Styles
+   ============================================================================= */
 
 * {
   margin: 0;
@@ -16,35 +148,55 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+html {
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+body {
+  font-family: var(--font-sans);
+  background: transparent;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* =============================================================================
+   App Layout
+   ============================================================================= */
 
 .container {
   display: flex;
   height: 100vh;
   width: 100vw;
+  background: transparent;
 }
 
-/* Prevent text selection while resizing */
 .container--resizing {
   user-select: none;
   cursor: col-resize;
 }
 
+/* =============================================================================
+   Main Panel
+   ============================================================================= */
+
 .main-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-primary);
+  background: var(--surface-base);
+  min-width: 0; /* Prevent flex overflow */
 }
+
+/* =============================================================================
+   Content Areas
+   ============================================================================= */
 
 .welcome,
 .session-view {
-  padding: 24px;
+  padding: var(--panel-padding-lg);
+  padding-top: calc(var(--titlebar-height) + var(--panel-padding));
   height: 100%;
 }
 
@@ -54,45 +206,72 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
+  gap: var(--space-3);
 }
 
 .welcome h2 {
-  margin-bottom: 8px;
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
 }
 
 .welcome p {
   color: var(--text-secondary);
+  font-size: var(--text-base);
 }
 
 .session-view {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Allow flex children to shrink */
 }
 
-.session-view h2 {
-  margin-bottom: 16px;
-  font-size: 20px;
-}
+/* =============================================================================
+   Resize Handle
+   ============================================================================= */
 
-/* Resize Handle */
 .resize-handle {
   width: 4px;
   cursor: col-resize;
   background: transparent;
-  transition: background 0.15s;
+  transition: background var(--transition-base);
   flex-shrink: 0;
+  position: relative;
+}
+
+.resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -2px;
+  right: -2px;
 }
 
 .resize-handle:hover,
 .resize-handle--active {
-  background: var(--border);
+  background: var(--border-strong);
 }
+
+/* =============================================================================
+   Utility Classes
+   ============================================================================= */
 
 .empty {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
 .error {
-  color: var(--error);
+  color: var(--status-error);
+}
+
+/* Drag region for title bar */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
 }

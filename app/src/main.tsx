@@ -6,6 +6,7 @@ import "./styles/sidebar.css";
 import "./styles/terminal.css";
 import "./styles/diff-viewer.css";
 import "./styles/daemon.css";
+import "./styles/tabs.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

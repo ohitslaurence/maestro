@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { useResizablePanels, ResizeHandle } from "./features/layout";
+import { useResizablePanels, ResizeHandle, TabBar } from "./features/layout";
+import type { Tab } from "./features/layout";
 import { useSessions, SessionList } from "./features/sessions";
 import { useTerminalSession, TerminalPanel } from "./features/terminal";
+import { GitPanel } from "./features/git";
 import {
   useDaemonConnection,
   ConnectionStatus,
@@ -9,6 +11,13 @@ import {
 } from "./features/daemon";
 
 const DEFAULT_TERMINAL_ID = "main";
+
+type MainPanelTab = "terminal" | "git";
+
+const TABS: Tab[] = [
+  { id: "terminal", label: "Terminal" },
+  { id: "git", label: "Git" },
+];
 
 function App() {
   // Daemon connection state
@@ -23,6 +32,7 @@ function App() {
   } = useDaemonConnection();
 
   const [showSettings, setShowSettings] = useState(false);
+  const [activeTab, setActiveTab] = useState<MainPanelTab>("terminal");
   const isConnected = connectionStatus === "connected";
 
   // Session management - only fetch when connected
@@ -38,7 +48,7 @@ function App() {
   // Layout state
   const { sidebarWidth, isResizing, onSidebarResizeStart } = useResizablePanels();
 
-  // Terminal state
+  // Terminal state - keep terminal alive even when on git tab
   const {
     status: terminalStatus,
     message: terminalMessage,
@@ -46,7 +56,7 @@ function App() {
   } = useTerminalSession({
     sessionId: selectedSession,
     terminalId: selectedSession ? DEFAULT_TERMINAL_ID : null,
-    isVisible: !!selectedSession && isConnected,
+    isVisible: !!selectedSession && isConnected && activeTab === "terminal",
   });
 
   // Find selected session info for display
@@ -72,6 +82,10 @@ function App() {
 
   const handleCloseSettings = useCallback(() => {
     setShowSettings(false);
+  }, []);
+
+  const handleTabChange = useCallback((tabId: string) => {
+    setActiveTab(tabId as MainPanelTab);
   }, []);
 
   return (
@@ -111,12 +125,25 @@ function App() {
           </div>
         ) : selectedSession && selectedSessionInfo ? (
           <div className="session-view">
-            <h2>{selectedSessionInfo.name}</h2>
-            <TerminalPanel
-              containerRef={terminalContainerRef}
-              status={terminalStatus}
-              message={terminalMessage}
-            />
+            <div className="session-header">
+              <h2>{selectedSessionInfo.name}</h2>
+              <TabBar
+                tabs={TABS}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+              />
+            </div>
+            <div className="session-content">
+              {activeTab === "terminal" ? (
+                <TerminalPanel
+                  containerRef={terminalContainerRef}
+                  status={terminalStatus}
+                  message={terminalMessage}
+                />
+              ) : (
+                <GitPanel sessionId={selectedSession} />
+              )}
+            </div>
           </div>
         ) : (
           <div className="welcome">

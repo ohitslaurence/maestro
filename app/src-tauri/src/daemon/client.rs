@@ -362,7 +362,8 @@ mod tests {
     use super::DaemonClient;
     use crate::daemon::config::DaemonConfig;
     use crate::daemon::protocol::{
-        GitStatusResult, SessionIdParams, SessionInfo, METHOD_GIT_STATUS, METHOD_LIST_SESSIONS,
+        GitDiffResult, GitLogResult, GitStatusResult, SessionIdParams, SessionInfo,
+        METHOD_GIT_DIFF, METHOD_GIT_LOG, METHOD_GIT_STATUS, METHOD_LIST_SESSIONS,
     };
     use serde_json::json;
     use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
@@ -458,6 +459,91 @@ mod tests {
         });
     }
 
+    #[test]
+    fn client_requests_git_diff() {
+        let runtime = tokio::runtime::Runtime::new().expect("runtime");
+        runtime.block_on(async {
+            let listener = TcpListener::bind("127.0.0.1:0")
+                .await
+                .expect("bind listener");
+            let addr = listener.local_addr().expect("local addr");
+
+            tokio::spawn(async move {
+                if let Ok((stream, _)) = listener.accept().await {
+                    handle_mock_git_diff_server(stream).await;
+                }
+            });
+
+            let config = DaemonConfig {
+                host: "127.0.0.1".to_string(),
+                port: addr.port(),
+                token: "secret".to_string(),
+            };
+
+            let client = DaemonClient::connect_without_app(&config)
+                .await
+                .expect("connect");
+            let diff: GitDiffResult = client
+                .call(
+                    METHOD_GIT_DIFF,
+                    Some(SessionIdParams {
+                        session_id: "/tmp/project".to_string(),
+                    }),
+                )
+                .await
+                .expect("git diff");
+
+            assert_eq!(diff.files.len(), 1);
+            assert_eq!(diff.files[0].path, "src/lib.rs");
+            assert!(diff.files[0].diff.contains("+fn test()"));
+            assert!(!diff.truncated);
+            assert!(diff.truncated_files.is_empty());
+        });
+    }
+
+    #[test]
+    fn client_requests_git_log() {
+        let runtime = tokio::runtime::Runtime::new().expect("runtime");
+        runtime.block_on(async {
+            let listener = TcpListener::bind("127.0.0.1:0")
+                .await
+                .expect("bind listener");
+            let addr = listener.local_addr().expect("local addr");
+
+            tokio::spawn(async move {
+                if let Ok((stream, _)) = listener.accept().await {
+                    handle_mock_git_log_server(stream).await;
+                }
+            });
+
+            let config = DaemonConfig {
+                host: "127.0.0.1".to_string(),
+                port: addr.port(),
+                token: "secret".to_string(),
+            };
+
+            let client = DaemonClient::connect_without_app(&config)
+                .await
+                .expect("connect");
+            let log: GitLogResult = client
+                .call(
+                    METHOD_GIT_LOG,
+                    Some(crate::daemon::protocol::GitLogParams {
+                        session_id: "/tmp/project".to_string(),
+                        limit: Some(1),
+                    }),
+                )
+                .await
+                .expect("git log");
+
+            assert_eq!(log.entries.len(), 1);
+            assert_eq!(log.entries[0].sha, "abc123");
+            assert_eq!(log.entries[0].summary, "Init repo");
+            assert_eq!(log.ahead, 0);
+            assert_eq!(log.behind, 0);
+        });
+    }
+
     async fn handle_mock_server(stream: TcpStream) {
         let (reader, mut writer) = stream.into_split();
         let mut reader = BufReader::new(reader);
@@ -533,6 +619,89 @@ mod tests {
             .write_all(status_response.as_bytes())
             .await
             .expect("write status response");
+        writer.write_all(b"\n").await.expect("newline");
+    }
+
+    async fn handle_mock_git_diff_server(stream: TcpStream) {
+        let (reader, mut writer) = stream.into_split();
+        let mut reader = BufReader::new(reader);
+
+        let auth_line = read_line(&mut reader).await;
+        let auth_value: serde_json::Value =
+            serde_json::from_str(auth_line.trim()).expect("auth json");
+        assert_eq!(auth_value.get("method"), Some(&json!("auth")));
+
+        let auth_response = json!({"id": 1, "result": {"ok": true}}).to_string();
+        writer
+            .write_all(auth_response.as_bytes())
+            .await
+            .expect("write auth response");
+        writer.write_all(b"\n").await.expect("newline");
+
+        let diff_line = read_line(&mut reader).await;
+        let diff_value: serde_json::Value =
+            serde_json::from_str(diff_line.trim()).expect("diff json");
+        assert_eq!(diff_value.get("method"), Some(&json!("git_diff")));
+        let params = diff_value.get("params").expect("params");
+        assert_eq!(params.get("session_id"), Some(&json!("/tmp/project")));
+
+        let diff_response = json!({
+            "id": 2,
+            "result": {
+                "files": [
+                    {"path": "src/lib.rs", "diff": "@@ -1 +1\n+fn test()"}
+                ],
+                "truncated": false,
+                "truncated_files": []
+            }
+        })
+        .to_string();
+        writer
+            .write_all(diff_response.as_bytes())
+            .await
+            .expect("write diff response");
+        writer.write_all(b"\n").await.expect("newline");
+    }
+
+    async fn handle_mock_git_log_server(stream: TcpStream) {
+        let (reader, mut writer) = stream.into_split();
+        let mut reader = BufReader::new(reader);
+
+        let auth_line = read_line(&mut reader).await;
+        let auth_value: serde_json::Value =
+            serde_json::from_str(auth_line.trim()).expect("auth json");
+        assert_eq!(auth_value.get("method"), Some(&json!("auth")));
+
+        let auth_response = json!({"id": 1, "result": {"ok": true}}).to_string();
+        writer
+            .write_all(auth_response.as_bytes())
+            .await
+            .expect("write auth response");
+        writer.write_all(b"\n").await.expect("newline");
+
+        let log_line = read_line(&mut reader).await;
+        let log_value: serde_json::Value =
+            serde_json::from_str(log_line.trim()).expect("log json");
+        assert_eq!(log_value.get("method"), Some(&json!("git_log")));
+        let params = log_value.get("params").expect("params");
+        assert_eq!(params.get("session_id"), Some(&json!("/tmp/project")));
+
+        let log_response = json!({
+            "id": 2,
+            "result": {
+                "entries": [
+                    {"sha": "abc123", "summary": "Init repo", "author": "Jane", "timestamp": 1700000000}
+                ],
+                "ahead": 0,
+                "behind": 0,
+                "upstream": null
+            }
+        })
+        .to_string();
+        writer
+            .write_all(log_response.as_bytes())
+            .await
+            .expect("write log response");
         writer.write_all(b"\n").await.expect("newline");
     }
 }
