@@ -10,14 +10,28 @@ Port CodexMonitor's terminal implementation to Maestro. This provides PTY manage
 - `reference/codex-monitor/src/features/terminal/hooks/useTerminalSession.ts` - Frontend integration
 - `reference/codex-monitor/src/features/terminal/components/TerminalPanel.tsx` - UI component
 
+## Current State
+
+### Already exists:
+- **Backend stubs** in `app/src-tauri/src/sessions.rs:133-167` - Commands registered but no-op
+- **Commands registered** in `app/src-tauri/src/lib.rs:30-33`
+- **Frontend wrappers** in `app/src/services/tauri.ts:50-89` - `openTerminal`, `writeTerminal`, `resizeTerminal`, `closeTerminal`
+- **Event subscription** in `app/src/services/events.ts` - `subscribeTerminalOutput`, `TerminalOutputEvent`
+
+### Decision: File organization
+Extract terminal implementation to `app/src-tauri/src/terminal.rs` for cleaner separation. Move existing stubs from `sessions.rs` and update `lib.rs` imports.
+
 ## Output
 
 ### Backend (Rust)
-- `app/src-tauri/src/terminal.rs` - PTY session management
+- Create `app/src-tauri/src/terminal.rs` - extract and implement PTY logic
+- Remove terminal stubs from `sessions.rs`, update `lib.rs` imports
+- Add `portable-pty` dependency to `Cargo.toml`
 
 ### Frontend (React)
 - `app/src/features/terminal/hooks/useTerminalSession.ts` - xterm.js integration
 - `app/src/features/terminal/components/TerminalPanel.tsx` - Presentational component
+- Add `@xterm/xterm` and `@xterm/addon-fit` dependencies
 
 ## Implementation Details
 
@@ -33,14 +47,14 @@ pub struct TerminalSession {
 ```
 
 **Commands:**
-- `terminal_open(workspace_id, terminal_id, cwd)` - Spawn PTY, start reader thread
-- `terminal_write(workspace_id, terminal_id, data)` - Write to PTY stdin
-- `terminal_resize(workspace_id, terminal_id, rows, cols)` - Resize PTY
-- `terminal_close(workspace_id, terminal_id)` - Kill shell, cleanup
+- `terminal_open(session_id, terminal_id, cwd)` - Spawn PTY, start reader thread
+- `terminal_write(session_id, terminal_id, data)` - Write to PTY stdin
+- `terminal_resize(session_id, terminal_id, rows, cols)` - Resize PTY
+- `terminal_close(session_id, terminal_id)` - Kill shell, cleanup
 
 **Reader Thread:**
 - Read PTY output in 8KB chunks
-- Emit `terminal-output` event with `{ workspace_id, terminal_id, data }`
+- Emit `terminal-output` event with `{ session_id, terminal_id, data }`
 - Block until shell exits
 
 ### Frontend: xterm.js Integration
