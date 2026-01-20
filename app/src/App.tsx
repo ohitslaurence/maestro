@@ -1,16 +1,32 @@
-import { useState, useEffect } from "react";
-import { listSessions } from "./services/tauri";
 import { useResizablePanels, ResizeHandle } from "./features/layout";
+import { useSessions, SessionList } from "./features/sessions";
+import { useTerminalSession, TerminalPanel } from "./features/terminal";
+
+const DEFAULT_TERMINAL_ID = "main";
 
 function App() {
-  const [sessions, setSessions] = useState<string[]>([]);
-  const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  // Session management
+  const {
+    sessions,
+    selectedSession,
+    isLoading: sessionsLoading,
+    error: sessionsError,
+    selectSession,
+  } = useSessions();
+
+  // Layout state
   const { sidebarWidth, isResizing, onSidebarResizeStart } = useResizablePanels();
 
-  useEffect(() => {
-    // Fetch sessions on mount
-    listSessions().then(setSessions).catch(console.error);
-  }, []);
+  // Terminal state
+  const {
+    status: terminalStatus,
+    message: terminalMessage,
+    containerRef: terminalContainerRef,
+  } = useTerminalSession({
+    sessionId: selectedSession,
+    terminalId: selectedSession ? DEFAULT_TERMINAL_ID : null,
+    isVisible: !!selectedSession,
+  });
 
   return (
     <div className={`container ${isResizing ? "container--resizing" : ""}`}>
@@ -18,33 +34,24 @@ function App() {
         <div className="sidebar-header">
           <h1>Orchestrator</h1>
         </div>
-        <nav className="session-list">
-          <h2>Sessions</h2>
-          {sessions.length === 0 ? (
-            <p className="empty">No active sessions</p>
-          ) : (
-            <ul>
-              {sessions.map((session) => (
-                <li
-                  key={session}
-                  className={selectedSession === session ? "selected" : ""}
-                  onClick={() => setSelectedSession(session)}
-                >
-                  {session}
-                </li>
-              ))}
-            </ul>
-          )}
-        </nav>
+        <SessionList
+          sessions={sessions}
+          selectedSession={selectedSession}
+          isLoading={sessionsLoading}
+          error={sessionsError}
+          onSelectSession={selectSession}
+        />
       </aside>
       <ResizeHandle onMouseDown={onSidebarResizeStart} isResizing={isResizing} />
       <main className="main-panel">
         {selectedSession ? (
           <div className="session-view">
             <h2>{selectedSession}</h2>
-            <div className="terminal-placeholder">
-              Terminal will render here
-            </div>
+            <TerminalPanel
+              containerRef={terminalContainerRef}
+              status={terminalStatus}
+              message={terminalMessage}
+            />
           </div>
         ) : (
           <div className="welcome">

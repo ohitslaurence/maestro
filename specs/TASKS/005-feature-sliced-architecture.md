@@ -16,11 +16,12 @@ Restructure `app/src/` to follow feature-sliced pattern:
 ```
 app/src/
   features/
-    terminal/
+    terminal/                  # ✓ DONE
       components/
         TerminalPanel.tsx      # Presentational
       hooks/
         useTerminalSession.ts  # State + effects
+      index.ts                 # Barrel export
     git/
       components/
         GitStatusPanel.tsx
@@ -28,17 +29,19 @@ app/src/
       hooks/
         useGitStatus.ts
         useGitDiffs.ts
+      index.ts
     sessions/
       components/
         SessionList.tsx
       hooks/
         useSessions.ts
-    layout/
+      index.ts
+    layout/                    # ✓ DONE (partial)
       components/
-        Sidebar.tsx
-        MainPanel.tsx
+        ResizeHandle.tsx       # Drag handle for panel resize
       hooks/
-        useResizablePanels.ts
+        useResizablePanels.ts  # Sidebar width state + mouse handlers
+      index.ts
   services/
     tauri.ts                   # IPC wrappers
     events.ts                  # Event hub
@@ -108,6 +111,18 @@ function App() {
 2. **Hooks compose with hooks** - composition over inheritance
 3. **One CSS file per area** - in `src/styles/`
 4. **Types in central file** - `src/types.ts`
+5. **Barrel exports** - each feature has `index.ts` for clean imports:
+   ```typescript
+   // features/terminal/index.ts
+   export { TerminalPanel } from "./components/TerminalPanel";
+   export { useTerminalSession } from "./hooks/useTerminalSession";
+   export type { TerminalSessionState } from "./hooks/useTerminalSession";
+   ```
+6. **Third-party CSS in hooks** - library CSS imported where used, not in `styles/`:
+   ```typescript
+   // In useTerminalSession.ts
+   import "@xterm/xterm/css/xterm.css";
+   ```
 
 ## Constraints
 
@@ -118,7 +133,14 @@ function App() {
 
 ## Migration Steps
 
-1. Create directory structure
-2. Move existing code into appropriate locations
+1. ~~Create directory structure~~ ✓
+2. ~~Move existing code into appropriate locations~~ ✓ (terminal, layout)
 3. Split any mixed component/logic into separate files
-4. Update imports in App.tsx
+4. Update imports in App.tsx to use barrel exports
+
+## Remaining Work
+
+- [x] `features/git/` - GitStatusPanel, DiffViewer, hooks
+- [x] `features/sessions/` - SessionList, useSessions
+- [x] Split `styles.css` into per-area files in `styles/`
+- [x] Wire terminal into App.tsx (currently placeholder)

@@ -1,0 +1,40 @@
+.terminal-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.terminal-surface {
+  flex: 1;
+  padding: 8px;
+}
+
+.terminal-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(26, 26, 26, 0.9);
+}
+
+.terminal-status {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Placeholder for when terminal isn't active */
+.terminal-placeholder {
+  flex: 1;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: monospace;
+  color: var(--text-secondary);
+  min-height: 400px;
+}

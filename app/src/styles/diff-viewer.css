@@ -1,0 +1,217 @@
+.git-status-panel {
+  padding: 16px;
+}
+
+.git-branch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.git-branch-icon {
+  color: var(--success);
+}
+
+.git-branch-name {
+  font-weight: 600;
+}
+
+.git-loading,
+.git-error,
+.git-empty,
+.git-clean {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.git-error {
+  color: var(--error);
+}
+
+.git-file-list {
+  margin-bottom: 16px;
+}
+
+.git-file-list h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.git-file-list ul {
+  list-style: none;
+}
+
+.git-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.git-file:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.git-status-badge {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.git-status-modified,
+.git-status-m {
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.git-status-added,
+.git-status-a {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: var(--success);
+}
+
+.git-status-deleted,
+.git-status-d {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: var(--error);
+}
+
+.git-status-untracked,
+.git-status-u,
+.git-status-\? {
+  background-color: rgba(100, 108, 255, 0.2);
+  color: var(--accent);
+}
+
+.git-file-path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.git-file-stats {
+  display: flex;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.git-additions {
+  color: var(--success);
+}
+
+.git-deletions {
+  color: var(--error);
+}
+
+.git-summary {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+
+/* Diff Viewer */
+.diff-viewer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.diff-header {
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.diff-path {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.diff-loading,
+.diff-empty {
+  padding: 24px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.diff-content {
+  flex: 1;
+  overflow: auto;
+  background-color: var(--bg-secondary);
+}
+
+.diff-content pre {
+  margin: 0;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.diff-line {
+  display: flex;
+  min-height: 20px;
+}
+
+.diff-line-number {
+  width: 48px;
+  padding: 0 8px;
+  text-align: right;
+  color: var(--text-secondary);
+  background-color: var(--bg-tertiary);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.diff-line-content {
+  flex: 1;
+  padding: 0 8px;
+  white-space: pre;
+}
+
+.diff-line--header {
+  background-color: rgba(100, 108, 255, 0.1);
+  color: var(--accent);
+}
+
+.diff-line--header .diff-line-number {
+  background-color: rgba(100, 108, 255, 0.15);
+}
+
+.diff-line--addition {
+  background-color: rgba(76, 175, 80, 0.15);
+}
+
+.diff-line--addition .diff-line-number {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: var(--success);
+}
+
+.diff-line--deletion {
+  background-color: rgba(244, 67, 54, 0.15);
+}
+
+.diff-line--deletion .diff-line-number {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: var(--error);
+}
+
+.diff-line--context {
+  background-color: transparent;
+}

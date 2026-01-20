@@ -1,0 +1,51 @@
+.sidebar {
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.session-list {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.session-list h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.session-list ul {
+  list-style: none;
+}
+
+.session-list li {
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.session-list li:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.session-list li.selected {
+  background-color: var(--accent);
+}
