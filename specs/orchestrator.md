@@ -48,6 +48,36 @@ Already implements:
 
 Key difference: CodexMonitor uses Codex's `app-server` protocol. We'd need to adapt for Claude Code + Open Code.
 
+## Design Principles
+
+### Agent-Harness Agnostic
+The orchestrator supports multiple agent harnesses (runtimes):
+- **Claude Code** - via Claude Agent SDK
+- **Open Code** - via its server protocol
+- **Future harnesses** - extensible architecture
+
+When spawning an agent: pick the project + pick the harness.
+
+```
+┌─────────────────────────────────────┐
+│         Orchestrator Core           │
+│  ┌─────────────────────────────┐    │
+│  │     Harness Abstraction     │    │
+│  │  ┌─────┐ ┌─────┐ ┌─────┐   │    │
+│  │  │Claude│ │Open │ │ ??? │   │    │
+│  │  │ Code │ │Code │ │     │   │    │
+│  │  └─────┘ └─────┘ └─────┘   │    │
+│  └─────────────────────────────┘    │
+└─────────────────────────────────────┘
+```
+
+Each harness implements:
+- `spawn(project_path, config) → session`
+- `attach(session_id) → stream`
+- `send_input(session_id, input)`
+- `stop(session_id)`
+- `get_status(session_id) → status`
+
 ## Core Features
 
 ### v1 - Connect & View

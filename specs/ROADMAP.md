@@ -4,9 +4,18 @@
 - [x] Initialize git repo
 - [x] Create spec document
 - [x] Add CodexMonitor as git subtree (`reference/codex-monitor/`)
-- [ ] Scaffold Tauri app
-- [ ] Get app running locally (blank shell)
+- [x] Scaffold Tauri app (`app/`)
+- [ ] Get app running locally on Mac (see below)
 - [ ] Verify dev environment works
+
+### Build on Mac
+```bash
+cd app
+bun install
+bun run tauri:dev
+```
+
+Requires: Rust toolchain, Xcode Command Line Tools
 
 ## Phase 1: Deep Analysis (Agent Task)
 Spin off agent to analyze CodexMonitor and document:
