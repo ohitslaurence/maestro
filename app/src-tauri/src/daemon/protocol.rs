@@ -116,17 +116,20 @@ pub struct GitLogParams {
 // --- OpenCode request params ---
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OpenCodeConnectParams {
     pub workspace_id: String,
     pub workspace_path: String,
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OpenCodeWorkspaceParams {
     pub workspace_id: String,
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OpenCodeSessionCreateParams {
     pub workspace_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -134,6 +137,7 @@ pub struct OpenCodeSessionCreateParams {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OpenCodeSessionPromptParams {
     pub workspace_id: String,
     pub session_id: String,
@@ -141,6 +145,7 @@ pub struct OpenCodeSessionPromptParams {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OpenCodeSessionAbortParams {
     pub workspace_id: String,
     pub session_id: String,
