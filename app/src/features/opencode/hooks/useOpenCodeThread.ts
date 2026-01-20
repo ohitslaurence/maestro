@@ -194,33 +194,40 @@ export function useOpenCodeThread({
     }
 
     const unsubscribe = subscribeOpenCodeEvents((event) => {
-      console.log("[opencode-thread] Received event:", event.eventType, event);
-
       // Filter by workspace
       if (event.workspaceId !== workspaceId) {
-        console.log("[opencode-thread] Skipping - workspace mismatch:", event.workspaceId, "vs", workspaceId);
         return;
       }
 
-      // Handle different event types
-      if (event.eventType === "message" || event.eventType === "message.updated") {
-        const msg = event.event as RawMessage;
-        console.log("[opencode-thread] Message event:", msg.id, msg.role, msg);
+      // Extract the actual event type from the nested event object
+      const innerEvent = event.event as { type: string; properties?: unknown };
+      const eventType = innerEvent?.type;
+
+      console.log("[opencode-thread] Event type:", eventType);
+
+      // Handle message events (actual conversation messages)
+      if (eventType === "message" || eventType === "message.updated") {
+        const msg = innerEvent.properties as RawMessage;
+        console.log("[opencode-thread] Message:", msg?.id, msg?.role);
+
+        if (!msg?.id) {
+          return;
+        }
 
         // Filter by session if specified
         if (sessionId && msg.sessionID !== sessionId) {
-          console.log("[opencode-thread] Skipping - session mismatch:", msg.sessionID, "vs", sessionId);
           return;
         }
 
         // Update or add message
         messagesRef.current.set(msg.id, msg);
         rebuildItems();
-      } else if (event.eventType === "session.error") {
-        const err = event.event as { error?: string };
-        setError(err.error || "Unknown error");
+      } else if (eventType === "session.error") {
+        const props = innerEvent.properties as { error?: string };
+        setError(props?.error || "Unknown error");
         setStatus("error");
       }
+      // Ignore other event types: server.heartbeat, session.created, session.updated, etc.
     });
 
     return unsubscribe;
