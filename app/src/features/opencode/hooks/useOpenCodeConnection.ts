@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFreshRef, useEffectOnceWhen } from "rooks";
 import {
   opencodeConnectWorkspace,
   opencodeStatus,
@@ -25,73 +26,56 @@ export function useOpenCodeConnection({
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const connectAttemptedRef = useRef<string | null>(null);
 
-  // Check connection status and auto-connect on workspace change
-  useEffect(() => {
-    if (!workspaceId || !workspacePath) {
-      setIsConnected(false);
-      setIsConnecting(false);
-      setError(null);
-      connectAttemptedRef.current = null;
-      return;
-    }
+  // Keep fresh refs to avoid stale closures in the effect
+  const workspaceIdRef = useFreshRef(workspaceId);
+  const workspacePathRef = useFreshRef(workspacePath);
 
-    // Skip if we already attempted for this workspace
-    if (connectAttemptedRef.current === workspaceId) {
-      return;
-    }
+  // Run once when we have a workspace and autoConnect is enabled
+  useEffectOnceWhen(
+    async () => {
+      const wsId = workspaceIdRef.current;
+      const wsPath = workspacePathRef.current;
+      if (!wsId || !wsPath) return;
 
-    let cancelled = false;
-
-    const checkAndConnect = async () => {
       // First check status
       try {
-        const status = await opencodeStatus(workspaceId);
-        if (cancelled) return;
-
+        const status = await opencodeStatus(wsId);
         if (status.connected) {
           setIsConnected(true);
-          connectAttemptedRef.current = workspaceId;
           return;
         }
       } catch {
-        // Status check failed, proceed to connect if autoConnect
+        // Status check failed, proceed to connect
       }
 
-      if (cancelled) return;
+      // Not connected, try to connect
+      setIsConnecting(true);
+      setError(null);
 
-      // Not connected, try to connect if autoConnect enabled
-      if (autoConnect) {
-        connectAttemptedRef.current = workspaceId;
-        setIsConnecting(true);
-        setError(null);
-
-        try {
-          await opencodeConnectWorkspace(workspaceId, workspacePath);
-          if (!cancelled) {
-            setIsConnected(true);
-          }
-        } catch (err) {
-          if (!cancelled) {
-            const message = err instanceof Error ? err.message : String(err);
-            setError(message);
-            setIsConnected(false);
-          }
-        } finally {
-          if (!cancelled) {
-            setIsConnecting(false);
-          }
-        }
+      try {
+        await opencodeConnectWorkspace(wsId, wsPath);
+        setIsConnected(true);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message);
+        setIsConnected(false);
+      } finally {
+        setIsConnecting(false);
       }
-    };
+    },
+    Boolean(workspaceId && workspacePath && autoConnect)
+  );
 
-    void checkAndConnect();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [workspaceId, workspacePath, autoConnect]);
+  // Reset state when workspace changes
+  useEffectOnceWhen(
+    () => {
+      setIsConnected(false);
+      setIsConnecting(false);
+      setError(null);
+    },
+    !workspaceId
+  );
 
   const connect = useCallback(async () => {
     if (!workspaceId || !workspacePath) {
@@ -105,7 +89,6 @@ export function useOpenCodeConnection({
     try {
       await opencodeConnectWorkspace(workspaceId, workspacePath);
       setIsConnected(true);
-      connectAttemptedRef.current = workspaceId;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message);
