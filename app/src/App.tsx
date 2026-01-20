@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { listSessions } from "./services/tauri";
 
 function App() {
   const [sessions, setSessions] = useState<string[]>([]);
@@ -7,9 +7,7 @@ function App() {
 
   useEffect(() => {
     // Fetch sessions on mount
-    invoke<string[]>("list_sessions")
-      .then(setSessions)
-      .catch(console.error);
+    listSessions().then(setSessions).catch(console.error);
   }, []);
 
   return (

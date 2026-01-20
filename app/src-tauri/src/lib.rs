@@ -25,6 +25,15 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             sessions::list_sessions,
+            sessions::spawn_session,
+            sessions::stop_session,
+            sessions::terminal_open,
+            sessions::terminal_write,
+            sessions::terminal_resize,
+            sessions::terminal_close,
+            sessions::get_git_status,
+            sessions::get_git_diffs,
+            sessions::get_git_log,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
