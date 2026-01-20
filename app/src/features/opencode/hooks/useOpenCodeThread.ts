@@ -252,23 +252,46 @@ export function useOpenCodeThread({
     }
   }, [convertMessageToItems, pendingUserMessages, sessionId]);
 
-  // Reset state when session changes
+  // Track previous session to detect real session switches
+  const prevSessionRef = useRef<{ workspaceId: string | null; sessionId: string | null }>({
+    workspaceId: null,
+    sessionId: null,
+  });
+
+  // Reset state only when switching between different sessions (not null → session)
   useEffect(() => {
-    messagesRef.current.clear();
-    setItems([]);
-    setStatus("idle");
-    setProcessingStartedAt(null);
-    setError(undefined);
+    const prev = prevSessionRef.current;
+    const workspaceChanged = workspaceId !== prev.workspaceId;
+    const sessionSwitched = prev.sessionId !== null && sessionId !== null && prev.sessionId !== sessionId;
+
+    // Update ref for next comparison
+    prevSessionRef.current = { workspaceId, sessionId };
+
+    // Only clear when workspace changes or switching between two different sessions
+    if (workspaceChanged || sessionSwitched) {
+      messagesRef.current.clear();
+      prevItemsRef.current = [];
+      setItems([]);
+      setStatus("idle");
+      setProcessingStartedAt(null);
+      setError(undefined);
+    }
   }, [workspaceId, sessionId]);
+
+  // Keep rebuildItems in a ref to avoid subscription churn
+  const rebuildItemsRef = useRef(rebuildItems);
+  useEffect(() => {
+    rebuildItemsRef.current = rebuildItems;
+  }, [rebuildItems]);
 
   // Rebuild when pending messages change
   useEffect(() => {
     if (pendingUserMessages.length > 0) {
-      rebuildItems();
+      rebuildItemsRef.current();
     }
-  }, [pendingUserMessages, rebuildItems]);
+  }, [pendingUserMessages]);
 
-  // Subscribe to OpenCode events
+  // Subscribe to OpenCode events - stable deps to avoid churn
   useEffect(() => {
     if (!workspaceId) {
       return;
@@ -289,7 +312,7 @@ export function useOpenCodeThread({
       if (eventType === "message.part.updated" && props?.part) {
         const part = props.part as PartData;
 
-        // Filter by session
+        // Filter by session (use current sessionId from closure, but accept if no session set yet)
         if (sessionId && part.sessionID !== sessionId) {
           return;
         }
@@ -308,7 +331,7 @@ export function useOpenCodeThread({
 
         // Update the part
         msg.parts.set(part.id, part);
-        rebuildItems();
+        rebuildItemsRef.current();
         return;
       }
 
@@ -342,7 +365,7 @@ export function useOpenCodeThread({
           msg.userText = info.summary.title;
         }
 
-        rebuildItems();
+        rebuildItemsRef.current();
         return;
       }
 
@@ -356,7 +379,7 @@ export function useOpenCodeThread({
     });
 
     return unsubscribe;
-  }, [workspaceId, sessionId, rebuildItems]);
+  }, [workspaceId, sessionId]); // Removed rebuildItems from deps - using ref instead
 
   return {
     items,
