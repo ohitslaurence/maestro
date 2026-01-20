@@ -352,7 +352,10 @@ impl DaemonClient {
         {
             let mut writer = self.writer.lock().await;
             let json = serde_json::to_string(&request).map_err(|e| format!("Serialize error: {e}"))?;
-            eprintln!("[daemon] Sending request: {}", json);
+            // Debug log for opencode commands only
+            if method.starts_with("opencode") {
+                eprintln!("[daemon] Sending request: {}", json);
+            }
             writer
                 .write_all(json.as_bytes())
                 .await

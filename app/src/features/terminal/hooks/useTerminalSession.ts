@@ -309,8 +309,18 @@ export function useTerminalSession({
       return;
     }
 
+    let lastCols = terminal.cols;
+    let lastRows = terminal.rows;
+    let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const resize = () => {
       fitAddon.fit();
+      // Only send resize if dimensions actually changed
+      if (terminal.cols === lastCols && terminal.rows === lastRows) {
+        return;
+      }
+      lastCols = terminal.cols;
+      lastRows = terminal.rows;
       const key = `${sessionId}:${terminalId}`;
       resizeTerminal(sessionId, terminalId, terminal.cols, terminal.rows).catch(
         (error) => {
@@ -323,8 +333,15 @@ export function useTerminalSession({
       );
     };
 
+    const debouncedResize = () => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      resizeTimeout = setTimeout(resize, 50);
+    };
+
     const observer = new ResizeObserver(() => {
-      resize();
+      debouncedResize();
     });
 
     if (containerRef.current) {
@@ -334,6 +351,9 @@ export function useTerminalSession({
 
     return () => {
       observer.disconnect();
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
     };
   }, [sessionId, terminalId, hasSession, isVisible, handleTerminalMissing]);
 
