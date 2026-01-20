@@ -194,17 +194,22 @@ export function useOpenCodeThread({
     }
 
     const unsubscribe = subscribeOpenCodeEvents((event) => {
+      console.log("[opencode-thread] Received event:", event.eventType, event);
+
       // Filter by workspace
       if (event.workspaceId !== workspaceId) {
+        console.log("[opencode-thread] Skipping - workspace mismatch:", event.workspaceId, "vs", workspaceId);
         return;
       }
 
       // Handle different event types
       if (event.eventType === "message" || event.eventType === "message.updated") {
         const msg = event.event as RawMessage;
+        console.log("[opencode-thread] Message event:", msg.id, msg.role, msg);
 
         // Filter by session if specified
         if (sessionId && msg.sessionID !== sessionId) {
+          console.log("[opencode-thread] Skipping - session mismatch:", msg.sessionID, "vs", sessionId);
           return;
         }
 

@@ -317,9 +317,12 @@ impl DaemonClient {
                 let _ = handle.emit("daemon:terminal_exited", params);
             }
             EVENT_OPENCODE => {
+                eprintln!("[tauri] Forwarding opencode event: {:?}", params);
                 let _ = handle.emit("daemon:opencode_event", params);
             }
-            _ => {}
+            _ => {
+                eprintln!("[tauri] Unknown event method: {}", method);
+            }
         }
     }
 
