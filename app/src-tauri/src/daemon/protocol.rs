@@ -188,3 +188,75 @@ pub struct TerminalExitedParams {
 // Event method names
 pub const EVENT_TERMINAL_OUTPUT: &str = "terminal_output";
 pub const EVENT_TERMINAL_EXITED: &str = "terminal_exited";
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        GitDiffResult, IncomingMessage, Request, Response, METHOD_GIT_STATUS, EVENT_TERMINAL_OUTPUT,
+    };
+    use serde_json::json;
+
+    #[test]
+    fn request_omits_params_when_none() {
+        let request = Request {
+            id: 1,
+            method: METHOD_GIT_STATUS,
+            params: None,
+        };
+
+        let value = serde_json::to_value(request).expect("request to serialize");
+        assert_eq!(value.get("id"), Some(&json!(1)));
+        assert_eq!(value.get("method"), Some(&json!(METHOD_GIT_STATUS)));
+        assert!(value.get("params").is_none());
+    }
+
+    #[test]
+    fn response_parses_success_and_error() {
+        let success: Response = serde_json::from_str(r#"{"id":1,"result":{"ok":true}}"#)
+            .expect("success response to parse");
+        match success {
+            Response::Success { id, result } => {
+                assert_eq!(id, 1);
+                assert_eq!(result.get("ok"), Some(&json!(true)));
+            }
+            _ => panic!("expected success response"),
+        }
+
+        let error: Response = serde_json::from_str(
+            r#"{"id":2,"error":{"code":"auth_failed","message":"nope"}}"#,
+        )
+        .expect("error response to parse");
+        match error {
+            Response::Error { id, error } => {
+                assert_eq!(id, 2);
+                assert_eq!(error.code, "auth_failed");
+                assert_eq!(error.message, "nope");
+            }
+            _ => panic!("expected error response"),
+        }
+    }
+
+    #[test]
+    fn incoming_message_parses_event() {
+        let event: IncomingMessage = serde_json::from_str(
+            r#"{"method":"terminal_output","params":{"session_id":"s","terminal_id":"t","data":"hi"}}"#,
+        )
+        .expect("event to parse");
+
+        match event {
+            IncomingMessage::Event(parsed) => {
+                assert_eq!(parsed.method, EVENT_TERMINAL_OUTPUT);
+                assert_eq!(parsed.params.get("data"), Some(&json!("hi")));
+            }
+            _ => panic!("expected event message"),
+        }
+    }
+
+    #[test]
+    fn git_diff_result_defaults_truncated_files() {
+        let result: GitDiffResult =
+            serde_json::from_str(r#"{"files":[],"truncated":false}"#)
+                .expect("diff result to parse");
+        assert!(result.truncated_files.is_empty());
+    }
+}

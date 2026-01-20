@@ -230,3 +230,69 @@ impl Event {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        ErrorResponse, Event, GitDiffResult, Request, RpcError, SuccessResponse, AUTH_FAILED,
+        EVENT_TERMINAL_OUTPUT,
+    };
+    use serde_json::json;
+
+    #[test]
+    fn request_defaults_params_to_null() {
+        let request: Request = serde_json::from_str(r#"{"id":1,"method":"auth"}"#)
+            .expect("request to parse");
+        assert_eq!(request.id, 1);
+        assert_eq!(request.method, "auth");
+        assert_eq!(request.params, json!(null));
+    }
+
+    #[test]
+    fn success_response_serializes_result() {
+        let response = SuccessResponse::new(2, json!({"ok": true}));
+        let value = serde_json::to_value(response).expect("response to serialize");
+        assert_eq!(value.get("id"), Some(&json!(2)));
+        assert_eq!(value.get("result"), Some(&json!({"ok": true})));
+    }
+
+    #[test]
+    fn error_response_serializes_error() {
+        let response = ErrorResponse::new(3, AUTH_FAILED, "nope");
+        let value = serde_json::to_value(response).expect("error to serialize");
+        assert_eq!(value.get("id"), Some(&json!(3)));
+        let error = value.get("error").expect("error field");
+        assert_eq!(error.get("code"), Some(&json!(AUTH_FAILED)));
+        assert_eq!(error.get("message"), Some(&json!("nope")));
+    }
+
+    #[test]
+    fn event_serializes_params() {
+        let event = Event::new(EVENT_TERMINAL_OUTPUT, json!({"data": "hi"}));
+        let value = serde_json::to_value(event).expect("event to serialize");
+        assert_eq!(value.get("method"), Some(&json!(EVENT_TERMINAL_OUTPUT)));
+        assert_eq!(value.get("params"), Some(&json!({"data": "hi"})));
+    }
+
+    #[test]
+    fn git_diff_result_omits_empty_truncated_files() {
+        let result = GitDiffResult {
+            files: vec![],
+            truncated: false,
+            truncated_files: vec![],
+        };
+        let value = serde_json::to_value(result).expect("diff result to serialize");
+        assert!(value.get("truncated_files").is_none());
+    }
+
+    #[test]
+    fn rpc_error_serializes_fields() {
+        let error = RpcError {
+            code: AUTH_FAILED,
+            message: "nope".to_string(),
+        };
+        let value = serde_json::to_value(error).expect("rpc error to serialize");
+        assert_eq!(value.get("code"), Some(&json!(AUTH_FAILED)));
+        assert_eq!(value.get("message"), Some(&json!("nope")));
+    }
+}

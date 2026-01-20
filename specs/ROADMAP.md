@@ -54,19 +54,25 @@
 
 **This is the critical path.** Without the daemon, we cannot test the real architecture.
 
-- [ ] **Daemon implementation** (Task 014)
-  - [ ] TCP listener with JSON-RPC protocol
-  - [ ] Token authentication
-  - [ ] Session discovery/management
-  - [ ] Terminal PTY (reuse portable-pty logic)
-  - [ ] Git operations (reuse sessions.rs git code)
-  - [ ] Event streaming to clients
+- [x] **Daemon implementation** (Task 014 - DONE)
+  - [x] TCP listener with JSON-RPC protocol
+  - [x] Token authentication
+  - [x] Session discovery/management
+  - [x] Terminal PTY (reuse portable-pty logic)
+  - [x] Git operations (reuse sessions.rs git code)
+  - [x] Event streaming to clients
 
-- [ ] **Tauri proxy layer**
-  - [ ] Connect to daemon on startup
-  - [ ] Proxy terminal commands to daemon
-  - [ ] Proxy git commands to daemon
-  - [ ] Forward daemon events to React
+- [x] **Tauri proxy layer** (Task 015 - DONE)
+  - [x] Connect to daemon on startup
+  - [x] Proxy terminal commands to daemon
+  - [x] Proxy git commands to daemon
+  - [x] Forward daemon events to React
+
+- [ ] **Frontend daemon integration** (Task 016 - NEXT)
+  - [ ] Update services to use new command/event names
+  - [ ] Add daemon connection hook and UI
+  - [ ] Update session/terminal hooks for new formats
+  - [ ] Settings modal for daemon configuration
 
 - [ ] **End-to-end testing**
   - [ ] Run daemon on VPS
@@ -105,10 +111,10 @@
 ## Task Specs
 
 Active:
-- `014-daemon-implementation.md` - Remote daemon (NEXT)
+- `016-frontend-daemon-integration.md` - Frontend updates for daemon (NEXT)
 
 Completed:
-- `DONE-001` through `DONE-013` - See `specs/TASKS/`
+- `DONE-001` through `DONE-015` - See `specs/TASKS/`
 
 ## Commands Reference
 
