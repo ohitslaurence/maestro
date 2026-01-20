@@ -2,6 +2,7 @@ mod config;
 mod connection;
 mod git;
 mod handlers;
+mod opencode;
 mod protocol;
 mod state;
 mod terminal;

@@ -56,6 +56,15 @@ pub const METHOD_GIT_STATUS: &str = "git_status";
 pub const METHOD_GIT_DIFF: &str = "git_diff";
 pub const METHOD_GIT_LOG: &str = "git_log";
 
+// OpenCode method names
+pub const METHOD_OPENCODE_CONNECT_WORKSPACE: &str = "opencode_connect_workspace";
+pub const METHOD_OPENCODE_DISCONNECT_WORKSPACE: &str = "opencode_disconnect_workspace";
+pub const METHOD_OPENCODE_STATUS: &str = "opencode_status";
+pub const METHOD_OPENCODE_SESSION_LIST: &str = "opencode_session_list";
+pub const METHOD_OPENCODE_SESSION_CREATE: &str = "opencode_session_create";
+pub const METHOD_OPENCODE_SESSION_PROMPT: &str = "opencode_session_prompt";
+pub const METHOD_OPENCODE_SESSION_ABORT: &str = "opencode_session_abort";
+
 // --- Request params ---
 
 #[derive(Debug, Serialize)]
@@ -102,6 +111,39 @@ pub struct GitLogParams {
     pub session_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u32>,
+}
+
+// --- OpenCode request params ---
+
+#[derive(Debug, Serialize)]
+pub struct OpenCodeConnectParams {
+    pub workspace_id: String,
+    pub workspace_path: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OpenCodeWorkspaceParams {
+    pub workspace_id: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OpenCodeSessionCreateParams {
+    pub workspace_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OpenCodeSessionPromptParams {
+    pub workspace_id: String,
+    pub session_id: String,
+    pub message: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OpenCodeSessionAbortParams {
+    pub workspace_id: String,
+    pub session_id: String,
 }
 
 // --- Response types ---
@@ -178,6 +220,22 @@ pub struct GitLogResult {
     pub upstream: Option<String>,
 }
 
+// --- OpenCode response types ---
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OpenCodeConnectResult {
+    pub workspace_id: String,
+    pub base_url: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OpenCodeStatusResult {
+    pub connected: bool,
+    pub base_url: Option<String>,
+}
+
 // --- Event params (for forwarding to frontend) ---
 
 #[allow(dead_code)]
@@ -199,6 +257,7 @@ pub struct TerminalExitedParams {
 // Event method names
 pub const EVENT_TERMINAL_OUTPUT: &str = "terminal_output";
 pub const EVENT_TERMINAL_EXITED: &str = "terminal_exited";
+pub const EVENT_OPENCODE: &str = "opencode:event";
 
 #[cfg(test)]
 mod tests {

@@ -1,6 +1,6 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, type DependencyList } from "react";
-import type { SessionStatus } from "../types";
+import type { OpenCodeEvent, SessionStatus } from "../types";
 
 export type Unsubscribe = () => void;
 
@@ -224,6 +224,16 @@ const daemonDebugHub = createEventHub<DaemonDebugEvent>("daemon:debug");
 const agentEventHub = createEventHub<AgentEvent>("agent-event");
 const sessionStatusHub = createEventHub<SessionStatusEvent>("session-status");
 
+// OpenCode events from daemon
+const opencodeEventHub = createTransformingEventHub<
+  { workspace_id: string; event_type: string; event: unknown },
+  OpenCodeEvent
+>("daemon:opencode_event", (raw) => ({
+  workspaceId: raw.workspace_id,
+  eventType: raw.event_type,
+  event: raw.event,
+}));
+
 // --- Subscription helpers ---
 
 export function subscribeTerminalOutput(
@@ -273,6 +283,13 @@ export function subscribeSessionStatus(
   options?: SubscriptionOptions,
 ): Unsubscribe {
   return sessionStatusHub.subscribe(onEvent, options);
+}
+
+export function subscribeOpenCodeEvents(
+  onEvent: (event: OpenCodeEvent) => void,
+  options?: SubscriptionOptions,
+): Unsubscribe {
+  return opencodeEventHub.subscribe(onEvent, options);
 }
 
 // --- React hook helper ---

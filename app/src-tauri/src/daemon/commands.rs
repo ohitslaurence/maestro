@@ -201,5 +201,113 @@ pub async fn git_log(
         .await
 }
 
+// --- OpenCode Commands (Proxy to Daemon) ---
+
+#[tauri::command]
+pub async fn opencode_connect_workspace(
+    workspace_id: String,
+    workspace_path: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<OpenCodeConnectResult, String> {
+    state
+        .call(
+            METHOD_OPENCODE_CONNECT_WORKSPACE,
+            Some(OpenCodeConnectParams {
+                workspace_id,
+                workspace_path,
+            }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn opencode_disconnect_workspace(
+    workspace_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_OPENCODE_DISCONNECT_WORKSPACE,
+            Some(OpenCodeWorkspaceParams { workspace_id }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn opencode_status(
+    workspace_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<OpenCodeStatusResult, String> {
+    state
+        .call(
+            METHOD_OPENCODE_STATUS,
+            Some(OpenCodeWorkspaceParams { workspace_id }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn opencode_session_list(
+    workspace_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_OPENCODE_SESSION_LIST,
+            Some(OpenCodeWorkspaceParams { workspace_id }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn opencode_session_create(
+    workspace_id: String,
+    title: Option<String>,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_OPENCODE_SESSION_CREATE,
+            Some(OpenCodeSessionCreateParams { workspace_id, title }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn opencode_session_prompt(
+    workspace_id: String,
+    session_id: String,
+    message: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_OPENCODE_SESSION_PROMPT,
+            Some(OpenCodeSessionPromptParams {
+                workspace_id,
+                session_id,
+                message,
+            }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn opencode_session_abort(
+    workspace_id: String,
+    session_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_OPENCODE_SESSION_ABORT,
+            Some(OpenCodeSessionAbortParams {
+                workspace_id,
+                session_id,
+            }),
+        )
+        .await
+}
+
 // Helper to use serde_json::Value without importing in this file
 use serde_json::Value;

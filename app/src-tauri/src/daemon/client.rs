@@ -316,6 +316,9 @@ impl DaemonClient {
             EVENT_TERMINAL_EXITED => {
                 let _ = handle.emit("daemon:terminal_exited", params);
             }
+            EVENT_OPENCODE => {
+                let _ = handle.emit("daemon:opencode_event", params);
+            }
             _ => {}
         }
     }

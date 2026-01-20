@@ -47,6 +47,8 @@ pub const TERMINAL_NOT_FOUND: &str = "terminal_not_found";
 pub const TERMINAL_EXISTS: &str = "terminal_exists";
 pub const GIT_ERROR: &str = "git_error";
 pub const INTERNAL_ERROR: &str = "internal_error";
+pub const OPENCODE_ERROR: &str = "opencode_error";
+pub const OPENCODE_NOT_CONNECTED: &str = "opencode_not_connected";
 
 // Method names
 pub const METHOD_AUTH: &str = "auth";
@@ -60,9 +62,20 @@ pub const METHOD_GIT_STATUS: &str = "git_status";
 pub const METHOD_GIT_DIFF: &str = "git_diff";
 pub const METHOD_GIT_LOG: &str = "git_log";
 
+// OpenCode method names
+pub const METHOD_OPENCODE_CONNECT_WORKSPACE: &str = "opencode_connect_workspace";
+pub const METHOD_OPENCODE_DISCONNECT_WORKSPACE: &str = "opencode_disconnect_workspace";
+pub const METHOD_OPENCODE_STATUS: &str = "opencode_status";
+pub const METHOD_OPENCODE_SESSION_LIST: &str = "opencode_session_list";
+pub const METHOD_OPENCODE_SESSION_CREATE: &str = "opencode_session_create";
+pub const METHOD_OPENCODE_SESSION_PROMPT: &str = "opencode_session_prompt";
+pub const METHOD_OPENCODE_SESSION_ABORT: &str = "opencode_session_abort";
+
 // Event names
 pub const EVENT_TERMINAL_OUTPUT: &str = "terminal_output";
 pub const EVENT_TERMINAL_EXITED: &str = "terminal_exited";
+#[allow(dead_code)]
+pub const EVENT_OPENCODE: &str = "opencode:event";
 
 // --- Request params ---
 
@@ -109,6 +122,39 @@ pub struct TerminalCloseParams {
 pub struct GitLogParams {
     pub session_id: String,
     pub limit: Option<u32>,
+}
+
+// --- OpenCode request params ---
+
+#[derive(Debug, Deserialize)]
+pub struct OpenCodeConnectParams {
+    pub workspace_id: String,
+    pub workspace_path: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OpenCodeWorkspaceParams {
+    pub workspace_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OpenCodeSessionCreateParams {
+    pub workspace_id: String,
+    #[serde(default)]
+    pub title: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OpenCodeSessionPromptParams {
+    pub workspace_id: String,
+    pub session_id: String,
+    pub message: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OpenCodeSessionAbortParams {
+    pub workspace_id: String,
+    pub session_id: String,
 }
 
 // --- Response types ---
@@ -181,6 +227,20 @@ pub struct GitLogResult {
     pub ahead: i32,
     pub behind: i32,
     pub upstream: Option<String>,
+}
+
+// --- OpenCode response types ---
+
+#[derive(Debug, Serialize)]
+pub struct OpenCodeConnectResult {
+    pub workspace_id: String,
+    pub base_url: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OpenCodeStatusResult {
+    pub connected: bool,
+    pub base_url: Option<String>,
 }
 
 // --- Event params ---

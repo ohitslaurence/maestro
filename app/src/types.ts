@@ -121,3 +121,27 @@ export type GitLogResponse = {
   behindEntries: GitLogEntry[];
   upstream: string | null;
 };
+
+// --- OpenCode types ---
+
+export type OpenCodeConnectResult = {
+  workspaceId: string;
+  baseUrl: string;
+};
+
+export type OpenCodeStatusResult = {
+  connected: boolean;
+  baseUrl?: string;
+};
+
+export type OpenCodeSession = {
+  id: string;
+  [key: string]: unknown;
+};
+
+/** OpenCode event forwarded from daemon */
+export type OpenCodeEvent = {
+  workspaceId: string;
+  eventType: string;
+  event: unknown;
+};

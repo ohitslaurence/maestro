@@ -65,6 +65,14 @@ pub fn run() {
             daemon::git_status,
             daemon::git_diff,
             daemon::git_log,
+            // OpenCode commands (proxied to daemon)
+            daemon::opencode_connect_workspace,
+            daemon::opencode_disconnect_workspace,
+            daemon::opencode_status,
+            daemon::opencode_session_list,
+            daemon::opencode_session_create,
+            daemon::opencode_session_prompt,
+            daemon::opencode_session_abort,
             // Local-only commands (agent harness - future)
             sessions::spawn_session,
             sessions::stop_session,

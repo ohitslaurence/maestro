@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
+use crate::opencode::OpenCodeServer;
 use crate::protocol::SessionInfo;
 use crate::terminal::TerminalHandle;
 
@@ -27,6 +28,9 @@ pub struct DaemonState {
 
     /// Next client ID counter
     next_client_id: Mutex<ClientId>,
+
+    /// Active OpenCode servers (workspaceId → OpenCodeServer)
+    pub opencode_servers: RwLock<HashMap<String, OpenCodeServer>>,
 }
 
 /// Channel for sending events to a client
@@ -46,6 +50,7 @@ impl DaemonState {
             terminal_owners: RwLock::new(HashMap::new()),
             clients: RwLock::new(HashMap::new()),
             next_client_id: Mutex::new(1),
+            opencode_servers: RwLock::new(HashMap::new()),
         }
     }
 
@@ -136,5 +141,42 @@ impl DaemonState {
     #[allow(dead_code)]
     pub async fn get_terminal_owner(&self, key: &str) -> Option<ClientId> {
         self.terminal_owners.read().await.get(key).copied()
+    }
+
+    /// Broadcast a message to all connected clients
+    pub async fn broadcast_to_all_clients(&self, msg: String) {
+        let clients = self.clients.read().await;
+        for tx in clients.values() {
+            let _ = tx.send(msg.clone());
+        }
+    }
+
+    /// Store an OpenCode server
+    pub async fn store_opencode_server(&self, workspace_id: String, server: OpenCodeServer) {
+        self.opencode_servers.write().await.insert(workspace_id, server);
+    }
+
+    /// Get an OpenCode server by workspace ID
+    pub async fn get_opencode_server(&self, workspace_id: &str) -> Option<String> {
+        self.opencode_servers
+            .read()
+            .await
+            .get(workspace_id)
+            .map(|s| s.base_url.clone())
+    }
+
+    /// Check if an OpenCode server exists
+    pub async fn has_opencode_server(&self, workspace_id: &str) -> bool {
+        self.opencode_servers.read().await.contains_key(workspace_id)
+    }
+
+    /// Remove an OpenCode server (shuts it down)
+    pub async fn remove_opencode_server(&self, workspace_id: &str) -> bool {
+        if let Some(mut server) = self.opencode_servers.write().await.remove(workspace_id) {
+            server.shutdown();
+            true
+        } else {
+            false
+        }
     }
 }

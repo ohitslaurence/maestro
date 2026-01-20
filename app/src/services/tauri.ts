@@ -7,6 +7,8 @@ import type {
   GitFileDiff,
   GitLogResult,
   GitStatusResult,
+  OpenCodeConnectResult,
+  OpenCodeStatusResult,
   SessionInfo,
   SessionInfoResult,
   TerminalSession,
@@ -166,4 +168,72 @@ export async function getGitLog(
   limit = 40,
 ): Promise<GitLogResult> {
   return gitLog(sessionId, limit);
+}
+
+// --- OpenCode commands ---
+
+/** Connect to OpenCode server for a workspace */
+export async function opencodeConnectWorkspace(
+  workspaceId: string,
+  workspacePath: string,
+): Promise<OpenCodeConnectResult> {
+  return invokeCommand<OpenCodeConnectResult>("opencode_connect_workspace", {
+    workspaceId,
+    workspacePath,
+  });
+}
+
+/** Disconnect OpenCode server for a workspace */
+export async function opencodeDisconnectWorkspace(
+  workspaceId: string,
+): Promise<{ ok: boolean }> {
+  return invokeCommand<{ ok: boolean }>("opencode_disconnect_workspace", {
+    workspaceId,
+  });
+}
+
+/** Get OpenCode status for a workspace */
+export async function opencodeStatus(
+  workspaceId: string,
+): Promise<OpenCodeStatusResult> {
+  return invokeCommand<OpenCodeStatusResult>("opencode_status", { workspaceId });
+}
+
+/** List OpenCode sessions for a workspace */
+export async function opencodeSessionList(
+  workspaceId: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("opencode_session_list", { workspaceId });
+}
+
+/** Create a new OpenCode session */
+export async function opencodeSessionCreate(
+  workspaceId: string,
+  title?: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("opencode_session_create", { workspaceId, title });
+}
+
+/** Send a prompt to an OpenCode session */
+export async function opencodeSessionPrompt(
+  workspaceId: string,
+  sessionId: string,
+  message: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("opencode_session_prompt", {
+    workspaceId,
+    sessionId,
+    message,
+  });
+}
+
+/** Abort an OpenCode session */
+export async function opencodeSessionAbort(
+  workspaceId: string,
+  sessionId: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("opencode_session_abort", {
+    workspaceId,
+    sessionId,
+  });
 }
