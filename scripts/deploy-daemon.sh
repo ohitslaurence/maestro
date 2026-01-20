@@ -74,6 +74,13 @@ stop_daemon() {
         if kill -0 "$pid" 2>/dev/null; then
             warn "Force killing daemon..."
             kill -9 "$pid" 2>/dev/null || true
+            sleep 0.2
+        fi
+
+        if kill -0 "$pid" 2>/dev/null; then
+            err "Daemon did not stop (PID $pid still running)"
+            ps -p "$pid" -o pid,ppid,stat,etime,cmd || true
+            return 1
         fi
 
         rm -f "$PID_FILE"
@@ -127,8 +134,11 @@ build_daemon() {
     cargo build --release
 
     mkdir -p "$INSTALL_DIR"
-    cp "target/release/$DAEMON_NAME" "$INSTALL_DIR/"
-    chmod +x "$INSTALL_DIR/$DAEMON_NAME"
+    local tmp_path
+    tmp_path="$(mktemp "$INSTALL_DIR/$DAEMON_NAME.XXXXXX")"
+    cp "target/release/$DAEMON_NAME" "$tmp_path"
+    chmod +x "$tmp_path"
+    mv -f "$tmp_path" "$INSTALL_DIR/$DAEMON_NAME"
     log "Installed to $INSTALL_DIR/$DAEMON_NAME"
 }
 
@@ -156,8 +166,8 @@ show_logs() {
 # Main
 case "${1:-deploy}" in
     deploy)
-        build_daemon
         stop_daemon
+        build_daemon
         start_daemon
         ;;
     start)
