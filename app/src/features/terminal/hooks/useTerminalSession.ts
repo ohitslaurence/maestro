@@ -41,7 +41,11 @@ function appendBuffer(existing: string | undefined, data: string): string {
 
 function shouldIgnoreTerminalError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
-  return message.includes("Terminal session not found");
+  return (
+    message.includes("Terminal session not found") ||
+    message.includes("terminal_not_found") ||
+    message.includes("Terminal not found")
+  );
 }
 
 export function useTerminalSession({
@@ -62,6 +66,7 @@ export function useTerminalSession({
   const [status, setStatus] = useState<TerminalStatus>("idle");
   const [message, setMessage] = useState("Open a terminal to start a session.");
   const [hasSession, setHasSession] = useState(false);
+  const [reconnectNonce, setReconnectNonce] = useState(0);
 
   const cleanupTerminalSession = useCallback(
     (sid: string, tid: string) => {
@@ -117,6 +122,14 @@ export function useTerminalSession({
     },
     [refreshTerminal],
   );
+
+  const handleTerminalMissing = useCallback((key: string) => {
+    openedSessionsRef.current.delete(key);
+    setHasSession(false);
+    setStatus("connecting");
+    setMessage("Reconnecting terminal...");
+    setReconnectNonce((value) => value + 1);
+  }, []);
 
   // Subscribe to terminal output events
   useEffect(() => {
@@ -205,7 +218,7 @@ export function useTerminalSession({
         }
         void writeTerminal(sid, tid, data).catch((error) => {
           if (shouldIgnoreTerminalError(error)) {
-            openedSessionsRef.current.delete(key);
+            handleTerminalMissing(key);
             return;
           }
           console.error("[terminal] write error", error);
@@ -271,9 +284,10 @@ export function useTerminalSession({
     doOpen().catch((error) => {
       setStatus("error");
       setMessage("Failed to start terminal session.");
+      setHasSession(false);
       console.error("[terminal] open error", error);
     });
-  }, [sessionId, terminalId, isVisible, refreshTerminal, syncActiveBuffer]);
+  }, [sessionId, terminalId, isVisible, reconnectNonce, refreshTerminal, syncActiveBuffer]);
 
   // Refit when active key changes
   useEffect(() => {
@@ -301,7 +315,7 @@ export function useTerminalSession({
       resizeTerminal(sessionId, terminalId, terminal.cols, terminal.rows).catch(
         (error) => {
           if (shouldIgnoreTerminalError(error)) {
-            openedSessionsRef.current.delete(key);
+            handleTerminalMissing(key);
             return;
           }
           console.error("[terminal] resize error", error);
@@ -321,7 +335,7 @@ export function useTerminalSession({
     return () => {
       observer.disconnect();
     };
-  }, [sessionId, terminalId, hasSession, isVisible]);
+  }, [sessionId, terminalId, hasSession, isVisible, handleTerminalMissing]);
 
   return {
     status,
