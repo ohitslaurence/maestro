@@ -226,7 +226,13 @@ pub async fn handle_session_prompt(request: &Request, state: &DaemonState) -> St
     };
 
     let path = format!("/session/{}/message", params.session_id);
-    let body = json!({ "content": params.message });
+    // OpenCode expects parts array format, not simple content string
+    let body = json!({
+        "parts": [{
+            "type": "text",
+            "text": params.message
+        }]
+    });
 
     match OpenCodeRegistry::proxy_post(&base_url, &path, Some(body), None).await {
         Ok(result) => serde_json::to_string(&SuccessResponse::new(request.id, result)).unwrap(),
