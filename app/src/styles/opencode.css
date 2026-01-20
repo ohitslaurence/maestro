@@ -1,0 +1,429 @@
+/* =============================================================================
+   OpenCode Thread UI Styles
+   Prefix: oc-
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Thread Container
+   ----------------------------------------------------------------------------- */
+
+.oc-thread {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.oc-thread__error {
+  padding: var(--space-3) var(--space-4);
+  background: var(--status-error-muted);
+  color: var(--status-error);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* -----------------------------------------------------------------------------
+   Messages Container
+   ----------------------------------------------------------------------------- */
+
+.oc-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.oc-messages__empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.oc-messages__processing {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  padding: var(--space-2) 0;
+}
+
+.oc-messages__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: oc-spin 0.8s linear infinite;
+}
+
+@keyframes oc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.oc-messages__error {
+  padding: var(--space-2) var(--space-3);
+  background: var(--status-error-muted);
+  color: var(--status-error);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-md);
+}
+
+/* -----------------------------------------------------------------------------
+   Message Bubbles
+   ----------------------------------------------------------------------------- */
+
+.oc-message {
+  display: flex;
+  max-width: 85%;
+}
+
+.oc-message--user {
+  align-self: flex-end;
+}
+
+.oc-message--assistant {
+  align-self: flex-start;
+}
+
+.oc-message__bubble {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  max-width: 100%;
+}
+
+.oc-message--user .oc-message__bubble {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.oc-message--assistant .oc-message__bubble {
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.oc-message__text {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* -----------------------------------------------------------------------------
+   Tool Row
+   ----------------------------------------------------------------------------- */
+
+.oc-tool {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.oc-tool__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.oc-tool__header:hover {
+  background: var(--surface-card-hover);
+}
+
+.oc-tool__status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.oc-tool__status--pending {
+  background: var(--text-tertiary);
+}
+
+.oc-tool__status--running {
+  background: var(--accent-primary);
+  animation: oc-pulse 1.5s ease-in-out infinite;
+}
+
+.oc-tool__status--completed {
+  background: var(--status-success);
+}
+
+.oc-tool__status--error {
+  background: var(--status-error);
+}
+
+@keyframes oc-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.oc-tool__name {
+  font-family: var(--font-mono);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.oc-tool__summary {
+  flex: 1;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oc-tool__chevron {
+  color: var(--text-tertiary);
+  font-size: var(--text-base);
+  flex-shrink: 0;
+}
+
+.oc-tool__content {
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.oc-tool__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.oc-tool__section--error {
+  color: var(--status-error);
+}
+
+.oc-tool__section-label {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.oc-tool__code {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-panel);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* -----------------------------------------------------------------------------
+   Reasoning Row
+   ----------------------------------------------------------------------------- */
+
+.oc-reasoning {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.oc-reasoning__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.oc-reasoning__header:hover {
+  background: var(--surface-card-hover);
+}
+
+.oc-reasoning__icon {
+  flex-shrink: 0;
+}
+
+.oc-reasoning__preview {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: italic;
+}
+
+.oc-reasoning__chevron {
+  color: var(--text-tertiary);
+  font-size: var(--text-base);
+  flex-shrink: 0;
+}
+
+.oc-reasoning__content {
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.oc-reasoning__text {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* -----------------------------------------------------------------------------
+   Patch Row
+   ----------------------------------------------------------------------------- */
+
+.oc-patch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--status-info-muted);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--status-info);
+}
+
+.oc-patch__icon {
+  flex-shrink: 0;
+}
+
+.oc-patch__text {
+  color: var(--text-secondary);
+}
+
+/* -----------------------------------------------------------------------------
+   Step Finish Row
+   ----------------------------------------------------------------------------- */
+
+.oc-step-finish {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.oc-step-finish__tokens {
+  font-family: var(--font-mono);
+}
+
+.oc-step-finish__cost {
+  font-family: var(--font-mono);
+}
+
+/* -----------------------------------------------------------------------------
+   Composer
+   ----------------------------------------------------------------------------- */
+
+.oc-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-panel);
+}
+
+.oc-composer__input {
+  flex: 1;
+  min-height: 36px;
+  max-height: 200px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  resize: none;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.oc-composer__input:focus {
+  border-color: var(--accent-primary);
+}
+
+.oc-composer__input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.oc-composer__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.oc-composer__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.oc-composer__btn {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.oc-composer__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.oc-composer__btn--send {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.oc-composer__btn--send:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+}
+
+.oc-composer__btn--stop {
+  background: var(--status-error-muted);
+  color: var(--status-error);
+}
+
+.oc-composer__btn--stop:hover {
+  background: var(--status-error);
+  color: white;
+}

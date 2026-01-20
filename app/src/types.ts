@@ -145,3 +145,33 @@ export type OpenCodeEvent = {
   eventType: string;
   event: unknown;
 };
+
+// --- OpenCode Thread UI types ---
+
+export type OpenCodeToolStatus = "pending" | "running" | "completed" | "error";
+
+/** UI-ready thread item (discriminated union) */
+export type OpenCodeThreadItem =
+  | { id: string; kind: "user-message"; text: string }
+  | { id: string; kind: "assistant-message"; text: string }
+  | { id: string; kind: "reasoning"; text: string; time?: { start: number; end?: number } }
+  | {
+      id: string;
+      kind: "tool";
+      tool: string;
+      callId: string;
+      status: OpenCodeToolStatus;
+      title?: string;
+      input: Record<string, unknown>;
+      output?: string;
+      error?: string;
+    }
+  | { id: string; kind: "patch"; hash: string; files: string[] }
+  | {
+      id: string;
+      kind: "step-finish";
+      cost: number;
+      tokens: { input: number; output: number; reasoning: number };
+    };
+
+export type OpenCodeThreadStatus = "idle" | "processing" | "error";

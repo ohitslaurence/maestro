@@ -10,14 +10,16 @@ import {
   ConnectionMenu,
   SettingsModal,
 } from "./features/daemon";
+import { ThreadView } from "./features/opencode";
 
 const DEFAULT_TERMINAL_ID = "main";
 
-type MainPanelTab = "terminal" | "git";
+type MainPanelTab = "terminal" | "git" | "agent";
 
 const TABS: Tab[] = [
   { id: "terminal", label: "Terminal" },
   { id: "git", label: "Git" },
+  { id: "agent", label: "Agent" },
 ];
 
 function App() {
@@ -212,14 +214,18 @@ function App() {
               />
             </div>
             <div className="session-content">
-              {activeTab === "terminal" ? (
+              {activeTab === "terminal" && (
                 <TerminalPanel
                   containerRef={terminalContainerRef}
                   status={terminalStatus}
                   message={terminalMessage}
                 />
-              ) : (
+              )}
+              {activeTab === "git" && (
                 <GitPanel sessionId={selectedSession} />
+              )}
+              {activeTab === "agent" && (
+                <ThreadView workspaceId={selectedSession} />
               )}
             </div>
           </div>
