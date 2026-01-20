@@ -55,6 +55,16 @@ The VPS daemon exposes JSON-RPC over TCP:
 
 Tailscale provides network security; daemon uses token auth.
 
+## Package Manager
+
+**Always use `bun` for TypeScript/JavaScript operations.** Do not use `npm`, `yarn`, or `pnpm`.
+
+```bash
+bun install      # not npm install
+bun run <script> # not npm run
+bun add <pkg>    # not npm install <pkg>
+```
+
 ## Running Locally
 
 ```bash
