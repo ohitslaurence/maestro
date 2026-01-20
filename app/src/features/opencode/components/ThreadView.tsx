@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useOpenCodeThread } from "../hooks/useOpenCodeThread";
 import { useOpenCodeSession } from "../hooks/useOpenCodeSession";
 import { useOpenCodeConnection } from "../hooks/useOpenCodeConnection";
@@ -18,6 +18,7 @@ export function ThreadView({ workspaceId }: ThreadViewProps) {
   } = useOpenCodeConnection({
     workspaceId,
     workspacePath: workspaceId, // path is used as both id and path
+    autoConnect: true,
   });
 
   const {
@@ -34,13 +35,6 @@ export function ThreadView({ workspaceId }: ThreadViewProps) {
     processingStartedAt,
     error: threadError,
   } = useOpenCodeThread({ workspaceId, sessionId });
-
-  // Auto-connect when workspace changes
-  useEffect(() => {
-    if (workspaceId && !isConnected && !isConnecting && !connectionError) {
-      void connect();
-    }
-  }, [workspaceId, isConnected, isConnecting, connectionError, connect]);
 
   const handleSend = useCallback(
     async (message: string) => {
