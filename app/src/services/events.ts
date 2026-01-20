@@ -224,13 +224,13 @@ const daemonDebugHub = createEventHub<DaemonDebugEvent>("daemon:debug");
 const agentEventHub = createEventHub<AgentEvent>("agent-event");
 const sessionStatusHub = createEventHub<SessionStatusEvent>("session-status");
 
-// OpenCode events from daemon
+// OpenCode events from daemon (daemon sends camelCase)
 const opencodeEventHub = createTransformingEventHub<
-  { workspace_id: string; event_type: string; event: unknown },
+  { workspaceId: string; eventType: string; event: unknown },
   OpenCodeEvent
 >("daemon:opencode_event", (raw) => ({
-  workspaceId: raw.workspace_id,
-  eventType: raw.event_type,
+  workspaceId: raw.workspaceId,
+  eventType: raw.eventType,
   event: raw.event,
 }));
 
