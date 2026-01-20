@@ -13,12 +13,6 @@ pub struct AgentSession {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TerminalSession {
-    pub id: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct GitFileStatus {
     pub path: String,
     pub status: String,
@@ -126,43 +120,6 @@ pub async fn spawn_session(
 
 #[tauri::command]
 pub async fn stop_session(_session_id: String) -> Result<(), String> {
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn terminal_open(
-    _session_id: String,
-    terminal_id: String,
-    _cols: u16,
-    _rows: u16,
-) -> Result<TerminalSession, String> {
-    Ok(TerminalSession { id: terminal_id })
-}
-
-#[tauri::command]
-pub async fn terminal_write(
-    _session_id: String,
-    _terminal_id: String,
-    _data: String,
-) -> Result<(), String> {
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn terminal_resize(
-    _session_id: String,
-    _terminal_id: String,
-    _cols: u16,
-    _rows: u16,
-) -> Result<(), String> {
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn terminal_close(
-    _session_id: String,
-    _terminal_id: String,
-) -> Result<(), String> {
     Ok(())
 }
 
