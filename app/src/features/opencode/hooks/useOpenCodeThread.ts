@@ -14,24 +14,45 @@ export type OpenCodeThreadState = {
   error?: string;
 };
 
-// Raw part types from OpenCode message-v2 events
-type RawPart = {
+// Part data from message.part.updated events
+type PartData = {
+  id: string;
+  messageID: string;
+  sessionID: string;
   type: string;
-  [key: string]: unknown;
+  text?: string;
+  content?: string;
+  tool?: string;
+  callID?: string;
+  title?: string;
+  input?: Record<string, unknown>;
+  output?: string;
+  error?: string;
+  hash?: string;
+  files?: string[];
+  cost?: number;
+  tokens?: { input: number; output: number; reasoning: number; cache?: { read: number; write: number } };
+  time?: { start?: number; end?: number };
 };
 
-type RawMessage = {
+// Message metadata from message.updated events
+type MessageInfo = {
   id: string;
   sessionID: string;
   role: "user" | "assistant";
   time?: { created?: number; completed?: number };
-  parts?: RawPart[];
-  content?: string;
+  summary?: { title?: string };
 };
 
-function generateId(): string {
-  return Math.random().toString(36).slice(2, 11);
-}
+// Internal tracked message
+type TrackedMessage = {
+  id: string;
+  sessionID: string;
+  role: "user" | "assistant";
+  time?: { created?: number; completed?: number };
+  userText?: string; // For user messages
+  parts: Map<string, PartData>; // For assistant messages
+};
 
 export function useOpenCodeThread({
   workspaceId,
@@ -42,104 +63,93 @@ export function useOpenCodeThread({
   const [processingStartedAt, setProcessingStartedAt] = useState<number | null>(null);
   const [error, setError] = useState<string | undefined>();
 
-  // Track messages by id for updates
-  const messagesRef = useRef<Map<string, RawMessage>>(new Map());
+  // Track messages by id
+  const messagesRef = useRef<Map<string, TrackedMessage>>(new Map());
 
-  // Convert raw message to thread items
-  const convertMessageToItems = useCallback((msg: RawMessage): OpenCodeThreadItem[] => {
+  // Convert tracked message to thread items
+  const convertMessageToItems = useCallback((msg: TrackedMessage): OpenCodeThreadItem[] => {
     const result: OpenCodeThreadItem[] = [];
 
-    // If it's a user message with content
-    if (msg.role === "user" && msg.content) {
+    // User message
+    if (msg.role === "user" && msg.userText) {
       result.push({
         id: msg.id,
         kind: "user-message",
-        text: msg.content,
+        text: msg.userText,
       });
       return result;
     }
 
-    // Process parts for assistant messages
-    if (msg.parts && Array.isArray(msg.parts)) {
-      for (const part of msg.parts) {
-        const partId = `${msg.id}-${generateId()}`;
-
-        switch (part.type) {
-          case "text":
-            if (typeof part.content === "string" && part.content.trim()) {
-              result.push({
-                id: partId,
-                kind: "assistant-message",
-                text: part.content,
-              });
-            }
-            break;
-
-          case "reasoning":
-            if (typeof part.content === "string") {
-              result.push({
-                id: partId,
-                kind: "reasoning",
-                text: part.content,
-                time: part.time as { start: number; end?: number } | undefined,
-              });
-            }
-            break;
-
-          case "tool": {
-            const toolStatus = deriveToolStatus(part);
+    // Assistant message - process parts
+    const parts = Array.from(msg.parts.values());
+    for (const part of parts) {
+      switch (part.type) {
+        case "text":
+          if (part.text?.trim()) {
             result.push({
-              id: partId,
-              kind: "tool",
-              tool: (part.tool as string) || "unknown",
-              callId: (part.callID as string) || partId,
-              status: toolStatus,
-              title: part.title as string | undefined,
-              input: (part.input as Record<string, unknown>) || {},
-              output: part.output as string | undefined,
-              error: part.error as string | undefined,
+              id: part.id,
+              kind: "assistant-message",
+              text: part.text,
             });
-            break;
           }
+          break;
 
-          case "patch":
+        case "reasoning":
+          if (part.content || part.text) {
             result.push({
-              id: partId,
-              kind: "patch",
-              hash: (part.hash as string) || "",
-              files: (part.files as string[]) || [],
+              id: part.id,
+              kind: "reasoning",
+              text: part.content || part.text || "",
+              time: part.time as { start: number; end?: number } | undefined,
             });
-            break;
+          }
+          break;
 
-          case "step-finish":
-            if (part.cost !== undefined || part.tokens) {
-              result.push({
-                id: partId,
-                kind: "step-finish",
-                cost: (part.cost as number) || 0,
-                tokens: (part.tokens as { input: number; output: number; reasoning: number }) || {
-                  input: 0,
-                  output: 0,
-                  reasoning: 0,
-                },
-              });
-            }
-            break;
-
-          // Skip non-display parts
-          case "step-start":
-          case "file":
-          case "agent":
-          case "subtask":
-          case "retry":
-          case "compaction":
-          case "snapshot":
-            break;
-
-          default:
-            // Unknown part type, skip
-            break;
+        case "tool": {
+          const toolStatus = deriveToolStatus(part);
+          result.push({
+            id: part.id,
+            kind: "tool",
+            tool: part.tool || "unknown",
+            callId: part.callID || part.id,
+            status: toolStatus,
+            title: part.title,
+            input: part.input || {},
+            output: part.output,
+            error: part.error,
+          });
+          break;
         }
+
+        case "patch":
+          result.push({
+            id: part.id,
+            kind: "patch",
+            hash: part.hash || "",
+            files: part.files || [],
+          });
+          break;
+
+        case "step-finish":
+          if (part.cost !== undefined || part.tokens) {
+            result.push({
+              id: part.id,
+              kind: "step-finish",
+              cost: part.cost || 0,
+              tokens: part.tokens || { input: 0, output: 0, reasoning: 0 },
+            });
+          }
+          break;
+
+        // Skip non-display parts
+        case "step-start":
+        case "file":
+        case "agent":
+        case "subtask":
+        case "retry":
+        case "compaction":
+        case "snapshot":
+          break;
       }
     }
 
@@ -200,31 +210,75 @@ export function useOpenCodeThread({
       }
 
       // Extract the actual event type from the nested event object
-      const innerEvent = event.event as { type: string; properties?: unknown };
+      const innerEvent = event.event as { type: string; properties?: Record<string, unknown> };
       const eventType = innerEvent?.type;
+      const props = innerEvent?.properties;
 
-      console.log("[opencode-thread] Event type:", eventType);
+      // Handle message.part.updated - streaming parts
+      if (eventType === "message.part.updated" && props?.part) {
+        const part = props.part as PartData;
 
-      // Handle message events (actual conversation messages)
-      if (eventType === "message" || eventType === "message.updated") {
-        const msg = innerEvent.properties as RawMessage;
-        console.log("[opencode-thread] Message:", msg?.id, msg?.role);
-
-        if (!msg?.id) {
+        // Filter by session
+        if (sessionId && part.sessionID !== sessionId) {
           return;
         }
 
-        // Filter by session if specified
-        if (sessionId && msg.sessionID !== sessionId) {
-          return;
+        // Get or create the message
+        let msg = messagesRef.current.get(part.messageID);
+        if (!msg) {
+          msg = {
+            id: part.messageID,
+            sessionID: part.sessionID,
+            role: "assistant", // Parts are always from assistant
+            parts: new Map(),
+          };
+          messagesRef.current.set(part.messageID, msg);
         }
 
-        // Update or add message
-        messagesRef.current.set(msg.id, msg);
+        // Update the part
+        msg.parts.set(part.id, part);
         rebuildItems();
-      } else if (eventType === "session.error") {
-        const props = innerEvent.properties as { error?: string };
-        setError(props?.error || "Unknown error");
+        return;
+      }
+
+      // Handle message.updated - message metadata
+      if (eventType === "message.updated" && props?.info) {
+        const info = props.info as MessageInfo;
+
+        // Filter by session
+        if (sessionId && info.sessionID !== sessionId) {
+          return;
+        }
+
+        // Get or create the message
+        let msg = messagesRef.current.get(info.id);
+        if (!msg) {
+          msg = {
+            id: info.id,
+            sessionID: info.sessionID,
+            role: info.role,
+            parts: new Map(),
+          };
+          messagesRef.current.set(info.id, msg);
+        }
+
+        // Update metadata
+        msg.role = info.role;
+        msg.time = info.time;
+
+        // For user messages, extract text from summary
+        if (info.role === "user" && info.summary?.title) {
+          msg.userText = info.summary.title;
+        }
+
+        rebuildItems();
+        return;
+      }
+
+      // Handle session.error
+      if (eventType === "session.error") {
+        const errProps = props as { error?: string } | undefined;
+        setError(errProps?.error || "Unknown error");
         setStatus("error");
       }
       // Ignore other event types: server.heartbeat, session.created, session.updated, etc.
@@ -241,13 +295,10 @@ export function useOpenCodeThread({
   };
 }
 
-function deriveToolStatus(part: RawPart): OpenCodeThreadItem & { kind: "tool" } extends { status: infer S } ? S : never {
+function deriveToolStatus(part: PartData): OpenCodeThreadItem & { kind: "tool" } extends { status: infer S } ? S : never {
   if (part.error) return "error";
   if (part.output !== undefined) return "completed";
-  if (part.time && typeof part.time === "object" && "start" in part.time) {
-    const timeObj = part.time as { start?: number; end?: number };
-    if (timeObj.end) return "completed";
-    return "running";
-  }
+  if (part.time?.end) return "completed";
+  if (part.time?.start) return "running";
   return "pending";
 }
