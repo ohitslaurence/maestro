@@ -1,5 +1,23 @@
 # Orchestrator Roadmap
 
+## Architecture Reminder
+
+```
+┌─────────────────────┐                  ┌─────────────────────────────────┐
+│   macOS (Tauri)     │                  │         VPS (Tailscale)         │
+│                     │                  │                                 │
+│  React + xterm.js   │     TCP          │  maestro-daemon                 │
+│  Rust Proxy Layer   │◄────────────────►│    ├── Terminal PTY             │
+│  (thin client)      │   JSON-RPC       │    ├── Git Operations           │
+│                     │                  │    ├── Session Manager          │
+└─────────────────────┘                  │    └── Agent Harnesses          │
+                                         └─────────────────────────────────┘
+```
+
+**The daemon runs remotely on VPS. The Mac app is a thin client.**
+
+---
+
 ## Phase 0: Setup (Complete)
 - [x] Initialize git repo
 - [x] Create spec document
@@ -8,20 +26,11 @@
 - [x] Get app running locally on Mac
 - [x] Create README.md and AGENTS.md
 
-### Build on Mac
-```bash
-cd app
-bun install
-bun run tauri:dev
-```
-
-Requires: Rust toolchain, Xcode Command Line Tools
-
 ## Phase 1: Deep Analysis (Complete)
 - [x] Analyze CodexMonitor architecture
 - [x] Document IPC patterns, state management, event flow
 - [x] Document terminal implementation (PTY + xterm.js)
-- [x] Document git integration (git2 crate)
+- [x] Document git integration
 - [x] Document diff rendering (@pierre/diffs)
 - [x] Document remote backend daemon (JSON-RPC)
 - [x] Document UI patterns (feature-sliced architecture)
@@ -29,40 +38,46 @@ Requires: Rust toolchain, Xcode Command Line Tools
 
 **Output:** `specs/CODEX_MONITOR_ANALYSIS.md`
 
-### Implementation Tasks Created
-See `specs/TASKS/` for detailed task specs:
-- `002-tauri-ipc-wrapper.md` - Type-safe IPC wrapper pattern
-- `003-event-hub-pattern.md` - Single-listen event subscription
-- `004-terminal-implementation.md` - PTY + xterm.js
-- `005-feature-sliced-architecture.md` - Component/hook separation
-- `006-resizable-panels.md` - Draggable panels with persistence
-
-### Research Tasks Created
-- `007-research-claude-code-sdk.md` - Claude Code programmatic interface
-- `008-research-opencode-server.md` - Open Code server protocol
-
-## Phase 2: Core Infrastructure (Complete)
+## Phase 2: Frontend Scaffolding (Complete)
 - [x] Feature-sliced architecture (Task 005)
 - [x] Tauri IPC wrapper (Task 002)
 - [x] Event hub pattern (Task 003)
 - [x] Resizable panels (Task 006)
 - [x] Basic layout (sidebar + main panel)
+- [x] Terminal UI (xterm.js + TerminalPanel)
+- [x] Git UI components (GitStatusPanel, DiffViewer)
+- [x] Sessions feature extraction
 
-## Phase 3: Terminal Integration (Complete)
-- [x] Terminal implementation (Task 004)
-- [x] PTY management in Rust backend
-- [x] xterm.js frontend integration
-- [x] Bidirectional streaming
+**Note:** Current terminal/git code runs locally in Tauri. This was scaffolding to validate the UI patterns. For the real architecture, these operations must run on the VPS daemon.
+
+## Phase 3: Remote Daemon (Current - BLOCKING)
+
+**This is the critical path.** Without the daemon, we cannot test the real architecture.
+
+- [ ] **Daemon implementation** (Task 014)
+  - [ ] TCP listener with JSON-RPC protocol
+  - [ ] Token authentication
+  - [ ] Session discovery/management
+  - [ ] Terminal PTY (reuse portable-pty logic)
+  - [ ] Git operations (reuse sessions.rs git code)
+  - [ ] Event streaming to clients
+
+- [ ] **Tauri proxy layer**
+  - [ ] Connect to daemon on startup
+  - [ ] Proxy terminal commands to daemon
+  - [ ] Proxy git commands to daemon
+  - [ ] Forward daemon events to React
+
+- [ ] **End-to-end testing**
+  - [ ] Run daemon on VPS
+  - [ ] Connect Tauri app from Mac
+  - [ ] Verify terminal works
+  - [ ] Verify git status/diff works
+
+## Phase 4: Git Integration Polish
+- [ ] Commit history panel
+- [ ] File tree with change indicators
 - [ ] Session switching with buffer restore
-
-## Phase 4: Git Integration (Current)
-- [x] Backend: Git status per session (Task 012)
-- [x] Backend: Git diff (staged/unstaged)
-- [x] Backend: Git log with ahead/behind
-- [x] Frontend: GitStatusPanel component
-- [x] Frontend: DiffViewer component
-- [ ] Frontend: Commit history panel
-- [ ] Frontend: File tree with change indicators
 
 ## Phase 5: Agent Protocol Integration
 - [x] Research Claude Code SDK (Task 007)
@@ -82,23 +97,34 @@ See `specs/TASKS/` for detailed task specs:
 
 ## Immediate Next Steps
 
-1. **Git UI polish** - Commit history panel, file tree with indicators
-2. **Session buffer restore** - Persist terminal state across session switches
-3. **Agent harness implementation** - Start with Claude Code based on Task 007 research
-4. **Wire git panels** - Connect GitStatusPanel/DiffViewer to session selection
+1. **Build daemon** (Task 014) - TCP server with terminal + git
+2. **Convert Tauri to proxy** - Forward commands to daemon
+3. **Deploy daemon to VPS** - Test real architecture
+4. **Iterate on UI** - Now that e2e works
+
+## Task Specs
+
+Active:
+- `014-daemon-implementation.md` - Remote daemon (NEXT)
+
+Completed:
+- `DONE-001` through `DONE-013` - See `specs/TASKS/`
 
 ## Commands Reference
 
 ```bash
-# Update CodexMonitor subtree
-git subtree pull --prefix=reference/codex-monitor https://github.com/Dimillian/CodexMonitor.git main --squash
-
-# Run Tauri dev
-bun run tauri:dev
+# Run Tauri dev (Mac)
+cd app && bun run tauri:dev
 
 # Build Tauri app
-bun run tauri build
+cd app && bun run tauri build
 
 # Type check
-bun run typecheck
+cd app && bun run typecheck
+
+# Run daemon (VPS) - after implementation
+maestro-daemon --listen 0.0.0.0:4733 --token "$MAESTRO_TOKEN"
+
+# Update CodexMonitor reference
+git subtree pull --prefix=reference/codex-monitor https://github.com/Dimillian/CodexMonitor.git main --squash
 ```
