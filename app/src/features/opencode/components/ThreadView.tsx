@@ -1,15 +1,23 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useOpenCodeThread } from "../hooks/useOpenCodeThread";
 import { useOpenCodeSession } from "../hooks/useOpenCodeSession";
 import { useOpenCodeConnection } from "../hooks/useOpenCodeConnection";
 import { ThreadMessages } from "./ThreadMessages";
 import { ThreadComposer } from "./ThreadComposer";
 
+type PendingUserMessage = {
+  id: string;
+  text: string;
+  timestamp: number;
+};
+
 type ThreadViewProps = {
   workspaceId: string | null;
 };
 
 export function ThreadView({ workspaceId }: ThreadViewProps) {
+  const [pendingUserMessages, setPendingUserMessages] = useState<PendingUserMessage[]>([]);
+
   const {
     isConnected,
     isConnecting,
@@ -34,7 +42,7 @@ export function ThreadView({ workspaceId }: ThreadViewProps) {
     status,
     processingStartedAt,
     error: threadError,
-  } = useOpenCodeThread({ workspaceId, sessionId });
+  } = useOpenCodeThread({ workspaceId, sessionId, pendingUserMessages });
 
   const handleSend = useCallback(
     async (message: string) => {
@@ -53,12 +61,21 @@ export function ThreadView({ workspaceId }: ThreadViewProps) {
         }
       }
 
-      if (activeSessionId) {
-        try {
-          await prompt(message);
-        } catch (err) {
-          console.error("[ThreadView] Failed to send prompt", err);
-        }
+      // Add pending user message for immediate UI feedback
+      const pendingMsg: PendingUserMessage = {
+        id: `pending-${Date.now()}`,
+        text: message,
+        timestamp: Date.now(),
+      };
+      setPendingUserMessages(prev => [...prev, pendingMsg]);
+
+      try {
+        // Pass activeSessionId explicitly in case state hasn't updated yet
+        await prompt(message, activeSessionId);
+      } catch (err) {
+        console.error("[ThreadView] Failed to send prompt", err);
+        // Remove pending message on error
+        setPendingUserMessages(prev => prev.filter(m => m.id !== pendingMsg.id));
       }
     },
     [isConnected, sessionId, create, prompt]

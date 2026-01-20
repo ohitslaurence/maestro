@@ -2,9 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { OpenCodeThreadItem, OpenCodeThreadStatus } from "../../../types";
 import { subscribeOpenCodeEvents } from "../../../services/events";
 
+type PendingUserMessage = {
+  id: string;
+  text: string;
+  timestamp: number;
+};
+
 type UseOpenCodeThreadOptions = {
   workspaceId: string | null;
   sessionId: string | null;
+  pendingUserMessages?: PendingUserMessage[];
 };
 
 export type OpenCodeThreadState = {
@@ -57,6 +64,7 @@ type TrackedMessage = {
 export function useOpenCodeThread({
   workspaceId,
   sessionId,
+  pendingUserMessages = [],
 }: UseOpenCodeThreadOptions): OpenCodeThreadState {
   const [items, setItems] = useState<OpenCodeThreadItem[]>([]);
   const [status, setStatus] = useState<OpenCodeThreadStatus>("idle");
@@ -159,26 +167,41 @@ export function useOpenCodeThread({
   // Rebuild items from all messages
   const rebuildItems = useCallback(() => {
     const messages = Array.from(messagesRef.current.values());
+
+    // Convert pending user messages to tracked messages (if not already in messages)
+    const pendingAsTracked: TrackedMessage[] = pendingUserMessages
+      .filter(p => !messages.some(m => m.id === p.id))
+      .map(p => ({
+        id: p.id,
+        sessionID: sessionId || "",
+        role: "user" as const,
+        time: { created: p.timestamp },
+        userText: p.text,
+        parts: new Map(),
+      }));
+
+    const allMessages = [...messages, ...pendingAsTracked];
+
     // Sort by creation time
-    messages.sort((a, b) => {
+    allMessages.sort((a, b) => {
       const aTime = a.time?.created ?? 0;
       const bTime = b.time?.created ?? 0;
       return aTime - bTime;
     });
 
     const newItems: OpenCodeThreadItem[] = [];
-    for (const msg of messages) {
+    for (const msg of allMessages) {
       newItems.push(...convertMessageToItems(msg));
     }
     setItems(newItems);
 
     // Determine processing status
-    const hasIncompleteAssistant = messages.some(
+    const hasIncompleteAssistant = allMessages.some(
       (m) => m.role === "assistant" && !m.time?.completed
     );
     if (hasIncompleteAssistant) {
       setStatus("processing");
-      const assistantMsg = messages.find(
+      const assistantMsg = allMessages.find(
         (m) => m.role === "assistant" && !m.time?.completed
       );
       setProcessingStartedAt(assistantMsg?.time?.created ?? Date.now());
@@ -186,7 +209,7 @@ export function useOpenCodeThread({
       setStatus("idle");
       setProcessingStartedAt(null);
     }
-  }, [convertMessageToItems]);
+  }, [convertMessageToItems, pendingUserMessages, sessionId]);
 
   // Reset state when session changes
   useEffect(() => {
@@ -196,6 +219,13 @@ export function useOpenCodeThread({
     setProcessingStartedAt(null);
     setError(undefined);
   }, [workspaceId, sessionId]);
+
+  // Rebuild when pending messages change
+  useEffect(() => {
+    if (pendingUserMessages.length > 0) {
+      rebuildItems();
+    }
+  }, [pendingUserMessages, rebuildItems]);
 
   // Subscribe to OpenCode events
   useEffect(() => {

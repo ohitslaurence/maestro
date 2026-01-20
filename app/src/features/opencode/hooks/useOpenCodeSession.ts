@@ -17,7 +17,7 @@ type SessionCreateResult = {
 export type OpenCodeSessionState = {
   sessionId: string | null;
   create: (title?: string) => Promise<string | null>;
-  prompt: (message: string) => Promise<void>;
+  prompt: (message: string, overrideSessionId?: string) => Promise<void>;
   abort: () => Promise<void>;
   isPrompting: boolean;
   setSessionId: (id: string | null) => void;
@@ -49,14 +49,15 @@ export function useOpenCodeSession({
   );
 
   const prompt = useCallback(
-    async (message: string): Promise<void> => {
-      if (!workspaceId || !sessionId) {
+    async (message: string, overrideSessionId?: string): Promise<void> => {
+      const targetSessionId = overrideSessionId ?? sessionId;
+      if (!workspaceId || !targetSessionId) {
         console.warn("[opencode] Cannot prompt: no workspace or session");
         return;
       }
       setIsPrompting(true);
       try {
-        await opencodeSessionPrompt(workspaceId, sessionId, message);
+        await opencodeSessionPrompt(workspaceId, targetSessionId, message);
       } catch (error) {
         console.error("[opencode] Failed to send prompt", error);
         throw error;
