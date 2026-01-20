@@ -49,6 +49,8 @@ pub const GIT_ERROR: &str = "git_error";
 pub const INTERNAL_ERROR: &str = "internal_error";
 pub const OPENCODE_ERROR: &str = "opencode_error";
 pub const OPENCODE_NOT_CONNECTED: &str = "opencode_not_connected";
+pub const CLAUDE_SDK_ERROR: &str = "claude_sdk_error";
+pub const CLAUDE_SDK_NOT_CONNECTED: &str = "claude_sdk_not_connected";
 
 // Method names
 pub const METHOD_AUTH: &str = "auth";
@@ -70,6 +72,15 @@ pub const METHOD_OPENCODE_SESSION_LIST: &str = "opencode_session_list";
 pub const METHOD_OPENCODE_SESSION_CREATE: &str = "opencode_session_create";
 pub const METHOD_OPENCODE_SESSION_PROMPT: &str = "opencode_session_prompt";
 pub const METHOD_OPENCODE_SESSION_ABORT: &str = "opencode_session_abort";
+
+// Claude SDK method names
+pub const METHOD_CLAUDE_SDK_CONNECT_WORKSPACE: &str = "claude_sdk_connect_workspace";
+pub const METHOD_CLAUDE_SDK_DISCONNECT_WORKSPACE: &str = "claude_sdk_disconnect_workspace";
+pub const METHOD_CLAUDE_SDK_STATUS: &str = "claude_sdk_status";
+pub const METHOD_CLAUDE_SDK_SESSION_LIST: &str = "claude_sdk_session_list";
+pub const METHOD_CLAUDE_SDK_SESSION_CREATE: &str = "claude_sdk_session_create";
+pub const METHOD_CLAUDE_SDK_SESSION_PROMPT: &str = "claude_sdk_session_prompt";
+pub const METHOD_CLAUDE_SDK_SESSION_ABORT: &str = "claude_sdk_session_abort";
 
 // Event names
 pub const EVENT_TERMINAL_OUTPUT: &str = "terminal_output";

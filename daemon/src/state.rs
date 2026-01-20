@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
+use crate::claude_sdk::ClaudeSdkServer;
 use crate::opencode::OpenCodeServer;
 use crate::protocol::SessionInfo;
 use crate::terminal::TerminalHandle;
@@ -31,6 +32,9 @@ pub struct DaemonState {
 
     /// Active OpenCode servers (workspaceId → OpenCodeServer)
     pub opencode_servers: RwLock<HashMap<String, OpenCodeServer>>,
+
+    /// Active Claude SDK servers (workspaceId → ClaudeSdkServer)
+    pub claude_sdk_servers: RwLock<HashMap<String, ClaudeSdkServer>>,
 }
 
 /// Channel for sending events to a client
@@ -51,6 +55,7 @@ impl DaemonState {
             clients: RwLock::new(HashMap::new()),
             next_client_id: Mutex::new(1),
             opencode_servers: RwLock::new(HashMap::new()),
+            claude_sdk_servers: RwLock::new(HashMap::new()),
         }
     }
 
@@ -173,6 +178,46 @@ impl DaemonState {
     /// Remove an OpenCode server (shuts it down)
     pub async fn remove_opencode_server(&self, workspace_id: &str) -> bool {
         if let Some(mut server) = self.opencode_servers.write().await.remove(workspace_id) {
+            server.shutdown();
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Store a Claude SDK server
+    pub async fn store_claude_sdk_server(&self, workspace_id: String, server: ClaudeSdkServer) {
+        self.claude_sdk_servers
+            .write()
+            .await
+            .insert(workspace_id, server);
+    }
+
+    /// Get a Claude SDK server by workspace ID
+    pub async fn get_claude_sdk_server(&self, workspace_id: &str) -> Option<String> {
+        self.claude_sdk_servers
+            .read()
+            .await
+            .get(workspace_id)
+            .map(|s| s.base_url.clone())
+    }
+
+    /// Check if a Claude SDK server exists
+    pub async fn has_claude_sdk_server(&self, workspace_id: &str) -> bool {
+        self.claude_sdk_servers
+            .read()
+            .await
+            .contains_key(workspace_id)
+    }
+
+    /// Remove a Claude SDK server (shuts it down)
+    pub async fn remove_claude_sdk_server(&self, workspace_id: &str) -> bool {
+        if let Some(mut server) = self
+            .claude_sdk_servers
+            .write()
+            .await
+            .remove(workspace_id)
+        {
             server.shutdown();
             true
         } else {

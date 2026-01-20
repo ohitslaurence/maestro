@@ -1,0 +1,11 @@
+{
+  "name": "maestro-claude-sdk-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "bun run src/server.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.0.16"
+  }
+}

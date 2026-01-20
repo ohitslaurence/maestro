@@ -1,5 +1,6 @@
 mod config;
 mod connection;
+mod claude_sdk;
 mod git;
 mod handlers;
 mod opencode;

@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod claude_sdk;
 pub mod git;
 pub mod opencode;
 pub mod sessions;
@@ -33,6 +34,13 @@ pub async fn dispatch(
         METHOD_OPENCODE_SESSION_CREATE => opencode::handle_session_create(request, &state).await,
         METHOD_OPENCODE_SESSION_PROMPT => opencode::handle_session_prompt(request, &state).await,
         METHOD_OPENCODE_SESSION_ABORT => opencode::handle_session_abort(request, &state).await,
+        METHOD_CLAUDE_SDK_CONNECT_WORKSPACE => claude_sdk::handle_connect(request, state).await,
+        METHOD_CLAUDE_SDK_DISCONNECT_WORKSPACE => claude_sdk::handle_disconnect(request, &state).await,
+        METHOD_CLAUDE_SDK_STATUS => claude_sdk::handle_status(request, &state).await,
+        METHOD_CLAUDE_SDK_SESSION_LIST => claude_sdk::handle_session_list(request, &state).await,
+        METHOD_CLAUDE_SDK_SESSION_CREATE => claude_sdk::handle_session_create(request, &state).await,
+        METHOD_CLAUDE_SDK_SESSION_PROMPT => claude_sdk::handle_session_prompt(request, &state).await,
+        METHOD_CLAUDE_SDK_SESSION_ABORT => claude_sdk::handle_session_abort(request, &state).await,
         _ => {
             let resp = ErrorResponse::new(
                 request.id,
