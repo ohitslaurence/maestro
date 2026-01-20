@@ -89,6 +89,9 @@ function toRows(lines: DiffLine[]): DiffRow[] {
 export function DiffViewer({ diff, isLoading }: DiffViewerProps) {
   const [mode, setMode] = useState<"split" | "unified">("split");
 
+  const lines = useMemo(() => (diff ? parseDiff(diff.diff) : []), [diff]);
+  const rows = useMemo(() => toRows(lines), [lines]);
+
   if (isLoading) {
     return (
       <div className="diff-viewer">
@@ -104,9 +107,6 @@ export function DiffViewer({ diff, isLoading }: DiffViewerProps) {
       </div>
     );
   }
-
-  const lines = useMemo(() => parseDiff(diff.diff), [diff.diff]);
-  const rows = useMemo(() => toRows(lines), [lines]);
 
   const handleToggleMode = () => {
     setMode((prev) => (prev === "split" ? "unified" : "split"));
