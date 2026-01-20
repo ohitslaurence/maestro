@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import type { OpenCodeThreadItem } from "../../../types";
 
 type ToolItem = Extract<OpenCodeThreadItem, { kind: "tool" }>;
@@ -20,7 +20,7 @@ function getFirstInputKey(input: Record<string, unknown>): string | null {
   return firstKey;
 }
 
-export function ToolRow({ item, isExpanded, onToggle }: ToolRowProps) {
+export const ToolRow = memo(function ToolRow({ item, isExpanded, onToggle }: ToolRowProps) {
   const handleClick = useCallback(() => {
     onToggle(item.id);
   }, [item.id, onToggle]);
@@ -59,4 +59,4 @@ export function ToolRow({ item, isExpanded, onToggle }: ToolRowProps) {
       )}
     </div>
   );
-}
+});

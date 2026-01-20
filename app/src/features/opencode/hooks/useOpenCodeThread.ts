@@ -61,6 +61,29 @@ type TrackedMessage = {
   parts: Map<string, PartData>; // For assistant messages
 };
 
+// Shallow compare two items by their key fields
+function itemsEqual(a: OpenCodeThreadItem, b: OpenCodeThreadItem): boolean {
+  if (a.id !== b.id || a.kind !== b.kind) return false;
+
+  switch (a.kind) {
+    case "user-message":
+    case "assistant-message":
+      return a.text === (b as typeof a).text;
+    case "reasoning":
+      return a.text === (b as typeof a).text;
+    case "tool":
+      return a.status === (b as typeof a).status &&
+             a.output === (b as typeof a).output &&
+             a.error === (b as typeof a).error;
+    case "patch":
+      return a.hash === (b as typeof a).hash;
+    case "step-finish":
+      return a.cost === (b as typeof a).cost;
+    default:
+      return false;
+  }
+}
+
 export function useOpenCodeThread({
   workspaceId,
   sessionId,
@@ -73,6 +96,9 @@ export function useOpenCodeThread({
 
   // Track messages by id
   const messagesRef = useRef<Map<string, TrackedMessage>>(new Map());
+
+  // Track previous items for efficient updates
+  const prevItemsRef = useRef<OpenCodeThreadItem[]>([]);
 
   // Convert tracked message to thread items
   const convertMessageToItems = useCallback((msg: TrackedMessage): OpenCodeThreadItem[] => {
@@ -193,7 +219,22 @@ export function useOpenCodeThread({
     for (const msg of allMessages) {
       newItems.push(...convertMessageToItems(msg));
     }
-    setItems(newItems);
+
+    // Preserve references for unchanged items to help React reconciliation
+    const prevItems = prevItemsRef.current;
+    const prevById = new Map(prevItems.map(item => [item.id, item]));
+
+    const mergedItems = newItems.map(newItem => {
+      const prevItem = prevById.get(newItem.id);
+      // If prev exists and is equal, reuse the old reference
+      if (prevItem && itemsEqual(prevItem, newItem)) {
+        return prevItem;
+      }
+      return newItem;
+    });
+
+    prevItemsRef.current = mergedItems;
+    setItems(mergedItems);
 
     // Determine processing status
     const hasIncompleteAssistant = allMessages.some(

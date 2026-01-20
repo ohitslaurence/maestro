@@ -1,10 +1,11 @@
+import { memo } from "react";
 import type { OpenCodeThreadItem } from "../../../types";
 
 type MessageRowProps = {
   item: Extract<OpenCodeThreadItem, { kind: "user-message" | "assistant-message" }>;
 };
 
-export function MessageRow({ item }: MessageRowProps) {
+export const MessageRow = memo(function MessageRow({ item }: MessageRowProps) {
   const isUser = item.kind === "user-message";
 
   return (
@@ -14,4 +15,4 @@ export function MessageRow({ item }: MessageRowProps) {
       </div>
     </div>
   );
-}
+});

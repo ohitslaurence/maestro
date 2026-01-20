@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import type { OpenCodeThreadItem } from "../../../types";
 
 type ReasoningItem = Extract<OpenCodeThreadItem, { kind: "reasoning" }>;
@@ -17,7 +17,7 @@ function getFirstLine(text: string): string {
   return firstLine;
 }
 
-export function ReasoningRow({ item, isExpanded, onToggle }: ReasoningRowProps) {
+export const ReasoningRow = memo(function ReasoningRow({ item, isExpanded, onToggle }: ReasoningRowProps) {
   const handleClick = useCallback(() => {
     onToggle(item.id);
   }, [item.id, onToggle]);
@@ -38,4 +38,4 @@ export function ReasoningRow({ item, isExpanded, onToggle }: ReasoningRowProps) 
       )}
     </div>
   );
-}
+});
