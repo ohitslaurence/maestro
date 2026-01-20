@@ -46,6 +46,11 @@ export type DaemonConnectionEvent = {
   reason?: string;
 };
 
+export type DaemonDebugEvent = {
+  message: string;
+  data?: unknown;
+};
+
 export type AgentEventType = "started" | "stopped" | "output" | "error";
 
 export type AgentEvent = {
@@ -213,6 +218,7 @@ const terminalExitedHub = createTransformingEventHub<
 // Daemon connection events
 const daemonConnectedHub = createEventHub<DaemonConnectionEvent>("daemon:connected");
 const daemonDisconnectedHub = createEventHub<{ reason?: string }>("daemon:disconnected");
+const daemonDebugHub = createEventHub<DaemonDebugEvent>("daemon:debug");
 
 // Agent and session events (local)
 const agentEventHub = createEventHub<AgentEvent>("agent-event");
@@ -246,6 +252,13 @@ export function subscribeDaemonDisconnected(
   options?: SubscriptionOptions,
 ): Unsubscribe {
   return daemonDisconnectedHub.subscribe(onEvent, options);
+}
+
+export function subscribeDaemonDebug(
+  onEvent: (event: DaemonDebugEvent) => void,
+  options?: SubscriptionOptions,
+): Unsubscribe {
+  return daemonDebugHub.subscribe(onEvent, options);
 }
 
 export function subscribeAgentEvents(

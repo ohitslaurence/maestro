@@ -136,10 +136,15 @@ pub struct GitFileStatus {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GitStatusResult {
+    #[serde(default, alias = "branch_name")]
     pub branch_name: String,
+    #[serde(default, alias = "staged_files")]
     pub staged_files: Vec<GitFileStatus>,
+    #[serde(default, alias = "unstaged_files")]
     pub unstaged_files: Vec<GitFileStatus>,
+    #[serde(default, alias = "total_additions")]
     pub total_additions: i32,
+    #[serde(default, alias = "total_deletions")]
     pub total_deletions: i32,
 }
 

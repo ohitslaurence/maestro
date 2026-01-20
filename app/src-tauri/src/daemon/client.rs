@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader, BufWriter};
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
@@ -62,6 +62,11 @@ impl DaemonState {
         *self.app_handle.lock().await = Some(handle);
     }
 
+    pub async fn emit_debug(&self, message: &str, data: Option<Value>) {
+        let app_handle = self.app_handle.lock().await.clone();
+        emit_debug(app_handle.as_ref(), message, data);
+    }
+
     pub async fn is_connected(&self) -> bool {
         let client = self.client.read().await;
         if let Some(c) = client.as_ref() {
@@ -87,10 +92,32 @@ impl DaemonState {
         let app_handle = self.app_handle.lock().await.clone();
         let app_handle = app_handle.ok_or("App handle not set")?;
 
+        emit_debug(
+            Some(&app_handle),
+            "connect:start",
+            Some(json!({
+                "host": config.host,
+                "port": config.port
+            })),
+        );
+
         // Disconnect existing client if any
         self.disconnect().await;
 
-        let client = DaemonClient::connect(&config, app_handle.clone()).await?;
+        let client = match DaemonClient::connect(&config, app_handle.clone()).await {
+            Ok(client) => {
+                emit_debug(Some(&app_handle), "connect:success", None);
+                client
+            }
+            Err(error) => {
+                emit_debug(
+                    Some(&app_handle),
+                    "connect:error",
+                    Some(json!({ "error": error })),
+                );
+                return Err(error);
+            }
+        };
         let client = Arc::new(client);
 
         *self.client.write().await = Some(client);
@@ -108,6 +135,7 @@ impl DaemonState {
             *c.connected.write().await = false;
         }
         if let Some(app) = self.app_handle.lock().await.as_ref() {
+            emit_debug(Some(app), "disconnect:requested", None);
             let _ = app.emit("daemon:disconnected", serde_json::json!({}));
         }
     }
@@ -184,10 +212,12 @@ impl DaemonClient {
     ) {
         tokio::spawn(async move {
             let mut line = String::new();
+            let handle = app_handle.as_ref();
             loop {
                 line.clear();
                 match reader.read_line(&mut line).await {
                     Ok(0) => {
+                        emit_debug(handle, "connection:closed", None);
                         // EOF - connection closed
                         break;
                     }
@@ -206,9 +236,27 @@ impl DaemonClient {
                                 // Event
                                 Self::handle_event(app_handle.as_ref(), &parsed);
                             }
+                        } else {
+                            let snippet = if trimmed.len() > 200 {
+                                format!("{}...", &trimmed[..200])
+                            } else {
+                                trimmed.to_string()
+                            };
+                            emit_debug(
+                                handle,
+                                "protocol:invalid_json",
+                                Some(json!({ "snippet": snippet })),
+                            );
                         }
                     }
-                    Err(_) => break,
+                    Err(error) => {
+                        emit_debug(
+                            handle,
+                            "connection:error",
+                            Some(json!({ "error": error.to_string() })),
+                        );
+                        break;
+                    }
                 }
             }
 
@@ -345,16 +393,43 @@ pub fn spawn_reconnect_task(state: Arc<DaemonState>) {
             }
 
             // Attempt reconnect
-            let delay = RECONNECT_DELAYS.get(attempt).copied().unwrap_or(RECONNECT_DELAYS[RECONNECT_DELAYS.len() - 1]);
+            let delay = RECONNECT_DELAYS
+                .get(attempt)
+                .copied()
+                .unwrap_or(RECONNECT_DELAYS[RECONNECT_DELAYS.len() - 1]);
+            state
+                .emit_debug(
+                    "reconnect:scheduled",
+                    Some(json!({
+                        "attempt": attempt + 1,
+                        "delay_ms": delay.as_millis()
+                    })),
+                )
+                .await;
             tokio::time::sleep(delay).await;
 
-            if let Err(_e) = state.connect().await {
+            if let Err(error) = state.connect().await {
+                state
+                    .emit_debug("reconnect:failed", Some(json!({ "error": error })))
+                    .await;
                 attempt = (attempt + 1).min(RECONNECT_DELAYS.len() - 1);
             } else {
+                state.emit_debug("reconnect:success", None).await;
                 attempt = 0;
             }
         }
     });
+}
+
+fn emit_debug(app_handle: Option<&AppHandle>, message: &str, data: Option<Value>) {
+    let Some(handle) = app_handle else {
+        return;
+    };
+    let payload = match data {
+        Some(data) => json!({ "message": message, "data": data }),
+        None => json!({ "message": message }),
+    };
+    let _ = handle.emit("daemon:debug", payload);
 }
 
 #[cfg(test)]

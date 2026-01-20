@@ -8,6 +8,7 @@ import {
 } from "../../../services/tauri";
 import {
   subscribeDaemonConnected,
+  subscribeDaemonDebug,
   subscribeDaemonDisconnected,
 } from "../../../services/events";
 
@@ -109,6 +110,16 @@ export function useDaemonConnection(): DaemonConnectionState {
       unsubConnect();
       unsubDisconnect();
     };
+  }, []);
+
+  useEffect(() => {
+    return subscribeDaemonDebug((event) => {
+      if (event.data !== undefined) {
+        console.info("[daemon]", event.message, event.data);
+      } else {
+        console.info("[daemon]", event.message);
+      }
+    });
   }, []);
 
   return {
