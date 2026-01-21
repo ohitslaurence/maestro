@@ -1,0 +1,6 @@
+specs_dir=specs
+plans_dir=specs/planning
+iterations=12
+model=sonnet
+postmortem=false
+unknown_key=ignored

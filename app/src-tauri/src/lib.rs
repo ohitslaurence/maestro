@@ -8,6 +8,7 @@ mod agent_state;
 mod daemon;
 mod hooks;
 mod sessions;
+mod storage;
 mod terminal;
 mod tools;
 
