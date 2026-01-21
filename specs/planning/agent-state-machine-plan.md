@@ -29,7 +29,7 @@ Exit Criteria
 Exit Criteria
 - [x] Tool run records include `mutating` flag and `attempt` count (See §3)
 - [x] `tool_lifecycle` events fire for start and completion (See §4, §5)
-- [ ] Mutating tool batch transitions to `PostToolsHook` (See §5)
+- [x] Mutating tool batch transitions to `PostToolsHook` (See §5)
 
 ## Phase 4: Post-tool hooks
 - [ ] Add hook runner with policy config (See §2, §5, §6)
