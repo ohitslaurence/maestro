@@ -1,0 +1,2936 @@
+# Translation catalog for Loom Web
+# Language: ru
+#
+msgid ""
+msgstr ""
+"Language: ru\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: nav.threads
+msgid "nav.threads"
+msgstr "Треды"
+
+#: nav.settings
+msgid "nav.settings"
+msgstr "Настройки"
+
+#: nav.admin
+msgid "nav.admin"
+msgstr "Админ"
+
+#: nav.jobs
+msgid "nav.jobs"
+msgstr "Задания"
+
+#: thread.new
+msgid "thread.new"
+msgstr "Новый тред"
+
+#: thread.delete
+msgid "thread.delete"
+msgstr "Удалить"
+
+#: thread.search
+msgid "thread.search"
+msgstr "Поиск тредов..."
+
+#: thread.noThreads
+msgid "thread.noThreads"
+msgstr "Тредов пока нет"
+
+#: thread.loadError
+msgid "thread.loadError"
+msgstr "Не удалось загрузить треды"
+
+#: state.waiting_for_user_input
+msgid "state.waiting_for_user_input"
+msgstr "Ожидание ввода"
+
+#: state.calling_llm
+msgid "state.calling_llm"
+msgstr "Вызов LLM"
+
+#: state.processing_llm_response
+msgid "state.processing_llm_response"
+msgstr "Обработка ответа"
+
+#: state.executing_tools
+msgid "state.executing_tools"
+msgstr "Выполнение инструментов"
+
+#: state.post_tools_hook
+msgid "state.post_tools_hook"
+msgstr "Постобработка"
+
+#: state.error
+msgid "state.error"
+msgstr "Ошибка"
+
+#: state.shutting_down
+msgid "state.shutting_down"
+msgstr "Завершение работы"
+
+#: tool.pending
+msgid "tool.pending"
+msgstr "Ожидание"
+
+#: tool.running
+msgid "tool.running"
+msgstr "Выполняется"
+
+#: tool.completed
+msgid "tool.completed"
+msgstr "Завершено"
+
+#: tool.failed
+msgid "tool.failed"
+msgstr "Ошибка"
+
+#: connection.connected
+msgid "connection.connected"
+msgstr "Подключено"
+
+#: connection.disconnected
+msgid "connection.disconnected"
+msgstr "Отключено"
+
+#: connection.connecting
+msgid "connection.connecting"
+msgstr "Подключение..."
+
+#: connection.reconnecting
+msgid "connection.reconnecting"
+msgstr "Переподключение..."
+
+#: connection.error
+msgid "connection.error"
+msgstr "Ошибка соединения"
+
+#: connection.clickToReconnect
+msgid "connection.clickToReconnect"
+msgstr "Нажмите для переподключения"
+
+#: connection.attempt
+msgid "connection.attempt"
+msgstr "Попытка {count}"
+
+#: message.placeholder
+msgid "message.placeholder"
+msgstr "Введите сообщение..."
+
+#: message.send
+msgid "message.send"
+msgstr "Отправить"
+
+#: auth.signOut
+msgid "auth.signOut"
+msgstr "Выйти"
+
+#: auth.dashboard.welcome
+msgid "auth.dashboard.welcome"
+msgstr "Добро пожаловать,"
+
+#: auth.dashboard.protectedPage
+msgid "auth.dashboard.protectedPage"
+msgstr "Это защищённая страница. Для просмотра необходимо войти в систему."
+
+#: general.loading
+msgid "general.loading"
+msgstr "Загрузка..."
+
+#: general.error
+msgid "general.error"
+msgstr "Произошла ошибка"
+
+#: general.retry
+msgid "general.retry"
+msgstr "Повторить"
+
+#: general.cancel
+msgid "general.cancel"
+msgstr "Отмена"
+
+#: general.save
+msgid "general.save"
+msgstr "Сохранить"
+
+#: general.close
+msgid "general.close"
+msgstr "Закрыть"
+
+#: auth.login.title
+msgid "auth.login.title"
+msgstr "Войти в Loom"
+
+#: auth.login.subtitle
+msgid "auth.login.subtitle"
+msgstr "Выберите способ входа"
+
+#: auth.login.github
+msgid "auth.login.github"
+msgstr "Продолжить с GitHub"
+
+#: auth.login.google
+msgid "auth.login.google"
+msgstr "Продолжить с Google"
+
+#: auth.login.or
+msgid "auth.login.or"
+msgstr "или"
+
+#: auth.login.emailLabel
+msgid "auth.login.emailLabel"
+msgstr "Email"
+
+#: auth.login.emailPlaceholder
+msgid "auth.login.emailPlaceholder"
+msgstr "you@example.com"
+
+#: auth.login.sendMagicLink
+msgid "auth.login.sendMagicLink"
+msgstr "Отправить ссылку для входа"
+
+#: auth.login.sending
+msgid "auth.login.sending"
+msgstr "Отправка..."
+
+#: auth.login.checkEmail
+msgid "auth.login.checkEmail"
+msgstr "Проверьте почту"
+
+#: auth.login.magicLinkSent
+msgid "auth.login.magicLinkSent"
+msgstr "Мы отправили ссылку для входа на"
+
+#: auth.login.useDifferentEmail
+msgid "auth.login.useDifferentEmail"
+msgstr "Использовать другой email"
+
+#: auth.login.error
+msgid "auth.login.error"
+msgstr "Не удалось отправить ссылку. Попробуйте ещё раз."
+
+#: auth.login.signups_disabled
+msgid "auth.login.signups_disabled"
+msgstr "Регистрация новых пользователей в настоящее время отключена. Пожалуйста, свяжитесь с администратором."
+
+#: auth.device.title
+msgid "auth.device.title"
+msgstr "Авторизация CLI"
+
+#: auth.device.subtitle
+msgid "auth.device.subtitle"
+msgstr "Введите код из терминала, чтобы связать CLI с вашим аккаунтом"
+
+#: auth.device.inputLabel
+msgid "auth.device.inputLabel"
+msgstr "Введите код"
+
+#: auth.device.placeholder
+msgid "auth.device.placeholder"
+msgstr "XXX-XXX-XXX"
+
+#: auth.device.authorize
+msgid "auth.device.authorize"
+msgstr "Авторизовать"
+
+#: auth.device.authorizing
+msgid "auth.device.authorizing"
+msgstr "Авторизация..."
+
+#: auth.device.success
+msgid "auth.device.success"
+msgstr "Авторизовано!"
+
+#: auth.device.successMessage
+msgid "auth.device.successMessage"
+msgstr "Можете закрыть эту страницу и вернуться в терминал."
+
+#: auth.device.error
+msgid "auth.device.error"
+msgstr "Недействительный или истёкший код. Проверьте терминал и попробуйте снова."
+
+#: auth.device.noCode
+msgid "auth.device.noCode"
+msgstr "Нет кода? Выполните"
+
+#: auth.device.cliCommand
+msgid "auth.device.cliCommand"
+msgstr "loom login"
+
+#: auth.device.inTerminal
+msgid "auth.device.inTerminal"
+msgstr "в терминале."
+
+#: settings.sessions.title
+msgid "settings.sessions.title"
+msgstr "Активные сессии"
+
+#: settings.sessions.description
+msgid "settings.sessions.description"
+msgstr "Управление активными сессиями на разных устройствах"
+
+#: settings.sessions.current
+msgid "settings.sessions.current"
+msgstr "Текущая сессия"
+
+#: settings.sessions.lastUsed
+msgid "settings.sessions.lastUsed"
+msgstr "Последнее использование"
+
+#: settings.sessions.createdAt
+msgid "settings.sessions.createdAt"
+msgstr "Создана"
+
+#: settings.sessions.revoke
+msgid "settings.sessions.revoke"
+msgstr "Отозвать"
+
+#: settings.sessions.revokeConfirm
+msgid "settings.sessions.revokeConfirm"
+msgstr "Вы уверены, что хотите отозвать эту сессию?"
+
+#: settings.sessions.noSessions
+msgid "settings.sessions.noSessions"
+msgstr "Нет активных сессий"
+
+#: settings.sessions.web
+msgid "settings.sessions.web"
+msgstr "Веб"
+
+#: settings.sessions.cli
+msgid "settings.sessions.cli"
+msgstr "CLI"
+
+#: settings.sessions.vscode
+msgid "settings.sessions.vscode"
+msgstr "VS Code"
+
+#: settings.nav.sessions
+msgid "settings.nav.sessions"
+msgstr "Сессии"
+
+#: settings.nav.profile
+msgid "settings.nav.profile"
+msgstr "Профиль"
+
+#: settings.nav.orgs
+msgid "settings.nav.orgs"
+msgstr "Организации"
+
+#: settings.profile.title
+msgid "settings.profile.title"
+msgstr "Настройки профиля"
+
+#: settings.profile.displayName
+msgid "settings.profile.displayName"
+msgstr "Отображаемое имя"
+
+#: settings.profile.email
+msgid "settings.profile.email"
+msgstr "Email"
+
+#: settings.profile.emailHint
+msgid "settings.profile.emailHint"
+msgstr "Email нельзя изменить здесь"
+
+#: settings.profile.username
+msgid "settings.profile.username"
+msgstr "Имя пользователя"
+
+#: settings.profile.usernamePlaceholder
+msgid "settings.profile.usernamePlaceholder"
+msgstr "Введите имя пользователя"
+
+#: settings.profile.usernameHint
+msgid "settings.profile.usernameHint"
+msgstr "Ваше имя пользователя используется для URL-адресов git-репозиториев"
+
+#: settings.profile.usernameInvalid
+msgid "settings.profile.usernameInvalid"
+msgstr "Имя пользователя может содержать только буквы, цифры и подчёркивания"
+
+#: settings.profile.usernameTaken
+msgid "settings.profile.usernameTaken"
+msgstr "Это имя пользователя уже занято"
+
+#: settings.profile.usernameTooShort
+msgid "settings.profile.usernameTooShort"
+msgstr "Имя пользователя должно быть не менее 3 символов"
+
+#: settings.profile.usernameTooLong
+msgid "settings.profile.usernameTooLong"
+msgstr "Имя пользователя должно быть не более 39 символов"
+
+#: settings.profile.locale
+msgid "settings.profile.locale"
+msgstr "Язык"
+
+#: settings.profile.save
+msgid "settings.profile.save"
+msgstr "Сохранить изменения"
+
+#: settings.profile.saving
+msgid "settings.profile.saving"
+msgstr "Сохранение..."
+
+#: settings.profile.saved
+msgid "settings.profile.saved"
+msgstr "Профиль успешно обновлён"
+
+#: settings.profile.error
+msgid "settings.profile.error"
+msgstr "Не удалось обновить профиль"
+
+#: orgs.title
+msgid "orgs.title"
+msgstr "Организации"
+
+#: orgs.description
+msgid "orgs.description"
+msgstr "Управление организациями и командами"
+
+#: orgs.create
+msgid "orgs.create"
+msgstr "Создать организацию"
+
+#: orgs.createTitle
+msgid "orgs.createTitle"
+msgstr "Создание организации"
+
+#: orgs.name
+msgid "orgs.name"
+msgstr "Название организации"
+
+#: orgs.slug
+msgid "orgs.slug"
+msgstr "URL-идентификатор"
+
+#: orgs.slugHint
+msgid "orgs.slugHint"
+msgstr "Используется в URL, только строчные буквы и дефисы"
+
+#: orgs.visibility
+msgid "orgs.visibility"
+msgstr "Видимость"
+
+#: orgs.visibilityPublic
+msgid "orgs.visibilityPublic"
+msgstr "Публичная"
+
+#: orgs.visibilityPrivate
+msgid "orgs.visibilityPrivate"
+msgstr "Приватная"
+
+#: orgs.joinPolicy
+msgid "orgs.joinPolicy"
+msgstr "Политика вступления"
+
+#: orgs.joinPolicyOpen
+msgid "orgs.joinPolicyOpen"
+msgstr "Открытая"
+
+#: orgs.joinPolicyRequest
+msgid "orgs.joinPolicyRequest"
+msgstr "По заявке"
+
+#: orgs.joinPolicyInvite
+msgid "orgs.joinPolicyInvite"
+msgstr "Только по приглашению"
+
+#: orgs.members
+msgid "orgs.members"
+msgstr "Участники"
+
+#: orgs.teams
+msgid "orgs.teams"
+msgstr "Команды"
+
+#: orgs.apiKeys
+msgid "orgs.apiKeys"
+msgstr "API-ключи"
+
+#: orgs.settings
+msgid "orgs.settings"
+msgstr "Настройки"
+
+#: orgs.noOrgs
+msgid "orgs.noOrgs"
+msgstr "Организаций пока нет"
+
+#: orgs.delete
+msgid "orgs.delete"
+msgstr "Удалить организацию"
+
+#: orgs.deleteConfirm
+msgid "orgs.deleteConfirm"
+msgstr "Вы уверены, что хотите удалить эту организацию?"
+
+#: settings.orgs.title
+msgid "settings.orgs.title"
+msgstr "Организации"
+
+#: settings.orgs.description
+msgid "settings.orgs.description"
+msgstr "Управление организациями и членством в командах"
+
+#: settings.orgs.create
+msgid "settings.orgs.create"
+msgstr "Создать организацию"
+
+#: settings.orgs.noOrgs
+msgid "settings.orgs.noOrgs"
+msgstr "Организаций пока нет"
+
+#: settings.orgs.loadError
+msgid "settings.orgs.loadError"
+msgstr "Не удалось загрузить организации"
+
+#: settings.orgs.personal
+msgid "settings.orgs.personal"
+msgstr "Личная"
+
+#: settings.orgs.slug
+msgid "settings.orgs.slug"
+msgstr "Идентификатор"
+
+#: settings.orgs.member
+msgid "settings.orgs.member"
+msgstr "участник"
+
+#: settings.orgs.members
+msgid "settings.orgs.members"
+msgstr "участников"
+
+#: settings.orgs.visibility.public
+msgid "settings.orgs.visibility.public"
+msgstr "Публичная"
+
+#: settings.orgs.visibility.unlisted
+msgid "settings.orgs.visibility.unlisted"
+msgstr "Скрытая"
+
+#: settings.orgs.visibility.private
+msgid "settings.orgs.visibility.private"
+msgstr "Приватная"
+
+#: settings.orgs.new.title
+msgid "settings.orgs.new.title"
+msgstr "Создание организации"
+
+#: settings.orgs.new.name
+msgid "settings.orgs.new.name"
+msgstr "Название организации"
+
+#: settings.orgs.new.namePlaceholder
+msgid "settings.orgs.new.namePlaceholder"
+msgstr "Моя организация"
+
+#: settings.orgs.new.slug
+msgid "settings.orgs.new.slug"
+msgstr "Идентификатор"
+
+#: settings.orgs.new.slugPlaceholder
+msgid "settings.orgs.new.slugPlaceholder"
+msgstr "my-organization"
+
+#: settings.orgs.new.slugHint
+msgid "settings.orgs.new.slugHint"
+msgstr "URL-идентификатор (строчные буквы, цифры и дефисы)"
+
+#: settings.orgs.new.visibility
+msgid "settings.orgs.new.visibility"
+msgstr "Видимость"
+
+#: settings.orgs.new.create
+msgid "settings.orgs.new.create"
+msgstr "Создать организацию"
+
+#: settings.orgs.new.creating
+msgid "settings.orgs.new.creating"
+msgstr "Создание..."
+
+#: settings.orgs.new.error
+msgid "settings.orgs.new.error"
+msgstr "Не удалось создать организацию"
+
+#: settings.orgs.new.requiredFields
+msgid "settings.orgs.new.requiredFields"
+msgstr "Название и идентификатор обязательны"
+
+#: members.title
+msgid "members.title"
+msgstr "Участники"
+
+#: members.add
+msgid "members.add"
+msgstr "Добавить участника"
+
+#: members.remove
+msgid "members.remove"
+msgstr "Удалить"
+
+#: members.removeConfirm
+msgid "members.removeConfirm"
+msgstr "Вы уверены, что хотите удалить этого участника?"
+
+#: members.role
+msgid "members.role"
+msgstr "Роль"
+
+#: members.roleOwner
+msgid "members.roleOwner"
+msgstr "Владелец"
+
+#: members.roleAdmin
+msgid "members.roleAdmin"
+msgstr "Администратор"
+
+#: members.roleMember
+msgid "members.roleMember"
+msgstr "Участник"
+
+#: members.changeRole
+msgid "members.changeRole"
+msgstr "Изменить роль"
+
+#: members.noMembers
+msgid "members.noMembers"
+msgstr "Участников пока нет"
+
+#: teams.title
+msgid "teams.title"
+msgstr "Команды"
+
+#: teams.create
+msgid "teams.create"
+msgstr "Создать команду"
+
+#: teams.createTitle
+msgid "teams.createTitle"
+msgstr "Создание команды"
+
+#: teams.name
+msgid "teams.name"
+msgstr "Название команды"
+
+#: teams.slug
+msgid "teams.slug"
+msgstr "URL-идентификатор"
+
+#: teams.members
+msgid "teams.members"
+msgstr "Участники команды"
+
+#: teams.addMember
+msgid "teams.addMember"
+msgstr "Добавить участника"
+
+#: teams.removeMember
+msgid "teams.removeMember"
+msgstr "Удалить"
+
+#: teams.removeMemberConfirm
+msgid "teams.removeMemberConfirm"
+msgstr "Вы уверены, что хотите удалить этого участника из команды?"
+
+#: teams.noTeams
+msgid "teams.noTeams"
+msgstr "Команд пока нет"
+
+#: teams.noMembers
+msgid "teams.noMembers"
+msgstr "В этой команде нет участников"
+
+#: teams.delete
+msgid "teams.delete"
+msgstr "Удалить команду"
+
+#: teams.deleteConfirm
+msgid "teams.deleteConfirm"
+msgstr "Вы уверены, что хотите удалить эту команду?"
+
+#: teams.roleMaintainer
+msgid "teams.roleMaintainer"
+msgstr "Ответственный"
+
+#: teams.roleMember
+msgid "teams.roleMember"
+msgstr "Участник"
+
+#: teams.role.maintainer
+msgid "teams.role.maintainer"
+msgstr "Ответственный"
+
+#: teams.role.member
+msgid "teams.role.member"
+msgstr "Участник"
+
+#: teams.backToOrg
+msgid "teams.backToOrg"
+msgstr "Назад к организации"
+
+#: teams.changeRole
+msgid "teams.changeRole"
+msgstr "Изменить роль"
+
+#: teams.settings
+msgid "teams.settings"
+msgstr "Настройки команды"
+
+#: teams.teamName
+msgid "teams.teamName"
+msgstr "Название команды"
+
+#: teams.save
+msgid "teams.save"
+msgstr "Сохранить изменения"
+
+#: teams.saving
+msgid "teams.saving"
+msgstr "Сохранение..."
+
+#: teams.saved
+msgid "teams.saved"
+msgstr "Команда успешно обновлена"
+
+#: teams.deleteTeam
+msgid "teams.deleteTeam"
+msgstr "Удалить команду"
+
+#: teams.deleteTeamConfirm
+msgid "teams.deleteTeamConfirm"
+msgstr "Вы уверены, что хотите удалить эту команду? Это действие нельзя отменить."
+
+#: teams.deleteTeamWarning
+msgid "teams.deleteTeamWarning"
+msgstr "Команда будет удалена безвозвратно, все участники будут исключены."
+
+#: teams.deleting
+msgid "teams.deleting"
+msgstr "Удаление..."
+
+#: teams.selectMember
+msgid "teams.selectMember"
+msgstr "Выберите участника для добавления"
+
+#: teams.selectRole
+msgid "teams.selectRole"
+msgstr "Выберите роль"
+
+#: teams.adding
+msgid "teams.adding"
+msgstr "Добавление..."
+
+#: teams.add
+msgid "teams.add"
+msgstr "Добавить"
+
+#: teams.noAvailableMembers
+msgid "teams.noAvailableMembers"
+msgstr "Нет доступных участников организации для добавления"
+
+#: apiKeys.title
+msgid "apiKeys.title"
+msgstr "API-ключи"
+
+#: apiKeys.description
+msgid "apiKeys.description"
+msgstr "Управление API-ключами для программного доступа"
+
+#: apiKeys.create
+msgid "apiKeys.create"
+msgstr "Создать API-ключ"
+
+#: apiKeys.createTitle
+msgid "apiKeys.createTitle"
+msgstr "Создание API-ключа"
+
+#: apiKeys.name
+msgid "apiKeys.name"
+msgstr "Название ключа"
+
+#: apiKeys.nameHint
+msgid "apiKeys.nameHint"
+msgstr "Описательное название для этого ключа"
+
+#: apiKeys.scopes
+msgid "apiKeys.scopes"
+msgstr "Права доступа"
+
+#: apiKeys.scopesHint
+msgid "apiKeys.scopesHint"
+msgstr "Выберите разрешения для этого ключа"
+
+#: apiKeys.scopeThreadsRead
+msgid "apiKeys.scopeThreadsRead"
+msgstr "Чтение тредов"
+
+#: apiKeys.scopeThreadsWrite
+msgid "apiKeys.scopeThreadsWrite"
+msgstr "Запись тредов"
+
+#: apiKeys.scopeLlmUse
+msgid "apiKeys.scopeLlmUse"
+msgstr "Использование LLM"
+
+#: apiKeys.prefix
+msgid "apiKeys.prefix"
+msgstr "Префикс ключа"
+
+#: apiKeys.createdAt
+msgid "apiKeys.createdAt"
+msgstr "Создан"
+
+#: apiKeys.lastUsed
+msgid "apiKeys.lastUsed"
+msgstr "Последнее использование"
+
+#: apiKeys.never
+msgid "apiKeys.never"
+msgstr "Никогда"
+
+#: apiKeys.revoke
+msgid "apiKeys.revoke"
+msgstr "Отозвать"
+
+#: apiKeys.revokeConfirm
+msgid "apiKeys.revokeConfirm"
+msgstr "Вы уверены, что хотите отозвать этот API-ключ?"
+
+#: apiKeys.noKeys
+msgid "apiKeys.noKeys"
+msgstr "API-ключей пока нет"
+
+#: apiKeys.copyWarning
+msgid "apiKeys.copyWarning"
+msgstr "Скопируйте ключ сейчас. Вы не сможете увидеть его снова."
+
+#: apiKeys.copied
+msgid "apiKeys.copied"
+msgstr "Скопировано в буфер обмена"
+
+#: general.search
+msgid "general.search"
+msgstr "Search"
+
+#: general.previous
+msgid "general.previous"
+msgstr "Previous"
+
+#: general.next
+msgid "general.next"
+msgstr "Next"
+
+#: general.done
+msgid "general.done"
+msgstr "Done"
+
+#: general.refresh
+msgid "general.refresh"
+msgstr "Refresh"
+
+#: admin.users.title
+msgid "admin.users.title"
+msgstr "User Management"
+
+#: admin.users.description
+msgid "admin.users.description"
+msgstr "View and manage users across the platform"
+
+#: admin.users.searchPlaceholder
+msgid "admin.users.searchPlaceholder"
+msgstr "Search by name or email..."
+
+#: admin.users.empty
+msgid "admin.users.empty"
+msgstr "No users found"
+
+#: admin.users.created
+msgid "admin.users.created"
+msgstr "Created"
+
+#: admin.users.lastLogin
+msgid "admin.users.lastLogin"
+msgstr "Last login"
+
+#: admin.users.impersonate
+msgid "admin.users.impersonate"
+msgstr "Имперсонировать"
+
+#: admin.users.updated
+msgid "admin.users.updated"
+msgstr "Обновлено"
+
+#: admin.users.makeAdmin
+msgid "admin.users.makeAdmin"
+msgstr "Сделать администратором"
+
+#: admin.users.removeAdmin
+msgid "admin.users.removeAdmin"
+msgstr "Снять администратора"
+
+#: admin.users.makeSupport
+msgid "admin.users.makeSupport"
+msgstr "Сделать поддержкой"
+
+#: admin.users.removeSupport
+msgid "admin.users.removeSupport"
+msgstr "Снять поддержку"
+
+#: admin.users.makeAuditor
+msgid "admin.users.makeAuditor"
+msgstr "Сделать аудитором"
+
+#: admin.users.removeAuditor
+msgid "admin.users.removeAuditor"
+msgstr "Снять аудитора"
+
+#: admin.users.cancel
+msgid "admin.users.cancel"
+msgstr "Отмена"
+
+#: admin.users.confirm
+msgid "admin.users.confirm"
+msgstr "Удалить"
+
+#: admin.users.delete
+msgid "admin.users.delete"
+msgstr "Удалить"
+
+#: admin.users.deleteConfirmMessage
+msgid "admin.users.deleteConfirmMessage"
+msgstr "Вы уверены, что хотите удалить этого пользователя? Это действие нельзя отменить."
+
+#: admin.users.deleteConfirmTitle
+msgid "admin.users.deleteConfirmTitle"
+msgstr "Удалить пользователя"
+
+#: admin.users.impersonateConfirmMessage
+msgid "admin.users.impersonateConfirmMessage"
+msgstr "Вы собираетесь выдать себя за этого пользователя. Все действия будут записаны для аудита."
+
+#: admin.users.impersonateConfirmTitle
+msgid "admin.users.impersonateConfirmTitle"
+msgstr "Выдать себя за пользователя"
+
+#: admin.users.impersonateReasonLabel
+msgid "admin.users.impersonateReasonLabel"
+msgstr "Причина имперсонации"
+
+#: admin.users.impersonateReasonPlaceholder
+msgid "admin.users.impersonateReasonPlaceholder"
+msgstr "напр., Расследование тикета поддержки #1234"
+
+#: admin.logs.title
+msgid "admin.logs.title"
+msgstr "Журналы Сервера"
+
+#: admin.logs.description
+msgid "admin.logs.description"
+msgstr "Просмотр и потоковая передача журналов сервера в реальном времени"
+
+#: admin.logs.buffer_status
+msgid "admin.logs.buffer_status"
+msgstr "{size} / {capacity} записей в буфере"
+
+#: admin.logs.start_stream
+msgid "admin.logs.start_stream"
+msgstr "Начать Трансляцию"
+
+#: admin.logs.stop_stream
+msgid "admin.logs.stop_stream"
+msgstr "Остановить Трансляцию"
+
+#: admin.logs.clear
+msgid "admin.logs.clear"
+msgstr "Очистить"
+
+#: admin.logs.level
+msgid "admin.logs.level"
+msgstr "Уровень"
+
+#: admin.logs.target
+msgid "admin.logs.target"
+msgstr "Цель"
+
+#: admin.logs.auto_scroll
+msgid "admin.logs.auto_scroll"
+msgstr "Автопрокрутка"
+
+#: admin.logs.no_logs
+msgid "admin.logs.no_logs"
+msgstr "Нет записей журнала"
+
+#: admin.logs.no_matches
+msgid "admin.logs.no_matches"
+msgstr "Нет журналов, соответствующих текущим фильтрам"
+
+#: admin.logs.streaming
+msgid "admin.logs.streaming"
+msgstr "В прямом эфире"
+
+#: admin.logs.stream_error
+msgid "admin.logs.stream_error"
+msgstr "Поток журналов отключен"
+
+#: admin.logs.search_placeholder
+msgid "admin.logs.search_placeholder"
+msgstr "Поиск в журналах..."
+
+#: admin.logs.show_all
+msgid "admin.logs.show_all"
+msgstr "Все уровни"
+
+#: admin.logs.errors_only
+msgid "admin.logs.errors_only"
+msgstr "Только ошибки"
+
+#: admin.logs.showing_count
+msgid "admin.logs.showing_count"
+msgstr "Показано {shown} из {total} журналов"
+
+#: admin.dashboard.view_all_logs
+msgid "admin.dashboard.view_all_logs"
+msgstr "Просмотреть все журналы →"
+#: admin.users.you
+msgid "admin.users.you"
+msgstr "(вы)"
+
+#: admin.users.makeAdmin
+msgid "admin.users.makeAdmin"
+msgstr "Сделать администратором"
+
+#: admin.users.removeAdmin
+msgid "admin.users.removeAdmin"
+msgstr "Снять администратора"
+
+#: admin.impersonation.banner
+msgid "admin.impersonation.banner"
+msgstr "Admin {admin} impersonating {user}"
+
+#: admin.impersonation.stop
+msgid "admin.impersonation.stop"
+msgstr "Stop Impersonating"
+
+#: admin.anthropic.title
+msgid "admin.anthropic.title"
+msgstr "Аккаунты Claude Max"
+
+#: admin.anthropic.add_account
+msgid "admin.anthropic.add_account"
+msgstr "Добавить аккаунт"
+
+#: admin.anthropic.remove
+msgid "admin.anthropic.remove"
+msgstr "Удалить"
+
+#: admin.anthropic.remove_confirm
+msgid "admin.anthropic.remove_confirm"
+msgstr "Удалить этот аккаунт из пула?"
+
+#: admin.anthropic.status.available
+msgid "admin.anthropic.status.available"
+msgstr "Доступен"
+
+#: admin.anthropic.status.cooling_down
+msgid "admin.anthropic.status.cooling_down"
+msgstr "Охлаждение"
+
+#: admin.anthropic.status.disabled
+msgid "admin.anthropic.status.disabled"
+msgstr "Отключён"
+
+#: admin.anthropic.cooldown_remaining
+msgid "admin.anthropic.cooldown_remaining"
+msgstr "Осталось {time}"
+
+#: admin.anthropic.expires_at
+msgid "admin.anthropic.expires_at"
+msgstr "Токен истекает: {time}"
+
+#: admin.anthropic.no_accounts
+msgid "admin.anthropic.no_accounts"
+msgstr "Аккаунты не настроены. Добавьте аккаунт Claude Max, чтобы начать."
+
+#: admin.anthropic.not_configured
+msgid "admin.anthropic.not_configured"
+msgstr "Пул OAuth Anthropic не настроен на этом сервере."
+
+#: admin.anthropic.account_added
+msgid "admin.anthropic.account_added"
+msgstr "Аккаунт {id} успешно добавлен"
+
+#: admin.anthropic.enter_code_title
+msgid "admin.anthropic.enter_code_title"
+msgstr "Введите код авторизации"
+
+#: admin.anthropic.enter_code_description
+msgid "admin.anthropic.enter_code_description"
+msgstr "Открылась новая вкладка браузера для авторизации в Claude. После авторизации скопируйте код со страницы Anthropic и вставьте его ниже."
+
+#: admin.anthropic.authorization_code
+msgid "admin.anthropic.authorization_code"
+msgstr "Код авторизации"
+
+#: admin.anthropic.code_placeholder
+msgid "admin.anthropic.code_placeholder"
+msgstr "Вставьте код от Anthropic сюда"
+
+#: admin.anthropic.submit_code
+msgid "admin.anthropic.submit_code"
+msgstr "Добавить аккаунт"
+
+#: admin.dashboard.title
+msgid "admin.dashboard.title"
+msgstr "Панель администратора"
+
+#: admin.dashboard.description
+msgid "admin.dashboard.description"
+msgstr "Администрирование и мониторинг сервера"
+
+#: admin.dashboard.sections
+msgid "admin.dashboard.sections"
+msgstr "Администрирование"
+
+#: admin.dashboard.anthropic_description
+msgid "admin.dashboard.anthropic_description"
+msgstr "Управление пулом OAuth-подписок Claude Max"
+
+#: admin.health.title
+msgid "admin.health.title"
+msgstr "Состояние сервера"
+
+#: admin.health.overall
+msgid "admin.health.overall"
+msgstr "Общий статус"
+
+#: admin.health.version
+msgid "admin.health.version"
+msgstr "Версия"
+
+#: admin.health.response_time
+msgid "admin.health.response_time"
+msgstr "Время отклика"
+
+#: admin.health.configured
+msgid "admin.health.configured"
+msgstr "Настроено"
+
+#: admin.health.not_configured
+msgid "admin.health.not_configured"
+msgstr "Не настроено"
+
+#: admin.health.status.healthy
+msgid "admin.health.status.healthy"
+msgstr "Исправен"
+
+#: admin.health.status.degraded
+msgid "admin.health.status.degraded"
+msgstr "Деградирован"
+
+#: admin.health.status.unhealthy
+msgid "admin.health.status.unhealthy"
+msgstr "Неисправен"
+
+#: admin.health.status.unknown
+msgid "admin.health.status.unknown"
+msgstr "Неизвестно"
+
+#: admin.health.database
+msgid "admin.health.database"
+msgstr "База данных"
+
+#: admin.health.bin_dir
+msgid "admin.health.bin_dir"
+msgstr "Каталог бинарных файлов"
+
+#: admin.health.llm_providers
+msgid "admin.health.llm_providers"
+msgstr "Провайдеры LLM"
+
+#: admin.health.google_cse
+msgid "admin.health.google_cse"
+msgstr "Google CSE"
+
+#: admin.health.serper
+msgid "admin.health.serper"
+msgstr "Serper"
+
+#: admin.health.github_app
+msgid "admin.health.github_app"
+msgstr "GitHub App"
+
+#: admin.health.kubernetes
+msgid "admin.health.kubernetes"
+msgstr "Kubernetes"
+
+#: admin.health.smtp
+msgid "admin.health.smtp"
+msgstr "SMTP"
+
+#: admin.health.geoip
+msgid "admin.health.geoip"
+msgstr "GeoIP"
+
+#: admin.health.jobs
+msgid "admin.health.jobs"
+msgstr "Фоновые задания"
+
+#: admin.health.auth_providers
+msgid "admin.health.auth_providers"
+msgstr "Провайдеры аутентификации"
+
+#: nav.weavers
+msgid "nav.weavers"
+msgstr "Weavers"
+
+#: weavers.title
+msgid "weavers.title"
+msgstr "Weavers"
+
+#: weavers.subtitle
+msgid "weavers.subtitle"
+msgstr "Управление временными средами разработки"
+
+#: weavers.new
+msgid "weavers.new"
+msgstr "Новый Weaver"
+
+#: weavers.description
+msgid "weavers.description"
+msgstr "Manage ephemeral development environments"
+
+#: weavers.create
+msgid "weavers.create"
+msgstr "Create Weaver"
+
+#: weavers.createFirst
+msgid "weavers.createFirst"
+msgstr "Create your first weaver"
+
+#: weavers.createTitle
+msgid "weavers.createTitle"
+msgstr "Create New Weaver"
+
+#: weavers.empty
+msgid "weavers.empty"
+msgstr "No weavers running"
+
+#: weavers.delete
+msgid "weavers.delete"
+msgstr "Delete"
+
+#: weavers.deleteConfirm
+msgid "weavers.deleteConfirm"
+msgstr "Are you sure you want to delete this weaver?"
+
+#: weavers.image
+msgid "weavers.image"
+msgstr "Image"
+
+#: weavers.imageName
+msgid "weavers.imageName"
+msgstr "Container Image"
+
+#: weavers.organization
+msgid "weavers.organization"
+msgstr "Организация"
+
+#: weavers.created
+msgid "weavers.created"
+msgstr "Created"
+
+#: weavers.age
+msgid "weavers.age"
+msgstr "Age"
+
+#: weavers.lifetime
+msgid "weavers.lifetime"
+msgstr "Lifetime"
+
+#: weavers.lifetimeLabel
+msgid "weavers.lifetimeLabel"
+msgstr "Lifetime (TTL)"
+
+#: weavers.workdir
+msgid "weavers.workdir"
+msgstr "Working Directory"
+
+#: weavers.hour
+msgid "weavers.hour"
+msgstr "hour"
+
+#: weavers.hours
+msgid "weavers.hours"
+msgstr "hours"
+
+#: weavers.attach
+msgid "weavers.attach"
+msgstr "Attach"
+
+#: weavers.backToList
+msgid "weavers.backToList"
+msgstr "Back to Weavers"
+
+#: weavers.notFound
+msgid "weavers.notFound"
+msgstr "Weaver not found"
+
+#: weavers.logs
+msgid "weavers.logs"
+msgstr "Logs"
+
+#: weavers.logsTitle
+msgid "weavers.logsTitle"
+msgstr "Weaver Logs"
+
+#: weavers.logsConnecting
+msgid "weavers.logsConnecting"
+msgstr "Connecting to log stream..."
+
+#: weavers.logsNoData
+msgid "weavers.logsNoData"
+msgstr "No logs available yet"
+
+#: weavers.logsError
+msgid "weavers.logsError"
+msgstr "Failed to connect to log stream"
+
+#: weavers.logsClosed
+msgid "weavers.logsClosed"
+msgstr "Log stream closed"
+
+#: weavers.creatingTitle
+msgid "weavers.creatingTitle"
+msgstr "Creating Weaver"
+
+#: weavers.creatingProgress
+msgid "weavers.creatingProgress"
+msgstr "Provisioning your weaver environment..."
+
+#: weavers.creatingWait
+msgid "weavers.creatingWait"
+msgstr "Waiting for weaver to become ready. You will be redirected automatically."
+
+#: weavers.createFailed
+msgid "weavers.createFailed"
+msgstr "Weaver creation failed"
+
+#: weavers.createTimeout
+msgid "weavers.createTimeout"
+msgstr "Weaver creation timed out"
+
+#: weavers.terminal.connected
+msgid "weavers.terminal.connected"
+msgstr "Connected"
+
+#: weavers.terminal.connecting
+msgid "weavers.terminal.connecting"
+msgstr "Connecting..."
+
+#: weavers.terminal.disconnected
+msgid "weavers.terminal.disconnected"
+msgstr "Disconnected"
+
+#: weavers.terminal.error
+msgid "weavers.terminal.error"
+msgstr "Connection error"
+
+#: weavers.terminal.reconnect
+msgid "weavers.terminal.reconnect"
+msgstr "Reconnect"
+
+#: weavers.terminal.pending
+msgid "weavers.terminal.pending"
+msgstr "Weaver is starting..."
+
+#: weavers.terminal.pendingHint
+msgid "weavers.terminal.pendingHint"
+msgstr "The terminal will be available once the weaver is running"
+
+#: weavers.terminal.notRunning
+msgid "weavers.terminal.notRunning"
+msgstr "Weaver is not running (status: {status})"
+
+#: client.repos.list.title
+msgid "client.repos.list.title"
+msgstr "Репозитории"
+
+#: client.repos.list.new
+msgid "client.repos.list.new"
+msgstr "Новый репозиторий"
+
+#: client.repos.list.search_placeholder
+msgid "client.repos.list.search_placeholder"
+msgstr "Поиск репозиториев..."
+
+#: client.repos.list.try_again
+msgid "client.repos.list.try_again"
+msgstr "Повторить"
+
+#: client.repos.list.no_match
+msgid "client.repos.list.no_match"
+msgstr "Репозитории не найдены"
+
+#: client.repos.list.empty
+msgid "client.repos.list.empty"
+msgstr "Репозиториев пока нет"
+
+#: client.repos.list.create_first
+msgid "client.repos.list.create_first"
+msgstr "Создайте свой первый репозиторий"
+
+#: client.repos.list.default_branch
+msgid "client.repos.list.default_branch"
+msgstr "Ветка по умолчанию:"
+
+#: client.repos.list.updated
+msgid "client.repos.list.updated"
+msgstr "Обновлено"
+
+#: jobs.title
+msgid "jobs.title"
+msgstr "Фоновые задания"
+
+#: jobs.description
+msgid "jobs.description"
+msgstr "Мониторинг и управление фоновыми заданиями"
+
+#: jobs.loading
+msgid "jobs.loading"
+msgstr "Загрузка заданий..."
+
+#: jobs.runNow
+msgid "jobs.runNow"
+msgstr "Запустить сейчас"
+
+#: jobs.running
+msgid "jobs.running"
+msgstr "Выполняется..."
+
+#: jobs.history
+msgid "jobs.history"
+msgstr "История"
+
+#: jobs.hideHistory
+msgid "jobs.hideHistory"
+msgstr "Скрыть историю"
+
+#: jobs.viewHistory
+msgid "jobs.viewHistory"
+msgstr "Показать историю"
+
+#: jobs.noJobs
+msgid "jobs.noJobs"
+msgstr "Фоновые задания не настроены"
+
+#: jobs.never
+msgid "jobs.never"
+msgstr "Никогда не запускалось"
+
+#: jobs.lastRun
+msgid "jobs.lastRun"
+msgstr "Последний запуск"
+
+#: jobs.duration
+msgid "jobs.duration"
+msgstr "Длительность"
+
+#: jobs.interval
+msgid "jobs.interval"
+msgstr "Интервал"
+
+#: jobs.type
+msgid "jobs.type"
+msgstr "Тип"
+
+#: jobs.failures
+msgid "jobs.failures"
+msgstr "{count} подряд ошибок"
+
+#: jobs.status.healthy
+msgid "jobs.status.healthy"
+msgstr "Исправно"
+
+#: jobs.status.degraded
+msgid "jobs.status.degraded"
+msgstr "Деградация"
+
+#: jobs.status.unhealthy
+msgid "jobs.status.unhealthy"
+msgstr "Неисправно"
+
+#: jobs.status.succeeded
+msgid "jobs.status.succeeded"
+msgstr "Успешно"
+
+#: jobs.status.failed
+msgid "jobs.status.failed"
+msgstr "Ошибка"
+
+#: jobs.status.running
+msgid "jobs.status.running"
+msgstr "Выполняется"
+
+#: jobs.status.cancelled
+msgid "jobs.status.cancelled"
+msgstr "Отменено"
+
+#: jobs.trigger.schedule
+msgid "jobs.trigger.schedule"
+msgstr "По расписанию"
+
+#: jobs.trigger.manual
+msgid "jobs.trigger.manual"
+msgstr "Вручную"
+
+#: jobs.trigger.retry
+msgid "jobs.trigger.retry"
+msgstr "Повтор"
+
+#: jobs.history.title
+msgid "jobs.history.title"
+msgstr "История запусков"
+
+#: jobs.history.status
+msgid "jobs.history.status"
+msgstr "Статус"
+
+#: jobs.history.started
+msgid "jobs.history.started"
+msgstr "Запущено"
+
+#: jobs.history.duration
+msgid "jobs.history.duration"
+msgstr "Длительность"
+
+#: jobs.history.trigger
+msgid "jobs.history.trigger"
+msgstr "Триггер"
+
+#: jobs.history.details
+msgid "jobs.history.details"
+msgstr "Подробности"
+
+#: jobs.history.loadMore
+msgid "jobs.history.loadMore"
+msgstr "Загрузить ещё"
+
+#: jobs.history.noRuns
+msgid "jobs.history.noRuns"
+msgstr "История запусков отсутствует"
+
+#: jobs.time.justNow
+msgid "jobs.time.justNow"
+msgstr "только что"
+
+#: jobs.time.minutesAgo
+msgid "jobs.time.minutesAgo"
+msgstr "{count} мин назад"
+
+#: jobs.time.hoursAgo
+msgid "jobs.time.hoursAgo"
+msgstr "{count} ч назад"
+
+#: jobs.time.daysAgo
+msgid "jobs.time.daysAgo"
+msgstr "{count} дн назад"
+
+#: client.repos.list.title
+msgid "client.repos.list.title"
+msgstr "Репозитории"
+
+#: client.repos.list.new
+msgid "client.repos.list.new"
+msgstr "Новый репозиторий"
+
+#: client.repos.list.search_placeholder
+msgid "client.repos.list.search_placeholder"
+msgstr "Поиск репозиториев..."
+
+#: client.repos.list.try_again
+msgid "client.repos.list.try_again"
+msgstr "Повторить"
+
+#: client.repos.list.no_match
+msgid "client.repos.list.no_match"
+msgstr "Репозитории не найдены"
+
+#: client.repos.list.empty
+msgid "client.repos.list.empty"
+msgstr "Репозиториев пока нет"
+
+#: client.repos.list.create_first
+msgid "client.repos.list.create_first"
+msgstr "Создайте свой первый репозиторий"
+
+#: client.repos.list.default_branch
+msgid "client.repos.list.default_branch"
+msgstr "Ветка по умолчанию:"
+
+#: client.repos.list.updated
+msgid "client.repos.list.updated"
+msgstr "Обновлено"
+
+#: client.repos.create.title
+msgid "client.repos.create.title"
+msgstr "Создать репозиторий"
+
+#: client.repos.create.name
+msgid "client.repos.create.name"
+msgstr "Название репозитория"
+
+#: client.repos.create.name_placeholder
+msgid "client.repos.create.name_placeholder"
+msgstr "мой-крутой-проект"
+
+#: client.repos.create.visibility
+msgid "client.repos.create.visibility"
+msgstr "Видимость"
+
+#: client.repos.create.private
+msgid "client.repos.create.private"
+msgstr "Приватный"
+
+#: client.repos.create.public
+msgid "client.repos.create.public"
+msgstr "Публичный"
+
+#: client.repos.create.submit
+msgid "client.repos.create.submit"
+msgstr "Создать репозиторий"
+
+#: client.repos.create.cancel
+msgid "client.repos.create.cancel"
+msgstr "Отмена"
+
+#: client.repos.create.error
+msgid "client.repos.create.error"
+msgstr "Не удалось создать репозиторий"
+
+#: client.repos.create.name_invalid
+msgid "client.repos.create.name_invalid"
+msgstr "Недопустимое название репозитория. Используйте буквы, цифры, точки, дефисы или подчёркивания."
+
+#: client.repos.header.clone
+msgid "client.repos.header.clone"
+msgstr "Клонировать"
+
+#: client.repos.header.clone_https
+msgid "client.repos.header.clone_https"
+msgstr "Клонировать через HTTPS"
+
+#: client.repos.header.copied
+msgid "client.repos.header.copied"
+msgstr "Скопировано!"
+
+#: client.repos.header.copy
+msgid "client.repos.header.copy"
+msgstr "Копировать"
+
+#: client.repos.header.default_branch
+msgid "client.repos.header.default_branch"
+msgstr "Ветка по умолчанию"
+
+#: client.repos.nav.code
+msgid "client.repos.nav.code"
+msgstr "Код"
+
+#: client.repos.nav.commits
+msgid "client.repos.nav.commits"
+msgstr "Коммиты"
+
+#: client.repos.nav.branches
+msgid "client.repos.nav.branches"
+msgstr "Ветки"
+
+#: client.repos.nav.settings
+msgid "client.repos.nav.settings"
+msgstr "Настройки"
+
+#: client.repos.tree.empty
+msgid "client.repos.tree.empty"
+msgstr "Эта директория пуста"
+
+#: client.repos.blob.lines
+msgid "client.repos.blob.lines"
+msgstr "строк"
+
+#: client.repos.blob.bytes
+msgid "client.repos.blob.bytes"
+msgstr "байт"
+
+#: client.repos.blob.blame
+msgid "client.repos.blob.blame"
+msgstr "Blame"
+
+#: client.repos.blob.copy
+msgid "client.repos.blob.copy"
+msgstr "Копировать"
+
+#: client.repos.blob.copied
+msgid "client.repos.blob.copied"
+msgstr "Скопировано!"
+
+#: client.repos.blob.raw
+msgid "client.repos.blob.raw"
+msgstr "Raw"
+
+#: client.repos.blob.binary_not_shown
+msgid "client.repos.blob.binary_not_shown"
+msgstr "Бинарный файл не отображается"
+
+#: client.repos.weaver.open
+msgid "client.repos.weaver.open"
+msgstr "Открыть в Weaver"
+
+#: client.repos.weaver.create_failed
+msgid "client.repos.weaver.create_failed"
+msgstr "Не удалось создать weaver"
+
+#: client.repos.weaver.no_org
+msgid "client.repos.weaver.no_org"
+msgstr "Организация не выбрана"
+
+#: client.repos.branch.find
+msgid "client.repos.branch.find"
+msgstr "Найти ветку..."
+
+#: client.repos.branch.not_found
+msgid "client.repos.branch.not_found"
+msgstr "Ветки не найдены"
+
+#: client.repos.branch.default
+msgid "client.repos.branch.default"
+msgstr "по умолчанию"
+
+#: client.repos.branches.title
+msgid "client.repos.branches.title"
+msgstr "Ветки"
+
+#: client.repos.branches.default
+msgid "client.repos.branches.default"
+msgstr "По умолчанию"
+
+#: client.repos.branches.empty
+msgid "client.repos.branches.empty"
+msgstr "Ветки не найдены"
+
+#: client.repos.branches.compare
+msgid "client.repos.branches.compare"
+msgstr "Сравнить"
+
+#: client.repos.commits.minutes_ago
+msgid "client.repos.commits.minutes_ago"
+msgstr "{count} минут назад"
+
+#: client.repos.commits.hours_ago
+msgid "client.repos.commits.hours_ago"
+msgstr "{count} часов назад"
+
+#: client.repos.commits.days_ago
+msgid "client.repos.commits.days_ago"
+msgstr "{count} дней назад"
+
+#: client.repos.commits.committed
+msgid "client.repos.commits.committed"
+msgstr "зафиксировано"
+
+#: client.repos.commits.copy_sha
+msgid "client.repos.commits.copy_sha"
+msgstr "Копировать SHA"
+
+#: client.repos.commits.empty
+msgid "client.repos.commits.empty"
+msgstr "Коммиты не найдены"
+
+#: client.repos.diff.parent
+msgid "client.repos.diff.parent"
+msgstr "Родитель"
+
+#: client.repos.diff.parents
+msgid "client.repos.diff.parents"
+msgstr "Родители"
+
+#: client.repos.diff.showing
+msgid "client.repos.diff.showing"
+msgstr "Показано"
+
+#: client.repos.diff.changed_file
+msgid "client.repos.diff.changed_file"
+msgstr "изменённый файл"
+
+#: client.repos.diff.changed_files
+msgid "client.repos.diff.changed_files"
+msgstr "изменённых файлов"
+
+#: client.repos.blame.lines
+msgid "client.repos.blame.lines"
+msgstr "строк"
+
+#: client.repos.blame.today
+msgid "client.repos.blame.today"
+msgstr "сегодня"
+
+#: client.repos.blame.days_ago
+msgid "client.repos.blame.days_ago"
+msgstr "{count}д назад"
+
+#: client.repos.blame.months_ago
+msgid "client.repos.blame.months_ago"
+msgstr "{count}мес назад"
+
+#: client.repos.blame.years_ago
+msgid "client.repos.blame.years_ago"
+msgstr "{count}г назад"
+
+#: client.repos.blame.empty
+msgid "client.repos.blame.empty"
+msgstr "Информация о blame недоступна"
+
+#: client.repos.compare.ahead
+msgid "client.repos.compare.ahead"
+msgstr "впереди"
+
+#: client.repos.compare.behind
+msgid "client.repos.compare.behind"
+msgstr "позади"
+
+#: client.repos.compare.commit
+msgid "client.repos.compare.commit"
+msgstr "коммит"
+
+#: client.repos.compare.commits
+msgid "client.repos.compare.commits"
+msgstr "коммитов"
+
+#: client.repos.compare.commits_heading
+msgid "client.repos.compare.commits_heading"
+msgstr "Коммиты"
+
+#: client.repos.compare.identical
+msgid "client.repos.compare.identical"
+msgstr "Эти ветки идентичны"
+
+#: client.repos.settings.general
+msgid "client.repos.settings.general"
+msgstr "Общие"
+
+#: client.repos.settings.name
+msgid "client.repos.settings.name"
+msgstr "Название репозитория"
+
+#: client.repos.settings.visibility
+msgid "client.repos.settings.visibility"
+msgstr "Видимость"
+
+#: client.repos.settings.private
+msgid "client.repos.settings.private"
+msgstr "Приватный"
+
+#: client.repos.settings.public
+msgid "client.repos.settings.public"
+msgstr "Публичный"
+
+#: client.repos.settings.visibility_private_desc
+msgid "client.repos.settings.visibility_private_desc"
+msgstr "Только вы и соавторы имеют доступ к этому репозиторию"
+
+#: client.repos.settings.visibility_public_desc
+msgid "client.repos.settings.visibility_public_desc"
+msgstr "Любой может клонировать этот репозиторий"
+
+#: client.repos.settings.default_branch
+msgid "client.repos.settings.default_branch"
+msgstr "Ветка по умолчанию"
+
+#: client.repos.settings.clone_url
+msgid "client.repos.settings.clone_url"
+msgstr "URL для клонирования"
+
+#: client.repos.settings.copy
+msgid "client.repos.settings.copy"
+msgstr "Копировать"
+
+#: client.repos.settings.save
+msgid "client.repos.settings.save"
+msgstr "Сохранить изменения"
+
+#: client.repos.settings.cancel
+msgid "client.repos.settings.cancel"
+msgstr "Отмена"
+
+#: client.repos.settings.danger_zone
+msgid "client.repos.settings.danger_zone"
+msgstr "Опасная зона"
+
+#: client.repos.settings.delete_title
+msgid "client.repos.settings.delete_title"
+msgstr "Удалить репозиторий"
+
+#: client.repos.settings.delete_warning
+msgid "client.repos.settings.delete_warning"
+msgstr "Это действие нельзя отменить. Репозиторий и всё его содержимое будут удалены навсегда."
+
+#: client.repos.settings.delete_button
+msgid "client.repos.settings.delete_button"
+msgstr "Удалить этот репозиторий"
+
+#: client.repos.settings.delete_confirm
+msgid "client.repos.settings.delete_confirm"
+msgstr "Введите название репозитория для подтверждения:"
+
+#: client.repos.settings.delete_confirm_button
+msgid "client.repos.settings.delete_confirm_button"
+msgstr "Я понимаю, удалить этот репозиторий"
+
+
+#: client.repos.settings.delete_confirm_desc
+msgid "client.repos.settings.delete_confirm_desc"
+msgstr ""
+
+#: client.repos.settings.delete_type_name
+msgid "client.repos.settings.delete_type_name"
+msgstr ""
+
+#: client.repos.settings.delete_error
+msgid "client.repos.settings.delete_error"
+msgstr ""
+
+#: thread.noThreadsFound
+msgid "thread.noThreadsFound"
+msgstr "Треды не найдены"
+
+#: thread.time.justNow
+msgid "thread.time.justNow"
+msgstr "Только что"
+
+#: thread.time.minutesAgo
+msgid "thread.time.minutesAgo"
+msgstr "{count} мин. назад"
+
+#: thread.time.hoursAgo
+msgid "thread.time.hoursAgo"
+msgstr "{count} ч. назад"
+
+#: thread.time.daysAgo
+msgid "thread.time.daysAgo"
+msgstr "{count} д. назад"
+
+#: thread.messageCount
+msgid "thread.messageCount"
+msgstr "{count} сообщений"
+
+#: thread.selectToView
+msgid "thread.selectToView"
+msgstr "Выберите тред для просмотра"
+
+#: thread.createToStart
+msgid "thread.createToStart"
+msgstr "Или создайте новый тред для начала"
+
+#: error.goHome
+msgid "error.goHome"
+msgstr "На главную"
+
+#: support.access.requested
+msgid "support.access.requested"
+msgstr "Доступ запрошен"
+
+#: support.access.requestSent
+msgid "support.access.requestSent"
+msgstr "Ваш запрос отправлен владельцу треда. Вы сможете просмотреть этот тред после его одобрения."
+
+#: support.access.requestId
+msgid "support.access.requestId"
+msgstr "ID запроса:"
+
+#: support.access.required
+msgid "support.access.required"
+msgstr "Требуется доступ"
+
+#: support.access.notShared
+msgid "support.access.notShared"
+msgstr "Этот тред не был предоставлен службе поддержки. Как член команды поддержки, вы можете запросить доступ у владельца треда."
+
+#: support.access.requesting
+msgid "support.access.requesting"
+msgstr "Запрос..."
+
+#: support.access.requestButton
+msgid "support.access.requestButton"
+msgstr "Запросить доступ"
+
+#: support.access.note
+msgid "support.access.note"
+msgstr "Владелец треда получит уведомление и сможет одобрить или отклонить ваш запрос. В случае одобрения доступ будет предоставлен на 31 день."
+
+#: support.access.errorAlreadyRequested
+msgid "support.access.errorAlreadyRequested"
+msgstr "Доступ к этому треду уже запрошен. Ожидание одобрения владельца."
+
+#: support.access.errorAlreadyActive
+msgid "support.access.errorAlreadyActive"
+msgstr "У вас уже есть активный доступ к этому треду. Попробуйте обновить страницу."
+
+#: support.access.errorFailed
+msgid "support.access.errorFailed"
+msgstr "Не удалось запросить доступ. Пожалуйста, попробуйте снова."
+
+#: support.access.errorUnexpected
+msgid "support.access.errorUnexpected"
+msgstr "Произошла непредвиденная ошибка."
+
+#: state.idle
+msgid "state.idle"
+msgstr "Ожидание"
+
+#: state.weaving
+msgid "state.weaving"
+msgstr "Плетение"
+
+#: state.threading
+msgid "state.threading"
+msgstr "Продевание"
+
+#: state.shuttlePass
+msgid "state.shuttlePass"
+msgstr "Проход челнока"
+
+#: state.brokenThread
+msgid "state.brokenThread"
+msgstr "Обрыв нити (попытка {retries})"
+
+#: tool.showError
+msgid "tool.showError"
+msgstr "Показать ошибку"
+
+#: tool.showOutput
+msgid "tool.showOutput"
+msgstr "Показать вывод"
+
+#: docs.title
+msgid "docs.title"
+msgstr "Документация Loom"
+
+#: docs.redirecting
+msgid "docs.redirecting"
+msgstr "Перенаправление на учебные материалы..."
+
+#: docs.tutorials.title
+msgid "docs.tutorials.title"
+msgstr "Учебные материалы"
+
+#: docs.tutorials.description
+msgid "docs.tutorials.description"
+msgstr "Обучающие уроки, которые проведут вас через серию шагов для завершения проекта."
+
+#: docs.tutorials.empty
+msgid "docs.tutorials.empty"
+msgstr "Учебные материалы пока недоступны."
+
+#: docs.explanation.title
+msgid "docs.explanation.title"
+msgstr "Объяснения"
+
+#: docs.explanation.description
+msgid "docs.explanation.description"
+msgstr "Обсуждения и справочные материалы, объясняющие концепции, решения и общую картину."
+
+#: docs.explanation.empty
+msgid "docs.explanation.empty"
+msgstr "Объяснения пока недоступны."
+
+#: docs.reference.title
+msgid "docs.reference.title"
+msgstr "Справочник"
+
+#: docs.reference.description
+msgid "docs.reference.description"
+msgstr "Техническая справочная документация с подробной информацией об API, конфигурации и внутренней структуре."
+
+#: docs.reference.empty
+msgid "docs.reference.empty"
+msgstr "Справочная документация пока недоступна."
+
+#: docs.howTo.title
+msgid "docs.howTo.title"
+msgstr "Практические руководства"
+
+#: docs.howTo.description
+msgid "docs.howTo.description"
+msgstr "Руководства, ориентированные на задачи, которые показывают, как достичь конкретных целей."
+
+#: docs.howTo.empty
+msgid "docs.howTo.empty"
+msgstr "Практические руководства пока недоступны."
+
+#: admin.auditLogs.title
+msgid "admin.auditLogs.title"
+msgstr "Журнал аудита безопасности"
+
+#: admin.auditLogs.loading
+msgid "admin.auditLogs.loading"
+msgstr "Загрузка журнала аудита..."
+
+#: admin.auditLogs.empty
+msgid "admin.auditLogs.empty"
+msgstr "Записи аудита не найдены."
+
+#: admin.auditLogs.showing
+msgid "admin.auditLogs.showing"
+msgstr "Показано {start} - {end} из {total}"
+
+#: admin.auditLogs.via
+msgid "admin.auditLogs.via"
+msgstr "через {userId}"
+
+#: admin.auditLogs.event.all
+msgid "admin.auditLogs.event.all"
+msgstr "Все события"
+
+#: admin.auditLogs.event.login
+msgid "admin.auditLogs.event.login"
+msgstr "Вход"
+
+#: admin.auditLogs.event.logout
+msgid "admin.auditLogs.event.logout"
+msgstr "Выход"
+
+#: admin.auditLogs.event.loginFailed
+msgid "admin.auditLogs.event.loginFailed"
+msgstr "Неудачный вход"
+
+#: admin.auditLogs.event.accessDenied
+msgid "admin.auditLogs.event.accessDenied"
+msgstr "Доступ запрещён"
+
+#: admin.auditLogs.event.sessionRevoked
+msgid "admin.auditLogs.event.sessionRevoked"
+msgstr "Сессия отозвана"
+
+#: admin.auditLogs.event.apiKeyCreated
+msgid "admin.auditLogs.event.apiKeyCreated"
+msgstr "API-ключ создан"
+
+#: admin.auditLogs.event.apiKeyRevoked
+msgid "admin.auditLogs.event.apiKeyRevoked"
+msgstr "API-ключ отозван"
+
+#: admin.auditLogs.event.orgCreated
+msgid "admin.auditLogs.event.orgCreated"
+msgstr "Организация создана"
+
+#: admin.auditLogs.event.memberAdded
+msgid "admin.auditLogs.event.memberAdded"
+msgstr "Участник добавлен"
+
+#: admin.auditLogs.event.memberRemoved
+msgid "admin.auditLogs.event.memberRemoved"
+msgstr "Участник удалён"
+
+#: admin.auditLogs.event.impersonationStarted
+msgid "admin.auditLogs.event.impersonationStarted"
+msgstr "Имперсонация начата"
+
+#: admin.auditLogs.event.impersonationEnded
+msgid "admin.auditLogs.event.impersonationEnded"
+msgstr "Имперсонация завершена"
+
+#: admin.auditLogs.column.timestamp
+msgid "admin.auditLogs.column.timestamp"
+msgstr "Время"
+
+#: admin.auditLogs.column.event
+msgid "admin.auditLogs.column.event"
+msgstr "Событие"
+
+#: admin.auditLogs.column.actor
+msgid "admin.auditLogs.column.actor"
+msgstr "Субъект"
+
+#: admin.auditLogs.column.resource
+msgid "admin.auditLogs.column.resource"
+msgstr "Ресурс"
+
+#: admin.auditLogs.column.details
+msgid "admin.auditLogs.column.details"
+msgstr "Подробности"
+
+#: admin.anthropic.expired
+msgid "admin.anthropic.expired"
+msgstr "Истёк"
+
+#: admin.anthropic.expiresInMinutes
+msgid "admin.anthropic.expiresInMinutes"
+msgstr "через {count} минут"
+
+#: admin.anthropic.expiresInHours
+msgid "admin.anthropic.expiresInHours"
+msgstr "через {count} часов"
+
+#: admin.anthropic.expiresInDays
+msgid "admin.anthropic.expiresInDays"
+msgstr "через {count} дней"
+
+#: admin.anthropic.remaining
+msgid "admin.anthropic.remaining"
+msgstr "осталось"
+
+#: admin.anthropic.tokenExpires
+msgid "admin.anthropic.tokenExpires"
+msgstr "Токен истекает:"
+
+#: admin.anthropic.summary.available
+msgid "admin.anthropic.summary.available"
+msgstr "доступно"
+
+#: admin.anthropic.summary.cooling
+msgid "admin.anthropic.summary.cooling"
+msgstr "охлаждение"
+
+#: admin.anthropic.summary.disabled
+msgid "admin.anthropic.summary.disabled"
+msgstr "отключено"
+
+#: admin.anthropic.summary.total
+msgid "admin.anthropic.summary.total"
+msgstr "всего"
+
+#: client.repos.blame.title
+msgid "client.repos.blame.title"
+msgstr "Blame:"
+
+#: client.repos.blame.viewFile
+msgid "client.repos.blame.viewFile"
+msgstr "Просмотреть файл"
+
+#: client.repos.compare.title
+msgid "client.repos.compare.title"
+msgstr "Сравнение"
+
+#: client.repos.compare.base
+msgid "client.repos.compare.base"
+msgstr "база:"
+
+#: client.repos.compare.compare
+msgid "client.repos.compare.compare"
+msgstr "сравнить:"
+
+#: client.repos.commits.title
+msgid "client.repos.commits.title"
+msgstr "Коммиты"
+
+#: client.repos.commits.count
+msgid "client.repos.commits.count"
+msgstr "коммитов"
+
+#: client.repos.commits.newer
+msgid "client.repos.commits.newer"
+msgstr "Новее"
+
+#: client.repos.commits.older
+msgid "client.repos.commits.older"
+msgstr "Старше"
+
+#: state.waiting
+msgid "state.waiting"
+msgstr "Ожидание"
+
+#: state.complete
+msgid "state.complete"
+msgstr "Завершено"
+
+#: tool.shuttleReady
+msgid "tool.shuttleReady"
+msgstr "Шаттл готов"
+
+#: tool.shuttlePasses
+msgid "tool.shuttlePasses"
+msgstr "Проходы шаттла"
+
+#: message.toolResult
+msgid "message.toolResult"
+msgstr "🔧 Результат инструмента"
+
+#: weavers.terminal.connectionClosed
+msgid "weavers.terminal.connectionClosed"
+msgstr "Соединение закрыто:"
+
+#: weavers.terminal.unknownReason
+msgid "weavers.terminal.unknownReason"
+msgstr "Неизвестная причина"
+
+#: weavers.terminal.connectFailed
+msgid "weavers.terminal.connectFailed"
+msgstr "Не удалось подключиться к weaver"
+
+#: docs.toc.title
+msgid "docs.toc.title"
+msgstr "На этой странице"
+
+#: docs.breadcrumbs.docs
+msgid "docs.breadcrumbs.docs"
+msgstr "Документация"
+
+#: docs.search.placeholder
+msgid "docs.search.placeholder"
+msgstr "Поиск..."
+
+#: docs.search.placeholderFull
+msgid "docs.search.placeholderFull"
+msgstr "Поиск по документации..."
+
+#: docs.search.close
+msgid "docs.search.close"
+msgstr "Закрыть поиск"
+
+#: docs.search.category.tutorial
+msgid "docs.search.category.tutorial"
+msgstr "Учебник"
+
+#: docs.search.category.howTo
+msgid "docs.search.category.howTo"
+msgstr "Руководство"
+
+#: docs.search.category.reference
+msgid "docs.search.category.reference"
+msgstr "Справочник"
+
+#: docs.search.category.explanation
+msgid "docs.search.category.explanation"
+msgstr "Объяснение"
+
+#: docs.search.noResults
+msgid "docs.search.noResults"
+msgstr "Ничего не найдено по запросу"
+
+#: docs.search.hint
+msgid "docs.search.hint"
+msgstr "Введите текст для поиска по документации"
+
+#: docs.search.key.navigate
+msgid "docs.search.key.navigate"
+msgstr "для навигации"
+
+#: docs.search.key.select
+msgid "docs.search.key.select"
+msgstr "для выбора"
+
+#: docs.search.key.close
+msgid "docs.search.key.close"
+msgstr "для закрытия"
+
+#: docs.callout.info
+msgid "docs.callout.info"
+msgstr "Информация"
+
+#: docs.callout.tip
+msgid "docs.callout.tip"
+msgstr "Совет"
+
+#: docs.callout.warning
+msgid "docs.callout.warning"
+msgstr "Предупреждение"
+
+#: docs.callout.danger
+msgid "docs.callout.danger"
+msgstr "Опасность"
+
+#: settings.sessions.loadError
+msgid "settings.sessions.loadError"
+msgstr "Не удалось загрузить сессии"
+
+#: settings.sessions.revokeError
+msgid "settings.sessions.revokeError"
+msgstr "Не удалось отозвать сессию"
+
+#: jobs.loadError
+msgid "jobs.loadError"
+msgstr "Не удалось загрузить задания"
+
+#: jobs.triggerError
+msgid "jobs.triggerError"
+msgstr "Не удалось запустить задание"
+
+#: general.unknownError
+msgid "general.unknownError"
+msgstr "Неизвестная ошибка"
+
+#: client.repos.list.loadError
+msgid "client.repos.list.loadError"
+msgstr "Не удалось загрузить репозитории"
+
+#: admin.health.fileCount
+msgid "admin.health.fileCount"
+msgstr "{count} файлов"
+
+#: admin.audit.title
+msgid "admin.audit.title"
+msgstr "Журналы аудита"
+
+#: admin.audit.description
+msgid "admin.audit.description"
+msgstr "Просмотр журналов аудита безопасности"
+
+#: auth.login.redirecting
+msgid "auth.login.redirecting"
+msgstr "Перенаправление..."
+
+#: org.title
+msgid "org.title"
+msgstr "Организация"
+
+#: org.members.add
+msgid "org.members.add"
+msgstr "Добавить участника"
+
+#: org.members.addTitle
+msgid "org.members.addTitle"
+msgstr "Добавить участника"
+
+#: org.members.email
+msgid "org.members.email"
+msgstr "Адрес электронной почты"
+
+#: org.members.empty
+msgid "org.members.empty"
+msgstr "Пока нет участников"
+
+#: org.members.invite
+msgid "org.members.invite"
+msgstr "Отправить приглашение"
+
+#: org.members.remove
+msgid "org.members.remove"
+msgstr "Удалить"
+
+#: org.members.removeConfirm
+msgid "org.members.removeConfirm"
+msgstr "Вы уверены, что хотите удалить этого участника?"
+
+#: org.roles.admin
+msgid "org.roles.admin"
+msgstr "Администратор"
+
+#: org.roles.member
+msgid "org.roles.member"
+msgstr "Участник"
+
+#: org.teams.create
+msgid "org.teams.create"
+msgstr "Создать команду"
+
+#: org.teams.createTitle
+msgid "org.teams.createTitle"
+msgstr "Создать новую команду"
+
+#: org.teams.empty
+msgid "org.teams.empty"
+msgstr "Пока нет команд"
+
+#: org.teams.memberCount
+msgid "org.teams.memberCount"
+msgstr "участников"
+
+#: org.teams.name
+msgid "org.teams.name"
+msgstr "Название команды"
+
+#: org.teams.slug
+msgid "org.teams.slug"
+msgstr "URL-идентификатор"
+
+#: org.apiKeys.create
+msgid "org.apiKeys.create"
+msgstr "Создать API-ключ"
+
+#: org.apiKeys.createTitle
+msgid "org.apiKeys.createTitle"
+msgstr "Создать новый API-ключ"
+
+#: org.apiKeys.created
+msgid "org.apiKeys.created"
+msgstr "API-ключ создан"
+
+#: org.apiKeys.copyWarning
+msgid "org.apiKeys.copyWarning"
+msgstr "Скопируйте этот ключ сейчас. Вы не сможете увидеть его снова."
+
+#: org.apiKeys.empty
+msgid "org.apiKeys.empty"
+msgstr "Пока нет API-ключей"
+
+#: org.apiKeys.lastUsed
+msgid "org.apiKeys.lastUsed"
+msgstr "Последнее использование"
+
+#: org.apiKeys.name
+msgid "org.apiKeys.name"
+msgstr "Название ключа"
+
+#: org.apiKeys.revoke
+msgid "org.apiKeys.revoke"
+msgstr "Отозвать"
+
+#: org.apiKeys.revokeConfirm
+msgid "org.apiKeys.revokeConfirm"
+msgstr "Вы уверены, что хотите отозвать этот API-ключ?"
+
+#: org.apiKeys.scopes
+msgid "org.apiKeys.scopes"
+msgstr "Области доступа"
+
+#: org.settings.name
+msgid "org.settings.name"
+msgstr "Название организации"
+
+#: org.settings.visibility
+msgid "org.settings.visibility"
+msgstr "Видимость"
+
+#: org.settings.joinPolicy
+msgid "org.settings.joinPolicy"
+msgstr "Политика присоединения"
+
+#: org.settings.saved
+msgid "org.settings.saved"
+msgstr "Настройки сохранены"
+
+#: org.settings.dangerZone
+msgid "org.settings.dangerZone"
+msgstr "Опасная зона"
+
+#: org.settings.deleteWarning
+msgid "org.settings.deleteWarning"
+msgstr "После удаления организации пути назад нет."
+
+#: org.settings.delete
+msgid "org.settings.delete"
+msgstr "Удалить организацию"
+
+#: org.settings.deleteConfirm
+msgid "org.settings.deleteConfirm"
+msgstr "Вы уверены, что хотите удалить эту организацию? Это действие нельзя отменить."
+
+#: org.visibility.public
+msgid "org.visibility.public"
+msgstr "Публичная"
+
+#: org.visibility.private
+msgid "org.visibility.private"
+msgstr "Частная"
+
+#: org.joinPolicy.open
+msgid "org.joinPolicy.open"
+msgstr "Открытая"
+
+#: org.joinPolicy.request
+msgid "org.joinPolicy.request"
+msgstr "Запрос на присоединение"
+
+#: org.joinPolicy.inviteOnly
+msgid "org.joinPolicy.inviteOnly"
+msgstr "Только по приглашению"
+
+#: org.tabs.members
+msgid "org.tabs.members"
+msgstr "Участники"
+
+#: org.tabs.teams
+msgid "org.tabs.teams"
+msgstr "Команды"
+
+#: org.tabs.apiKeys
+msgid "org.tabs.apiKeys"
+msgstr "API-ключи"
+
+#: org.tabs.settings
+msgid "org.tabs.settings"
+msgstr "Настройки"
+
+# ============================================================================
+# Kill Switches
+# ============================================================================
+
+#: killSwitch.title
+msgid "killSwitch.title"
+msgstr "Kill Switches"
+
+#: killSwitch.description
+msgid "killSwitch.description"
+msgstr "Emergency shutoff controls for feature flags"
+
+#: killSwitch.create
+msgid "killSwitch.create"
+msgstr "Create Kill Switch"
+
+#: killSwitch.createTitle
+msgid "killSwitch.createTitle"
+msgstr "Create New Kill Switch"
+
+#: killSwitch.key
+msgid "killSwitch.key"
+msgstr "Key"
+
+#: killSwitch.keyHint
+msgid "killSwitch.keyHint"
+msgstr "Lowercase alphanumeric with underscores, 3-100 characters"
+
+#: killSwitch.name
+msgid "killSwitch.name"
+msgstr "Name"
+
+#: killSwitch.linkedFlags
+msgid "killSwitch.linkedFlags"
+msgstr "Linked Flags"
+
+#: killSwitch.linkedFlagsHint
+msgid "killSwitch.linkedFlagsHint"
+msgstr "Flag keys that will be disabled when this kill switch is active"
+
+#: killSwitch.status
+msgid "killSwitch.status"
+msgstr "Status"
+
+#: killSwitch.active
+msgid "killSwitch.active"
+msgstr "Active"
+
+#: killSwitch.inactive
+msgid "killSwitch.inactive"
+msgstr "Inactive"
+
+#: killSwitch.activate
+msgid "killSwitch.activate"
+msgstr "Activate"
+
+#: killSwitch.deactivate
+msgid "killSwitch.deactivate"
+msgstr "Deactivate"
+
+#: killSwitch.activateTitle
+msgid "killSwitch.activateTitle"
+msgstr "Activate Kill Switch"
+
+#: killSwitch.activateWarning
+msgid "killSwitch.activateWarning"
+msgstr "Activating this kill switch will immediately disable all linked feature flags."
+
+#: killSwitch.reason
+msgid "killSwitch.reason"
+msgstr "Reason"
+
+#: killSwitch.reasonPlaceholder
+msgid "killSwitch.reasonPlaceholder"
+msgstr "Enter the reason for activation (required)"
+
+#: killSwitch.reasonRequired
+msgid "killSwitch.reasonRequired"
+msgstr "A reason is required for activation"
+
+#: killSwitch.activatedAt
+msgid "killSwitch.activatedAt"
+msgstr "Activated at"
+
+#: killSwitch.activatedBy
+msgid "killSwitch.activatedBy"
+msgstr "Activated by"
+
+#: killSwitch.activationReason
+msgid "killSwitch.activationReason"
+msgstr "Activation reason"
+
+#: killSwitch.delete
+msgid "killSwitch.delete"
+msgstr "Delete"
+
+#: killSwitch.deleteConfirm
+msgid "killSwitch.deleteConfirm"
+msgstr "Are you sure you want to delete this kill switch?"
+
+#: killSwitch.empty
+msgid "killSwitch.empty"
+msgstr "No kill switches configured"
+
+#: killSwitch.noLinkedFlags
+msgid "killSwitch.noLinkedFlags"
+msgstr "No linked flags"
+
+# ============================================================================
+# Exposure Tracking
+# ============================================================================
+
+#: exposure.title
+msgid "exposure.title"
+msgstr "Отслеживание Экспозиции"
+
+#: exposure.description
+msgid "exposure.description"
+msgstr "Отслеживание экспозиции пользователей к вариантам флагов для анализа экспериментов"
+
+#: exposure.tracking
+msgid "exposure.tracking"
+msgstr "Отслеживание Экспозиции"
+
+#: exposure.enabled
+msgid "exposure.enabled"
+msgstr "Включено"
+
+#: exposure.disabled
+msgid "exposure.disabled"
+msgstr "Отключено"
+
+#: exposure.enableTracking
+msgid "exposure.enableTracking"
+msgstr "Включить Отслеживание Экспозиции"
+
+#: exposure.disableTracking
+msgid "exposure.disableTracking"
+msgstr "Отключить Отслеживание Экспозиции"
+
+#: exposure.enableHint
+msgid "exposure.enableHint"
+msgstr "При включении оценки флагов будут записываться для анализа экспериментов"
+
+#: exposure.logs
+msgid "exposure.logs"
+msgstr "Журналы Экспозиции"
+
+#: exposure.export
+msgid "exposure.export"
+msgstr "Экспорт Журналов"
+
+#: exposure.exportHint
+msgid "exposure.exportHint"
+msgstr "Скачать журналы экспозиции в формате CSV"
+
+#: exposure.noLogs
+msgid "exposure.noLogs"
+msgstr "Журналы экспозиции не найдены"
+
+#: exposure.flagKey
+msgid "exposure.flagKey"
+msgstr "Ключ Флага"
+
+#: exposure.variant
+msgid "exposure.variant"
+msgstr "Вариант"
+
+#: exposure.userId
+msgid "exposure.userId"
+msgstr "ID Пользователя"
+
+#: exposure.timestamp
+msgid "exposure.timestamp"
+msgstr "Метка Времени"
+
+#: exposure.reason
+msgid "exposure.reason"
+msgstr "Причина"
+
+#: exposure.environment
+msgid "exposure.environment"
+msgstr "Окружение"
+
+#: exposure.filterByFlag
+msgid "exposure.filterByFlag"
+msgstr "Фильтр по флагу"
+
+#: exposure.filterByEnvironment
+msgid "exposure.filterByEnvironment"
+msgstr "Фильтр по окружению"
+
+#: exposure.startDate
+msgid "exposure.startDate"
+msgstr "Дата Начала"
+
+#: exposure.endDate
+msgid "exposure.endDate"
+msgstr "Дата Окончания"
+
+#: exposure.totalCount
+msgid "exposure.totalCount"
+msgstr "{count} экспозиций"
+
+#: exposure.deduplicationWindow
+msgid "exposure.deduplicationWindow"
+msgstr "Экспозиции дедуплицируются в окне 1 час на пользователя/контекст"
+
+# ============================================================================
+# Flag Stats
+# ============================================================================
+
+#: flagStats.title
+msgid "flagStats.title"
+msgstr "Flag Statistics"
+
+#: flagStats.description
+msgid "flagStats.description"
+msgstr "Evaluation statistics for this flag"
+
+#: flagStats.lastEvaluated
+msgid "flagStats.lastEvaluated"
+msgstr "Last Evaluated"
+
+#: flagStats.never
+msgid "flagStats.never"
+msgstr "Never"
+
+#: flagStats.evaluations24h
+msgid "flagStats.evaluations24h"
+msgstr "Evaluations (24h)"
+
+#: flagStats.evaluations7d
+msgid "flagStats.evaluations7d"
+msgstr "Evaluations (7d)"
+
+#: flagStats.evaluations30d
+msgid "flagStats.evaluations30d"
+msgstr "Evaluations (30d)"
+
+#: flagStats.staleFlags
+msgid "flagStats.staleFlags"
+msgstr "Stale Flags"
+
+#: flagStats.staleFlagsDescription
+msgid "flagStats.staleFlagsDescription"
+msgstr "Flags that haven't been evaluated recently"
+
+#: flagStats.noStaleFlags
+msgid "flagStats.noStaleFlags"
+msgstr "No stale flags found"
+
+#: flagStats.staleFlagsHint
+msgid "flagStats.staleFlagsHint"
+msgstr "Flags are considered stale after {days} days without evaluation"
+
+#: flagStats.daysSinceEvaluated
+msgid "flagStats.daysSinceEvaluated"
+msgstr "{days} days ago"
+
+#: flagStats.neverEvaluated
+msgid "flagStats.neverEvaluated"
+msgstr "Never evaluated"
+
+#: flagStats.viewStats
+msgid "flagStats.viewStats"
+msgstr "View Stats"
+
+# ============================================================================
+# Flags SDK (client-side)
+# ============================================================================
+
+#: client.flags.error.invalid_sdk_key
+msgid "client.flags.error.invalid_sdk_key"
+msgstr "Invalid or missing SDK key"
+
+#: client.flags.error.invalid_base_url
+msgid "client.flags.error.invalid_base_url"
+msgstr "Invalid or missing base URL"
+
+#: client.flags.error.connection_failed
+msgid "client.flags.error.connection_failed"
+msgstr "Failed to connect to server"
+
+#: client.flags.error.request_failed
+msgid "client.flags.error.request_failed"
+msgstr "HTTP request failed"
+
+#: client.flags.error.parse_failed
+msgid "client.flags.error.parse_failed"
+msgstr "Failed to parse server response"
+
+#: client.flags.error.server_error
+msgid "client.flags.error.server_error"
+msgstr "Server returned an error"
+
+#: client.flags.error.flag_not_found
+msgid "client.flags.error.flag_not_found"
+msgstr "Flag not found"
+
+#: client.flags.error.sse_connection_failed
+msgid "client.flags.error.sse_connection_failed"
+msgstr "SSE connection failed"
+
+#: client.flags.error.sse_stream_error
+msgid "client.flags.error.sse_stream_error"
+msgstr "SSE stream error"
+
+#: client.flags.error.offline_no_cache
+msgid "client.flags.error.offline_no_cache"
+msgstr "Client is offline and no cached data is available"
+
+#: client.flags.error.authentication_failed
+msgid "client.flags.error.authentication_failed"
+msgstr "SDK key authentication failed"
+
+#: client.flags.error.rate_limited
+msgid "client.flags.error.rate_limited"
+msgstr "Rate limited. Retry after seconds"
+
+#: client.flags.error.initialization_timeout
+msgid "client.flags.error.initialization_timeout"
+msgstr "Client initialization timed out"
+
+#: client.flags.error.client_closed
+msgid "client.flags.error.client_closed"
+msgstr "Client has been closed"
+
+#: client.flags.error.invalid_value_type
+msgid "client.flags.error.invalid_value_type"
+msgstr "Invalid flag value type"
+
+#: client.flags.status.initializing
+msgid "client.flags.status.initializing"
+msgstr "Initializing flags client..."
+
+#: client.flags.status.connected
+msgid "client.flags.status.connected"
+msgstr "Flags client connected"
+
+#: client.flags.status.disconnected
+msgid "client.flags.status.disconnected"
+msgstr "Flags client disconnected"
+
+#: client.flags.status.reconnecting
+msgid "client.flags.status.reconnecting"
+msgstr "Reconnecting to flags server..."
+
+#: client.flags.status.using_cache
+msgid "client.flags.status.using_cache"
+msgstr "Using cached flag values"
+
+#: client.flags.status.cache_initialized
+msgid "client.flags.status.cache_initialized"
+msgstr "Flag cache initialized with {count} flags"
+
+# ============================================================================
+# HTTP Client (client-side)
+# ============================================================================
+
+#: client.http.error.timeout
+msgid "client.http.error.timeout"
+msgstr "Request timed out"
+
+#: client.http.error.network
+msgid "client.http.error.network"
+msgstr "Network request failed"
+
+#: client.http.error.rate_limited
+msgid "client.http.error.rate_limited"
+msgstr "Rate limited"
+
+#: client.http.error.server
+msgid "client.http.error.server"
+msgstr "Server returned an error"
+
+#: client.http.retry.attempt
+msgid "client.http.retry.attempt"
+msgstr "Retry attempt {count}"
+
+#: client.http.retry.max_attempts
+msgid "client.http.retry.max_attempts"
+msgstr "Max retry attempts reached"

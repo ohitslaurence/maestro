@@ -1,0 +1,57 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[package]
+name = "loom-cli"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "loom"
+path = "src/main.rs"
+
+[dependencies]
+agent-client-protocol = "0.9"
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
+clap = { workspace = true }
+ctrlc = "3"
+dirs = "6"
+futures = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }
+sys-locale = "0.3"
+humantime = "2"
+loom-cli-acp = { path = "../loom-cli-acp" }
+loom-cli-auto-commit = { path = "../loom-cli-auto-commit" }
+loom-cli-config = { path = "../loom-cli-config" }
+loom-common-core = { path = "../loom-common-core" }
+loom-cli-credentials = { path = "../loom-cli-credentials", features = ["keyring"] }
+loom-cli-git = { path = "../loom-cli-git" }
+loom-common-http = { path = "../loom-common-http" }
+loom-common-i18n = { path = "../loom-common-i18n" }
+loom-server-llm-proxy = { path = "../loom-server-llm-proxy" }
+loom-server-logs = { path = "../loom-server-logs" }
+loom-common-secret = { path = "../loom-common-secret" }
+loom-common-thread = { path = "../loom-common-thread" }
+loom-cli-spool = { path = "../loom-cli-spool" }
+loom-cli-tools = { path = "../loom-cli-tools" }
+loom-cli-wgtunnel = { path = "../loom-cli-wgtunnel" }
+loom-common-version = { workspace = true }
+reqwest = { workspace = true }
+self-replace = "1"
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tokio-tungstenite = { version = "0.21", features = ["rustls-tls-webpki-roots"] }
+tokio-util = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+url = "2"
+webbrowser = "1"
+
+[dev-dependencies]
+proptest = { workspace = true }

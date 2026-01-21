@@ -1,0 +1,50 @@
+# Rust build artifacts
+/target/
+
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# prek hooks cache
+.prek/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Binary distribution - platform binaries served by loom-server
+/bin/*
+!/bin/.gitkeep
+
+# Compiled binaries (all platforms)
+/bin/linux-x86_64
+/bin/linux-aarch64
+/bin/macos-x86_64
+/bin/macos-aarch64
+/bin/windows-x86_64
+
+# Backup binaries from loom update
+*.old
+*.new
+
+# Release artifacts
+*.tar.gz
+*.zip
+/dist/
+
+# Container/OCI build artifacts
+/result
+/result-*
+
+# Database files
+loom.db*

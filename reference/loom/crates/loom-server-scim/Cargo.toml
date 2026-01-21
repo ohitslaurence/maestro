@@ -1,0 +1,29 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[package]
+name = "loom-server-scim"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "SCIM 2.0 HTTP handlers for Loom server"
+
+[dependencies]
+loom-scim = { path = "../loom-scim" }
+loom-server-audit = { path = "../loom-server-audit" }
+loom-server-auth = { path = "../loom-server-auth" }
+loom-server-db = { path = "../loom-server-db" }
+loom-server-provisioning = { path = "../loom-server-provisioning" }
+loom-common-secret = { path = "../loom-common-secret" }
+
+axum = { version = "0.8", features = ["macros"] }
+chrono = { version = "0.4", features = ["serde"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+subtle = "2"

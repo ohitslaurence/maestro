@@ -1,0 +1,128 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[package]
+name = "loom-server"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "HTTP server for Loom thread persistence"
+
+[[bin]]
+name = "loom-server"
+path = "src/main.rs"
+
+[lib]
+name = "loom_server"
+path = "src/lib.rs"
+
+[dependencies]
+futures = { workspace = true }
+loom-server-config = { path = "../loom-server-config" }
+loom-server-docs = { path = "../loom-server-docs" }
+loom-server-db = { path = "../loom-server-db" }
+loom-server-provisioning = { path = "../loom-server-provisioning" }
+loom-server-jobs = { path = "../loom-server-jobs" }
+loom-server-logs = { path = "../loom-server-logs" }
+loom-server-weaver = { path = "../loom-server-weaver" }
+loom-common-core = { path = "../loom-common-core" }
+loom-server-k8s = { path = "../loom-server-k8s" }
+loom-server-secrets = { path = "../loom-server-secrets" }
+loom-common-secret = { path = "../loom-common-secret" }
+loom-server-auth = { path = "../loom-server-auth" }
+loom-server-audit = { path = "../loom-server-audit" }
+loom-server-api = { path = "../loom-server-api", features = ["openapi"] }
+loom-server-auth-devicecode = { path = "../loom-server-auth-devicecode" }
+loom-server-auth-github = { path = "../loom-server-auth-github" }
+loom-server-auth-google = { path = "../loom-server-auth-google" }
+loom-server-auth-magiclink = { path = "../loom-server-auth-magiclink" }
+loom-server-auth-okta = { path = "../loom-server-auth-okta" }
+loom-server-smtp = { path = "../loom-server-smtp" }
+loom-server-email = { path = "../loom-server-email" }
+loom-server-flags = { path = "../loom-server-flags" }
+loom-flags-core = { path = "../loom-flags-core" }
+loom-server-analytics = { path = "../loom-server-analytics" }
+loom-analytics-core = { path = "../loom-analytics-core" }
+loom-server-crons = { path = "../loom-server-crons" }
+loom-crons-core = { path = "../loom-crons-core", features = ["openapi"] }
+loom-server-crash = { path = "../loom-server-crash" }
+loom-crash-core = { path = "../loom-crash-core", features = ["openapi"] }
+loom-server-sessions = { path = "../loom-server-sessions" }
+loom-sessions-core = { path = "../loom-sessions-core", features = ["openapi"] }
+loom-common-i18n = { path = "../loom-common-i18n" }
+loom-server-geoip = { path = "../loom-server-geoip" }
+loom-server-github-app = { path = "../loom-server-github-app", features = ["openapi"] }
+loom-server-scim = { path = "../loom-server-scim" }
+loom-server-scm = { path = "../loom-server-scm" }
+loom-server-scm-mirror = { path = "../loom-server-scm-mirror" }
+loom-server-session = { path = "../loom-server-session" }
+loom-server-wgtunnel = { path = "../loom-server-wgtunnel" }
+gix = { version = "0.68", default-features = false, features = ["revision"] }
+loom-server-search-google-cse = { path = "../loom-server-search-google-cse", features = ["openapi"] }
+loom-server-search-serper = { path = "../loom-server-search-serper", features = ["openapi"] }
+loom-server-llm-anthropic = { path = "../loom-server-llm-anthropic" }
+loom-server-llm-service = { path = "../loom-server-llm-service" }
+loom-common-thread = { path = "../loom-common-thread", features = ["openapi"] }
+url = "2"
+loom-common-version = { path = "../loom-common-version", features = ["serde", "utoipa"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
+
+# HMAC for webhook verification
+hex = "0.4"
+hmac = "0.12"
+sha2 = "0.10"
+
+# Base64 decoding for git HTTP Basic auth
+base64 = "0.22"
+
+# Web framework
+axum = { version = "0.8", features = ["macros", "ws", "multipart"] }
+tower = "0.5"
+pin-project-lite.workspace = true
+tower-http = { version = "0.6", features = ["cors", "trace", "fs"] }
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# SSE streaming
+async-stream = "0.3"
+
+# From workspace
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# Config
+dotenvy = "0.15"
+
+# CLI
+clap = { workspace = true }
+humantime = "2"
+
+# For LLM query detection
+async-trait = { workspace = true }
+regex = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+uuid7.workspace = true
+
+# Metrics
+prometheus = "0.13"
+
+# OpenAPI documentation
+utoipa = { version = "5", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "9", features = ["axum", "vendored"] }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest.workspace = true
+tempfile.workspace = true
+tokio-test.workspace = true
+

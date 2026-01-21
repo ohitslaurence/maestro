@@ -1,0 +1,2900 @@
+# Translation catalog for Loom Web
+# Language: fr
+#
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: nav.threads
+msgid "nav.threads"
+msgstr "Fils"
+
+#: nav.settings
+msgid "nav.settings"
+msgstr "Paramètres"
+
+#: nav.admin
+msgid "nav.admin"
+msgstr "Admin"
+
+#: nav.jobs
+msgid "nav.jobs"
+msgstr "Tâches"
+
+#: thread.new
+msgid "thread.new"
+msgstr "Nouveau fil"
+
+#: thread.delete
+msgid "thread.delete"
+msgstr "Supprimer"
+
+#: thread.search
+msgid "thread.search"
+msgstr "Rechercher des fils..."
+
+#: thread.noThreads
+msgid "thread.noThreads"
+msgstr "Aucun fil pour le moment"
+
+#: thread.loadError
+msgid "thread.loadError"
+msgstr "Échec du chargement des fils"
+
+#: state.waiting_for_user_input
+msgid "state.waiting_for_user_input"
+msgstr "En attente d'une entrée"
+
+#: state.calling_llm
+msgid "state.calling_llm"
+msgstr "Appel du LLM"
+
+#: state.processing_llm_response
+msgid "state.processing_llm_response"
+msgstr "Traitement de la réponse"
+
+#: state.executing_tools
+msgid "state.executing_tools"
+msgstr "Exécution des outils"
+
+#: state.post_tools_hook
+msgid "state.post_tools_hook"
+msgstr "Post-traitement"
+
+#: state.error
+msgid "state.error"
+msgstr "Erreur"
+
+#: state.shutting_down
+msgid "state.shutting_down"
+msgstr "Arrêt en cours"
+
+#: tool.pending
+msgid "tool.pending"
+msgstr "En attente"
+
+#: tool.running
+msgid "tool.running"
+msgstr "En cours"
+
+#: tool.completed
+msgid "tool.completed"
+msgstr "Terminé"
+
+#: tool.failed
+msgid "tool.failed"
+msgstr "Échoué"
+
+#: connection.connected
+msgid "connection.connected"
+msgstr "Connecté"
+
+#: connection.disconnected
+msgid "connection.disconnected"
+msgstr "Déconnecté"
+
+#: connection.connecting
+msgid "connection.connecting"
+msgstr "Connexion..."
+
+#: connection.reconnecting
+msgid "connection.reconnecting"
+msgstr "Reconnexion..."
+
+#: connection.error
+msgid "connection.error"
+msgstr "Erreur de connexion"
+
+#: connection.clickToReconnect
+msgid "connection.clickToReconnect"
+msgstr "Cliquez pour reconnecter"
+
+#: connection.attempt
+msgid "connection.attempt"
+msgstr "Tentative {count}"
+
+#: message.placeholder
+msgid "message.placeholder"
+msgstr "Tapez un message..."
+
+#: message.send
+msgid "message.send"
+msgstr "Envoyer"
+
+#: auth.signOut
+msgid "auth.signOut"
+msgstr "Déconnexion"
+
+#: auth.dashboard.welcome
+msgid "auth.dashboard.welcome"
+msgstr "Bienvenue,"
+
+#: auth.dashboard.protectedPage
+msgid "auth.dashboard.protectedPage"
+msgstr "Ceci est une page protégée. Vous devez être connecté pour la voir."
+
+#: general.loading
+msgid "general.loading"
+msgstr "Chargement..."
+
+#: general.error
+msgid "general.error"
+msgstr "Une erreur est survenue"
+
+#: general.retry
+msgid "general.retry"
+msgstr "Réessayer"
+
+#: general.cancel
+msgid "general.cancel"
+msgstr "Annuler"
+
+#: general.save
+msgid "general.save"
+msgstr "Enregistrer"
+
+#: general.close
+msgid "general.close"
+msgstr "Fermer"
+
+#: auth.login.title
+msgid "auth.login.title"
+msgstr "Connexion à Loom"
+
+#: auth.login.subtitle
+msgid "auth.login.subtitle"
+msgstr "Choisissez votre méthode de connexion"
+
+#: auth.login.github
+msgid "auth.login.github"
+msgstr "Continuer avec GitHub"
+
+#: auth.login.google
+msgid "auth.login.google"
+msgstr "Continuer avec Google"
+
+#: auth.login.or
+msgid "auth.login.or"
+msgstr "ou"
+
+#: auth.login.emailLabel
+msgid "auth.login.emailLabel"
+msgstr "Adresse e-mail"
+
+#: auth.login.emailPlaceholder
+msgid "auth.login.emailPlaceholder"
+msgstr "vous@exemple.com"
+
+#: auth.login.sendMagicLink
+msgid "auth.login.sendMagicLink"
+msgstr "Envoyer le lien magique"
+
+#: auth.login.sending
+msgid "auth.login.sending"
+msgstr "Envoi..."
+
+#: auth.login.checkEmail
+msgid "auth.login.checkEmail"
+msgstr "Vérifiez vos e-mails"
+
+#: auth.login.magicLinkSent
+msgid "auth.login.magicLinkSent"
+msgstr "Nous avons envoyé un lien de connexion à"
+
+#: auth.login.useDifferentEmail
+msgid "auth.login.useDifferentEmail"
+msgstr "Utiliser une autre adresse e-mail"
+
+#: auth.login.error
+msgid "auth.login.error"
+msgstr "Impossible d'envoyer le lien magique. Veuillez réessayer."
+
+#: auth.login.signups_disabled
+msgid "auth.login.signups_disabled"
+msgstr "Les inscriptions de nouveaux utilisateurs sont actuellement désactivées. Veuillez contacter un administrateur."
+
+#: auth.device.title
+msgid "auth.device.title"
+msgstr "Autoriser le CLI"
+
+#: auth.device.subtitle
+msgid "auth.device.subtitle"
+msgstr "Entrez le code affiché dans votre terminal pour lier votre CLI à votre compte"
+
+#: auth.device.inputLabel
+msgid "auth.device.inputLabel"
+msgstr "Entrez votre code"
+
+#: auth.device.placeholder
+msgid "auth.device.placeholder"
+msgstr "XXX-XXX-XXX"
+
+#: auth.device.authorize
+msgid "auth.device.authorize"
+msgstr "Autoriser"
+
+#: auth.device.authorizing
+msgid "auth.device.authorizing"
+msgstr "Autorisation..."
+
+#: auth.device.success
+msgid "auth.device.success"
+msgstr "Autorisé !"
+
+#: auth.device.successMessage
+msgid "auth.device.successMessage"
+msgstr "Vous pouvez maintenant fermer cette page et retourner à votre terminal."
+
+#: auth.device.error
+msgid "auth.device.error"
+msgstr "Code invalide ou expiré. Veuillez vérifier votre terminal et réessayer."
+
+#: auth.device.noCode
+msgid "auth.device.noCode"
+msgstr "Vous n'avez pas de code ? Exécutez"
+
+#: auth.device.cliCommand
+msgid "auth.device.cliCommand"
+msgstr "loom login"
+
+#: auth.device.inTerminal
+msgid "auth.device.inTerminal"
+msgstr "dans votre terminal."
+
+#: settings.sessions.title
+msgid "settings.sessions.title"
+msgstr "Sessions actives"
+
+#: settings.sessions.description
+msgid "settings.sessions.description"
+msgstr "Gérez vos sessions actives sur tous vos appareils"
+
+#: settings.sessions.current
+msgid "settings.sessions.current"
+msgstr "Session actuelle"
+
+#: settings.sessions.lastUsed
+msgid "settings.sessions.lastUsed"
+msgstr "Dernière utilisation"
+
+#: settings.sessions.createdAt
+msgid "settings.sessions.createdAt"
+msgstr "Créée le"
+
+#: settings.sessions.revoke
+msgid "settings.sessions.revoke"
+msgstr "Révoquer"
+
+#: settings.sessions.revokeConfirm
+msgid "settings.sessions.revokeConfirm"
+msgstr "Êtes-vous sûr de vouloir révoquer cette session ?"
+
+#: settings.sessions.noSessions
+msgid "settings.sessions.noSessions"
+msgstr "Aucune session active"
+
+#: settings.sessions.web
+msgid "settings.sessions.web"
+msgstr "Web"
+
+#: settings.sessions.cli
+msgid "settings.sessions.cli"
+msgstr "CLI"
+
+#: settings.sessions.vscode
+msgid "settings.sessions.vscode"
+msgstr "VS Code"
+
+#: settings.nav.sessions
+msgid "settings.nav.sessions"
+msgstr "Sessions"
+
+#: settings.nav.profile
+msgid "settings.nav.profile"
+msgstr "Profil"
+
+#: settings.nav.orgs
+msgid "settings.nav.orgs"
+msgstr "Organisations"
+
+#: settings.profile.title
+msgid "settings.profile.title"
+msgstr "Paramètres du profil"
+
+#: settings.profile.displayName
+msgid "settings.profile.displayName"
+msgstr "Nom d'affichage"
+
+#: settings.profile.email
+msgid "settings.profile.email"
+msgstr "E-mail"
+
+#: settings.profile.emailHint
+msgid "settings.profile.emailHint"
+msgstr "L'e-mail ne peut pas être modifié ici"
+
+#: settings.profile.username
+msgid "settings.profile.username"
+msgstr "Nom d'utilisateur"
+
+#: settings.profile.usernamePlaceholder
+msgid "settings.profile.usernamePlaceholder"
+msgstr "Entrez le nom d'utilisateur"
+
+#: settings.profile.usernameHint
+msgid "settings.profile.usernameHint"
+msgstr "Votre nom d'utilisateur est utilisé pour les URLs des dépôts git"
+
+#: settings.profile.usernameInvalid
+msgid "settings.profile.usernameInvalid"
+msgstr "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres et des underscores"
+
+#: settings.profile.usernameTaken
+msgid "settings.profile.usernameTaken"
+msgstr "Ce nom d'utilisateur est déjà pris"
+
+#: settings.profile.usernameTooShort
+msgid "settings.profile.usernameTooShort"
+msgstr "Le nom d'utilisateur doit comporter au moins 3 caractères"
+
+#: settings.profile.usernameTooLong
+msgid "settings.profile.usernameTooLong"
+msgstr "Le nom d'utilisateur doit comporter au maximum 39 caractères"
+
+#: settings.profile.locale
+msgid "settings.profile.locale"
+msgstr "Langue"
+
+#: settings.profile.save
+msgid "settings.profile.save"
+msgstr "Enregistrer les modifications"
+
+#: settings.profile.saving
+msgid "settings.profile.saving"
+msgstr "Enregistrement..."
+
+#: settings.profile.saved
+msgid "settings.profile.saved"
+msgstr "Profil mis à jour avec succès"
+
+#: settings.profile.error
+msgid "settings.profile.error"
+msgstr "Échec de la mise à jour du profil"
+
+#: orgs.title
+msgid "orgs.title"
+msgstr "Organisations"
+
+#: orgs.description
+msgid "orgs.description"
+msgstr "Gérez vos organisations et équipes"
+
+#: orgs.create
+msgid "orgs.create"
+msgstr "Créer une organisation"
+
+#: orgs.createTitle
+msgid "orgs.createTitle"
+msgstr "Créer une nouvelle organisation"
+
+#: orgs.name
+msgid "orgs.name"
+msgstr "Nom de l'organisation"
+
+#: orgs.slug
+msgid "orgs.slug"
+msgstr "Identifiant URL"
+
+#: orgs.slugHint
+msgid "orgs.slugHint"
+msgstr "Utilisé dans les URL, lettres minuscules et tirets uniquement"
+
+#: orgs.visibility
+msgid "orgs.visibility"
+msgstr "Visibilité"
+
+#: orgs.visibilityPublic
+msgid "orgs.visibilityPublic"
+msgstr "Publique"
+
+#: orgs.visibilityPrivate
+msgid "orgs.visibilityPrivate"
+msgstr "Privée"
+
+#: orgs.joinPolicy
+msgid "orgs.joinPolicy"
+msgstr "Politique d'adhésion"
+
+#: orgs.joinPolicyOpen
+msgid "orgs.joinPolicyOpen"
+msgstr "Ouverte"
+
+#: orgs.joinPolicyRequest
+msgid "orgs.joinPolicyRequest"
+msgstr "Demande d'adhésion"
+
+#: orgs.joinPolicyInvite
+msgid "orgs.joinPolicyInvite"
+msgstr "Sur invitation uniquement"
+
+#: orgs.members
+msgid "orgs.members"
+msgstr "Membres"
+
+#: orgs.teams
+msgid "orgs.teams"
+msgstr "Équipes"
+
+#: orgs.apiKeys
+msgid "orgs.apiKeys"
+msgstr "Clés API"
+
+#: orgs.settings
+msgid "orgs.settings"
+msgstr "Paramètres"
+
+#: orgs.noOrgs
+msgid "orgs.noOrgs"
+msgstr "Aucune organisation pour le moment"
+
+#: orgs.delete
+msgid "orgs.delete"
+msgstr "Supprimer l'organisation"
+
+#: orgs.deleteConfirm
+msgid "orgs.deleteConfirm"
+msgstr "Êtes-vous sûr de vouloir supprimer cette organisation ?"
+
+#: settings.orgs.title
+msgid "settings.orgs.title"
+msgstr "Organisations"
+
+#: settings.orgs.description
+msgid "settings.orgs.description"
+msgstr "Gérez vos organisations et vos adhésions d'équipe"
+
+#: settings.orgs.create
+msgid "settings.orgs.create"
+msgstr "Créer une organisation"
+
+#: settings.orgs.noOrgs
+msgid "settings.orgs.noOrgs"
+msgstr "Aucune organisation pour le moment"
+
+#: settings.orgs.loadError
+msgid "settings.orgs.loadError"
+msgstr "Échec du chargement des organisations"
+
+#: settings.orgs.personal
+msgid "settings.orgs.personal"
+msgstr "Personnel"
+
+#: settings.orgs.slug
+msgid "settings.orgs.slug"
+msgstr "Identifiant"
+
+#: settings.orgs.member
+msgid "settings.orgs.member"
+msgstr "membre"
+
+#: settings.orgs.members
+msgid "settings.orgs.members"
+msgstr "membres"
+
+#: settings.orgs.visibility.public
+msgid "settings.orgs.visibility.public"
+msgstr "Publique"
+
+#: settings.orgs.visibility.unlisted
+msgid "settings.orgs.visibility.unlisted"
+msgstr "Non répertoriée"
+
+#: settings.orgs.visibility.private
+msgid "settings.orgs.visibility.private"
+msgstr "Privée"
+
+#: settings.orgs.new.title
+msgid "settings.orgs.new.title"
+msgstr "Créer une organisation"
+
+#: settings.orgs.new.name
+msgid "settings.orgs.new.name"
+msgstr "Nom de l'organisation"
+
+#: settings.orgs.new.namePlaceholder
+msgid "settings.orgs.new.namePlaceholder"
+msgstr "Mon organisation"
+
+#: settings.orgs.new.slug
+msgid "settings.orgs.new.slug"
+msgstr "Identifiant"
+
+#: settings.orgs.new.slugPlaceholder
+msgid "settings.orgs.new.slugPlaceholder"
+msgstr "mon-organisation"
+
+#: settings.orgs.new.slugHint
+msgid "settings.orgs.new.slugHint"
+msgstr "Identifiant compatible URL (lettres minuscules, chiffres et tirets)"
+
+#: settings.orgs.new.visibility
+msgid "settings.orgs.new.visibility"
+msgstr "Visibilité"
+
+#: settings.orgs.new.create
+msgid "settings.orgs.new.create"
+msgstr "Créer l'organisation"
+
+#: settings.orgs.new.creating
+msgid "settings.orgs.new.creating"
+msgstr "Création..."
+
+#: settings.orgs.new.error
+msgid "settings.orgs.new.error"
+msgstr "Échec de la création de l'organisation"
+
+#: settings.orgs.new.requiredFields
+msgid "settings.orgs.new.requiredFields"
+msgstr "Le nom et l'identifiant sont requis"
+
+#: members.title
+msgid "members.title"
+msgstr "Membres"
+
+#: members.add
+msgid "members.add"
+msgstr "Ajouter un membre"
+
+#: members.remove
+msgid "members.remove"
+msgstr "Supprimer"
+
+#: members.removeConfirm
+msgid "members.removeConfirm"
+msgstr "Êtes-vous sûr de vouloir supprimer ce membre ?"
+
+#: members.role
+msgid "members.role"
+msgstr "Rôle"
+
+#: members.roleOwner
+msgid "members.roleOwner"
+msgstr "Propriétaire"
+
+#: members.roleAdmin
+msgid "members.roleAdmin"
+msgstr "Administrateur"
+
+#: members.roleMember
+msgid "members.roleMember"
+msgstr "Membre"
+
+#: members.changeRole
+msgid "members.changeRole"
+msgstr "Changer le rôle"
+
+#: members.noMembers
+msgid "members.noMembers"
+msgstr "Aucun membre pour le moment"
+
+#: teams.title
+msgid "teams.title"
+msgstr "Équipes"
+
+#: teams.create
+msgid "teams.create"
+msgstr "Créer une équipe"
+
+#: teams.createTitle
+msgid "teams.createTitle"
+msgstr "Créer une nouvelle équipe"
+
+#: teams.name
+msgid "teams.name"
+msgstr "Nom de l'équipe"
+
+#: teams.slug
+msgid "teams.slug"
+msgstr "Identifiant URL"
+
+#: teams.members
+msgid "teams.members"
+msgstr "Membres de l'équipe"
+
+#: teams.addMember
+msgid "teams.addMember"
+msgstr "Ajouter un membre"
+
+#: teams.removeMember
+msgid "teams.removeMember"
+msgstr "Supprimer"
+
+#: teams.removeMemberConfirm
+msgid "teams.removeMemberConfirm"
+msgstr "Êtes-vous sûr de vouloir supprimer ce membre de l'équipe ?"
+
+#: teams.noTeams
+msgid "teams.noTeams"
+msgstr "Aucune équipe pour le moment"
+
+#: teams.noMembers
+msgid "teams.noMembers"
+msgstr "Aucun membre dans cette équipe"
+
+#: teams.delete
+msgid "teams.delete"
+msgstr "Supprimer l'équipe"
+
+#: teams.deleteConfirm
+msgid "teams.deleteConfirm"
+msgstr "Êtes-vous sûr de vouloir supprimer cette équipe ?"
+
+#: teams.roleMaintainer
+msgid "teams.roleMaintainer"
+msgstr "Mainteneur"
+
+#: teams.roleMember
+msgid "teams.roleMember"
+msgstr "Membre"
+
+#: teams.role.maintainer
+msgid "teams.role.maintainer"
+msgstr "Mainteneur"
+
+#: teams.role.member
+msgid "teams.role.member"
+msgstr "Membre"
+
+#: teams.backToOrg
+msgid "teams.backToOrg"
+msgstr "Retour à l'organisation"
+
+#: teams.changeRole
+msgid "teams.changeRole"
+msgstr "Changer le rôle"
+
+#: teams.settings
+msgid "teams.settings"
+msgstr "Paramètres de l'équipe"
+
+#: teams.teamName
+msgid "teams.teamName"
+msgstr "Nom de l'équipe"
+
+#: teams.save
+msgid "teams.save"
+msgstr "Enregistrer les modifications"
+
+#: teams.saving
+msgid "teams.saving"
+msgstr "Enregistrement..."
+
+#: teams.saved
+msgid "teams.saved"
+msgstr "Équipe mise à jour avec succès"
+
+#: teams.deleteTeam
+msgid "teams.deleteTeam"
+msgstr "Supprimer l'équipe"
+
+#: teams.deleteTeamConfirm
+msgid "teams.deleteTeamConfirm"
+msgstr "Êtes-vous sûr de vouloir supprimer cette équipe ? Cette action est irréversible."
+
+#: teams.deleteTeamWarning
+msgid "teams.deleteTeamWarning"
+msgstr "Cela supprimera définitivement l'équipe et retirera tous les membres."
+
+#: teams.deleting
+msgid "teams.deleting"
+msgstr "Suppression..."
+
+#: teams.selectMember
+msgid "teams.selectMember"
+msgstr "Sélectionnez un membre à ajouter"
+
+#: teams.selectRole
+msgid "teams.selectRole"
+msgstr "Sélectionnez un rôle"
+
+#: teams.adding
+msgid "teams.adding"
+msgstr "Ajout..."
+
+#: teams.add
+msgid "teams.add"
+msgstr "Ajouter"
+
+#: teams.noAvailableMembers
+msgid "teams.noAvailableMembers"
+msgstr "Aucun membre de l'organisation disponible à ajouter"
+
+#: apiKeys.title
+msgid "apiKeys.title"
+msgstr "Clés API"
+
+#: apiKeys.description
+msgid "apiKeys.description"
+msgstr "Gérez les clés API pour l'accès programmatique"
+
+#: apiKeys.create
+msgid "apiKeys.create"
+msgstr "Créer une clé API"
+
+#: apiKeys.createTitle
+msgid "apiKeys.createTitle"
+msgstr "Créer une nouvelle clé API"
+
+#: apiKeys.name
+msgid "apiKeys.name"
+msgstr "Nom de la clé"
+
+#: apiKeys.nameHint
+msgid "apiKeys.nameHint"
+msgstr "Un nom descriptif pour cette clé"
+
+#: apiKeys.scopes
+msgid "apiKeys.scopes"
+msgstr "Portées"
+
+#: apiKeys.scopesHint
+msgid "apiKeys.scopesHint"
+msgstr "Sélectionnez les permissions pour cette clé"
+
+#: apiKeys.scopeThreadsRead
+msgid "apiKeys.scopeThreadsRead"
+msgstr "Lire les fils"
+
+#: apiKeys.scopeThreadsWrite
+msgid "apiKeys.scopeThreadsWrite"
+msgstr "Écrire les fils"
+
+#: apiKeys.scopeLlmUse
+msgid "apiKeys.scopeLlmUse"
+msgstr "Utiliser le LLM"
+
+#: apiKeys.prefix
+msgid "apiKeys.prefix"
+msgstr "Préfixe de la clé"
+
+#: apiKeys.createdAt
+msgid "apiKeys.createdAt"
+msgstr "Créée le"
+
+#: apiKeys.lastUsed
+msgid "apiKeys.lastUsed"
+msgstr "Dernière utilisation"
+
+#: apiKeys.never
+msgid "apiKeys.never"
+msgstr "Jamais"
+
+#: apiKeys.revoke
+msgid "apiKeys.revoke"
+msgstr "Révoquer"
+
+#: apiKeys.revokeConfirm
+msgid "apiKeys.revokeConfirm"
+msgstr "Êtes-vous sûr de vouloir révoquer cette clé API ?"
+
+#: apiKeys.noKeys
+msgid "apiKeys.noKeys"
+msgstr "Aucune clé API pour le moment"
+
+#: apiKeys.copyWarning
+msgid "apiKeys.copyWarning"
+msgstr "Copiez cette clé maintenant. Vous ne pourrez plus la voir ensuite."
+
+#: apiKeys.copied
+msgid "apiKeys.copied"
+msgstr "Copié dans le presse-papiers"
+
+#: general.search
+msgid "general.search"
+msgstr "Rechercher"
+
+#: general.previous
+msgid "general.previous"
+msgstr "Précédent"
+
+#: general.next
+msgid "general.next"
+msgstr "Suivant"
+
+#: general.done
+msgid "general.done"
+msgstr "Terminé"
+
+#: general.refresh
+msgid "general.refresh"
+msgstr "Actualiser"
+
+#: admin.users.title
+msgid "admin.users.title"
+msgstr "Gestion des utilisateurs"
+
+#: admin.users.description
+msgid "admin.users.description"
+msgstr "Voir et gérer les utilisateurs de la plateforme"
+
+#: admin.users.searchPlaceholder
+msgid "admin.users.searchPlaceholder"
+msgstr "Rechercher par nom ou email..."
+
+#: admin.users.empty
+msgid "admin.users.empty"
+msgstr "Aucun utilisateur trouvé"
+
+#: admin.users.created
+msgid "admin.users.created"
+msgstr "Créé"
+
+#: admin.users.lastLogin
+msgid "admin.users.lastLogin"
+msgstr "Dernière connexion"
+
+#: admin.users.impersonate
+msgid "admin.users.impersonate"
+msgstr "Usurper"
+
+#: admin.users.updated
+msgid "admin.users.updated"
+msgstr "Mis à jour"
+
+#: admin.users.makeAdmin
+msgid "admin.users.makeAdmin"
+msgstr "Nommer administrateur"
+
+#: admin.users.removeAdmin
+msgid "admin.users.removeAdmin"
+msgstr "Retirer administrateur"
+
+#: admin.users.makeSupport
+msgid "admin.users.makeSupport"
+msgstr "Nommer support"
+
+#: admin.users.removeSupport
+msgid "admin.users.removeSupport"
+msgstr "Retirer support"
+
+#: admin.users.makeAuditor
+msgid "admin.users.makeAuditor"
+msgstr "Nommer auditeur"
+
+#: admin.users.removeAuditor
+msgid "admin.users.removeAuditor"
+msgstr "Retirer auditeur"
+
+#: admin.users.cancel
+msgid "admin.users.cancel"
+msgstr "Annuler"
+
+#: admin.users.confirm
+msgid "admin.users.confirm"
+msgstr "Supprimer"
+
+#: admin.users.delete
+msgid "admin.users.delete"
+msgstr "Supprimer"
+
+#: admin.users.deleteConfirmMessage
+msgid "admin.users.deleteConfirmMessage"
+msgstr "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action ne peut pas être annulée."
+
+#: admin.users.deleteConfirmTitle
+msgid "admin.users.deleteConfirmTitle"
+msgstr "Supprimer l'utilisateur"
+
+#: admin.users.impersonateConfirmMessage
+msgid "admin.users.impersonateConfirmMessage"
+msgstr "Vous êtes sur le point d'usurper l'identité de cet utilisateur. Toutes les actions seront enregistrées à des fins d'audit."
+
+#: admin.users.impersonateConfirmTitle
+msgid "admin.users.impersonateConfirmTitle"
+msgstr "Usurper l'identité de l'utilisateur"
+
+#: admin.users.impersonateReasonLabel
+msgid "admin.users.impersonateReasonLabel"
+msgstr "Raison de l'usurpation"
+
+#: admin.users.impersonateReasonPlaceholder
+msgid "admin.users.impersonateReasonPlaceholder"
+msgstr "ex., Enquête sur le ticket de support #1234"
+
+#: admin.logs.title
+msgid "admin.logs.title"
+msgstr "Journaux du Serveur"
+
+#: admin.logs.description
+msgid "admin.logs.description"
+msgstr "Afficher et diffuser les journaux du serveur en temps réel"
+
+#: admin.logs.buffer_status
+msgid "admin.logs.buffer_status"
+msgstr "{size} / {capacity} entrées dans le tampon"
+
+#: admin.logs.start_stream
+msgid "admin.logs.start_stream"
+msgstr "Démarrer la Diffusion"
+
+#: admin.logs.stop_stream
+msgid "admin.logs.stop_stream"
+msgstr "Arrêter la Diffusion"
+
+#: admin.logs.clear
+msgid "admin.logs.clear"
+msgstr "Effacer"
+
+#: admin.logs.level
+msgid "admin.logs.level"
+msgstr "Niveau"
+
+#: admin.logs.target
+msgid "admin.logs.target"
+msgstr "Cible"
+
+#: admin.logs.auto_scroll
+msgid "admin.logs.auto_scroll"
+msgstr "Défilement automatique"
+
+#: admin.logs.no_logs
+msgid "admin.logs.no_logs"
+msgstr "Aucune entrée de journal"
+
+#: admin.logs.no_matches
+msgid "admin.logs.no_matches"
+msgstr "Aucun journal ne correspond aux filtres actuels"
+
+#: admin.logs.streaming
+msgid "admin.logs.streaming"
+msgstr "En direct"
+
+#: admin.logs.stream_error
+msgid "admin.logs.stream_error"
+msgstr "Flux de journaux déconnecté"
+
+#: admin.logs.search_placeholder
+msgid "admin.logs.search_placeholder"
+msgstr "Rechercher dans les journaux..."
+
+#: admin.logs.show_all
+msgid "admin.logs.show_all"
+msgstr "Tous les niveaux"
+
+#: admin.logs.errors_only
+msgid "admin.logs.errors_only"
+msgstr "Erreurs uniquement"
+
+#: admin.logs.showing_count
+msgid "admin.logs.showing_count"
+msgstr "Affichage de {shown} sur {total} journaux"
+
+#: admin.dashboard.view_all_logs
+msgid "admin.dashboard.view_all_logs"
+msgstr "Voir tous les journaux →"
+#: admin.users.you
+msgid "admin.users.you"
+msgstr "(vous)"
+
+#: admin.users.makeAdmin
+msgid "admin.users.makeAdmin"
+msgstr "Rendre administrateur"
+
+#: admin.users.removeAdmin
+msgid "admin.users.removeAdmin"
+msgstr "Retirer administrateur"
+
+#: admin.impersonation.banner
+msgid "admin.impersonation.banner"
+msgstr "Admin {admin} usurpe {user}"
+
+#: admin.impersonation.stop
+msgid "admin.impersonation.stop"
+msgstr "Arrêter l'usurpation"
+
+#: nav.weavers
+msgid "nav.weavers"
+msgstr "Weavers"
+
+#: weavers.title
+msgid "weavers.title"
+msgstr "Weavers"
+
+#: weavers.subtitle
+msgid "weavers.subtitle"
+msgstr "Gérer les environnements de développement éphémères"
+
+#: weavers.new
+msgid "weavers.new"
+msgstr "Nouveau Weaver"
+
+#: weavers.description
+msgid "weavers.description"
+msgstr "Gérer les environnements de développement éphémères"
+
+#: weavers.create
+msgid "weavers.create"
+msgstr "Créer un Weaver"
+
+#: weavers.createFirst
+msgid "weavers.createFirst"
+msgstr "Créez votre premier weaver"
+
+#: weavers.createTitle
+msgid "weavers.createTitle"
+msgstr "Créer un nouveau Weaver"
+
+#: weavers.empty
+msgid "weavers.empty"
+msgstr "Aucun weaver en cours"
+
+#: weavers.delete
+msgid "weavers.delete"
+msgstr "Supprimer"
+
+#: weavers.deleteConfirm
+msgid "weavers.deleteConfirm"
+msgstr "Êtes-vous sûr de vouloir supprimer ce weaver ?"
+
+#: weavers.image
+msgid "weavers.image"
+msgstr "Image"
+
+#: weavers.imageName
+msgid "weavers.imageName"
+msgstr "Image du conteneur"
+
+#: weavers.organization
+msgid "weavers.organization"
+msgstr "Organisation"
+
+#: weavers.created
+msgid "weavers.created"
+msgstr "Créé"
+
+#: weavers.age
+msgid "weavers.age"
+msgstr "Âge"
+
+#: weavers.lifetime
+msgid "weavers.lifetime"
+msgstr "Durée de vie"
+
+#: weavers.lifetimeLabel
+msgid "weavers.lifetimeLabel"
+msgstr "Durée de vie (TTL)"
+
+#: weavers.workdir
+msgid "weavers.workdir"
+msgstr "Répertoire de travail"
+
+#: weavers.hour
+msgid "weavers.hour"
+msgstr "heure"
+
+#: weavers.hours
+msgid "weavers.hours"
+msgstr "heures"
+
+#: weavers.attach
+msgid "weavers.attach"
+msgstr "Attacher"
+
+#: weavers.backToList
+msgid "weavers.backToList"
+msgstr "Retour aux Weavers"
+
+#: weavers.notFound
+msgid "weavers.notFound"
+msgstr "Weaver non trouvé"
+
+#: weavers.logs
+msgid "weavers.logs"
+msgstr "Logs"
+
+#: weavers.logsTitle
+msgid "weavers.logsTitle"
+msgstr "Logs du Weaver"
+
+#: weavers.logsConnecting
+msgid "weavers.logsConnecting"
+msgstr "Connexion au flux de logs..."
+
+#: weavers.logsNoData
+msgid "weavers.logsNoData"
+msgstr "Aucun log disponible"
+
+#: weavers.logsError
+msgid "weavers.logsError"
+msgstr "Échec de connexion au flux de logs"
+
+#: weavers.logsClosed
+msgid "weavers.logsClosed"
+msgstr "Flux de logs fermé"
+
+#: weavers.creatingTitle
+msgid "weavers.creatingTitle"
+msgstr "Création du Weaver"
+
+#: weavers.creatingProgress
+msgid "weavers.creatingProgress"
+msgstr "Provisionnement de votre environnement weaver..."
+
+#: weavers.creatingWait
+msgid "weavers.creatingWait"
+msgstr "En attente que le weaver soit prêt. Vous serez redirigé automatiquement."
+
+#: weavers.createFailed
+msgid "weavers.createFailed"
+msgstr "Échec de la création du weaver"
+
+#: weavers.createTimeout
+msgid "weavers.createTimeout"
+msgstr "Délai de création du weaver dépassé"
+
+#: weavers.terminal.connected
+msgid "weavers.terminal.connected"
+msgstr "Connecté"
+
+#: weavers.terminal.connecting
+msgid "weavers.terminal.connecting"
+msgstr "Connexion..."
+
+#: weavers.terminal.disconnected
+msgid "weavers.terminal.disconnected"
+msgstr "Déconnecté"
+
+#: weavers.terminal.error
+msgid "weavers.terminal.error"
+msgstr "Erreur de connexion"
+
+#: weavers.terminal.reconnect
+msgid "weavers.terminal.reconnect"
+msgstr "Reconnecter"
+
+#: weavers.terminal.pending
+msgid "weavers.terminal.pending"
+msgstr "Le weaver démarre..."
+
+#: weavers.terminal.pendingHint
+msgid "weavers.terminal.pendingHint"
+msgstr "Le terminal sera disponible quand le weaver sera en cours"
+
+#: weavers.terminal.notRunning
+msgid "weavers.terminal.notRunning"
+msgstr "Le weaver ne fonctionne pas (statut: {status})"
+
+#: jobs.title
+msgid "jobs.title"
+msgstr "Tâches en arrière-plan"
+
+#: jobs.description
+msgid "jobs.description"
+msgstr "Surveiller et gérer les tâches planifiées en arrière-plan"
+
+#: jobs.loading
+msgid "jobs.loading"
+msgstr "Chargement des tâches..."
+
+#: jobs.runNow
+msgid "jobs.runNow"
+msgstr "Exécuter maintenant"
+
+#: jobs.running
+msgid "jobs.running"
+msgstr "En cours..."
+
+#: jobs.history
+msgid "jobs.history"
+msgstr "Historique"
+
+#: jobs.hideHistory
+msgid "jobs.hideHistory"
+msgstr "Masquer l'historique"
+
+#: jobs.viewHistory
+msgid "jobs.viewHistory"
+msgstr "Voir l'historique"
+
+#: jobs.noJobs
+msgid "jobs.noJobs"
+msgstr "Aucune tâche en arrière-plan configurée"
+
+#: jobs.never
+msgid "jobs.never"
+msgstr "Jamais exécuté"
+
+#: jobs.lastRun
+msgid "jobs.lastRun"
+msgstr "Dernière exécution"
+
+#: jobs.duration
+msgid "jobs.duration"
+msgstr "Durée"
+
+#: jobs.interval
+msgid "jobs.interval"
+msgstr "Intervalle"
+
+#: jobs.type
+msgid "jobs.type"
+msgstr "Type"
+
+#: jobs.failures
+msgid "jobs.failures"
+msgstr "{count} échecs consécutifs"
+
+#: jobs.status.healthy
+msgid "jobs.status.healthy"
+msgstr "Sain"
+
+#: jobs.status.degraded
+msgid "jobs.status.degraded"
+msgstr "Dégradé"
+
+#: jobs.status.unhealthy
+msgid "jobs.status.unhealthy"
+msgstr "Non sain"
+
+#: jobs.status.succeeded
+msgid "jobs.status.succeeded"
+msgstr "Réussi"
+
+#: jobs.status.failed
+msgid "jobs.status.failed"
+msgstr "Échoué"
+
+#: jobs.status.running
+msgid "jobs.status.running"
+msgstr "En cours"
+
+#: jobs.status.cancelled
+msgid "jobs.status.cancelled"
+msgstr "Annulé"
+
+#: jobs.trigger.schedule
+msgid "jobs.trigger.schedule"
+msgstr "Planifié"
+
+#: jobs.trigger.manual
+msgid "jobs.trigger.manual"
+msgstr "Manuel"
+
+#: jobs.trigger.retry
+msgid "jobs.trigger.retry"
+msgstr "Nouvelle tentative"
+
+#: jobs.history.title
+msgid "jobs.history.title"
+msgstr "Historique des exécutions"
+
+#: jobs.history.status
+msgid "jobs.history.status"
+msgstr "Statut"
+
+#: jobs.history.started
+msgid "jobs.history.started"
+msgstr "Démarré"
+
+#: jobs.history.duration
+msgid "jobs.history.duration"
+msgstr "Durée"
+
+#: jobs.history.trigger
+msgid "jobs.history.trigger"
+msgstr "Déclencheur"
+
+#: jobs.history.details
+msgid "jobs.history.details"
+msgstr "Détails"
+
+#: jobs.history.loadMore
+msgid "jobs.history.loadMore"
+msgstr "Charger plus"
+
+#: jobs.history.noRuns
+msgid "jobs.history.noRuns"
+msgstr "Aucun historique d'exécution disponible"
+
+#: jobs.time.justNow
+msgid "jobs.time.justNow"
+msgstr "à l'instant"
+
+#: jobs.time.minutesAgo
+msgid "jobs.time.minutesAgo"
+msgstr "il y a {count} min"
+
+#: jobs.time.hoursAgo
+msgid "jobs.time.hoursAgo"
+msgstr "il y a {count} heures"
+
+#: jobs.time.daysAgo
+msgid "jobs.time.daysAgo"
+msgstr "il y a {count} jours"
+
+#: client.repos.list.title
+msgid "client.repos.list.title"
+msgstr "Dépôts"
+
+#: client.repos.list.new
+msgid "client.repos.list.new"
+msgstr "Nouveau dépôt"
+
+#: client.repos.list.search_placeholder
+msgid "client.repos.list.search_placeholder"
+msgstr "Rechercher des dépôts..."
+
+#: client.repos.list.try_again
+msgid "client.repos.list.try_again"
+msgstr "Réessayer"
+
+#: client.repos.list.no_match
+msgid "client.repos.list.no_match"
+msgstr "Aucun dépôt ne correspond à votre recherche"
+
+#: client.repos.list.empty
+msgid "client.repos.list.empty"
+msgstr "Aucun dépôt pour le moment"
+
+#: client.repos.list.create_first
+msgid "client.repos.list.create_first"
+msgstr "Créez votre premier dépôt"
+
+#: client.repos.list.default_branch
+msgid "client.repos.list.default_branch"
+msgstr "Branche par défaut :"
+
+#: client.repos.list.updated
+msgid "client.repos.list.updated"
+msgstr "Mis à jour"
+
+#: client.repos.create.title
+msgid "client.repos.create.title"
+msgstr "Créer un dépôt"
+
+#: client.repos.create.name
+msgid "client.repos.create.name"
+msgstr "Nom du dépôt"
+
+#: client.repos.create.name_placeholder
+msgid "client.repos.create.name_placeholder"
+msgstr "mon-super-projet"
+
+#: client.repos.create.visibility
+msgid "client.repos.create.visibility"
+msgstr "Visibilité"
+
+#: client.repos.create.private
+msgid "client.repos.create.private"
+msgstr "Privé"
+
+#: client.repos.create.public
+msgid "client.repos.create.public"
+msgstr "Public"
+
+#: client.repos.create.submit
+msgid "client.repos.create.submit"
+msgstr "Créer le dépôt"
+
+#: client.repos.create.cancel
+msgid "client.repos.create.cancel"
+msgstr "Annuler"
+
+#: client.repos.create.error
+msgid "client.repos.create.error"
+msgstr "Échec de la création du dépôt"
+
+#: client.repos.create.name_invalid
+msgid "client.repos.create.name_invalid"
+msgstr "Nom de dépôt invalide. Utilisez des lettres, chiffres, points, tirets ou underscores."
+
+#: client.repos.header.clone
+msgid "client.repos.header.clone"
+msgstr "Cloner"
+
+#: client.repos.header.clone_https
+msgid "client.repos.header.clone_https"
+msgstr "Cloner avec HTTPS"
+
+#: client.repos.header.copied
+msgid "client.repos.header.copied"
+msgstr "Copié !"
+
+#: client.repos.header.copy
+msgid "client.repos.header.copy"
+msgstr "Copier"
+
+#: client.repos.header.default_branch
+msgid "client.repos.header.default_branch"
+msgstr "Branche par défaut"
+
+#: client.repos.nav.code
+msgid "client.repos.nav.code"
+msgstr "Code"
+
+#: client.repos.nav.commits
+msgid "client.repos.nav.commits"
+msgstr "Commits"
+
+#: client.repos.nav.branches
+msgid "client.repos.nav.branches"
+msgstr "Branches"
+
+#: client.repos.nav.settings
+msgid "client.repos.nav.settings"
+msgstr "Paramètres"
+
+#: client.repos.tree.empty
+msgid "client.repos.tree.empty"
+msgstr "Ce répertoire est vide"
+
+#: client.repos.blob.lines
+msgid "client.repos.blob.lines"
+msgstr "lignes"
+
+#: client.repos.blob.bytes
+msgid "client.repos.blob.bytes"
+msgstr "octets"
+
+#: client.repos.blob.blame
+msgid "client.repos.blob.blame"
+msgstr "Blame"
+
+#: client.repos.blob.copy
+msgid "client.repos.blob.copy"
+msgstr "Copier"
+
+#: client.repos.blob.copied
+msgid "client.repos.blob.copied"
+msgstr "Copié !"
+
+#: client.repos.blob.raw
+msgid "client.repos.blob.raw"
+msgstr "Raw"
+
+#: client.repos.blob.binary_not_shown
+msgid "client.repos.blob.binary_not_shown"
+msgstr "Fichier binaire non affiché"
+
+#: client.repos.weaver.open
+msgid "client.repos.weaver.open"
+msgstr "Ouvrir dans Weaver"
+
+#: client.repos.weaver.create_failed
+msgid "client.repos.weaver.create_failed"
+msgstr "Échec de la création du weaver"
+
+#: client.repos.weaver.no_org
+msgid "client.repos.weaver.no_org"
+msgstr "Aucune organisation sélectionnée"
+
+#: client.repos.branch.find
+msgid "client.repos.branch.find"
+msgstr "Rechercher une branche..."
+
+#: client.repos.branch.not_found
+msgid "client.repos.branch.not_found"
+msgstr "Aucune branche trouvée"
+
+#: client.repos.branch.default
+msgid "client.repos.branch.default"
+msgstr "par défaut"
+
+#: client.repos.branches.title
+msgid "client.repos.branches.title"
+msgstr "Branches"
+
+#: client.repos.branches.default
+msgid "client.repos.branches.default"
+msgstr "Par défaut"
+
+#: client.repos.branches.empty
+msgid "client.repos.branches.empty"
+msgstr "Aucune branche trouvée"
+
+#: client.repos.branches.compare
+msgid "client.repos.branches.compare"
+msgstr "Comparer"
+
+#: client.repos.commits.minutes_ago
+msgid "client.repos.commits.minutes_ago"
+msgstr "il y a {count} minutes"
+
+#: client.repos.commits.hours_ago
+msgid "client.repos.commits.hours_ago"
+msgstr "il y a {count} heures"
+
+#: client.repos.commits.days_ago
+msgid "client.repos.commits.days_ago"
+msgstr "il y a {count} jours"
+
+#: client.repos.commits.committed
+msgid "client.repos.commits.committed"
+msgstr "commité"
+
+#: client.repos.commits.copy_sha
+msgid "client.repos.commits.copy_sha"
+msgstr "Copier SHA"
+
+#: client.repos.commits.empty
+msgid "client.repos.commits.empty"
+msgstr "Aucun commit trouvé"
+
+#: client.repos.diff.parent
+msgid "client.repos.diff.parent"
+msgstr "Parent"
+
+#: client.repos.diff.parents
+msgid "client.repos.diff.parents"
+msgstr "Parents"
+
+#: client.repos.diff.showing
+msgid "client.repos.diff.showing"
+msgstr "Affichage de"
+
+#: client.repos.diff.changed_file
+msgid "client.repos.diff.changed_file"
+msgstr "fichier modifié"
+
+#: client.repos.diff.changed_files
+msgid "client.repos.diff.changed_files"
+msgstr "fichiers modifiés"
+
+#: client.repos.blame.lines
+msgid "client.repos.blame.lines"
+msgstr "lignes"
+
+#: client.repos.blame.today
+msgid "client.repos.blame.today"
+msgstr "aujourd'hui"
+
+#: client.repos.blame.days_ago
+msgid "client.repos.blame.days_ago"
+msgstr "il y a {count}j"
+
+#: client.repos.blame.months_ago
+msgid "client.repos.blame.months_ago"
+msgstr "il y a {count}m"
+
+#: client.repos.blame.years_ago
+msgid "client.repos.blame.years_ago"
+msgstr "il y a {count}a"
+
+#: client.repos.blame.empty
+msgid "client.repos.blame.empty"
+msgstr "Aucune information de blame disponible"
+
+#: client.repos.compare.ahead
+msgid "client.repos.compare.ahead"
+msgstr "en avance"
+
+#: client.repos.compare.behind
+msgid "client.repos.compare.behind"
+msgstr "en retard"
+
+#: client.repos.compare.commit
+msgid "client.repos.compare.commit"
+msgstr "commit"
+
+#: client.repos.compare.commits
+msgid "client.repos.compare.commits"
+msgstr "commits"
+
+#: client.repos.compare.commits_heading
+msgid "client.repos.compare.commits_heading"
+msgstr "Commits"
+
+#: client.repos.compare.identical
+msgid "client.repos.compare.identical"
+msgstr "Ces branches sont identiques"
+
+#: client.repos.settings.general
+msgid "client.repos.settings.general"
+msgstr "Général"
+
+#: client.repos.settings.name
+msgid "client.repos.settings.name"
+msgstr "Nom du dépôt"
+
+#: client.repos.settings.visibility
+msgid "client.repos.settings.visibility"
+msgstr "Visibilité"
+
+#: client.repos.settings.private
+msgid "client.repos.settings.private"
+msgstr "Privé"
+
+#: client.repos.settings.public
+msgid "client.repos.settings.public"
+msgstr "Public"
+
+#: client.repos.settings.visibility_private_desc
+msgid "client.repos.settings.visibility_private_desc"
+msgstr "Seuls vous et les collaborateurs pouvez accéder à ce dépôt"
+
+#: client.repos.settings.visibility_public_desc
+msgid "client.repos.settings.visibility_public_desc"
+msgstr "Tout le monde peut cloner ce dépôt"
+
+#: client.repos.settings.default_branch
+msgid "client.repos.settings.default_branch"
+msgstr "Branche par défaut"
+
+#: client.repos.settings.clone_url
+msgid "client.repos.settings.clone_url"
+msgstr "URL de clonage"
+
+#: client.repos.settings.copy
+msgid "client.repos.settings.copy"
+msgstr "Copier"
+
+#: client.repos.settings.save
+msgid "client.repos.settings.save"
+msgstr "Enregistrer les modifications"
+
+#: client.repos.settings.cancel
+msgid "client.repos.settings.cancel"
+msgstr "Annuler"
+
+#: client.repos.settings.danger_zone
+msgid "client.repos.settings.danger_zone"
+msgstr "Zone de danger"
+
+#: client.repos.settings.delete_title
+msgid "client.repos.settings.delete_title"
+msgstr "Supprimer le dépôt"
+
+#: client.repos.settings.delete_warning
+msgid "client.repos.settings.delete_warning"
+msgstr "Cette action est irréversible. Cela supprimera définitivement le dépôt et tout son contenu."
+
+#: client.repos.settings.delete_button
+msgid "client.repos.settings.delete_button"
+msgstr "Supprimer ce dépôt"
+
+#: client.repos.settings.delete_confirm
+msgid "client.repos.settings.delete_confirm"
+msgstr "Tapez le nom du dépôt pour confirmer :"
+
+#: client.repos.settings.delete_confirm_button
+msgid "client.repos.settings.delete_confirm_button"
+msgstr "Je comprends, supprimer ce dépôt"
+
+
+#: client.repos.settings.delete_confirm_desc
+msgid "client.repos.settings.delete_confirm_desc"
+msgstr ""
+
+#: client.repos.settings.delete_type_name
+msgid "client.repos.settings.delete_type_name"
+msgstr ""
+
+#: client.repos.settings.delete_error
+msgid "client.repos.settings.delete_error"
+msgstr ""
+
+#: admin.anthropic.title
+msgid "admin.anthropic.title"
+msgstr "Comptes Claude Max"
+
+#: admin.anthropic.add_account
+msgid "admin.anthropic.add_account"
+msgstr "Ajouter un compte"
+
+#: admin.anthropic.remove
+msgid "admin.anthropic.remove"
+msgstr "Supprimer"
+
+#: admin.anthropic.remove_confirm
+msgid "admin.anthropic.remove_confirm"
+msgstr "Supprimer ce compte du pool ?"
+
+#: admin.anthropic.status.available
+msgid "admin.anthropic.status.available"
+msgstr "Disponible"
+
+#: admin.anthropic.status.cooling_down
+msgid "admin.anthropic.status.cooling_down"
+msgstr "En refroidissement"
+
+#: admin.anthropic.status.disabled
+msgid "admin.anthropic.status.disabled"
+msgstr "Désactivé"
+
+#: admin.anthropic.cooldown_remaining
+msgid "admin.anthropic.cooldown_remaining"
+msgstr "{time} restant"
+
+#: admin.anthropic.expires_at
+msgid "admin.anthropic.expires_at"
+msgstr "Le jeton expire : {time}"
+
+#: admin.anthropic.no_accounts
+msgid "admin.anthropic.no_accounts"
+msgstr "Aucun compte configuré. Ajoutez un compte Claude Max pour commencer."
+
+#: admin.anthropic.not_configured
+msgid "admin.anthropic.not_configured"
+msgstr "Le pool OAuth Anthropic n'est pas configuré sur ce serveur."
+
+#: admin.anthropic.account_added
+msgid "admin.anthropic.account_added"
+msgstr "Compte {id} ajouté avec succès"
+
+#: admin.anthropic.enter_code_title
+msgid "admin.anthropic.enter_code_title"
+msgstr "Entrer le code d'autorisation"
+
+#: admin.anthropic.enter_code_description
+msgid "admin.anthropic.enter_code_description"
+msgstr "Un nouvel onglet du navigateur s'est ouvert pour vous permettre de vous autoriser avec Claude. Après l'autorisation, copiez le code de la page Anthropic et collez-le ci-dessous."
+
+#: admin.anthropic.authorization_code
+msgid "admin.anthropic.authorization_code"
+msgstr "Code d'autorisation"
+
+#: admin.anthropic.code_placeholder
+msgid "admin.anthropic.code_placeholder"
+msgstr "Collez le code d'Anthropic ici"
+
+#: admin.anthropic.submit_code
+msgid "admin.anthropic.submit_code"
+msgstr "Ajouter un compte"
+
+#: admin.dashboard.title
+msgid "admin.dashboard.title"
+msgstr "Tableau de bord Admin"
+
+#: admin.dashboard.description
+msgid "admin.dashboard.description"
+msgstr "Administration et surveillance du serveur"
+
+#: admin.dashboard.sections
+msgid "admin.dashboard.sections"
+msgstr "Administration"
+
+#: admin.dashboard.anthropic_description
+msgid "admin.dashboard.anthropic_description"
+msgstr "Gérer le pool d'abonnements OAuth Claude Max"
+
+#: admin.health.title
+msgid "admin.health.title"
+msgstr "État du serveur"
+
+#: admin.health.overall
+msgid "admin.health.overall"
+msgstr "État général"
+
+#: admin.health.version
+msgid "admin.health.version"
+msgstr "Version"
+
+#: admin.health.response_time
+msgid "admin.health.response_time"
+msgstr "Temps de réponse"
+
+#: admin.health.configured
+msgid "admin.health.configured"
+msgstr "Configuré"
+
+#: admin.health.not_configured
+msgid "admin.health.not_configured"
+msgstr "Non configuré"
+
+#: admin.health.status.healthy
+msgid "admin.health.status.healthy"
+msgstr "Sain"
+
+#: admin.health.status.degraded
+msgid "admin.health.status.degraded"
+msgstr "Dégradé"
+
+#: admin.health.status.unhealthy
+msgid "admin.health.status.unhealthy"
+msgstr "Non sain"
+
+#: admin.health.status.unknown
+msgid "admin.health.status.unknown"
+msgstr "Inconnu"
+
+#: admin.health.database
+msgid "admin.health.database"
+msgstr "Base de données"
+
+#: admin.health.bin_dir
+msgid "admin.health.bin_dir"
+msgstr "Répertoire des binaires"
+
+#: admin.health.llm_providers
+msgid "admin.health.llm_providers"
+msgstr "Fournisseurs LLM"
+
+#: admin.health.google_cse
+msgid "admin.health.google_cse"
+msgstr "Google CSE"
+
+#: admin.health.serper
+msgid "admin.health.serper"
+msgstr "Serper"
+
+#: admin.health.github_app
+msgid "admin.health.github_app"
+msgstr "Application GitHub"
+
+#: admin.health.kubernetes
+msgid "admin.health.kubernetes"
+msgstr "Kubernetes"
+
+#: admin.health.smtp
+msgid "admin.health.smtp"
+msgstr "SMTP"
+
+#: admin.health.geoip
+msgid "admin.health.geoip"
+msgstr "GeoIP"
+
+#: admin.health.jobs
+msgid "admin.health.jobs"
+msgstr "Tâches en arrière-plan"
+
+#: admin.health.auth_providers
+msgid "admin.health.auth_providers"
+msgstr "Fournisseurs d'authentification"
+
+#: thread.noThreadsFound
+msgid "thread.noThreadsFound"
+msgstr "Aucun fil trouvé"
+
+#: thread.time.justNow
+msgid "thread.time.justNow"
+msgstr "À l'instant"
+
+#: thread.time.minutesAgo
+msgid "thread.time.minutesAgo"
+msgstr "Il y a {count}m"
+
+#: thread.time.hoursAgo
+msgid "thread.time.hoursAgo"
+msgstr "Il y a {count}h"
+
+#: thread.time.daysAgo
+msgid "thread.time.daysAgo"
+msgstr "Il y a {count}j"
+
+#: thread.messageCount
+msgid "thread.messageCount"
+msgstr "{count} messages"
+
+#: thread.selectToView
+msgid "thread.selectToView"
+msgstr "Sélectionnez un fil pour le consulter"
+
+#: thread.createToStart
+msgid "thread.createToStart"
+msgstr "Ou créez un nouveau fil pour commencer"
+
+#: error.goHome
+msgid "error.goHome"
+msgstr "Retour à l'accueil"
+
+#: support.access.requested
+msgid "support.access.requested"
+msgstr "Accès demandé"
+
+#: support.access.requestSent
+msgid "support.access.requestSent"
+msgstr "Votre demande a été envoyée au propriétaire du fil. Vous pourrez consulter ce fil une fois qu'il aura approuvé votre demande."
+
+#: support.access.requestId
+msgid "support.access.requestId"
+msgstr "ID de la demande :"
+
+#: support.access.required
+msgid "support.access.required"
+msgstr "Accès requis"
+
+#: support.access.notShared
+msgid "support.access.notShared"
+msgstr "Ce fil n'a pas été partagé avec le support. En tant que membre de l'équipe de support, vous pouvez demander l'accès au propriétaire du fil."
+
+#: support.access.requesting
+msgid "support.access.requesting"
+msgstr "Demande en cours..."
+
+#: support.access.requestButton
+msgid "support.access.requestButton"
+msgstr "Demander l'accès"
+
+#: support.access.note
+msgid "support.access.note"
+msgstr "Le propriétaire du fil recevra une notification et pourra approuver ou refuser votre demande. Si elle est approuvée, l'accès sera accordé pour 31 jours."
+
+#: support.access.errorAlreadyRequested
+msgid "support.access.errorAlreadyRequested"
+msgstr "L'accès a déjà été demandé pour ce fil. En attente de l'approbation du propriétaire."
+
+#: support.access.errorAlreadyActive
+msgid "support.access.errorAlreadyActive"
+msgstr "Vous avez déjà un accès actif à ce fil. Essayez de rafraîchir la page."
+
+#: support.access.errorFailed
+msgid "support.access.errorFailed"
+msgstr "Échec de la demande d'accès. Veuillez réessayer."
+
+#: support.access.errorUnexpected
+msgid "support.access.errorUnexpected"
+msgstr "Une erreur inattendue s'est produite."
+
+#: state.idle
+msgid "state.idle"
+msgstr "Inactif"
+
+#: state.weaving
+msgid "state.weaving"
+msgstr "Tissage"
+
+#: state.threading
+msgid "state.threading"
+msgstr "Enfilage"
+
+#: state.shuttlePass
+msgid "state.shuttlePass"
+msgstr "Passage de navette"
+
+#: state.brokenThread
+msgid "state.brokenThread"
+msgstr "Fil cassé (tentative {retries})"
+
+#: tool.showError
+msgid "tool.showError"
+msgstr "Afficher l'erreur"
+
+#: tool.showOutput
+msgid "tool.showOutput"
+msgstr "Afficher la sortie"
+
+#: docs.title
+msgid "docs.title"
+msgstr "Documentation Loom"
+
+#: docs.redirecting
+msgid "docs.redirecting"
+msgstr "Redirection vers les tutoriels..."
+
+#: docs.tutorials.title
+msgid "docs.tutorials.title"
+msgstr "Tutoriels"
+
+#: docs.tutorials.description
+msgid "docs.tutorials.description"
+msgstr "Leçons orientées apprentissage qui vous guident à travers une série d'étapes pour réaliser un projet."
+
+#: docs.tutorials.empty
+msgid "docs.tutorials.empty"
+msgstr "Aucun tutoriel disponible pour le moment."
+
+#: docs.explanation.title
+msgid "docs.explanation.title"
+msgstr "Explications"
+
+#: docs.explanation.description
+msgid "docs.explanation.description"
+msgstr "Discussions et informations de contexte qui expliquent les concepts, les décisions et la vision d'ensemble."
+
+#: docs.explanation.empty
+msgid "docs.explanation.empty"
+msgstr "Aucune explication disponible pour le moment."
+
+#: docs.reference.title
+msgid "docs.reference.title"
+msgstr "Référence"
+
+#: docs.reference.description
+msgid "docs.reference.description"
+msgstr "Documentation technique de référence avec des informations détaillées sur les API, la configuration et les composants internes."
+
+#: docs.reference.empty
+msgid "docs.reference.empty"
+msgstr "Aucune documentation de référence disponible pour le moment."
+
+#: docs.howTo.title
+msgid "docs.howTo.title"
+msgstr "Guides pratiques"
+
+#: docs.howTo.description
+msgid "docs.howTo.description"
+msgstr "Guides orientés tâches qui vous montrent comment atteindre des objectifs spécifiques."
+
+#: docs.howTo.empty
+msgid "docs.howTo.empty"
+msgstr "Aucun guide pratique disponible pour le moment."
+
+#: admin.auditLogs.title
+msgid "admin.auditLogs.title"
+msgstr "Journaux d'audit de sécurité"
+
+#: admin.auditLogs.loading
+msgid "admin.auditLogs.loading"
+msgstr "Chargement des journaux d'audit..."
+
+#: admin.auditLogs.empty
+msgid "admin.auditLogs.empty"
+msgstr "Aucun journal d'audit trouvé."
+
+#: admin.auditLogs.showing
+msgid "admin.auditLogs.showing"
+msgstr "Affichage de {start} - {end} sur {total}"
+
+#: admin.auditLogs.via
+msgid "admin.auditLogs.via"
+msgstr "via {userId}"
+
+#: admin.auditLogs.event.all
+msgid "admin.auditLogs.event.all"
+msgstr "Tous les événements"
+
+#: admin.auditLogs.event.login
+msgid "admin.auditLogs.event.login"
+msgstr "Connexion"
+
+#: admin.auditLogs.event.logout
+msgid "admin.auditLogs.event.logout"
+msgstr "Déconnexion"
+
+#: admin.auditLogs.event.loginFailed
+msgid "admin.auditLogs.event.loginFailed"
+msgstr "Échec de connexion"
+
+#: admin.auditLogs.event.accessDenied
+msgid "admin.auditLogs.event.accessDenied"
+msgstr "Accès refusé"
+
+#: admin.auditLogs.event.sessionRevoked
+msgid "admin.auditLogs.event.sessionRevoked"
+msgstr "Session révoquée"
+
+#: admin.auditLogs.event.apiKeyCreated
+msgid "admin.auditLogs.event.apiKeyCreated"
+msgstr "Clé API créée"
+
+#: admin.auditLogs.event.apiKeyRevoked
+msgid "admin.auditLogs.event.apiKeyRevoked"
+msgstr "Clé API révoquée"
+
+#: admin.auditLogs.event.orgCreated
+msgid "admin.auditLogs.event.orgCreated"
+msgstr "Organisation créée"
+
+#: admin.auditLogs.event.memberAdded
+msgid "admin.auditLogs.event.memberAdded"
+msgstr "Membre ajouté"
+
+#: admin.auditLogs.event.memberRemoved
+msgid "admin.auditLogs.event.memberRemoved"
+msgstr "Membre supprimé"
+
+#: admin.auditLogs.event.impersonationStarted
+msgid "admin.auditLogs.event.impersonationStarted"
+msgstr "Usurpation d'identité démarrée"
+
+#: admin.auditLogs.event.impersonationEnded
+msgid "admin.auditLogs.event.impersonationEnded"
+msgstr "Usurpation d'identité terminée"
+
+#: admin.auditLogs.column.timestamp
+msgid "admin.auditLogs.column.timestamp"
+msgstr "Horodatage"
+
+#: admin.auditLogs.column.event
+msgid "admin.auditLogs.column.event"
+msgstr "Événement"
+
+#: admin.auditLogs.column.actor
+msgid "admin.auditLogs.column.actor"
+msgstr "Acteur"
+
+#: admin.auditLogs.column.resource
+msgid "admin.auditLogs.column.resource"
+msgstr "Ressource"
+
+#: admin.auditLogs.column.details
+msgid "admin.auditLogs.column.details"
+msgstr "Détails"
+
+#: admin.anthropic.expired
+msgid "admin.anthropic.expired"
+msgstr "Expiré"
+
+#: admin.anthropic.expiresInMinutes
+msgid "admin.anthropic.expiresInMinutes"
+msgstr "dans {count} minutes"
+
+#: admin.anthropic.expiresInHours
+msgid "admin.anthropic.expiresInHours"
+msgstr "dans {count} heures"
+
+#: admin.anthropic.expiresInDays
+msgid "admin.anthropic.expiresInDays"
+msgstr "dans {count} jours"
+
+#: admin.anthropic.remaining
+msgid "admin.anthropic.remaining"
+msgstr "restant"
+
+#: admin.anthropic.tokenExpires
+msgid "admin.anthropic.tokenExpires"
+msgstr "Le jeton expire :"
+
+#: admin.anthropic.summary.available
+msgid "admin.anthropic.summary.available"
+msgstr "disponible"
+
+#: admin.anthropic.summary.cooling
+msgid "admin.anthropic.summary.cooling"
+msgstr "en refroidissement"
+
+#: admin.anthropic.summary.disabled
+msgid "admin.anthropic.summary.disabled"
+msgstr "désactivé"
+
+#: admin.anthropic.summary.total
+msgid "admin.anthropic.summary.total"
+msgstr "total"
+
+#: client.repos.blame.title
+msgid "client.repos.blame.title"
+msgstr "Blame :"
+
+#: client.repos.blame.viewFile
+msgid "client.repos.blame.viewFile"
+msgstr "Voir le fichier"
+
+#: client.repos.compare.title
+msgid "client.repos.compare.title"
+msgstr "Comparer"
+
+#: client.repos.compare.base
+msgid "client.repos.compare.base"
+msgstr "base :"
+
+#: client.repos.compare.compare
+msgid "client.repos.compare.compare"
+msgstr "comparer :"
+
+#: client.repos.commits.title
+msgid "client.repos.commits.title"
+msgstr "Commits"
+
+#: client.repos.commits.count
+msgid "client.repos.commits.count"
+msgstr "commits"
+
+#: client.repos.commits.newer
+msgid "client.repos.commits.newer"
+msgstr "Plus récent"
+
+#: client.repos.commits.older
+msgid "client.repos.commits.older"
+msgstr "Plus ancien"
+
+#: state.waiting
+msgid "state.waiting"
+msgstr "En attente"
+
+#: state.complete
+msgid "state.complete"
+msgstr "Terminé"
+
+#: tool.shuttleReady
+msgid "tool.shuttleReady"
+msgstr "Navette prête"
+
+#: tool.shuttlePasses
+msgid "tool.shuttlePasses"
+msgstr "Passes de navette"
+
+#: message.toolResult
+msgid "message.toolResult"
+msgstr "🔧 Résultat de l'outil"
+
+#: weavers.terminal.connectionClosed
+msgid "weavers.terminal.connectionClosed"
+msgstr "Connexion fermée :"
+
+#: weavers.terminal.unknownReason
+msgid "weavers.terminal.unknownReason"
+msgstr "Raison inconnue"
+
+#: weavers.terminal.connectFailed
+msgid "weavers.terminal.connectFailed"
+msgstr "Échec de connexion au weaver"
+
+#: docs.toc.title
+msgid "docs.toc.title"
+msgstr "Sur cette page"
+
+#: docs.breadcrumbs.docs
+msgid "docs.breadcrumbs.docs"
+msgstr "Docs"
+
+#: docs.search.placeholder
+msgid "docs.search.placeholder"
+msgstr "Rechercher dans la doc..."
+
+#: docs.search.placeholderFull
+msgid "docs.search.placeholderFull"
+msgstr "Rechercher dans la documentation..."
+
+#: docs.search.close
+msgid "docs.search.close"
+msgstr "Fermer la recherche"
+
+#: docs.search.category.tutorial
+msgid "docs.search.category.tutorial"
+msgstr "Tutoriel"
+
+#: docs.search.category.howTo
+msgid "docs.search.category.howTo"
+msgstr "Guide pratique"
+
+#: docs.search.category.reference
+msgid "docs.search.category.reference"
+msgstr "Référence"
+
+#: docs.search.category.explanation
+msgid "docs.search.category.explanation"
+msgstr "Explication"
+
+#: docs.search.noResults
+msgid "docs.search.noResults"
+msgstr "Aucun résultat trouvé pour"
+
+#: docs.search.hint
+msgid "docs.search.hint"
+msgstr "Tapez pour rechercher dans la documentation"
+
+#: docs.search.key.navigate
+msgid "docs.search.key.navigate"
+msgstr "pour naviguer"
+
+#: docs.search.key.select
+msgid "docs.search.key.select"
+msgstr "pour sélectionner"
+
+#: docs.search.key.close
+msgid "docs.search.key.close"
+msgstr "pour fermer"
+
+#: docs.callout.info
+msgid "docs.callout.info"
+msgstr "Info"
+
+#: docs.callout.tip
+msgid "docs.callout.tip"
+msgstr "Astuce"
+
+#: docs.callout.warning
+msgid "docs.callout.warning"
+msgstr "Avertissement"
+
+#: docs.callout.danger
+msgid "docs.callout.danger"
+msgstr "Danger"
+
+#: settings.sessions.loadError
+msgid "settings.sessions.loadError"
+msgstr "Échec du chargement des sessions"
+
+#: settings.sessions.revokeError
+msgid "settings.sessions.revokeError"
+msgstr "Échec de la révocation de session"
+
+#: jobs.loadError
+msgid "jobs.loadError"
+msgstr "Échec du chargement des tâches"
+
+#: jobs.triggerError
+msgid "jobs.triggerError"
+msgstr "Échec du déclenchement de la tâche"
+
+#: general.unknownError
+msgid "general.unknownError"
+msgstr "Erreur inconnue"
+
+#: client.repos.list.loadError
+msgid "client.repos.list.loadError"
+msgstr "Échec du chargement des dépôts"
+
+#: admin.health.fileCount
+msgid "admin.health.fileCount"
+msgstr "{count} fichiers"
+
+#: admin.audit.title
+msgid "admin.audit.title"
+msgstr "Journaux d'audit"
+
+#: admin.audit.description
+msgid "admin.audit.description"
+msgstr "Voir les journaux d'audit de sécurité"
+
+#: auth.login.redirecting
+msgid "auth.login.redirecting"
+msgstr "Redirection..."
+
+#: org.title
+msgid "org.title"
+msgstr "Organisation"
+
+#: org.members.add
+msgid "org.members.add"
+msgstr "Ajouter un membre"
+
+#: org.members.addTitle
+msgid "org.members.addTitle"
+msgstr "Ajouter un membre"
+
+#: org.members.email
+msgid "org.members.email"
+msgstr "Adresse e-mail"
+
+#: org.members.empty
+msgid "org.members.empty"
+msgstr "Aucun membre pour le moment"
+
+#: org.members.invite
+msgid "org.members.invite"
+msgstr "Envoyer l'invitation"
+
+#: org.members.remove
+msgid "org.members.remove"
+msgstr "Supprimer"
+
+#: org.members.removeConfirm
+msgid "org.members.removeConfirm"
+msgstr "Êtes-vous sûr de vouloir supprimer ce membre ?"
+
+#: org.roles.admin
+msgid "org.roles.admin"
+msgstr "Administrateur"
+
+#: org.roles.member
+msgid "org.roles.member"
+msgstr "Membre"
+
+#: org.teams.create
+msgid "org.teams.create"
+msgstr "Créer une équipe"
+
+#: org.teams.createTitle
+msgid "org.teams.createTitle"
+msgstr "Créer une nouvelle équipe"
+
+#: org.teams.empty
+msgid "org.teams.empty"
+msgstr "Aucune équipe pour le moment"
+
+#: org.teams.memberCount
+msgid "org.teams.memberCount"
+msgstr "membres"
+
+#: org.teams.name
+msgid "org.teams.name"
+msgstr "Nom de l'équipe"
+
+#: org.teams.slug
+msgid "org.teams.slug"
+msgstr "Slug URL"
+
+#: org.apiKeys.create
+msgid "org.apiKeys.create"
+msgstr "Créer une clé API"
+
+#: org.apiKeys.createTitle
+msgid "org.apiKeys.createTitle"
+msgstr "Créer une nouvelle clé API"
+
+#: org.apiKeys.created
+msgid "org.apiKeys.created"
+msgstr "Clé API créée"
+
+#: org.apiKeys.copyWarning
+msgid "org.apiKeys.copyWarning"
+msgstr "Copiez cette clé maintenant. Vous ne pourrez plus la voir."
+
+#: org.apiKeys.empty
+msgid "org.apiKeys.empty"
+msgstr "Aucune clé API pour le moment"
+
+#: org.apiKeys.lastUsed
+msgid "org.apiKeys.lastUsed"
+msgstr "Dernière utilisation"
+
+#: org.apiKeys.name
+msgid "org.apiKeys.name"
+msgstr "Nom de la clé"
+
+#: org.apiKeys.revoke
+msgid "org.apiKeys.revoke"
+msgstr "Révoquer"
+
+#: org.apiKeys.revokeConfirm
+msgid "org.apiKeys.revokeConfirm"
+msgstr "Êtes-vous sûr de vouloir révoquer cette clé API ?"
+
+#: org.apiKeys.scopes
+msgid "org.apiKeys.scopes"
+msgstr "Portées"
+
+#: org.settings.name
+msgid "org.settings.name"
+msgstr "Nom de l'organisation"
+
+#: org.settings.visibility
+msgid "org.settings.visibility"
+msgstr "Visibilité"
+
+#: org.settings.joinPolicy
+msgid "org.settings.joinPolicy"
+msgstr "Politique d'adhésion"
+
+#: org.settings.saved
+msgid "org.settings.saved"
+msgstr "Paramètres enregistrés"
+
+#: org.settings.dangerZone
+msgid "org.settings.dangerZone"
+msgstr "Zone de danger"
+
+#: org.settings.deleteWarning
+msgid "org.settings.deleteWarning"
+msgstr "Une fois l'organisation supprimée, il n'y a pas de retour en arrière."
+
+#: org.settings.delete
+msgid "org.settings.delete"
+msgstr "Supprimer l'organisation"
+
+#: org.settings.deleteConfirm
+msgid "org.settings.deleteConfirm"
+msgstr "Êtes-vous sûr de vouloir supprimer cette organisation ? Cette action est irréversible."
+
+#: org.visibility.public
+msgid "org.visibility.public"
+msgstr "Public"
+
+#: org.visibility.private
+msgid "org.visibility.private"
+msgstr "Privé"
+
+#: org.joinPolicy.open
+msgid "org.joinPolicy.open"
+msgstr "Ouvert"
+
+#: org.joinPolicy.request
+msgid "org.joinPolicy.request"
+msgstr "Demande d'adhésion"
+
+#: org.joinPolicy.inviteOnly
+msgid "org.joinPolicy.inviteOnly"
+msgstr "Sur invitation uniquement"
+
+#: org.tabs.members
+msgid "org.tabs.members"
+msgstr "Membres"
+
+#: org.tabs.teams
+msgid "org.tabs.teams"
+msgstr "Équipes"
+
+#: org.tabs.apiKeys
+msgid "org.tabs.apiKeys"
+msgstr "Clés API"
+
+#: org.tabs.settings
+msgid "org.tabs.settings"
+msgstr "Paramètres"
+
+# ============================================================================
+# Kill Switches
+# ============================================================================
+
+#: killSwitch.title
+msgid "killSwitch.title"
+msgstr "Kill Switches"
+
+#: killSwitch.description
+msgid "killSwitch.description"
+msgstr "Emergency shutoff controls for feature flags"
+
+#: killSwitch.create
+msgid "killSwitch.create"
+msgstr "Create Kill Switch"
+
+#: killSwitch.createTitle
+msgid "killSwitch.createTitle"
+msgstr "Create New Kill Switch"
+
+#: killSwitch.key
+msgid "killSwitch.key"
+msgstr "Key"
+
+#: killSwitch.keyHint
+msgid "killSwitch.keyHint"
+msgstr "Lowercase alphanumeric with underscores, 3-100 characters"
+
+#: killSwitch.name
+msgid "killSwitch.name"
+msgstr "Name"
+
+#: killSwitch.linkedFlags
+msgid "killSwitch.linkedFlags"
+msgstr "Linked Flags"
+
+#: killSwitch.linkedFlagsHint
+msgid "killSwitch.linkedFlagsHint"
+msgstr "Flag keys that will be disabled when this kill switch is active"
+
+#: killSwitch.status
+msgid "killSwitch.status"
+msgstr "Status"
+
+#: killSwitch.active
+msgid "killSwitch.active"
+msgstr "Active"
+
+#: killSwitch.inactive
+msgid "killSwitch.inactive"
+msgstr "Inactive"
+
+#: killSwitch.activate
+msgid "killSwitch.activate"
+msgstr "Activate"
+
+#: killSwitch.deactivate
+msgid "killSwitch.deactivate"
+msgstr "Deactivate"
+
+#: killSwitch.activateTitle
+msgid "killSwitch.activateTitle"
+msgstr "Activate Kill Switch"
+
+#: killSwitch.activateWarning
+msgid "killSwitch.activateWarning"
+msgstr "Activating this kill switch will immediately disable all linked feature flags."
+
+#: killSwitch.reason
+msgid "killSwitch.reason"
+msgstr "Reason"
+
+#: killSwitch.reasonPlaceholder
+msgid "killSwitch.reasonPlaceholder"
+msgstr "Enter the reason for activation (required)"
+
+#: killSwitch.reasonRequired
+msgid "killSwitch.reasonRequired"
+msgstr "A reason is required for activation"
+
+#: killSwitch.activatedAt
+msgid "killSwitch.activatedAt"
+msgstr "Activated at"
+
+#: killSwitch.activatedBy
+msgid "killSwitch.activatedBy"
+msgstr "Activated by"
+
+#: killSwitch.activationReason
+msgid "killSwitch.activationReason"
+msgstr "Activation reason"
+
+#: killSwitch.delete
+msgid "killSwitch.delete"
+msgstr "Delete"
+
+#: killSwitch.deleteConfirm
+msgid "killSwitch.deleteConfirm"
+msgstr "Are you sure you want to delete this kill switch?"
+
+#: killSwitch.empty
+msgid "killSwitch.empty"
+msgstr "No kill switches configured"
+
+#: killSwitch.noLinkedFlags
+msgid "killSwitch.noLinkedFlags"
+msgstr "No linked flags"
+
+# ============================================================================
+# Exposure Tracking
+# ============================================================================
+
+#: exposure.title
+msgid "exposure.title"
+msgstr "Suivi des Expositions"
+
+#: exposure.description
+msgid "exposure.description"
+msgstr "Suivre l'exposition des utilisateurs aux variantes des drapeaux pour l'analyse des expériences"
+
+#: exposure.tracking
+msgid "exposure.tracking"
+msgstr "Suivi des Expositions"
+
+#: exposure.enabled
+msgid "exposure.enabled"
+msgstr "Activé"
+
+#: exposure.disabled
+msgid "exposure.disabled"
+msgstr "Désactivé"
+
+#: exposure.enableTracking
+msgid "exposure.enableTracking"
+msgstr "Activer le Suivi des Expositions"
+
+#: exposure.disableTracking
+msgid "exposure.disableTracking"
+msgstr "Désactiver le Suivi des Expositions"
+
+#: exposure.enableHint
+msgid "exposure.enableHint"
+msgstr "Lorsqu'il est activé, les évaluations des drapeaux seront enregistrées pour l'analyse des expériences"
+
+#: exposure.logs
+msgid "exposure.logs"
+msgstr "Journaux d'Exposition"
+
+#: exposure.export
+msgid "exposure.export"
+msgstr "Exporter les Journaux"
+
+#: exposure.exportHint
+msgid "exposure.exportHint"
+msgstr "Télécharger les journaux d'exposition au format CSV"
+
+#: exposure.noLogs
+msgid "exposure.noLogs"
+msgstr "Aucun journal d'exposition trouvé"
+
+#: exposure.flagKey
+msgid "exposure.flagKey"
+msgstr "Clé du Drapeau"
+
+#: exposure.variant
+msgid "exposure.variant"
+msgstr "Variante"
+
+#: exposure.userId
+msgid "exposure.userId"
+msgstr "ID Utilisateur"
+
+#: exposure.timestamp
+msgid "exposure.timestamp"
+msgstr "Horodatage"
+
+#: exposure.reason
+msgid "exposure.reason"
+msgstr "Raison"
+
+#: exposure.environment
+msgid "exposure.environment"
+msgstr "Environnement"
+
+#: exposure.filterByFlag
+msgid "exposure.filterByFlag"
+msgstr "Filtrer par drapeau"
+
+#: exposure.filterByEnvironment
+msgid "exposure.filterByEnvironment"
+msgstr "Filtrer par environnement"
+
+#: exposure.startDate
+msgid "exposure.startDate"
+msgstr "Date de Début"
+
+#: exposure.endDate
+msgid "exposure.endDate"
+msgstr "Date de Fin"
+
+#: exposure.totalCount
+msgid "exposure.totalCount"
+msgstr "{count} expositions"
+
+#: exposure.deduplicationWindow
+msgid "exposure.deduplicationWindow"
+msgstr "Les expositions sont dédupliquées dans une fenêtre d'une heure par utilisateur/contexte"
+
+# ============================================================================
+# Flag Stats
+# ============================================================================
+
+#: flagStats.title
+msgid "flagStats.title"
+msgstr "Flag Statistics"
+
+#: flagStats.description
+msgid "flagStats.description"
+msgstr "Evaluation statistics for this flag"
+
+#: flagStats.lastEvaluated
+msgid "flagStats.lastEvaluated"
+msgstr "Last Evaluated"
+
+#: flagStats.never
+msgid "flagStats.never"
+msgstr "Never"
+
+#: flagStats.evaluations24h
+msgid "flagStats.evaluations24h"
+msgstr "Evaluations (24h)"
+
+#: flagStats.evaluations7d
+msgid "flagStats.evaluations7d"
+msgstr "Evaluations (7d)"
+
+#: flagStats.evaluations30d
+msgid "flagStats.evaluations30d"
+msgstr "Evaluations (30d)"
+
+#: flagStats.staleFlags
+msgid "flagStats.staleFlags"
+msgstr "Stale Flags"
+
+#: flagStats.staleFlagsDescription
+msgid "flagStats.staleFlagsDescription"
+msgstr "Flags that haven't been evaluated recently"
+
+#: flagStats.noStaleFlags
+msgid "flagStats.noStaleFlags"
+msgstr "No stale flags found"
+
+#: flagStats.staleFlagsHint
+msgid "flagStats.staleFlagsHint"
+msgstr "Flags are considered stale after {days} days without evaluation"
+
+#: flagStats.daysSinceEvaluated
+msgid "flagStats.daysSinceEvaluated"
+msgstr "{days} days ago"
+
+#: flagStats.neverEvaluated
+msgid "flagStats.neverEvaluated"
+msgstr "Never evaluated"
+
+#: flagStats.viewStats
+msgid "flagStats.viewStats"
+msgstr "View Stats"
+
+# ============================================================================
+# Flags SDK (client-side)
+# ============================================================================
+
+#: client.flags.error.invalid_sdk_key
+msgid "client.flags.error.invalid_sdk_key"
+msgstr "Invalid or missing SDK key"
+
+#: client.flags.error.invalid_base_url
+msgid "client.flags.error.invalid_base_url"
+msgstr "Invalid or missing base URL"
+
+#: client.flags.error.connection_failed
+msgid "client.flags.error.connection_failed"
+msgstr "Failed to connect to server"
+
+#: client.flags.error.request_failed
+msgid "client.flags.error.request_failed"
+msgstr "HTTP request failed"
+
+#: client.flags.error.parse_failed
+msgid "client.flags.error.parse_failed"
+msgstr "Failed to parse server response"
+
+#: client.flags.error.server_error
+msgid "client.flags.error.server_error"
+msgstr "Server returned an error"
+
+#: client.flags.error.flag_not_found
+msgid "client.flags.error.flag_not_found"
+msgstr "Flag not found"
+
+#: client.flags.error.sse_connection_failed
+msgid "client.flags.error.sse_connection_failed"
+msgstr "SSE connection failed"
+
+#: client.flags.error.sse_stream_error
+msgid "client.flags.error.sse_stream_error"
+msgstr "SSE stream error"
+
+#: client.flags.error.offline_no_cache
+msgid "client.flags.error.offline_no_cache"
+msgstr "Client is offline and no cached data is available"
+
+#: client.flags.error.authentication_failed
+msgid "client.flags.error.authentication_failed"
+msgstr "SDK key authentication failed"
+
+#: client.flags.error.rate_limited
+msgid "client.flags.error.rate_limited"
+msgstr "Rate limited. Retry after seconds"
+
+#: client.flags.error.initialization_timeout
+msgid "client.flags.error.initialization_timeout"
+msgstr "Client initialization timed out"
+
+#: client.flags.error.client_closed
+msgid "client.flags.error.client_closed"
+msgstr "Client has been closed"
+
+#: client.flags.error.invalid_value_type
+msgid "client.flags.error.invalid_value_type"
+msgstr "Invalid flag value type"
+
+#: client.flags.status.initializing
+msgid "client.flags.status.initializing"
+msgstr "Initializing flags client..."
+
+#: client.flags.status.connected
+msgid "client.flags.status.connected"
+msgstr "Flags client connected"
+
+#: client.flags.status.disconnected
+msgid "client.flags.status.disconnected"
+msgstr "Flags client disconnected"
+
+#: client.flags.status.reconnecting
+msgid "client.flags.status.reconnecting"
+msgstr "Reconnecting to flags server..."
+
+#: client.flags.status.using_cache
+msgid "client.flags.status.using_cache"
+msgstr "Using cached flag values"
+
+#: client.flags.status.cache_initialized
+msgid "client.flags.status.cache_initialized"
+msgstr "Flag cache initialized with {count} flags"
+
+# ============================================================================
+# HTTP Client (client-side)
+# ============================================================================
+
+#: client.http.error.timeout
+msgid "client.http.error.timeout"
+msgstr "Request timed out"
+
+#: client.http.error.network
+msgid "client.http.error.network"
+msgstr "Network request failed"
+
+#: client.http.error.rate_limited
+msgid "client.http.error.rate_limited"
+msgstr "Rate limited"
+
+#: client.http.error.server
+msgid "client.http.error.server"
+msgstr "Server returned an error"
+
+#: client.http.retry.attempt
+msgid "client.http.retry.attempt"
+msgstr "Retry attempt {count}"
+
+#: client.http.retry.max_attempts
+msgid "client.http.retry.max_attempts"
+msgstr "Max retry attempts reached"

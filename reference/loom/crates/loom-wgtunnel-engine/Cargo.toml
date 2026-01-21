@@ -1,0 +1,37 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[package]
+name = "loom-wgtunnel-engine"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+loom-wgtunnel-common = { path = "../loom-wgtunnel-common" }
+loom-wgtunnel-conn = { path = "../loom-wgtunnel-conn" }
+loom-common-secret = { path = "../loom-common-secret" }
+
+# WireGuard (using defguard fork for x25519-dalek v2.0 compatibility)
+defguard_boringtun = "0.6"
+
+# Virtual network stack
+smoltcp = { version = "0.11", default-features = false, features = ["alloc", "medium-ip", "proto-ipv6", "socket-tcp"] }
+
+# Async
+tokio = { version = "1", features = ["sync", "time", "rt", "io-util"] }
+
+# Random
+fastrand = "2"
+
+# Error handling
+thiserror = "1"
+anyhow = "1"
+
+# Logging
+tracing = "0.1"
+
+[dev-dependencies]
+tokio-test = "0.4"

@@ -1,0 +1,110 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+name: "build and publish: audit-sidecar"
+
+on:
+  push:
+    branches: [trunk]
+    paths:
+      - 'crates/loom-weaver-audit-sidecar/**'
+      - 'crates/loom-weaver-ebpf/**'
+      - 'crates/loom-weaver-ebpf-common/**'
+      - 'infra/pkgs/audit-sidecar-image.nix'
+      - 'infra/pkgs/loom-weaver-ebpf.nix'
+      - 'flake.nix'
+      - 'Cargo.lock'
+      - '.github/workflows/publish-audit-sidecar.yml'
+  release:
+    types: [created]
+  workflow_dispatch: # Allow manual triggers
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    name: Build & Push Audit Sidecar Image
+    runs-on: namespace-profile-cached-amd64
+    permissions:
+      contents: read
+      packages: write
+      id-token: write  # Required for cosign keyless signing
+
+    steps:
+      - name: Checkout repository
+        uses: namespacelabs/nscloud-checkout-action@v7
+
+      - name: Set up Nix cache
+        run: |
+          sudo mkdir -p /cache/nix /nix
+          sudo mount --bind /cache/nix /nix
+          sudo chown runner /nix
+
+      - name: Setup Nix
+        uses: cachix/install-nix-action@9aaadd8b85853f67fcdf488e6a4e9efa94ee96e2
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@ee79db531bfb851a7cf47035057b7cca88d26449
+        with:
+          name: devenv
+
+      - name: Build tools and image
+        run: |
+          nix build .#skopeo -o result-skopeo
+          # eBPF build requires sandbox=false for build-std to fetch std library sources
+          nix build .#audit-sidecar-image -o result-audit-sidecar-image --option sandbox false
+
+      - name: Login to GHCR
+        if: github.ref == 'refs/heads/trunk' || github.event_name == 'release'
+        run: |
+          # Use Docker config location that cosign can also read
+          mkdir -p ~/.docker
+          export REGISTRY_AUTH_FILE="${HOME}/.docker/config.json"
+          echo "${{ secrets.GITHUB_TOKEN }}" | ./result-skopeo/bin/skopeo login ghcr.io -u ${{ github.actor }} --password-stdin --authfile "${REGISTRY_AUTH_FILE}"
+
+      - name: Push audit-sidecar image
+        if: github.ref == 'refs/heads/trunk' || github.event_name == 'release'
+        run: |
+          export REGISTRY_AUTH_FILE="${HOME}/.docker/config.json"
+          # Get short SHA for tagging
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          # Push with SHA tag
+          ./result-skopeo/bin/skopeo copy \
+            --authfile "${REGISTRY_AUTH_FILE}" \
+            docker-archive:result-audit-sidecar-image \
+            docker://ghcr.io/${{ github.repository_owner }}/loom-audit-sidecar:${SHORT_SHA}
+
+          # Push latest tag on trunk
+          if [[ "${{ github.ref }}" == "refs/heads/trunk" ]]; then
+            ./result-skopeo/bin/skopeo copy \
+              --authfile "${REGISTRY_AUTH_FILE}" \
+              docker-archive:result-audit-sidecar-image \
+              docker://ghcr.io/${{ github.repository_owner }}/loom-audit-sidecar:latest
+          fi
+
+          # Push version tag on release
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            ./result-skopeo/bin/skopeo copy \
+              --authfile "${REGISTRY_AUTH_FILE}" \
+              docker-archive:result-audit-sidecar-image \
+              docker://ghcr.io/${{ github.repository_owner }}/loom-audit-sidecar:${{ github.event.release.tag_name }}
+          fi
+
+          # Output digest for cosign signing
+          echo "IMAGE_DIGEST=$(./result-skopeo/bin/skopeo inspect --authfile "${REGISTRY_AUTH_FILE}" docker://ghcr.io/${{ github.repository_owner }}/loom-audit-sidecar:${SHORT_SHA} --format '{{.Digest}}')" >> $GITHUB_ENV
+
+      - name: Install cosign
+        if: github.ref == 'refs/heads/trunk' || github.event_name == 'release'
+        run: nix build .#cosign -o result-cosign
+
+      - name: Sign container image
+        if: github.ref == 'refs/heads/trunk' || github.event_name == 'release'
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          # Sign by digest (more secure than tag)
+          ./result-cosign/bin/cosign sign --yes \
+            ghcr.io/${{ github.repository_owner }}/loom-audit-sidecar@${IMAGE_DIGEST}

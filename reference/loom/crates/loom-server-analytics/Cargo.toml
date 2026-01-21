@@ -1,0 +1,53 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[package]
+name = "loom-server-analytics"
+version = "0.1.0"
+edition = "2021"
+license = "Proprietary"
+description = "Product analytics server implementation for Loom"
+
+[dependencies]
+# Internal crates
+loom-analytics-core = { path = "../loom-analytics-core" }
+loom-common-secret = { path = "../loom-common-secret" }
+loom-server-api = { path = "../loom-server-api" }
+
+# Web framework
+axum = { version = "0.8", features = ["macros"] }
+axum-extra = { version = "0.10", features = ["typed-header"] }
+http = "1"
+
+# Async runtime
+async-trait = "0.1"
+tokio = { version = "1", features = ["sync", "time"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+thiserror = "2"
+
+# Logging
+tracing = "0.1"
+
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID
+uuid = { version = "1", features = ["v4", "v7", "serde"] }
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
+
+# Password hashing for API keys
+argon2 = "0.5"
+rand = "0.8"
+
+[dev-dependencies]
+proptest = "1"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
+tokio-test = "0.4"
+tempfile = "3"

@@ -1,0 +1,198 @@
+{
+  "name": "loom-vscode",
+  "displayName": "Loom AI Coding Assistant",
+  "description": "AI-powered coding assistant with agentic capabilities",
+  "version": "0.1.0",
+  "publisher": "ghuntley",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ghuntley/loom"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Machine Learning",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "coding assistant",
+    "loom",
+    "agent"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCommand:loom.openChat",
+    "onView:loom.chatView",
+    "onCommand:loom.explainSelection",
+    "onCommand:loom.refactorSelection"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "Loom",
+      "properties": {
+        "loom.loomPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Loom executable. If empty, uses PATH."
+        },
+        "loom.additionalArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Additional arguments to pass to the Loom agent."
+        },
+        "loom.logLevel": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warn",
+            "info",
+            "debug",
+            "trace"
+          ],
+          "default": "info",
+          "description": "Log level for the Loom extension."
+        },
+        "loom.autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically start the Loom agent when the extension activates."
+        },
+        "loom.serverUrl": {
+          "type": "string",
+          "default": "",
+          "description": "URL of the Loom server. If empty, starts a local agent process."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "loom.openChat",
+        "title": "Open Chat",
+        "category": "Loom",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "loom.newSession",
+        "title": "New Session",
+        "category": "Loom",
+        "icon": "$(add)"
+      },
+      {
+        "command": "loom.cancelCurrentTurn",
+        "title": "Cancel Current Turn",
+        "category": "Loom",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "loom.restartAgent",
+        "title": "Restart Agent",
+        "category": "Loom",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "loom.showLogs",
+        "title": "Show Logs",
+        "category": "Loom",
+        "icon": "$(output)"
+      },
+      {
+        "command": "loom.explainSelection",
+        "title": "Explain Selection",
+        "category": "Loom"
+      },
+      {
+        "command": "loom.refactorSelection",
+        "title": "Refactor Selection",
+        "category": "Loom"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "loom",
+          "title": "Loom",
+          "icon": "$(hubot)"
+        }
+      ]
+    },
+    "views": {
+      "loom": [
+        {
+          "type": "webview",
+          "id": "loom.chatView",
+          "name": "Chat"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "loom.explainSelection",
+          "when": "editorHasSelection",
+          "group": "loom@1"
+        },
+        {
+          "command": "loom.refactorSelection",
+          "when": "editorHasSelection",
+          "group": "loom@2"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "loom.newSession",
+          "when": "view == loom.chatView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "loom.cancelCurrentTurn",
+          "when": "view == loom.chatView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "loom.restartAgent",
+          "when": "view == loom.chatView",
+          "group": "navigation@3"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "loom.openChat",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "webpack --mode production",
+    "watch": "webpack --mode development --watch",
+    "package": "vsce package",
+    "test": "node ./out/test/runTest.js",
+    "lint": "eslint src --ext ts"
+  },
+  "dependencies": {
+    "@agentclientprotocol/sdk": "^0.12.0"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vscode/test-electron": "^2.3.8",
+    "eslint": "^8.56.0",
+    "mocha": "^10.2.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

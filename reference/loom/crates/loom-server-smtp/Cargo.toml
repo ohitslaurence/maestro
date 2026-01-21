@@ -1,0 +1,23 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[package]
+name = "loom-server-smtp"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "SMTP email client for Loom"
+
+[dependencies]
+lettre = { version = "0.11", default-features = false, features = ["tokio1-rustls-tls", "smtp-transport", "builder"] }
+tokio = { workspace = true, features = ["rt"] }
+thiserror.workspace = true
+tracing.workspace = true
+serde = { workspace = true, features = ["derive"] }
+loom-common-secret.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+tokio-test.workspace = true

@@ -1,0 +1,95 @@
+---
+title: CLI Reference
+summary: Complete command reference for the Loom CLI.
+diataxis: reference
+order: 10
+tags:
+  - cli
+  - reference
+---
+
+<script>
+	import { Callout } from '$lib/docs/components';
+</script>
+
+# CLI Reference
+
+Complete reference for all Loom CLI commands.
+
+## Global Options
+
+| Option | Description |
+|--------|-------------|
+| `--help, -h` | Show help message |
+| `--version, -V` | Show version number |
+| `--server-url` | Override server URL |
+| `--verbose, -v` | Enable verbose output |
+
+## Commands
+
+### `loom new`
+
+Create a new thread with an initial message.
+
+```bash
+loom new [message]
+```
+
+**Options:**
+- `--image <path>` - Attach an image to the message
+
+**Examples:**
+
+```bash
+loom new "Help me refactor this function"
+loom new "What's in this screenshot?" --image ./screenshot.png
+```
+
+### `loom attach`
+
+Attach to an existing thread.
+
+```bash
+loom attach <thread-id>
+```
+
+### `loom threads`
+
+Manage threads.
+
+```bash
+loom threads list          # List all threads
+loom threads show <id>     # Show thread details
+loom threads delete <id>   # Delete a thread
+loom threads export <id>   # Export thread to JSON
+```
+
+### `loom login`
+
+Authenticate with the Loom server.
+
+```bash
+loom login [--provider <name>]
+```
+
+<Callout variant="info">
+	Supported providers: `github`, `google`, `magic-link`
+</Callout>
+
+### `loom logout`
+
+Clear authentication credentials.
+
+```bash
+loom logout
+```
+
+### `loom weaver`
+
+Manage remote execution environments.
+
+```bash
+loom weaver ps             # List running weavers
+loom weaver create         # Create a new weaver
+loom weaver delete <id>    # Delete a weaver
+```

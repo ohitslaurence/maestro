@@ -1,0 +1,69 @@
+{
+	"$schema": "https://dprint.dev/schemas/v0.json",
+	"projectType": "openSource",
+	"incremental": true,
+	"includes": [
+		"**/*.{ts,js,tsx,jsx,mts,cts,json,jsonc,md,toml,yml,yaml,css}",
+		"**/*.nix",
+		"**/*.rs",
+		"web/**/*.{ts,js,tsx,jsx,svelte,css,html,json,md}",
+		"api/**/*.rs",
+		"infra/**/*.nix"
+	],
+	"excludes": [
+		"**/node_modules/**",
+		"**/target/**",
+		"**/.svelte-kit/**",
+		"**/build/**",
+		"**/dist/**",
+		"**/.next/**",
+		"pnpm-lock.yaml",
+		"Cargo.lock",
+		"flake.lock",
+		"devenv.lock",
+		"**/*.tf",
+		"**/*.tfvars"
+	],
+	"plugins": [
+		"https://plugins.dprint.dev/biome-0.11.7.wasm",
+		"https://plugins.dprint.dev/json-0.21.0.wasm",
+		"https://plugins.dprint.dev/markdown-0.20.0.wasm",
+		"https://plugins.dprint.dev/toml-0.7.0.wasm",
+		"https://plugins.dprint.dev/dockerfile-0.3.3.wasm",
+		"https://plugins.dprint.dev/exec-0.6.0.json@a054130d458f124f9b5c91484833828950723a5af3f8ff2bd1523bd47b83b364"
+	],
+	"exec": {
+		"cwd": "${configDir}",
+		"commands": [
+			{
+				"command": "rustfmt --edition 2024",
+				"exts": ["rs"]
+			}
+		]
+	},
+	"biome": {
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineWidth": 100,
+		"quoteStyle": "single",
+		"jsxQuoteStyle": "double",
+		"semicolons": "always",
+		"trailingCommas": "es5"
+	},
+	"json": {
+		"useTabs": true,
+		"indentWidth": 2
+	},
+	"markdown": {
+		"lineWidth": 100,
+		"textWrap": "always"
+	},
+	"toml": {
+		"useTabs": true,
+		"indentWidth": 2
+	},
+	"dockerfile": {
+		"useTabs": true,
+		"indentWidth": 2
+	}
+}

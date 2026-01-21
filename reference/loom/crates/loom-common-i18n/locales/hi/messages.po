@@ -1,0 +1,1764 @@
+# Loom Server Translations - Hindi
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>
+# SPDX-License-Identifier: Proprietary
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: hi\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: Email: Magic Link - Subject
+msgid "server.email.magic_link.subject"
+msgstr "Loom में साइन इन करें"
+
+#: Email: Magic Link - Body intro
+msgid "server.email.magic_link.body"
+msgstr "अपने Loom खाते में साइन इन करने के लिए नीचे दी गई लिंक पर क्लिक करें।"
+
+#: Email: Magic Link - Expiry notice
+msgid "server.email.magic_link.expires"
+msgstr "यह लिंक {minutes} मिनट में समाप्त हो जाएगी।"
+
+#: Email: Magic Link - Ignore notice
+msgid "server.email.magic_link.ignore"
+msgstr "यदि आपने यह ईमेल का अनुरोध नहीं किया है, तो आप इसे सुरक्षित रूप से अनदेखा कर सकते हैं।"
+
+#: Email: Magic Link - Copy link instruction
+msgid "server.email.magic_link.copy_link"
+msgstr "या इस लिंक को कॉपी और पेस्ट करें:"
+
+#: Email: Org Invitation - Subject
+msgid "server.email.invitation.subject"
+msgstr "आपको Loom पर {org_name} में शामिल होने के लिए आमंत्रित किया गया है"
+
+#: Email: Org Invitation - Body
+msgid "server.email.invitation.body"
+msgstr "{inviter_name} ने आपको Loom पर \"{org_name}\" संगठन में शामिल होने के लिए आमंत्रित किया है।"
+
+#: Email: Org Invitation - Action instruction
+msgid "server.email.invitation.action"
+msgstr "आमंत्रण स्वीकार करने के लिए नीचे दी गई लिंक पर क्लिक करें:"
+
+#: Email: Org Invitation - No expiry notice
+msgid "server.email.invitation.no_expiry"
+msgstr "यह आमंत्रण समाप्त नहीं होता, लेकिन संगठन व्यवस्थापक द्वारा रद्द किया जा सकता है।"
+
+#: Email: Security Alert - Subject
+msgid "server.email.security_alert.subject"
+msgstr "Loom सुरक्षा चेतावनी: {event}"
+
+#: Email: Security Alert - Body intro
+msgid "server.email.security_alert.body"
+msgstr "आपके Loom खाते पर एक सुरक्षा घटना हुई है।"
+
+#: Email: Security Alert - Event label
+msgid "server.email.security_alert.event"
+msgstr "घटना: {event}"
+
+#: Email: Security Alert - Details label
+msgid "server.email.security_alert.details"
+msgstr "विवरण:"
+
+#: Email: Security Alert - Action instruction
+msgid "server.email.security_alert.action"
+msgstr "यदि यह आप नहीं थे, तो कृपया तुरंत अपने खाते की सुरक्षा सेटिंग्स की समीक्षा करें।"
+
+#: Email: Deletion Warning - Subject
+msgid "server.email.deletion_warning.subject"
+msgstr "आपका Loom खाता हटाने के लिए निर्धारित है"
+
+#: Email: Deletion Warning - Body
+msgid "server.email.deletion_warning.body"
+msgstr "आपका Loom खाता {days} दिनों में स्थायी रूप से हटाने के लिए निर्धारित है।"
+
+#: Email: Deletion Warning - Restore instruction
+msgid "server.email.deletion_warning.restore"
+msgstr "यदि आपने इस हटाने का अनुरोध नहीं किया है, या यदि आपने अपना मन बदल लिया है, तो आप हटाने की तारीख से पहले लॉग इन करके अपना खाता पुनर्स्थापित कर सकते हैं।"
+
+#: Email: Deletion Warning - Permanent notice
+msgid "server.email.deletion_warning.permanent"
+msgstr "स्थायी हटाने के बाद, आपका डेटा पुनर्प्राप्त नहीं किया जा सकता।"
+
+#: Email: Deletion Scheduled - Subject
+msgid "server.email.deletion_scheduled.subject"
+msgstr "खाता हटाना निर्धारित"
+
+#: Email: Deletion Scheduled - Body
+msgid "server.email.deletion_scheduled.body"
+msgstr "आपका खाता हटाने के लिए निर्धारित किया गया है।"
+
+#: Email: Deletion Scheduled - Grace period notice
+msgid "server.email.deletion_scheduled.grace"
+msgstr "आपके पास लॉग इन करके और हटाने को रद्द करके अपना खाता पुनर्स्थापित करने के लिए {days} दिन हैं।"
+
+#: Email: Deletion Scheduled - Permanent notice
+msgid "server.email.deletion_scheduled.permanent"
+msgstr "अनुग्रह अवधि के बाद, आपका खाता और सभी संबंधित डेटा स्थायी रूप से हटा दिया जाएगा।"
+
+#: API: Auth - Check email response
+msgid "server.api.auth.check_email"
+msgstr "लॉगिन लिंक के लिए अपना ईमेल देखें"
+
+#: API: Auth - Logged out response
+msgid "server.api.auth.logged_out"
+msgstr "सफलतापूर्वक लॉग आउट किया गया"
+
+#: API: Error - Internal error
+msgid "server.api.error.internal"
+msgstr "एक आंतरिक त्रुटि हुई"
+
+#: API: Error - Not found
+msgid "server.api.error.not_found"
+msgstr "संसाधन नहीं मिला"
+
+#: API: Error - Unauthorized
+msgid "server.api.error.unauthorized"
+msgstr "प्रमाणीकरण आवश्यक है"
+
+#: API: Error - Forbidden
+msgid "server.api.error.forbidden"
+msgstr "पहुँच अस्वीकृत"
+
+#: API: Error - Bad request
+msgid "server.api.error.bad_request"
+msgstr "अमान्य अनुरोध"
+
+#: API: Error - Conflict
+msgid "server.api.error.conflict"
+msgstr "संसाधन विवाद"
+
+#: API: Error - Gone
+msgid "server.api.error.gone"
+msgstr "संसाधन अब उपलब्ध नहीं है"
+
+#: API: Error - Not configured
+msgid "server.api.error.not_configured"
+msgstr "सुविधा कॉन्फ़िगर नहीं है"
+
+# ============================================================================
+# Auth API responses
+# ============================================================================
+
+#: API: Auth - Invalid email
+msgid "server.api.auth.invalid_email"
+msgstr "कृपया एक वैध ईमेल पता प्रदान करें"
+
+#: API: Auth - Device code authorized
+msgid "server.api.auth.device_authorized"
+msgstr "डिवाइस सफलतापूर्वक अधिकृत"
+
+#: API: Auth - Invalid device code
+msgid "server.api.auth.invalid_device_code"
+msgstr "अमान्य या समाप्त डिवाइस कोड"
+
+#: API: Auth - Invalid user code
+msgid "server.api.auth.invalid_user_code"
+msgstr "अमान्य या समाप्त उपयोगकर्ता कोड"
+
+#: API: Auth - OAuth not configured
+msgid "server.api.auth.oauth_not_configured"
+msgstr "{provider} OAuth कॉन्फ़िगर नहीं है"
+
+#: API: Auth - Magic link sent (always shown to prevent enumeration)
+msgid "server.api.auth.magic_link_sent"
+msgstr "यदि इस ईमेल के साथ कोई खाता मौजूद है, तो एक लॉगिन लिंक भेज दी गई है"
+
+#: API: Auth - Email not verified (Google/Okta)
+msgid "server.api.auth.email_not_verified"
+msgstr "ईमेल पता प्रदाता द्वारा सत्यापित नहीं किया गया है"
+
+#: API: Auth - No verified email (GitHub)
+msgid "server.api.auth.no_verified_email"
+msgstr "कोई सत्यापित ईमेल पता नहीं मिला। कृपया GitHub के साथ अपना ईमेल सत्यापित करें और पुनः प्रयास करें।"
+
+#: API: Auth - Signups disabled
+msgid "server.api.auth.signups_disabled"
+msgstr "नए उपयोगकर्ता पंजीकरण वर्तमान में अक्षम है। कृपया एक व्यवस्थापक से संपर्क करें।"
+
+# ============================================================================
+# User API responses
+# ============================================================================
+
+#: API: User - Not found
+msgid "server.api.user.not_found"
+msgstr "उपयोगकर्ता नहीं मिला"
+
+#: API: User - Invalid ID
+msgid "server.api.user.invalid_id"
+msgstr "अमान्य उपयोगकर्ता ID प्रारूप"
+
+#: API: User - Display name empty
+msgid "server.api.user.display_name_empty"
+msgstr "प्रदर्शन नाम खाली नहीं हो सकता"
+
+#: API: User - Profile updated
+msgid "server.api.user.profile_updated"
+msgstr "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई"
+
+#: API: User - Deletion scheduled
+msgid "server.api.user.deletion_scheduled"
+msgstr "खाता हटाने के लिए निर्धारित"
+
+#: API: User - Deletion already scheduled
+msgid "server.api.user.deletion_already_scheduled"
+msgstr "खाता हटाना पहले से निर्धारित है"
+
+#: API: User - Deletion failed
+msgid "server.api.user.deletion_failed"
+msgstr "खाता हटाना निर्धारित करने में विफल"
+
+#: API: User - No pending deletion
+msgid "server.api.user.no_pending_deletion"
+msgstr "इस खाते के लिए कोई लंबित हटाना नहीं है"
+
+#: API: User - Grace period expired
+msgid "server.api.user.grace_period_expired"
+msgstr "अनुग्रह अवधि समाप्त हो गई है, खाता पुनर्स्थापित नहीं किया जा सकता"
+
+#: API: User - Account restored
+msgid "server.api.user.account_restored"
+msgstr "खाता सफलतापूर्वक पुनर्स्थापित"
+
+#: API: User - Identity unlinked
+msgid "server.api.user.identity_unlinked"
+msgstr "पहचान सफलतापूर्वक अनलिंक की गई"
+
+#: API: User - Identity not found
+msgid "server.api.user.identity_not_found"
+msgstr "पहचान नहीं मिली"
+
+#: API: User - Cannot unlink last identity
+msgid "server.api.user.cannot_unlink_last_identity"
+msgstr "अंतिम पहचान को अनलिंक नहीं किया जा सकता"
+
+#: API: User - Username updated
+msgid "server.api.user.username_updated"
+msgstr "उपयोगकर्ता नाम सफलतापूर्वक अपडेट किया गया"
+
+#: API: User - Username invalid
+msgid "server.api.user.username_invalid"
+msgstr "उपयोगकर्ता नाम का प्रारूप अमान्य है"
+
+#: API: User - Username taken
+msgid "server.api.user.username_taken"
+msgstr "यह उपयोगकर्ता नाम पहले से उपयोग में है"
+
+#: API: User - Username too short
+msgid "server.api.user.username_too_short"
+msgstr "उपयोगकर्ता नाम कम से कम 3 अक्षरों का होना चाहिए"
+
+#: API: User - Username too long
+msgid "server.api.user.username_too_long"
+msgstr "उपयोगकर्ता नाम अधिकतम 39 अक्षरों का होना चाहिए"
+
+#: API: User - Username reserved
+msgid "server.api.user.username_reserved"
+msgstr "यह उपयोगकर्ता नाम आरक्षित है और इसका उपयोग नहीं किया जा सकता"
+
+#: API: User - Invalid locale
+msgid "server.api.user.invalid_locale"
+msgstr "अमान्य भाषा सेटिंग"
+
+# ============================================================================
+# Organization API responses
+# ============================================================================
+
+#: API: Org - Not found
+msgid "server.api.org.not_found"
+msgstr "संगठन नहीं मिला"
+
+#: API: Org - Invalid ID
+msgid "server.api.org.invalid_id"
+msgstr "अमान्य संगठन ID"
+
+#: API: Org - Invalid slug length
+msgid "server.api.org.invalid_slug_length"
+msgstr "स्लग 3 से 50 अक्षरों के बीच होना चाहिए"
+
+#: API: Org - Invalid slug format
+msgid "server.api.org.invalid_slug_format"
+msgstr "स्लग में केवल लोअरकेस अल्फ़ान्यूमेरिक अक्षर और हाइफ़न होने चाहिए"
+
+#: API: Org - Slug exists
+msgid "server.api.org.slug_exists"
+msgstr "इस स्लग के साथ एक संगठन पहले से मौजूद है"
+
+#: API: Org - Slug reserved
+msgid "server.api.org.slug_reserved"
+msgstr "This organization slug is reserved"
+
+#: API: Org - Invalid role
+msgid "server.api.org.invalid_role"
+msgstr "भूमिका इनमें से एक होनी चाहिए: owner, admin, member"
+
+#: API: Org - List failed
+msgid "server.api.org.list_failed"
+msgstr "संगठनों को सूचीबद्ध करने में विफल"
+
+#: API: Org - Create failed
+msgid "server.api.org.create_failed"
+msgstr "संगठन बनाने में विफल"
+
+#: API: Org - Not a member
+msgid "server.api.org.not_a_member"
+msgstr "आप इस संगठन के सदस्य नहीं हैं"
+
+#: API: Org - Already a member
+msgid "server.api.org.already_member"
+msgstr "उपयोगकर्ता पहले से इस संगठन का सदस्य है"
+
+#: API: Org - Member added
+msgid "server.api.org.member_added"
+msgstr "सदस्य संगठन में जोड़ा गया"
+
+#: API: Org - Member removed
+msgid "server.api.org.member_removed"
+msgstr "सदस्य संगठन से हटाया गया"
+
+#: API: Org - Member not found
+msgid "server.api.org.member_not_found"
+msgstr "इस संगठन में सदस्य नहीं मिला"
+
+#: API: Org - Last owner
+msgid "server.api.org.last_owner"
+msgstr "अंतिम मालिक को हटाया या पदावनत नहीं किया जा सकता"
+
+#: API: Org - Cannot delete personal org
+msgid "server.api.org.cannot_delete_personal"
+msgstr "व्यक्तिगत संगठन को हटाया नहीं जा सकता"
+
+#: API: Org - Deleted
+msgid "server.api.org.deleted"
+msgstr "संगठन हटाया गया"
+
+#: API: Org - Restored
+msgid "server.api.org.restored"
+msgstr "संगठन पुनर्स्थापित"
+
+#: API: Org - Not deleted
+msgid "server.api.org.not_deleted"
+msgstr "संगठन हटाया नहीं गया है"
+
+#: API: Org - Grace period expired
+msgid "server.api.org.grace_period_expired"
+msgstr "अनुग्रह अवधि समाप्त हो गई है और इस संगठन को पुनर्स्थापित नहीं किया जा सकता"
+
+#: API: Org - Owner required
+msgid "server.api.org.owner_required"
+msgstr "केवल मालिक ही यह कार्य कर सकते हैं"
+
+#: API: Org - Role updated
+msgid "server.api.org.role_updated"
+msgstr "सदस्य की भूमिका अपडेट की गई"
+
+#: API: Org - Join request for private org
+msgid "server.api.org.join_request_private"
+msgstr "निजी संगठन में शामिल होने का अनुरोध नहीं किया जा सकता"
+
+#: API: Org - Join request pending
+msgid "server.api.org.join_request_pending"
+msgstr "आपके पास इस संगठन के लिए पहले से एक लंबित शामिल होने का अनुरोध है"
+
+#: API: Org - Join request created
+msgid "server.api.org.join_request_created"
+msgstr "शामिल होने का अनुरोध सबमिट किया गया"
+
+#: API: Org - Join request not found
+msgid "server.api.org.join_request_not_found"
+msgstr "शामिल होने का अनुरोध नहीं मिला"
+
+#: API: Org - Join request approved
+msgid "server.api.org.join_request_approved"
+msgstr "शामिल होने का अनुरोध स्वीकृत"
+
+#: API: Org - Join request rejected
+msgid "server.api.org.join_request_rejected"
+msgstr "शामिल होने का अनुरोध अस्वीकृत"
+
+# ============================================================================
+# Team API responses
+# ============================================================================
+
+#: API: Team - Not found
+msgid "server.api.team.not_found"
+msgstr "टीम नहीं मिली"
+
+#: API: Team - Invalid ID
+msgid "server.api.team.invalid_id"
+msgstr "अमान्य टीम ID"
+
+#: API: Team - Invalid slug length
+msgid "server.api.team.invalid_slug_length"
+msgstr "स्लग 2 से 50 अक्षरों के बीच होना चाहिए"
+
+#: API: Team - Invalid slug format
+msgid "server.api.team.invalid_slug_format"
+msgstr "स्लग में केवल लोअरकेस अल्फ़ान्यूमेरिक अक्षर और हाइफ़न होने चाहिए"
+
+#: API: Team - List failed
+msgid "server.api.team.list_failed"
+msgstr "टीमों को सूचीबद्ध करने में विफल"
+
+#: API: Team - Membership check failed
+msgid "server.api.team.membership_check_failed"
+msgstr "संगठन सदस्यता जाँचने में विफल"
+
+# ============================================================================
+# Invitation API responses
+# ============================================================================
+
+#: API: Invitation - Created
+msgid "server.api.invitation.created"
+msgstr "आमंत्रण सफलतापूर्वक भेजा गया"
+
+#: API: Invitation - Cancelled
+msgid "server.api.invitation.cancelled"
+msgstr "आमंत्रण रद्द किया गया"
+
+#: API: Invitation - Accepted
+msgid "server.api.invitation.accepted"
+msgstr "आमंत्रण स्वीकार किया गया"
+
+#: API: Invitation - Not found
+msgid "server.api.invitation.not_found"
+msgstr "आमंत्रण नहीं मिला"
+
+#: API: Invitation - Expired
+msgid "server.api.invitation.expired"
+msgstr "यह आमंत्रण समाप्त हो गया है"
+
+#: API: Invitation - Invalid token
+msgid "server.api.invitation.invalid_token"
+msgstr "अमान्य आमंत्रण टोकन"
+
+#: API: Invitation - Already accepted
+msgid "server.api.invitation.already_accepted"
+msgstr "यह आमंत्रण पहले ही स्वीकार किया जा चुका है"
+
+#: API: Invitation - List failed
+msgid "server.api.invitation.list_failed"
+msgstr "आमंत्रणों को सूचीबद्ध करने में विफल"
+
+# ============================================================================
+# Join request API responses
+# ============================================================================
+
+#: API: Join request - Created
+msgid "server.api.join_request.created"
+msgstr "शामिल होने का अनुरोध सबमिट किया गया"
+
+#: API: Join request - Approved
+msgid "server.api.join_request.approved"
+msgstr "शामिल होने का अनुरोध स्वीकृत"
+
+#: API: Join request - Rejected
+msgid "server.api.join_request.rejected"
+msgstr "शामिल होने का अनुरोध अस्वीकृत"
+
+#: API: Join request - Already member
+msgid "server.api.join_request.already_member"
+msgstr "आप पहले से इस संगठन के सदस्य हैं"
+
+#: API: Join request - Already pending
+msgid "server.api.join_request.already_pending"
+msgstr "आपके पास पहले से एक लंबित शामिल होने का अनुरोध है"
+
+#: API: Join request - Not found
+msgid "server.api.join_request.not_found"
+msgstr "शामिल होने का अनुरोध नहीं मिला"
+
+#: API: Join request - Private org
+msgid "server.api.join_request.private_org"
+msgstr "निजी संगठन में शामिल होने का अनुरोध नहीं किया जा सकता"
+
+# ============================================================================
+# API Key responses
+# ============================================================================
+
+#: API: API Key - Invalid org ID
+msgid "server.api.api_key.invalid_org_id"
+msgstr "अमान्य संगठन ID प्रारूप"
+
+#: API: API Key - Name empty
+msgid "server.api.api_key.name_empty"
+msgstr "API कुंजी का नाम खाली नहीं हो सकता"
+
+#: API: API Key - No scopes
+msgid "server.api.api_key.no_scopes"
+msgstr "कम से कम एक स्कोप निर्दिष्ट होना चाहिए"
+
+#: API: API Key - Created
+msgid "server.api.api_key.created"
+msgstr "API कुंजी बनाई गई"
+
+#: API: API Key - Revoked
+msgid "server.api.api_key.revoked"
+msgstr "API कुंजी रद्द की गई"
+
+#: API: API Key - Not found
+msgid "server.api.api_key.not_found"
+msgstr "API कुंजी नहीं मिली"
+
+#: API: API Key - List failed
+msgid "server.api.api_key.list_failed"
+msgstr "API कुंजियों को सूचीबद्ध करने में विफल"
+
+#: API: API Key - Create failed
+msgid "server.api.api_key.create_failed"
+msgstr "API कुंजी बनाने में विफल"
+
+# ============================================================================
+# Session API responses
+# ============================================================================
+
+#: API: Session - Invalid ID
+msgid "server.api.session.invalid_id"
+msgstr "अमान्य सत्र ID प्रारूप"
+
+#: API: Session - Not found
+msgid "server.api.session.not_found"
+msgstr "सत्र नहीं मिला"
+
+#: API: Session - Revoked
+msgid "server.api.session.revoked"
+msgstr "सत्र सफलतापूर्वक रद्द किया गया"
+
+#: API: Session - List failed
+msgid "server.api.session.list_failed"
+msgstr "सत्र प्राप्त करने में विफल"
+
+#: API: Session - Revoke failed
+msgid "server.api.session.revoke_failed"
+msgstr "सत्र रद्द करने में विफल"
+
+#: API: Session - Ownership check failed
+msgid "server.api.session.ownership_check_failed"
+msgstr "सत्र स्वामित्व सत्यापित करने में विफल"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - System admin required
+msgid "server.api.admin.system_admin_required"
+msgstr "सिस्टम व्यवस्थापक भूमिका आवश्यक है"
+
+#: API: Admin - Cannot remove own admin
+msgid "server.api.admin.cannot_remove_own_admin"
+msgstr "अपनी स्वयं की व्यवस्थापक स्थिति नहीं हटा सकते"
+
+#: API: Admin - User list failed
+msgid "server.api.admin.user_list_failed"
+msgstr "उपयोगकर्ताओं को सूचीबद्ध करने में विफल"
+
+#: API: Admin - User update failed
+msgid "server.api.admin.user_update_failed"
+msgstr "उपयोगकर्ता को अपडेट करने में विफल"
+
+#: API: Admin - Roles updated
+msgid "server.api.admin.roles_updated"
+msgstr "उपयोगकर्ता भूमिकाएँ अपडेट की गईं"
+
+#: Auth: Device Page - Title
+msgid "server.auth.device.title"
+msgstr "डिवाइस प्राधिकरण - Loom"
+
+#: Auth: Device Page - Heading
+msgid "server.auth.device.heading"
+msgstr "डिवाइस प्राधिकरण"
+
+#: Auth: Device Page - Subtitle
+msgid "server.auth.device.subtitle"
+msgstr "अपने टर्मिनल में दिखाया गया कोड दर्ज करें"
+
+#: Auth: Device Page - Code label
+msgid "server.auth.device.code_label"
+msgstr "प्राधिकरण कोड"
+
+#: Auth: Device Page - Submit button
+msgid "server.auth.device.submit"
+msgstr "डिवाइस अधिकृत करें"
+
+#: Auth: Device Page - Authorizing button
+msgid "server.auth.device.authorizing"
+msgstr "अधिकृत कर रहे हैं..."
+
+#: Auth: Device Page - Authorized button
+msgid "server.auth.device.authorized"
+msgstr "अधिकृत"
+
+#: Auth: Device Page - Expiry help text
+msgid "server.auth.device.expiry_help"
+msgstr "यह कोड 15 मिनट बाद समाप्त हो जाता है।"
+
+#: Auth: Device Page - Success message
+msgid "server.auth.device.success"
+msgstr "डिवाइस सफलतापूर्वक अधिकृत! आप इस विंडो को बंद कर सकते हैं।"
+
+#: Auth: Device Page - Invalid code format
+msgid "server.auth.device.invalid_format"
+msgstr "कृपया XXX-XXX-XXX प्रारूप में एक वैध कोड दर्ज करें"
+
+#: Auth: Device Page - Generic error
+msgid "server.auth.device.error"
+msgstr "एक त्रुटि हुई। कृपया पुनः प्रयास करें।"
+
+#: Auth: Device Page - Authorization failed
+msgid "server.auth.device.auth_failed"
+msgstr "प्राधिकरण विफल। कृपया पुनः प्रयास करें।"
+
+# ============================================================================
+# Support Access API responses
+# ============================================================================
+
+#: API: Support Access - Not support staff
+msgid "server.api.support_access.not_support_staff"
+msgstr "केवल सहायता कर्मचारी ही सहायता पहुँच का अनुरोध कर सकते हैं"
+
+#: API: Support Access - Thread not found
+msgid "server.api.support_access.thread_not_found"
+msgstr "थ्रेड नहीं मिला"
+
+#: API: Support Access - Already requested
+msgid "server.api.support_access.already_requested"
+msgstr "इस थ्रेड के लिए सहायता पहुँच पहले से अनुरोधित है"
+
+#: API: Support Access - Already active
+msgid "server.api.support_access.already_active"
+msgstr "इस थ्रेड के लिए सहायता पहुँच पहले से सक्रिय है"
+
+#: API: Support Access - Requested
+msgid "server.api.support_access.requested"
+msgstr "सहायता पहुँच का अनुरोध किया गया"
+
+#: API: Support Access - Request failed
+msgid "server.api.support_access.request_failed"
+msgstr "सहायता पहुँच का अनुरोध करने में विफल"
+
+#: API: Support Access - Not owner
+msgid "server.api.support_access.not_owner"
+msgstr "केवल थ्रेड मालिक ही सहायता पहुँच को स्वीकृत या रद्द कर सकते हैं"
+
+#: API: Support Access - No pending request
+msgid "server.api.support_access.no_pending_request"
+msgstr "इस थ्रेड के लिए कोई लंबित सहायता पहुँच अनुरोध नहीं मिला"
+
+#: API: Support Access - Approved
+msgid "server.api.support_access.approved"
+msgstr "सहायता पहुँच स्वीकृत"
+
+#: API: Support Access - Approve failed
+msgid "server.api.support_access.approve_failed"
+msgstr "सहायता पहुँच स्वीकृत करने में विफल"
+
+#: API: Support Access - No active access
+msgid "server.api.support_access.no_active_access"
+msgstr "इस थ्रेड के लिए कोई सक्रिय सहायता पहुँच नहीं मिली"
+
+#: API: Support Access - Revoked
+msgid "server.api.support_access.revoked"
+msgstr "सहायता पहुँच रद्द की गई"
+
+#: API: Support Access - Revoke failed
+msgid "server.api.support_access.revoke_failed"
+msgstr "सहायता पहुँच रद्द करने में विफल"
+
+# ============================================================================
+# Share Link API responses
+# ============================================================================
+
+#: API: Share - Invalid thread ID
+msgid "server.api.share.invalid_thread_id"
+msgstr "अमान्य थ्रेड ID प्रारूप"
+
+#: API: Share - Thread not found
+msgid "server.api.share.thread_not_found"
+msgstr "थ्रेड नहीं मिला"
+
+#: API: Share - Invalid expires_at
+msgid "server.api.share.invalid_expires_at"
+msgstr "अमान्य समाप्ति तिथि प्रारूप। RFC 3339 प्रारूप का उपयोग करें।"
+
+#: API: Share - Create failed
+msgid "server.api.share.create_failed"
+msgstr "शेयर लिंक बनाने में विफल"
+
+#: API: Share - Link not found
+msgid "server.api.share.link_not_found"
+msgstr "इस थ्रेड के लिए कोई सक्रिय शेयर लिंक नहीं मिली"
+
+#: API: Share - Revoked
+msgid "server.api.share.revoked"
+msgstr "शेयर लिंक रद्द की गई"
+
+#: API: Share - Revoke failed
+msgid "server.api.share.revoke_failed"
+msgstr "शेयर लिंक रद्द करने में विफल"
+
+#: API: Share - Invalid or expired link
+msgid "server.api.share.invalid_or_expired"
+msgstr "अमान्य या समाप्त शेयर लिंक"
+
+#: API: Share - Link revoked
+msgid "server.api.share.link_revoked"
+msgstr "यह शेयर लिंक रद्द कर दी गई है"
+
+#: API: Share - Link expired
+msgid "server.api.share.link_expired"
+msgstr "यह शेयर लिंक समाप्त हो गई है"
+
+#: API: Share - Validation failed
+msgid "server.api.share.validation_failed"
+msgstr "शेयर लिंक सत्यापित करने में विफल"
+
+#: API: Share - Fetch failed
+msgid "server.api.share.fetch_failed"
+msgstr "थ्रेड प्राप्त करने में विफल"
+
+#: API: Weaver - Provisioner not configured
+msgid "server.api.weaver.provisioner_not_configured"
+msgstr "Weaver प्रोविज़नर कॉन्फ़िगर नहीं है"
+
+#: API: Weaver - Invalid ID
+msgid "server.api.weaver.invalid_id"
+msgstr "अमान्य Weaver ID: {id}"
+
+#: API: Weaver - Not found
+msgid "server.api.weaver.not_found"
+msgstr "Weaver नहीं मिला: {id}"
+
+#: API: Weaver - Access denied
+msgid "server.api.weaver.access_denied"
+msgstr "आपको इस Weaver तक पहुँचने की अनुमति नहीं है"
+
+#: API: Weaver - Attach denied
+msgid "server.api.weaver.attach_denied"
+msgstr "आपको इस Weaver से जुड़ने की अनुमति नहीं है"
+
+#: API: Weaver - Delete denied
+msgid "server.api.weaver.delete_denied"
+msgstr "आपको इस Weaver को हटाने की अनुमति नहीं है"
+
+#: API: Weaver - Read only attach
+msgid "server.api.weaver.read_only_attach"
+msgstr "केवल-पढ़ने योग्य जुड़ाव: सहायता उपयोगकर्ताओं के लिए इनपुट अक्षम है"
+
+#: API: Weaver - Logs access denied
+msgid "server.api.weaver.logs_denied"
+msgstr "आपको इस Weaver के लॉग तक पहुँचने की अनुमति नहीं है"
+
+# ============================================================================
+# CLI: Update command
+# ============================================================================
+
+#: CLI: Update - Current version
+msgid "client.update.current_version"
+msgstr "वर्तमान संस्करण: {version}"
+
+#: CLI: Update - Platform
+msgid "client.update.platform"
+msgstr "प्लेटफ़ॉर्म: {platform}"
+
+#: CLI: Update - Checking
+msgid "client.update.checking"
+msgstr "अपडेट की जाँच हो रही है..."
+
+#: CLI: Update - Already up to date
+msgid "client.update.up_to_date"
+msgstr "पहले से अप टू डेट है (SHA: {sha})"
+
+#: CLI: Update - Update available
+msgid "client.update.available"
+msgstr "अपडेट उपलब्ध: {current} -> {remote}"
+
+#: CLI: Update - Downloading
+msgid "client.update.downloading"
+msgstr "{url} से डाउनलोड हो रहा है..."
+
+#: CLI: Update - Downloaded
+msgid "client.update.downloaded"
+msgstr "{bytes} बाइट्स डाउनलोड किए गए (सत्यापित)"
+
+#: CLI: Update - Complete
+msgid "client.update.complete"
+msgstr "अपडेट पूर्ण! कृपया loom पुनः आरंभ करें।"
+
+#: CLI: Update - Error: empty binary
+msgid "client.update.error.empty_binary"
+msgstr "डाउनलोड की गई बाइनरी खाली है"
+
+#: CLI: Update - Error: SHA mismatch
+msgid "client.update.error.sha_mismatch"
+msgstr "डाउनलोड की गई बाइनरी SHA बेमेल: अपेक्षित {expected}, प्राप्त {actual}"
+
+#: CLI: Update - Error: env not set
+msgid "client.update.error.env_not_set"
+msgstr "अपडेट के लिए LOOM_UPDATE_BASE_URL या LOOM_THREAD_SYNC_URL सेट होना चाहिए"
+
+#: CLI: Update - Error: check failed
+msgid "client.update.error.check_failed"
+msgstr "अपडेट की जाँच करने में विफल: {status}"
+
+# ============================================================================
+# CLI: Authentication
+# ============================================================================
+
+#: CLI: Auth - Visit URL prompt
+msgid "client.auth.visit_url"
+msgstr "{url} पर जाएँ और कोड दर्ज करें: {code}"
+
+#: CLI: Auth - Browser open failed
+msgid "client.auth.browser_failed"
+msgstr "(ब्राउज़र स्वचालित रूप से नहीं खोला जा सका)"
+
+#: CLI: Auth - Waiting for authorization
+msgid "client.auth.waiting"
+msgstr "प्राधिकरण की प्रतीक्षा हो रही है"
+
+#: CLI: Auth - Authorization timed out
+msgid "client.auth.timed_out"
+msgstr "प्राधिकरण का समय समाप्त हो गया"
+
+#: CLI: Auth - Login cancelled
+msgid "client.auth.cancelled"
+msgstr "लॉगिन रद्द किया गया"
+
+#: CLI: Auth - Login successful
+msgid "client.auth.login_success"
+msgstr "{server} में सफलतापूर्वक लॉग इन किया गया"
+
+#: CLI: Auth - Device code expired
+msgid "client.auth.device_expired"
+msgstr "डिवाइस कोड समाप्त हो गया"
+
+#: CLI: Auth - Logged out
+msgid "client.auth.logged_out"
+msgstr "{server} से लॉग आउट किया गया"
+
+# ============================================================================
+# CLI: REPL
+# ============================================================================
+
+#: CLI: REPL - Welcome message
+msgid "client.repl.welcome"
+msgstr "Loom में आपका स्वागत है - AI-संचालित कोडिंग सहायक"
+
+#: CLI: REPL - Thread ID
+msgid "client.repl.thread_id"
+msgstr "थ्रेड: {id}"
+
+#: CLI: REPL - Instructions
+msgid "client.repl.instructions"
+msgstr "अपना संदेश टाइप करें और Enter दबाएँ। बाहर निकलने के लिए Ctrl+C का उपयोग करें।"
+
+#: CLI: REPL - Interrupted
+msgid "client.repl.interrupted"
+msgstr "बाधित। थ्रेड सहेजा गया। अलविदा!"
+
+#: CLI: REPL - Error
+msgid "client.repl.error"
+msgstr "त्रुटि: {error}"
+
+# ============================================================================
+# CLI: Search
+# ============================================================================
+
+#: CLI: Search - No results
+msgid "client.search.no_results"
+msgstr "\"{query}\" के लिए कोई परिणाम नहीं मिला"
+
+#: CLI: Search - Results header
+msgid "client.search.results_header"
+msgstr "\"{query}\" के लिए परिणाम ({count} हिट्स):"
+
+#: CLI: Search - Local no results
+msgid "client.search.local_no_results"
+msgstr "\"{query}\" के लिए कोई परिणाम नहीं मिला (स्थानीय खोज)"
+
+#: CLI: Search - Local results header
+msgid "client.search.local_results_header"
+msgstr "\"{query}\" के लिए स्थानीय परिणाम ({count} हिट्स):"
+
+# ============================================================================
+# CLI: Threads
+# ============================================================================
+
+#: CLI: Threads - No threads
+msgid "client.threads.no_threads"
+msgstr "कोई थ्रेड नहीं मिला।"
+
+#: CLI: Threads - List header
+msgid "client.threads.list_header"
+msgstr "{id:<40} {title:<40} {updated:<20}"
+
+#: CLI: Threads - Private session
+msgid "client.threads.private_session"
+msgstr "निजी सत्र शुरू हो रहा है (केवल-स्थानीय, कभी सर्वर से सिंक नहीं होगा)।"
+
+#: CLI: Threads - Shared with support
+msgid "client.threads.shared_support"
+msgstr "थ्रेड {id} सहायता के साथ साझा किया गया है।"
+
+#: CLI: Threads - Visibility changed
+msgid "client.threads.visibility_changed"
+msgstr "थ्रेड {id} की दृश्यता {visibility} में बदली गई।"
+
+# ============================================================================
+# CLI: Weaver
+# ============================================================================
+
+#: CLI: Weaver - Creating
+msgid "client.weaver.creating"
+msgstr "Weaver बना रहे हैं..."
+
+#: CLI: Weaver - Created ID
+msgid "client.weaver.created_id"
+msgstr "  ID:    {id}"
+
+#: CLI: Weaver - Created image
+msgid "client.weaver.created_image"
+msgstr "  इमेज: {image}"
+
+#: CLI: Weaver - Created TTL
+msgid "client.weaver.created_ttl"
+msgstr "  TTL:   {hours} घंटे"
+
+#: CLI: Weaver - Attaching
+msgid "client.weaver.attaching"
+msgstr "Weaver से जुड़ रहे हैं..."
+
+#: CLI: Weaver - Detached
+msgid "client.weaver.detached"
+msgstr "[Weaver {id} से विलग]"
+
+#: CLI: Weaver - Reattach hint
+msgid "client.weaver.reattach_hint"
+msgstr "Weaver अभी भी चल रहा है। पुनः जुड़ें: loom attach {id}"
+
+#: CLI: Weaver - No weavers
+msgid "client.weaver.no_weavers"
+msgstr "कोई Weaver नहीं चल रहा।"
+
+#: CLI: Weaver - List header
+msgid "client.weaver.list_header"
+msgstr "{id:<40} {image:<30} {status:<10} {age:<8} {ttl:<8}"
+
+#: CLI: Weaver - Deleting
+msgid "client.weaver.deleting"
+msgstr "Weaver {id} हटा रहे हैं..."
+
+#: CLI: Weaver - Deleted
+msgid "client.weaver.deleted"
+msgstr "Weaver हटाया गया।"
+
+#: CLI: Weaver - Attach prefix
+msgid "client.weaver.attach_prefix"
+msgstr "[Weaver {id} से जुड़ रहे हैं]"
+
+# ============================================================================
+# Weaver API responses
+# ============================================================================
+
+#: API: Weaver - Invalid org ID
+msgid "server.api.weaver.invalid_org_id"
+msgstr "अमान्य संगठन आईडी: {id}"
+
+#: API: Weaver - Not org member
+msgid "server.api.weaver.not_org_member"
+msgstr "आप इस संगठन के सदस्य नहीं हैं"
+
+#: API: Weaver - Membership check failed
+msgid "server.api.weaver.membership_check_failed"
+msgstr "संगठन की सदस्यता सत्यापित करने में विफल"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - Cannot remove last admin
+msgid "server.api.admin.cannot_remove_last_admin"
+msgstr "अंतिम सिस्टम व्यवस्थापक को हटाया नहीं जा सकता"
+
+# ============================================================================
+# SCM: Repository API responses
+# ============================================================================
+
+#: API: SCM Repo - Not found
+msgid "server.api.scm.repo.not_found"
+msgstr "रिपॉजिटरी नहीं मिली"
+
+#: API: SCM - Not configured
+msgid "server.api.scm.not_configured"
+msgstr "SCM कॉन्फ़िगर नहीं है"
+
+#: API: SCM - Internal error
+msgid "server.api.scm.internal_error"
+msgstr "आंतरिक सर्वर त्रुटि"
+
+#: API: SCM - Repository not found
+msgid "server.api.scm.repo_not_found"
+msgstr "रिपॉजिटरी नहीं मिली"
+
+#: API: SCM - Invalid repository name
+msgid "server.api.scm.invalid_repo_name"
+msgstr "रिपॉजिटरी का नाम 1 से 100 अक्षरों के बीच होना चाहिए"
+
+#: API: SCM - Cannot create for other user
+msgid "server.api.scm.cannot_create_for_other_user"
+msgstr "अन्य उपयोगकर्ता के लिए रिपॉजिटरी नहीं बनाई जा सकती"
+
+#: API: SCM - Not org member
+msgid "server.api.scm.not_org_member"
+msgstr "आप इस संगठन के सदस्य नहीं हैं"
+
+#: API: SCM - Org admin required
+msgid "server.api.scm.org_admin_required"
+msgstr "रिपॉजिटरी बनाने के लिए संगठन का मालिक या व्यवस्थापक होना आवश्यक है"
+
+#: API: SCM - Organization not found
+msgid "server.api.scm.org_not_found"
+msgstr "संगठन नहीं मिला"
+
+#: API: SCM - Repository already exists
+msgid "server.api.scm.repo_already_exists"
+msgstr "इस नाम की रिपॉजिटरी पहले से मौजूद है"
+
+#: API: SCM - Failed to create repository
+msgid "server.api.scm.failed_to_create_repo"
+msgstr "रिपॉजिटरी बनाने में विफल"
+
+#: API: SCM - Failed to initialize repo on disk
+msgid "server.api.scm.failed_to_init_repo_disk"
+msgstr "डिस्क पर रिपॉजिटरी इनिशियलाइज़ करने में विफल"
+
+#: API: SCM - Failed to initialize git repo
+msgid "server.api.scm.failed_to_init_git_repo"
+msgstr "गिट रिपॉजिटरी इनिशियलाइज़ करने में विफल"
+
+#: API: SCM - Access denied
+msgid "server.api.scm.access_denied"
+msgstr "पहुँच अस्वीकृत"
+
+#: API: SCM - Admin required
+msgid "server.api.scm.admin_required"
+msgstr "व्यवस्थापक पहुँच आवश्यक"
+
+#: API: SCM - Invalid default branch
+msgid "server.api.scm.invalid_default_branch"
+msgstr "डिफ़ॉल्ट ब्रांच खाली नहीं हो सकती"
+
+#: API: SCM - Failed to update repository
+msgid "server.api.scm.failed_to_update_repo"
+msgstr "रिपॉजिटरी अपडेट करने में विफल"
+
+#: API: SCM - Failed to delete repository
+msgid "server.api.scm.failed_to_delete_repo"
+msgstr "रिपॉजिटरी हटाने में विफल"
+
+#: API: SCM - User not found
+msgid "server.api.scm.user_not_found"
+msgstr "उपयोगकर्ता नहीं मिला"
+
+#: API: SCM - Failed to list repositories
+msgid "server.api.scm.failed_to_list_repos"
+msgstr "रिपॉजिटरी सूचीबद्ध करने में विफल"
+
+# ============================================================================
+# SCM: Git API responses
+# ============================================================================
+
+#: API: SCM Git - Auth required for private repo
+msgid "server.api.scm.git.auth_required_private"
+msgstr "प्राइवेट रिपॉजिटरी के लिए प्रमाणीकरण आवश्यक"
+
+#: API: SCM Git - Auth required for push
+msgid "server.api.scm.git.auth_required_push"
+msgstr "पुश के लिए प्रमाणीकरण आवश्यक"
+
+#: API: SCM Git - Auth required
+msgid "server.api.scm.git.auth_required"
+msgstr "प्रमाणीकरण आवश्यक"
+
+#: API: SCM Git - Access denied
+msgid "server.api.scm.git.access_denied"
+msgstr "रिपॉजिटरी तक पहुँच अस्वीकृत"
+
+#: API: SCM Git - Write access denied
+msgid "server.api.scm.git.write_access_denied"
+msgstr "रिपॉजिटरी में लिखने की पहुँच अस्वीकृत"
+
+# ============================================================================
+# SCM: Protection API responses
+# ============================================================================
+
+#: API: SCM Protection - Failed to load rules
+msgid "server.api.scm.protection.failed_to_load"
+msgstr "सुरक्षा नियम लोड करने में विफल"
+
+#: API: SCM Protection - Failed to list rules
+msgid "server.api.scm.protection.failed_to_list"
+msgstr "सुरक्षा नियम सूचीबद्ध करने में विफल"
+
+#: API: SCM Protection - Invalid pattern
+msgid "server.api.scm.protection.invalid_pattern"
+msgstr "पैटर्न 1 से 256 अक्षरों के बीच होना चाहिए"
+
+#: API: SCM Protection - Rule already exists
+msgid "server.api.scm.protection.already_exists"
+msgstr "इस पैटर्न का सुरक्षा नियम पहले से मौजूद है"
+
+#: API: SCM Protection - Failed to create rule
+msgid "server.api.scm.protection.failed_to_create"
+msgstr "सुरक्षा नियम बनाने में विफल"
+
+#: API: SCM Protection - Rule not found
+msgid "server.api.scm.protection.rule_not_found"
+msgstr "सुरक्षा नियम नहीं मिला"
+
+#: API: SCM Protection - Failed to delete rule
+msgid "server.api.scm.protection.failed_to_delete"
+msgstr "सुरक्षा नियम हटाने में विफल"
+
+# ============================================================================
+# SCM: Webhook API responses
+# ============================================================================
+
+#: API: SCM Webhook - Not found
+msgid "server.api.scm.webhook.not_found"
+msgstr "वेबहुक नहीं मिला"
+
+#: API: SCM Webhook - Admin required
+msgid "server.api.scm.webhook.admin_required"
+msgstr "व्यवस्थापक पहुँच आवश्यक"
+
+#: API: SCM Webhook - URL required
+msgid "server.api.scm.webhook.url_required"
+msgstr "URL आवश्यक है"
+
+#: API: SCM Webhook - URL invalid protocol
+msgid "server.api.scm.webhook.url_invalid_protocol"
+msgstr "URL http:// या https:// से शुरू होना चाहिए"
+
+#: API: SCM Webhook - URL too long
+msgid "server.api.scm.webhook.url_too_long"
+msgstr "URL 2048 अक्षरों से कम होना चाहिए"
+
+#: API: SCM Webhook - Events required
+msgid "server.api.scm.webhook.events_required"
+msgstr "कम से कम एक इवेंट आवश्यक है"
+
+#: API: SCM Webhook - Invalid event
+msgid "server.api.scm.webhook.invalid_event"
+msgstr "अमान्य इवेंट '{event}'। वैध इवेंट: {valid_events}"
+
+#: API: SCM Webhook - Secret required
+msgid "server.api.scm.webhook.secret_required"
+msgstr "सीक्रेट आवश्यक है"
+
+#: API: SCM Webhook - URL invalid
+msgid "server.api.scm.webhook.url_invalid"
+msgstr "अमान्य URL प्रारूप"
+
+#: API: SCM Webhook - Localhost blocked
+msgid "server.api.scm.webhook.url_localhost_blocked"
+msgstr "लोकलहोस्ट URL की अनुमति नहीं है"
+
+#: API: SCM Webhook - Private IP blocked
+msgid "server.api.scm.webhook.url_private_ip_blocked"
+msgstr "प्राइवेट या आंतरिक IP पते की अनुमति नहीं है"
+
+# ============================================================================
+# SCM: Maintenance API responses
+# ============================================================================
+
+#: API: SCM Maintenance - Not configured
+msgid "server.api.scm.maintenance.not_configured"
+msgstr "मेंटेनेंस कॉन्फ़िगर नहीं है"
+
+#: API: SCM Maintenance - Job queued for repository
+msgid "server.api.scm.maintenance.job_queued"
+msgstr "रिपॉजिटरी के लिए मेंटेनेंस कार्य '{task}' कतार में है"
+
+#: API: SCM Maintenance - Global sweep queued
+msgid "server.api.scm.maintenance.sweep_queued"
+msgstr "ग्लोबल मेंटेनेंस स्वीप '{task}' कतार में है"
+
+# ============================================================================
+# SCM: Mirror API responses
+# ============================================================================
+
+#: API: SCM Mirror - URL required
+msgid "server.api.scm.mirror.url_required"
+msgstr "मिरर URL आवश्यक है"
+
+#: API: SCM Mirror - URL invalid protocol
+msgid "server.api.scm.mirror.url_invalid_protocol"
+msgstr "मिरर URL http:// या https:// से शुरू होना चाहिए"
+
+#: API: SCM Mirror - URL too long
+msgid "server.api.scm.mirror.url_too_long"
+msgstr "मिरर URL 2048 अक्षरों से कम होना चाहिए"
+
+#: API: SCM Mirror - URL invalid
+msgid "server.api.scm.mirror.url_invalid"
+msgstr "अमान्य मिरर URL प्रारूप"
+
+#: API: SCM Mirror - Localhost blocked
+msgid "server.api.scm.mirror.url_localhost_blocked"
+msgstr "मिरर के लिए लोकलहोस्ट URL की अनुमति नहीं है"
+
+#: API: SCM Mirror - Private IP blocked
+msgid "server.api.scm.mirror.url_private_ip_blocked"
+msgstr "मिरर के लिए प्राइवेट या आंतरिक IP पते की अनुमति नहीं है"
+
+#: API: SCM Mirror - Not found
+msgid "server.api.scm.mirror.not_found"
+msgstr "मिरर नहीं मिला"
+
+#: API: SCM Mirror - Disabled
+msgid "server.api.scm.mirror.disabled"
+msgstr "मिरर अक्षम है"
+
+#: API: SCM Mirror - Sync queued
+msgid "server.api.scm.mirror.sync_queued"
+msgstr "मिरर सिंक कतार में है"
+
+#: API: SCM Mirror - Failed to delete
+msgid "server.api.scm.mirror.failed_to_delete"
+msgstr "मिरर हटाने में विफल"
+
+#: API: SCM Mirror - Invalid path format
+msgid "server.api.scm.mirror.invalid_path"
+msgstr "अमान्य मिरर पाथ प्रारूप। अपेक्षित: mirrors/{platform}/{owner}/{repo}"
+
+#: API: SCM Mirror - Push not allowed
+msgid "server.api.scm.mirror.push_not_allowed"
+msgstr "मिरर रिपॉजिटरी में पुश की अनुमति नहीं है"
+
+#: API: SCM Mirror - Remote repository not found
+msgid "server.api.scm.mirror.remote_not_found"
+msgstr "रिमोट रिपॉजिटरी नहीं मिली"
+
+#: API: SCM Mirror - Mirrors org not found
+msgid "server.api.scm.mirror.mirrors_org_not_found"
+msgstr "मिरर संगठन कॉन्फ़िगर नहीं है। कृपया 'mirrors' नाम का संगठन बनाएं।"
+
+#: API: SCM Mirror - Clone failed
+msgid "server.api.scm.mirror.clone_failed"
+msgstr "रिमोट रिपॉजिटरी क्लोन करने में विफल"
+
+# ============================================================================
+# Jobs: Scheduler
+# ============================================================================
+
+#: Jobs: Email Alert - Subject
+msgid "server.jobs.alert.subject"
+msgstr "[Loom] जॉब विफल: {job_name}"
+
+#: Jobs: Email Alert - Body intro
+msgid "server.jobs.alert.body"
+msgstr "जॉब \"{job_name}\" लगातार {consecutive_failures} बार विफल हुई है।"
+
+#: Jobs: Email Alert - Job ID
+msgid "server.jobs.alert.job_id"
+msgstr "जॉब ID: {job_id}"
+
+#: Jobs: Email Alert - Last error
+msgid "server.jobs.alert.last_error"
+msgstr "अंतिम त्रुटि: {error_message}"
+
+#: Jobs: Email Alert - Last run
+msgid "server.jobs.alert.last_run"
+msgstr "अंतिम रन: {last_run_at}"
+
+#: Jobs: Email Alert - View history link
+msgid "server.jobs.alert.view_history"
+msgstr "जॉब इतिहास देखें: {url}"
+
+#: Jobs: API - Job not found
+msgid "server.jobs.error.not_found"
+msgstr "जॉब नहीं मिली: {job_id}"
+
+#: Jobs: API - Scheduler not configured
+msgid "server.jobs.error.not_configured"
+msgstr "जॉब शेड्यूलर कॉन्फ़िगर नहीं है"
+
+#: Jobs: API - Job triggered
+msgid "server.jobs.success.triggered"
+msgstr "जॉब {job_id} सफलतापूर्वक ट्रिगर की गई"
+
+#: Jobs: API - Job cancelled
+msgid "server.jobs.success.cancelled"
+msgstr "जॉब {job_id} रद्द की गई"
+
+#: Jobs: API - Job enabled
+msgid "server.jobs.success.enabled"
+msgstr "जॉब {job_id} सक्षम की गई"
+
+#: Jobs: API - Job disabled
+msgid "server.jobs.success.disabled"
+msgstr "जॉब {job_id} अक्षम की गई"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - User deleted
+msgid "server.api.admin.user_deleted"
+msgstr "उपयोगकर्ता सफलतापूर्वक हटाया गया"
+
+#: API: Admin - Cannot delete self
+msgid "server.api.admin.cannot_delete_self"
+msgstr "अपना खाता नहीं हटा सकते"
+
+#: API: Admin - User not found
+msgid "server.api.admin.user_not_found"
+msgstr "उपयोगकर्ता नहीं मिला"
+
+# ============================================================================
+# Admin Users UI
+# ============================================================================
+
+#: Admin Users - Delete button
+msgid "admin.users.delete"
+msgstr "हटाएं"
+
+#: Admin Users - Delete user title
+msgid "admin.users.deleteUser"
+msgstr "उपयोगकर्ता हटाएं"
+
+#: Admin Users - Delete confirm title
+msgid "admin.users.deleteConfirmTitle"
+msgstr "उपयोगकर्ता हटाएं"
+
+#: Admin Users - Delete confirm message
+msgid "admin.users.deleteConfirmMessage"
+msgstr "क्या आप वाकई इस उपयोगकर्ता को हटाना चाहते हैं? यह क्रिया खाते को सॉफ्ट-डिलीट करेगी।"
+
+#: Admin Users - Delete success
+msgid "admin.users.deleteSuccess"
+msgstr "उपयोगकर्ता सफलतापूर्वक हटाया गया"
+
+#: Admin Users - Cancel button
+msgid "admin.users.cancel"
+msgstr "रद्द करें"
+
+#: Admin Users - Confirm delete button
+msgid "admin.users.confirm"
+msgstr "हटाने की पुष्टि करें"
+
+# ============================================================================
+# SCM Git Browser API
+# ============================================================================
+
+#: API: SCM Browser - Failed to open repository
+msgid "server.api.scm.browser.failed_to_open_repo"
+msgstr "Failed to open repository"
+
+#: API: SCM Browser - File path required
+msgid "server.api.scm.browser.file_path_required"
+msgstr "File path is required"
+
+#: API: SCM Browser - Ref not found
+msgid "server.api.scm.browser.ref_not_found"
+msgstr "Reference not found: {ref}"
+
+#: API: SCM Browser - Failed to get object
+msgid "server.api.scm.browser.failed_to_get_object"
+msgstr "Failed to get object"
+
+#: API: SCM Browser - Failed to get commit
+msgid "server.api.scm.browser.failed_to_get_commit"
+msgstr "Failed to get commit"
+
+#: API: SCM Browser - Failed to get tree
+msgid "server.api.scm.browser.failed_to_get_tree"
+msgstr "Failed to get tree"
+
+#: API: SCM Browser - Failed to lookup path
+msgid "server.api.scm.browser.failed_to_lookup_path"
+msgstr "Failed to lookup path"
+
+#: API: SCM Browser - Path not found
+msgid "server.api.scm.browser.path_not_found"
+msgstr "Path not found: {path}"
+
+#: API: SCM Browser - Not a file
+msgid "server.api.scm.browser.not_a_file"
+msgstr "Not a file: {path}"
+
+#: API: SCM Browser - Not a directory
+msgid "server.api.scm.browser.not_a_directory"
+msgstr "Not a directory: {path}"
+
+
+# ============================================================================
+# Feature Flags API responses
+# ============================================================================
+
+#: API: Flags - Flag not found
+msgid "server.api.flags.flag_not_found"
+msgstr "फ़ीचर फ़्लैग नहीं मिला"
+
+#: API: Flags - Flag created
+msgid "server.api.flags.flag_created"
+msgstr "फ़ीचर फ़्लैग बनाया गया"
+
+#: API: Flags - Flag updated
+msgid "server.api.flags.flag_updated"
+msgstr "फ़ीचर फ़्लैग अपडेट किया गया"
+
+#: API: Flags - Flag archived
+msgid "server.api.flags.flag_archived"
+msgstr "फ़ीचर फ़्लैग संग्रहीत किया गया"
+
+#: API: Flags - Flag restored
+msgid "server.api.flags.flag_restored"
+msgstr "फ़ीचर फ़्लैग पुनर्स्थापित किया गया"
+
+#: API: Flags - Invalid flag key
+msgid "server.api.flags.invalid_flag_key"
+msgstr "अमान्य फ़्लैग कुंजी"
+
+#: API: Flags - Duplicate flag key
+msgid "server.api.flags.duplicate_flag_key"
+msgstr "फ़्लैग कुंजी पहले से मौजूद है"
+
+#: API: Flags - Variant not found
+msgid "server.api.flags.variant_not_found"
+msgstr "वैरिएंट नहीं मिला"
+
+#: API: Flags - Default variant missing
+msgid "server.api.flags.default_variant_missing"
+msgstr "डिफ़ॉल्ट वैरिएंट वैरिएंट सूची में नहीं है"
+
+#: API: Flags - Circular prerequisite
+msgid "server.api.flags.circular_prerequisite"
+msgstr "चक्रीय पूर्वापेक्षा निर्भरता का पता चला"
+
+#: API: Flags - Prerequisite not found
+msgid "server.api.flags.prerequisite_not_found"
+msgstr "पूर्वापेक्षा फ़्लैग नहीं मिला"
+
+#: API: Flags - Strategy not found
+msgid "server.api.flags.strategy_not_found"
+msgstr "रोलआउट रणनीति नहीं मिली"
+
+#: API: Flags - Strategy created
+msgid "server.api.flags.strategy_created"
+msgstr "रणनीति बनाई गई"
+
+#: API: Flags - Strategy updated
+msgid "server.api.flags.strategy_updated"
+msgstr "रणनीति अपडेट की गई"
+
+#: API: Flags - Strategy deleted
+msgid "server.api.flags.strategy_deleted"
+msgstr "रणनीति हटाई गई"
+
+#: API: Flags - Strategy in use
+msgid "server.api.flags.strategy_in_use"
+msgstr "रणनीति वर्तमान में अन्य फ़्लैग द्वारा उपयोग में है"
+
+#: API: Flags - Environment not found
+msgid "server.api.flags.environment_not_found"
+msgstr "वातावरण नहीं मिला"
+
+#: API: Flags - Environment created
+msgid "server.api.flags.environment_created"
+msgstr "वातावरण बनाया गया"
+
+#: API: Flags - Environment updated
+msgid "server.api.flags.environment_updated"
+msgstr "वातावरण अपडेट किया गया"
+
+#: API: Flags - Environment deleted
+msgid "server.api.flags.environment_deleted"
+msgstr "वातावरण हटाया गया"
+
+#: API: Flags - Environment has active keys
+msgid "server.api.flags.environment_has_active_keys"
+msgstr "सक्रिय SDK कुंजियों वाले वातावरण को हटाया नहीं जा सकता"
+
+#: API: Flags - Invalid environment name
+msgid "server.api.flags.invalid_environment_name"
+msgstr "अमान्य वातावरण नाम"
+
+#: API: Flags - Invalid environment color
+msgid "server.api.flags.invalid_environment_color"
+msgstr "अमान्य वातावरण रंग"
+
+#: API: Flags - Duplicate environment name
+msgid "server.api.flags.duplicate_environment_name"
+msgstr "वातावरण नाम पहले से मौजूद है"
+
+#: API: Flags - Flag config updated
+msgid "server.api.flags.flag_config_updated"
+msgstr "वातावरण कॉन्फ़िगरेशन अपडेट किया गया"
+
+#: API: Flags - Kill switch not found
+msgid "server.api.flags.kill_switch_not_found"
+msgstr "किल स्विच नहीं मिला"
+
+#: API: Flags - Kill switch created
+msgid "server.api.flags.kill_switch_created"
+msgstr "किल स्विच बनाया गया"
+
+#: API: Flags - Kill switch updated
+msgid "server.api.flags.kill_switch_updated"
+msgstr "किल स्विच अपडेट किया गया"
+
+#: API: Flags - Kill switch deleted
+msgid "server.api.flags.kill_switch_deleted"
+msgstr "किल स्विच हटाया गया"
+
+#: API: Flags - Kill switch activated
+msgid "server.api.flags.kill_switch_activated"
+msgstr "किल स्विच सक्रिय किया गया"
+
+#: API: Flags - Kill switch deactivated
+msgid "server.api.flags.kill_switch_deactivated"
+msgstr "किल स्विच निष्क्रिय किया गया"
+
+#: API: Flags - Invalid kill switch key
+msgid "server.api.flags.invalid_kill_switch_key"
+msgstr "अमान्य किल स्विच कुंजी"
+
+#: API: Flags - Duplicate kill switch key
+msgid "server.api.flags.duplicate_kill_switch_key"
+msgstr "किल स्विच कुंजी पहले से मौजूद है"
+
+#: API: Flags - Activation reason required
+msgid "server.api.flags.activation_reason_required"
+msgstr "सक्रियण कारण आवश्यक है"
+
+#: API: Flags - SDK key not found
+msgid "server.api.flags.sdk_key_not_found"
+msgstr "SDK कुंजी नहीं मिली"
+
+#: API: Flags - SDK key created
+msgid "server.api.flags.sdk_key_created"
+msgstr "SDK कुंजी बनाई गई"
+
+#: API: Flags - SDK key revoked
+msgid "server.api.flags.sdk_key_revoked"
+msgstr "SDK कुंजी निरस्त की गई"
+
+#: API: Flags - SDK key revoked success
+msgid "server.api.flags.sdk_key_revoked_success"
+msgstr "SDK कुंजी सफलतापूर्वक निरस्त की गई"
+
+#: API: Flags - Invalid SDK key format
+msgid "server.api.flags.invalid_sdk_key_format"
+msgstr "अमान्य SDK कुंजी प्रारूप"
+
+#: API: Flags - Export started
+msgid "server.api.flags.export_started"
+msgstr "एक्सपोज़र निर्यात शुरू हुआ"
+
+#: API: Flags - Exposure already logged
+msgid "server.api.flags.exposure_already_logged"
+msgstr "एक्सपोज़र पहले से लॉग किया गया है"
+
+#: API: Flags - Exposure created
+msgid "server.api.flags.exposure_created"
+msgstr "एक्सपोज़र बनाया गया"
+
+#: API: Flags - Exposure tracking disabled
+msgid "server.api.flags.exposure_tracking_disabled"
+msgstr "एक्सपोज़र ट्रैकिंग अक्षम"
+
+#: API: Flags - Exposure tracking enabled
+msgid "server.api.flags.exposure_tracking_enabled"
+msgstr "एक्सपोज़र ट्रैकिंग सक्षम"
+
+#: API: Flags - Invalid time range
+msgid "server.api.flags.invalid_time_range"
+msgstr "अमान्य समय सीमा"
+
+#: API: Flags - No exposures found
+msgid "server.api.flags.no_exposures_found"
+msgstr "कोई एक्सपोज़र नहीं मिला"
+
+# ============================================================================
+# Flag Stats API responses
+# ============================================================================
+
+#: API: Flags - Stats retrieved
+msgid "server.api.flags.stats_retrieved"
+msgstr "Flag statistics retrieved successfully"
+
+#: API: Flags - Stale flags retrieved
+msgid "server.api.flags.stale_flags_retrieved"
+msgstr "Stale flags retrieved successfully"
+
+#: API: Flags - Flag is stale
+msgid "server.api.flags.flag_is_stale"
+msgstr "This flag has not been evaluated in {days} days"
+
+#: API: Flags - No stale flags
+msgid "server.api.flags.no_stale_flags"
+msgstr "No stale flags found"
+
+#: API: Flags - Never evaluated
+msgid "server.api.flags.never_evaluated"
+msgstr "This flag has never been evaluated"
+
+#: API: Flags - Last evaluated
+msgid "server.api.flags.last_evaluated"
+msgstr "Last evaluated: {date}"
+
+#: API: Flags - Evaluations 24h
+msgid "server.api.flags.evaluations_24h"
+msgstr "Evaluations in last 24 hours: {count}"
+
+#: API: Flags - Evaluations 7d
+msgid "server.api.flags.evaluations_7d"
+msgstr "Evaluations in last 7 days: {count}"
+
+#: API: Flags - Evaluations 30d
+msgid "server.api.flags.evaluations_30d"
+msgstr "Evaluations in last 30 days: {count}"
+
+#: API: Flags - Stale threshold
+msgid "server.api.flags.stale_threshold"
+msgstr "Flags are considered stale after {days} days without evaluation"
+
+# ============================================================================
+# CLI: Feature Flags SDK
+# ============================================================================
+
+#: Flags SDK: Invalid SDK key
+msgid "client.flags.error.invalid_sdk_key"
+msgstr "Invalid or missing SDK key"
+
+#: Flags SDK: Invalid base URL
+msgid "client.flags.error.invalid_base_url"
+msgstr "Invalid or missing base URL"
+
+#: Flags SDK: Connection failed
+msgid "client.flags.error.connection_failed"
+msgstr "Failed to connect to server"
+
+#: Flags SDK: Request failed
+msgid "client.flags.error.request_failed"
+msgstr "HTTP request failed"
+
+#: Flags SDK: Parse failed
+msgid "client.flags.error.parse_failed"
+msgstr "Failed to parse server response"
+
+#: Flags SDK: Server error
+msgid "client.flags.error.server_error"
+msgstr "Server returned an error"
+
+#: Flags SDK: Flag not found
+msgid "client.flags.error.flag_not_found"
+msgstr "Flag not found"
+
+#: Flags SDK: SSE connection failed
+msgid "client.flags.error.sse_connection_failed"
+msgstr "SSE connection failed"
+
+#: Flags SDK: SSE stream error
+msgid "client.flags.error.sse_stream_error"
+msgstr "SSE stream error"
+
+#: Flags SDK: Offline no cache
+msgid "client.flags.error.offline_no_cache"
+msgstr "Client is offline and no cached data is available"
+
+#: Flags SDK: Authentication failed
+msgid "client.flags.error.authentication_failed"
+msgstr "SDK key authentication failed"
+
+#: Flags SDK: Rate limited
+msgid "client.flags.error.rate_limited"
+msgstr "Rate limited. Retry after seconds"
+
+#: Flags SDK: Initialization timeout
+msgid "client.flags.error.initialization_timeout"
+msgstr "Client initialization timed out"
+
+#: Flags SDK: Client closed
+msgid "client.flags.error.client_closed"
+msgstr "Client has been closed"
+
+#: Flags SDK: Invalid value type
+msgid "client.flags.error.invalid_value_type"
+msgstr "Invalid flag value type"
+
+#: Flags SDK: Initializing
+msgid "client.flags.status.initializing"
+msgstr "Initializing flags client..."
+
+#: Flags SDK: Connected
+msgid "client.flags.status.connected"
+msgstr "Flags client connected"
+
+#: Flags SDK: Disconnected
+msgid "client.flags.status.disconnected"
+msgstr "Flags client disconnected"
+
+#: Flags SDK: Reconnecting
+msgid "client.flags.status.reconnecting"
+msgstr "Reconnecting to flags server..."
+
+#: Flags SDK: Using cached values
+msgid "client.flags.status.using_cache"
+msgstr "Using cached flag values"
+
+#: Flags SDK: Cache initialized
+msgid "client.flags.status.cache_initialized"
+msgstr "Flag cache initialized with {count} flags"
+
+
+msgid "server.api.admin.flags.listed"
+msgstr "Listed platform flags"
+
+msgid "server.api.admin.flags.created"
+msgstr "Platform flag created successfully"
+
+msgid "server.api.admin.flags.updated"
+msgstr "Platform flag updated successfully"
+
+msgid "server.api.admin.flags.archived"
+msgstr "Platform flag archived successfully"
+
+msgid "server.api.admin.flags.restored"
+msgstr "Platform flag restored successfully"
+
+msgid "server.api.admin.flags.not_found"
+msgstr "Platform flag not found"
+
+msgid "server.api.admin.flags.duplicate_key"
+msgstr "A platform flag with this key already exists"
+
+msgid "server.api.admin.kill_switches.listed"
+msgstr "Listed platform kill switches"
+
+msgid "server.api.admin.kill_switches.created"
+msgstr "Platform kill switch created successfully"
+
+msgid "server.api.admin.kill_switches.updated"
+msgstr "Platform kill switch updated successfully"
+
+msgid "server.api.admin.kill_switches.activated"
+msgstr "Platform kill switch activated"
+
+msgid "server.api.admin.kill_switches.deactivated"
+msgstr "Platform kill switch deactivated"
+
+msgid "server.api.admin.kill_switches.deleted"
+msgstr "Platform kill switch deleted"
+
+msgid "server.api.admin.kill_switches.not_found"
+msgstr "Platform kill switch not found"
+
+msgid "server.api.admin.kill_switches.duplicate_key"
+msgstr "A platform kill switch with this key already exists"
+
+msgid "server.api.admin.strategies.listed"
+msgstr "Listed platform strategies"
+

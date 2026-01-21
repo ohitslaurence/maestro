@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 6595a6410f9b05ed73c5e18ae2c8165301842dcf950f76d72928fb1ff446fc5f # shrinks to resp = ServerQueryResponse { query_id: "Q-00000000000000000000000000000000", sent_at: "2025-01-01T00:00:00Z", result: FileContent("a"), error: None }

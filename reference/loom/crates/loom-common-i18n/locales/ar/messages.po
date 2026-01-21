@@ -1,0 +1,1781 @@
+# Loom Server Translations - Arabic (RTL)
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>
+# SPDX-License-Identifier: Proprietary
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);\n"
+
+#: Email: Magic Link - Subject
+msgid "server.email.magic_link.subject"
+msgstr "تسجيل الدخول إلى Loom"
+
+#: Email: Magic Link - Body intro
+msgid "server.email.magic_link.body"
+msgstr "انقر على الرابط أدناه لتسجيل الدخول إلى حسابك في Loom."
+
+#: Email: Magic Link - Expiry notice
+msgid "server.email.magic_link.expires"
+msgstr "تنتهي صلاحية هذا الرابط خلال {minutes} دقيقة."
+
+#: Email: Magic Link - Ignore notice
+msgid "server.email.magic_link.ignore"
+msgstr "إذا لم تطلب هذا البريد الإلكتروني، يمكنك تجاهله بأمان."
+
+#: Email: Magic Link - Copy link instruction
+msgid "server.email.magic_link.copy_link"
+msgstr "أو انسخ والصق هذا الرابط:"
+
+#: Email: Org Invitation - Subject
+msgid "server.email.invitation.subject"
+msgstr "لقد تمت دعوتك للانضمام إلى {org_name} على Loom"
+
+#: Email: Org Invitation - Body
+msgid "server.email.invitation.body"
+msgstr "قام {inviter_name} بدعوتك للانضمام إلى منظمة \"{org_name}\" على Loom."
+
+#: Email: Org Invitation - Action instruction
+msgid "server.email.invitation.action"
+msgstr "انقر على الرابط أدناه لقبول الدعوة:"
+
+#: Email: Org Invitation - No expiry notice
+msgid "server.email.invitation.no_expiry"
+msgstr "هذه الدعوة لا تنتهي صلاحيتها، ولكن يمكن إلغاؤها من قبل مسؤول المنظمة."
+
+#: Email: Security Alert - Subject
+msgid "server.email.security_alert.subject"
+msgstr "تنبيه أمان Loom: {event}"
+
+#: Email: Security Alert - Body intro
+msgid "server.email.security_alert.body"
+msgstr "حدث حدث أمني في حسابك على Loom."
+
+#: Email: Security Alert - Event label
+msgid "server.email.security_alert.event"
+msgstr "الحدث: {event}"
+
+#: Email: Security Alert - Details label
+msgid "server.email.security_alert.details"
+msgstr "التفاصيل:"
+
+#: Email: Security Alert - Action instruction
+msgid "server.email.security_alert.action"
+msgstr "إذا لم تكن أنت، يرجى مراجعة إعدادات أمان حسابك فورًا."
+
+#: Email: Deletion Warning - Subject
+msgid "server.email.deletion_warning.subject"
+msgstr "تم جدولة حسابك في Loom للحذف"
+
+#: Email: Deletion Warning - Body
+msgid "server.email.deletion_warning.body"
+msgstr "تم جدولة حسابك في Loom للحذف الدائم خلال {days} أيام."
+
+#: Email: Deletion Warning - Restore instruction
+msgid "server.email.deletion_warning.restore"
+msgstr "إذا لم تطلب هذا الحذف، أو إذا غيرت رأيك، يمكنك استعادة حسابك عن طريق تسجيل الدخول قبل تاريخ الحذف."
+
+#: Email: Deletion Warning - Permanent notice
+msgid "server.email.deletion_warning.permanent"
+msgstr "بعد الحذف الدائم، لا يمكن استرداد بياناتك."
+
+#: Email: Deletion Scheduled - Subject
+msgid "server.email.deletion_scheduled.subject"
+msgstr "تم جدولة حذف الحساب"
+
+#: Email: Deletion Scheduled - Body
+msgid "server.email.deletion_scheduled.body"
+msgstr "تم جدولة حسابك للحذف."
+
+#: Email: Deletion Scheduled - Grace period notice
+msgid "server.email.deletion_scheduled.grace"
+msgstr "لديك {days} أيام لاستعادة حسابك عن طريق تسجيل الدخول وإلغاء الحذف."
+
+#: Email: Deletion Scheduled - Permanent notice
+msgid "server.email.deletion_scheduled.permanent"
+msgstr "بعد فترة السماح، سيتم حذف حسابك وجميع البيانات المرتبطة به بشكل دائم."
+
+#: API: Auth - Check email response
+msgid "server.api.auth.check_email"
+msgstr "تحقق من بريدك الإلكتروني للحصول على رابط تسجيل الدخول"
+
+#: API: Auth - Logged out response
+msgid "server.api.auth.logged_out"
+msgstr "تم تسجيل الخروج بنجاح"
+
+#: API: Error - Internal error
+msgid "server.api.error.internal"
+msgstr "حدث خطأ داخلي"
+
+#: API: Error - Not found
+msgid "server.api.error.not_found"
+msgstr "المورد غير موجود"
+
+#: API: Error - Unauthorized
+msgid "server.api.error.unauthorized"
+msgstr "المصادقة مطلوبة"
+
+#: API: Error - Forbidden
+msgid "server.api.error.forbidden"
+msgstr "الوصول مرفوض"
+
+#: API: Error - Bad request
+msgid "server.api.error.bad_request"
+msgstr "طلب غير صالح"
+
+#: API: Error - Conflict
+msgid "server.api.error.conflict"
+msgstr "تعارض في الموارد"
+
+#: API: Error - Gone
+msgid "server.api.error.gone"
+msgstr "المورد لم يعد متاحًا"
+
+#: API: Error - Not configured
+msgid "server.api.error.not_configured"
+msgstr "الميزة غير مكونة"
+
+# ============================================================================
+# Auth API responses
+# ============================================================================
+
+#: API: Auth - Invalid email
+msgid "server.api.auth.invalid_email"
+msgstr "يرجى تقديم عنوان بريد إلكتروني صالح"
+
+#: API: Auth - Device code authorized
+msgid "server.api.auth.device_authorized"
+msgstr "تم تفويض الجهاز بنجاح"
+
+#: API: Auth - Invalid device code
+msgid "server.api.auth.invalid_device_code"
+msgstr "رمز الجهاز غير صالح أو منتهي الصلاحية"
+
+#: API: Auth - Invalid user code
+msgid "server.api.auth.invalid_user_code"
+msgstr "رمز المستخدم غير صالح أو منتهي الصلاحية"
+
+#: API: Auth - OAuth not configured
+msgid "server.api.auth.oauth_not_configured"
+msgstr "OAuth لـ {provider} غير مكون"
+
+#: API: Auth - Magic link sent (always shown to prevent enumeration)
+msgid "server.api.auth.magic_link_sent"
+msgstr "إذا كان هناك حساب بهذا البريد الإلكتروني، فقد تم إرسال رابط تسجيل الدخول"
+
+#: API: Auth - Email not verified (Google/Okta)
+msgid "server.api.auth.email_not_verified"
+msgstr "لم يتم التحقق من عنوان البريد الإلكتروني من قبل المزود"
+
+#: API: Auth - No verified email (GitHub)
+msgid "server.api.auth.no_verified_email"
+msgstr "لم يتم العثور على عنوان بريد إلكتروني تم التحقق منه. يرجى التحقق من بريدك الإلكتروني مع GitHub والمحاولة مرة أخرى."
+
+#: API: Auth - Signups disabled
+msgid "server.api.auth.signups_disabled"
+msgstr "تسجيل المستخدمين الجدد معطل حالياً. يرجى التواصل مع المسؤول."
+
+# ============================================================================
+# User API responses
+# ============================================================================
+
+#: API: User - Not found
+msgid "server.api.user.not_found"
+msgstr "المستخدم غير موجود"
+
+#: API: User - Invalid ID
+msgid "server.api.user.invalid_id"
+msgstr "تنسيق معرف المستخدم غير صالح"
+
+#: API: User - Display name empty
+msgid "server.api.user.display_name_empty"
+msgstr "لا يمكن أن يكون اسم العرض فارغًا"
+
+#: API: User - Profile updated
+msgid "server.api.user.profile_updated"
+msgstr "تم تحديث الملف الشخصي بنجاح"
+
+#: API: User - Deletion scheduled
+msgid "server.api.user.deletion_scheduled"
+msgstr "تم جدولة الحساب للحذف"
+
+#: API: User - Deletion already scheduled
+msgid "server.api.user.deletion_already_scheduled"
+msgstr "تم جدولة حذف الحساب بالفعل"
+
+#: API: User - Deletion failed
+msgid "server.api.user.deletion_failed"
+msgstr "فشل في جدولة حذف الحساب"
+
+#: API: User - No pending deletion
+msgid "server.api.user.no_pending_deletion"
+msgstr "لا يوجد حذف معلق لهذا الحساب"
+
+#: API: User - Grace period expired
+msgid "server.api.user.grace_period_expired"
+msgstr "انتهت فترة السماح، لا يمكن استعادة الحساب"
+
+#: API: User - Account restored
+msgid "server.api.user.account_restored"
+msgstr "تم استعادة الحساب بنجاح"
+
+#: API: User - Identity unlinked
+msgid "server.api.user.identity_unlinked"
+msgstr "تم إلغاء ربط الهوية بنجاح"
+
+#: API: User - Identity not found
+msgid "server.api.user.identity_not_found"
+msgstr "الهوية غير موجودة"
+
+#: API: User - Cannot unlink last identity
+msgid "server.api.user.cannot_unlink_last_identity"
+msgstr "لا يمكن إلغاء ربط الهوية الأخيرة"
+
+#: API: User - Username updated
+msgid "server.api.user.username_updated"
+msgstr "تم تحديث اسم المستخدم بنجاح"
+
+#: API: User - Username invalid
+msgid "server.api.user.username_invalid"
+msgstr "تنسيق اسم المستخدم غير صالح"
+
+#: API: User - Username taken
+msgid "server.api.user.username_taken"
+msgstr "اسم المستخدم مستخدم بالفعل"
+
+#: API: User - Username too short
+msgid "server.api.user.username_too_short"
+msgstr "يجب أن يتكون اسم المستخدم من 3 أحرف على الأقل"
+
+#: API: User - Username too long
+msgid "server.api.user.username_too_long"
+msgstr "يجب ألا يتجاوز اسم المستخدم 39 حرفًا"
+
+#: API: User - Username reserved
+msgid "server.api.user.username_reserved"
+msgstr "اسم المستخدم هذا محجوز ولا يمكن استخدامه"
+
+#: API: User - Invalid locale
+msgid "server.api.user.invalid_locale"
+msgstr "إعداد اللغة غير صالح"
+
+# ============================================================================
+# Organization API responses
+# ============================================================================
+
+#: API: Org - Not found
+msgid "server.api.org.not_found"
+msgstr "المنظمة غير موجودة"
+
+#: API: Org - Invalid ID
+msgid "server.api.org.invalid_id"
+msgstr "معرف المنظمة غير صالح"
+
+#: API: Org - Invalid slug length
+msgid "server.api.org.invalid_slug_length"
+msgstr "يجب أن يكون الرابط المختصر بين 3 و 50 حرفًا"
+
+#: API: Org - Invalid slug format
+msgid "server.api.org.invalid_slug_format"
+msgstr "يجب أن يحتوي الرابط المختصر على أحرف أبجدية رقمية صغيرة وشرطات فقط"
+
+#: API: Org - Slug exists
+msgid "server.api.org.slug_exists"
+msgstr "توجد منظمة بهذا الرابط المختصر بالفعل"
+
+#: API: Org - Slug reserved
+msgid "server.api.org.slug_reserved"
+msgstr "هذا الرابط المختصر للمنظمة محجوز"
+
+#: API: Org - Invalid role
+msgid "server.api.org.invalid_role"
+msgstr "يجب أن يكون الدور واحدًا من: owner أو admin أو member"
+
+#: API: Org - List failed
+msgid "server.api.org.list_failed"
+msgstr "فشل في إدراج المنظمات"
+
+#: API: Org - Create failed
+msgid "server.api.org.create_failed"
+msgstr "فشل في إنشاء المنظمة"
+
+#: API: Org - Not a member
+msgid "server.api.org.not_a_member"
+msgstr "أنت لست عضوًا في هذه المنظمة"
+
+#: API: Org - Already a member
+msgid "server.api.org.already_member"
+msgstr "المستخدم عضو بالفعل في هذه المنظمة"
+
+#: API: Org - Member added
+msgid "server.api.org.member_added"
+msgstr "تمت إضافة العضو إلى المنظمة"
+
+#: API: Org - Member removed
+msgid "server.api.org.member_removed"
+msgstr "تم إزالة العضو من المنظمة"
+
+#: API: Org - Member not found
+msgid "server.api.org.member_not_found"
+msgstr "العضو غير موجود في هذه المنظمة"
+
+#: API: Org - Last owner
+msgid "server.api.org.last_owner"
+msgstr "لا يمكن إزالة أو تخفيض رتبة المالك الأخير"
+
+#: API: Org - Cannot delete personal org
+msgid "server.api.org.cannot_delete_personal"
+msgstr "لا يمكن حذف المنظمة الشخصية"
+
+#: API: Org - Deleted
+msgid "server.api.org.deleted"
+msgstr "تم حذف المنظمة"
+
+#: API: Org - Restored
+msgid "server.api.org.restored"
+msgstr "تم استعادة المنظمة"
+
+#: API: Org - Not deleted
+msgid "server.api.org.not_deleted"
+msgstr "المنظمة ليست محذوفة"
+
+#: API: Org - Grace period expired
+msgid "server.api.org.grace_period_expired"
+msgstr "انتهت فترة السماح ولا يمكن استعادة هذه المنظمة"
+
+#: API: Org - Owner required
+msgid "server.api.org.owner_required"
+msgstr "يمكن للمالكين فقط تنفيذ هذا الإجراء"
+
+#: API: Org - Role updated
+msgid "server.api.org.role_updated"
+msgstr "تم تحديث دور العضو"
+
+#: API: Org - Join request for private org
+msgid "server.api.org.join_request_private"
+msgstr "لا يمكن طلب الانضمام إلى منظمة خاصة"
+
+#: API: Org - Join request pending
+msgid "server.api.org.join_request_pending"
+msgstr "لديك طلب انضمام معلق بالفعل لهذه المنظمة"
+
+#: API: Org - Join request created
+msgid "server.api.org.join_request_created"
+msgstr "تم تقديم طلب الانضمام"
+
+#: API: Org - Join request not found
+msgid "server.api.org.join_request_not_found"
+msgstr "طلب الانضمام غير موجود"
+
+#: API: Org - Join request approved
+msgid "server.api.org.join_request_approved"
+msgstr "تم الموافقة على طلب الانضمام"
+
+#: API: Org - Join request rejected
+msgid "server.api.org.join_request_rejected"
+msgstr "تم رفض طلب الانضمام"
+
+# ============================================================================
+# Team API responses
+# ============================================================================
+
+#: API: Team - Not found
+msgid "server.api.team.not_found"
+msgstr "الفريق غير موجود"
+
+#: API: Team - Invalid ID
+msgid "server.api.team.invalid_id"
+msgstr "معرف الفريق غير صالح"
+
+#: API: Team - Invalid slug length
+msgid "server.api.team.invalid_slug_length"
+msgstr "يجب أن يكون الرابط المختصر بين 2 و 50 حرفًا"
+
+#: API: Team - Invalid slug format
+msgid "server.api.team.invalid_slug_format"
+msgstr "يجب أن يحتوي الرابط المختصر على أحرف أبجدية رقمية صغيرة وشرطات فقط"
+
+#: API: Team - List failed
+msgid "server.api.team.list_failed"
+msgstr "فشل في إدراج الفرق"
+
+#: API: Team - Membership check failed
+msgid "server.api.team.membership_check_failed"
+msgstr "فشل في التحقق من عضوية المنظمة"
+
+# ============================================================================
+# Invitation API responses
+# ============================================================================
+
+#: API: Invitation - Created
+msgid "server.api.invitation.created"
+msgstr "تم إرسال الدعوة بنجاح"
+
+#: API: Invitation - Cancelled
+msgid "server.api.invitation.cancelled"
+msgstr "تم إلغاء الدعوة"
+
+#: API: Invitation - Accepted
+msgid "server.api.invitation.accepted"
+msgstr "تم قبول الدعوة"
+
+#: API: Invitation - Not found
+msgid "server.api.invitation.not_found"
+msgstr "الدعوة غير موجودة"
+
+#: API: Invitation - Expired
+msgid "server.api.invitation.expired"
+msgstr "انتهت صلاحية هذه الدعوة"
+
+#: API: Invitation - Invalid token
+msgid "server.api.invitation.invalid_token"
+msgstr "رمز الدعوة غير صالح"
+
+#: API: Invitation - Already accepted
+msgid "server.api.invitation.already_accepted"
+msgstr "تم قبول هذه الدعوة بالفعل"
+
+#: API: Invitation - List failed
+msgid "server.api.invitation.list_failed"
+msgstr "فشل في إدراج الدعوات"
+
+# ============================================================================
+# Join request API responses
+# ============================================================================
+
+#: API: Join request - Created
+msgid "server.api.join_request.created"
+msgstr "تم تقديم طلب الانضمام"
+
+#: API: Join request - Approved
+msgid "server.api.join_request.approved"
+msgstr "تم الموافقة على طلب الانضمام"
+
+#: API: Join request - Rejected
+msgid "server.api.join_request.rejected"
+msgstr "تم رفض طلب الانضمام"
+
+#: API: Join request - Already member
+msgid "server.api.join_request.already_member"
+msgstr "أنت عضو بالفعل في هذه المنظمة"
+
+#: API: Join request - Already pending
+msgid "server.api.join_request.already_pending"
+msgstr "لديك طلب انضمام معلق بالفعل"
+
+#: API: Join request - Not found
+msgid "server.api.join_request.not_found"
+msgstr "طلب الانضمام غير موجود"
+
+#: API: Join request - Private org
+msgid "server.api.join_request.private_org"
+msgstr "لا يمكن طلب الانضمام إلى منظمة خاصة"
+
+# ============================================================================
+# API Key responses
+# ============================================================================
+
+#: API: API Key - Invalid org ID
+msgid "server.api.api_key.invalid_org_id"
+msgstr "تنسيق معرف المنظمة غير صالح"
+
+#: API: API Key - Name empty
+msgid "server.api.api_key.name_empty"
+msgstr "لا يمكن أن يكون اسم مفتاح API فارغًا"
+
+#: API: API Key - No scopes
+msgid "server.api.api_key.no_scopes"
+msgstr "يجب تحديد نطاق واحد على الأقل"
+
+#: API: API Key - Created
+msgid "server.api.api_key.created"
+msgstr "تم إنشاء مفتاح API"
+
+#: API: API Key - Revoked
+msgid "server.api.api_key.revoked"
+msgstr "تم إلغاء مفتاح API"
+
+#: API: API Key - Not found
+msgid "server.api.api_key.not_found"
+msgstr "مفتاح API غير موجود"
+
+#: API: API Key - List failed
+msgid "server.api.api_key.list_failed"
+msgstr "فشل في إدراج مفاتيح API"
+
+#: API: API Key - Create failed
+msgid "server.api.api_key.create_failed"
+msgstr "فشل في إنشاء مفتاح API"
+
+# ============================================================================
+# Session API responses
+# ============================================================================
+
+#: API: Session - Invalid ID
+msgid "server.api.session.invalid_id"
+msgstr "تنسيق معرف الجلسة غير صالح"
+
+#: API: Session - Not found
+msgid "server.api.session.not_found"
+msgstr "الجلسة غير موجودة"
+
+#: API: Session - Revoked
+msgid "server.api.session.revoked"
+msgstr "تم إلغاء الجلسة بنجاح"
+
+#: API: Session - List failed
+msgid "server.api.session.list_failed"
+msgstr "فشل في استرداد الجلسات"
+
+#: API: Session - Revoke failed
+msgid "server.api.session.revoke_failed"
+msgstr "فشل في إلغاء الجلسة"
+
+#: API: Session - Ownership check failed
+msgid "server.api.session.ownership_check_failed"
+msgstr "فشل في التحقق من ملكية الجلسة"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - System admin required
+msgid "server.api.admin.system_admin_required"
+msgstr "مطلوب دور مسؤول النظام"
+
+#: API: Admin - Cannot remove own admin
+msgid "server.api.admin.cannot_remove_own_admin"
+msgstr "لا يمكنك إزالة حالة المسؤول الخاصة بك"
+
+#: API: Admin - Cannot remove last admin
+msgid "server.api.admin.cannot_remove_last_admin"
+msgstr "لا يمكن إزالة آخر مسؤول في النظام"
+
+#: API: Admin - User list failed
+msgid "server.api.admin.user_list_failed"
+msgstr "فشل في إدراج المستخدمين"
+
+#: API: Admin - User update failed
+msgid "server.api.admin.user_update_failed"
+msgstr "فشل في تحديث المستخدم"
+
+#: API: Admin - Roles updated
+msgid "server.api.admin.roles_updated"
+msgstr "تم تحديث أدوار المستخدم"
+
+#: Auth: Device Page - Title
+msgid "server.auth.device.title"
+msgstr "تفويض الجهاز - Loom"
+
+#: Auth: Device Page - Heading
+msgid "server.auth.device.heading"
+msgstr "تفويض الجهاز"
+
+#: Auth: Device Page - Subtitle
+msgid "server.auth.device.subtitle"
+msgstr "أدخل الرمز الظاهر في الطرفية"
+
+#: Auth: Device Page - Code label
+msgid "server.auth.device.code_label"
+msgstr "رمز التفويض"
+
+#: Auth: Device Page - Submit button
+msgid "server.auth.device.submit"
+msgstr "تفويض الجهاز"
+
+#: Auth: Device Page - Authorizing button
+msgid "server.auth.device.authorizing"
+msgstr "جارٍ التفويض..."
+
+#: Auth: Device Page - Authorized button
+msgid "server.auth.device.authorized"
+msgstr "تم التفويض"
+
+#: Auth: Device Page - Expiry help text
+msgid "server.auth.device.expiry_help"
+msgstr "تنتهي صلاحية هذا الرمز بعد 15 دقيقة."
+
+#: Auth: Device Page - Success message
+msgid "server.auth.device.success"
+msgstr "تم تفويض الجهاز بنجاح! يمكنك إغلاق هذه النافذة."
+
+#: Auth: Device Page - Invalid code format
+msgid "server.auth.device.invalid_format"
+msgstr "يرجى إدخال رمز صالح بالتنسيق XXX-XXX-XXX"
+
+#: Auth: Device Page - Generic error
+msgid "server.auth.device.error"
+msgstr "حدث خطأ. يرجى المحاولة مرة أخرى."
+
+#: Auth: Device Page - Authorization failed
+msgid "server.auth.device.auth_failed"
+msgstr "فشل التفويض. يرجى المحاولة مرة أخرى."
+
+# ============================================================================
+# Support Access API responses
+# ============================================================================
+
+#: API: Support Access - Not support staff
+msgid "server.api.support_access.not_support_staff"
+msgstr "يمكن لموظفي الدعم فقط طلب الوصول إلى الدعم"
+
+#: API: Support Access - Thread not found
+msgid "server.api.support_access.thread_not_found"
+msgstr "المحادثة غير موجودة"
+
+#: API: Support Access - Already requested
+msgid "server.api.support_access.already_requested"
+msgstr "تم طلب الوصول إلى الدعم بالفعل لهذه المحادثة"
+
+#: API: Support Access - Already active
+msgid "server.api.support_access.already_active"
+msgstr "الوصول إلى الدعم نشط بالفعل لهذه المحادثة"
+
+#: API: Support Access - Requested
+msgid "server.api.support_access.requested"
+msgstr "تم طلب الوصول إلى الدعم"
+
+#: API: Support Access - Request failed
+msgid "server.api.support_access.request_failed"
+msgstr "فشل في طلب الوصول إلى الدعم"
+
+#: API: Support Access - Not owner
+msgid "server.api.support_access.not_owner"
+msgstr "يمكن لمالك المحادثة فقط الموافقة على الوصول إلى الدعم أو إلغائه"
+
+#: API: Support Access - No pending request
+msgid "server.api.support_access.no_pending_request"
+msgstr "لم يتم العثور على طلب وصول دعم معلق لهذه المحادثة"
+
+#: API: Support Access - Approved
+msgid "server.api.support_access.approved"
+msgstr "تمت الموافقة على الوصول إلى الدعم"
+
+#: API: Support Access - Approve failed
+msgid "server.api.support_access.approve_failed"
+msgstr "فشل في الموافقة على الوصول إلى الدعم"
+
+#: API: Support Access - No active access
+msgid "server.api.support_access.no_active_access"
+msgstr "لم يتم العثور على وصول دعم نشط لهذه المحادثة"
+
+#: API: Support Access - Revoked
+msgid "server.api.support_access.revoked"
+msgstr "تم إلغاء الوصول إلى الدعم"
+
+#: API: Support Access - Revoke failed
+msgid "server.api.support_access.revoke_failed"
+msgstr "فشل في إلغاء الوصول إلى الدعم"
+
+# ============================================================================
+# Share Link API responses
+# ============================================================================
+
+#: API: Share - Invalid thread ID
+msgid "server.api.share.invalid_thread_id"
+msgstr "تنسيق معرف المحادثة غير صالح"
+
+#: API: Share - Thread not found
+msgid "server.api.share.thread_not_found"
+msgstr "المحادثة غير موجودة"
+
+#: API: Share - Invalid expires_at
+msgid "server.api.share.invalid_expires_at"
+msgstr "تنسيق تاريخ انتهاء الصلاحية غير صالح. استخدم تنسيق RFC 3339."
+
+#: API: Share - Create failed
+msgid "server.api.share.create_failed"
+msgstr "فشل في إنشاء رابط المشاركة"
+
+#: API: Share - Link not found
+msgid "server.api.share.link_not_found"
+msgstr "لم يتم العثور على رابط مشاركة نشط لهذه المحادثة"
+
+#: API: Share - Revoked
+msgid "server.api.share.revoked"
+msgstr "تم إلغاء رابط المشاركة"
+
+#: API: Share - Revoke failed
+msgid "server.api.share.revoke_failed"
+msgstr "فشل في إلغاء رابط المشاركة"
+
+#: API: Share - Invalid or expired link
+msgid "server.api.share.invalid_or_expired"
+msgstr "رابط مشاركة غير صالح أو منتهي الصلاحية"
+
+#: API: Share - Link revoked
+msgid "server.api.share.link_revoked"
+msgstr "تم إلغاء رابط المشاركة هذا"
+
+#: API: Share - Link expired
+msgid "server.api.share.link_expired"
+msgstr "انتهت صلاحية رابط المشاركة هذا"
+
+#: API: Share - Validation failed
+msgid "server.api.share.validation_failed"
+msgstr "فشل في التحقق من رابط المشاركة"
+
+#: API: Share - Fetch failed
+msgid "server.api.share.fetch_failed"
+msgstr "فشل في جلب المحادثة"
+
+#: API: Weaver - Provisioner not configured
+msgid "server.api.weaver.provisioner_not_configured"
+msgstr "لم يتم تكوين مزود الـ weaver"
+
+#: API: Weaver - Invalid ID
+msgid "server.api.weaver.invalid_id"
+msgstr "معرف weaver غير صالح: {id}"
+
+#: API: Weaver - Not found
+msgid "server.api.weaver.not_found"
+msgstr "لم يتم العثور على weaver: {id}"
+
+#: API: Weaver - Access denied
+msgid "server.api.weaver.access_denied"
+msgstr "ليس لديك إذن للوصول إلى هذا الـ weaver"
+
+#: API: Weaver - Attach denied
+msgid "server.api.weaver.attach_denied"
+msgstr "ليس لديك إذن للاتصال بهذا الـ weaver"
+
+#: API: Weaver - Delete denied
+msgid "server.api.weaver.delete_denied"
+msgstr "ليس لديك إذن لحذف هذا الـ weaver"
+
+#: API: Weaver - Read only attach
+msgid "server.api.weaver.read_only_attach"
+msgstr "اتصال للقراءة فقط: الإدخال معطل لمستخدمي الدعم"
+
+#: API: Weaver - Logs access denied
+msgid "server.api.weaver.logs_denied"
+msgstr "ليس لديك إذن للوصول إلى سجلات هذا الـ weaver"
+
+# ============================================================================
+# CLI: Update command
+# ============================================================================
+
+#: CLI: Update - Current version
+msgid "client.update.current_version"
+msgstr "الإصدار الحالي: {version}"
+
+#: CLI: Update - Platform
+msgid "client.update.platform"
+msgstr "المنصة: {platform}"
+
+#: CLI: Update - Checking
+msgid "client.update.checking"
+msgstr "جارٍ البحث عن تحديثات..."
+
+#: CLI: Update - Already up to date
+msgid "client.update.up_to_date"
+msgstr "محدث بالفعل (SHA: {sha})"
+
+#: CLI: Update - Update available
+msgid "client.update.available"
+msgstr "تحديث متاح: {current} -> {remote}"
+
+#: CLI: Update - Downloading
+msgid "client.update.downloading"
+msgstr "جارٍ التنزيل من {url}..."
+
+#: CLI: Update - Downloaded
+msgid "client.update.downloaded"
+msgstr "تم تنزيل {bytes} بايت (تم التحقق)"
+
+#: CLI: Update - Complete
+msgid "client.update.complete"
+msgstr "اكتمل التحديث! يرجى إعادة تشغيل loom."
+
+#: CLI: Update - Error: empty binary
+msgid "client.update.error.empty_binary"
+msgstr "الملف الثنائي المنزل فارغ"
+
+#: CLI: Update - Error: SHA mismatch
+msgid "client.update.error.sha_mismatch"
+msgstr "عدم تطابق SHA للملف الثنائي المنزل: متوقع {expected}، حصلت على {actual}"
+
+#: CLI: Update - Error: env not set
+msgid "client.update.error.env_not_set"
+msgstr "يجب تعيين LOOM_UPDATE_BASE_URL أو LOOM_THREAD_SYNC_URL للتحديثات"
+
+#: CLI: Update - Error: check failed
+msgid "client.update.error.check_failed"
+msgstr "فشل البحث عن تحديثات: {status}"
+
+# ============================================================================
+# CLI: Authentication
+# ============================================================================
+
+#: CLI: Auth - Visit URL prompt
+msgid "client.auth.visit_url"
+msgstr "قم بزيارة {url} وأدخل الرمز: {code}"
+
+#: CLI: Auth - Browser open failed
+msgid "client.auth.browser_failed"
+msgstr "(تعذر فتح المتصفح تلقائياً)"
+
+#: CLI: Auth - Waiting for authorization
+msgid "client.auth.waiting"
+msgstr "في انتظار التفويض"
+
+#: CLI: Auth - Authorization timed out
+msgid "client.auth.timed_out"
+msgstr "انتهت مهلة التفويض"
+
+#: CLI: Auth - Login cancelled
+msgid "client.auth.cancelled"
+msgstr "تم إلغاء تسجيل الدخول"
+
+#: CLI: Auth - Login successful
+msgid "client.auth.login_success"
+msgstr "تم تسجيل الدخول بنجاح إلى {server}"
+
+#: CLI: Auth - Device code expired
+msgid "client.auth.device_expired"
+msgstr "انتهت صلاحية رمز الجهاز"
+
+#: CLI: Auth - Logged out
+msgid "client.auth.logged_out"
+msgstr "تم تسجيل الخروج من {server}"
+
+# ============================================================================
+# CLI: REPL
+# ============================================================================
+
+#: CLI: REPL - Welcome message
+msgid "client.repl.welcome"
+msgstr "مرحباً بك في Loom - مساعد البرمجة بالذكاء الاصطناعي"
+
+#: CLI: REPL - Thread ID
+msgid "client.repl.thread_id"
+msgstr "المحادثة: {id}"
+
+#: CLI: REPL - Instructions
+msgid "client.repl.instructions"
+msgstr "اكتب رسالتك واضغط Enter. استخدم Ctrl+C للخروج."
+
+#: CLI: REPL - Interrupted
+msgid "client.repl.interrupted"
+msgstr "تم المقاطعة. تم حفظ المحادثة. وداعاً!"
+
+#: CLI: REPL - Error
+msgid "client.repl.error"
+msgstr "خطأ: {error}"
+
+# ============================================================================
+# CLI: Search
+# ============================================================================
+
+#: CLI: Search - No results
+msgid "client.search.no_results"
+msgstr "لم يتم العثور على نتائج لـ \"{query}\""
+
+#: CLI: Search - Results header
+msgid "client.search.results_header"
+msgstr "نتائج \"{query}\" ({count} نتيجة):"
+
+#: CLI: Search - Local no results
+msgid "client.search.local_no_results"
+msgstr "لم يتم العثور على نتائج لـ \"{query}\" (بحث محلي)"
+
+#: CLI: Search - Local results header
+msgid "client.search.local_results_header"
+msgstr "نتائج محلية لـ \"{query}\" ({count} نتيجة):"
+
+# ============================================================================
+# CLI: Threads
+# ============================================================================
+
+#: CLI: Threads - No threads
+msgid "client.threads.no_threads"
+msgstr "لم يتم العثور على محادثات."
+
+#: CLI: Threads - List header
+msgid "client.threads.list_header"
+msgstr "{id:<40} {title:<40} {updated:<20}"
+
+#: CLI: Threads - Private session
+msgid "client.threads.private_session"
+msgstr "بدء جلسة خاصة (محلية فقط، لا تتم مزامنتها مع الخادم)."
+
+#: CLI: Threads - Shared with support
+msgid "client.threads.shared_support"
+msgstr "تمت مشاركة المحادثة {id} مع الدعم."
+
+#: CLI: Threads - Visibility changed
+msgid "client.threads.visibility_changed"
+msgstr "تم تغيير رؤية المحادثة {id} إلى {visibility}."
+
+# ============================================================================
+# CLI: Weaver
+# ============================================================================
+
+#: CLI: Weaver - Creating
+msgid "client.weaver.creating"
+msgstr "جارٍ إنشاء weaver..."
+
+#: CLI: Weaver - Created ID
+msgid "client.weaver.created_id"
+msgstr "  المعرف:    {id}"
+
+#: CLI: Weaver - Created image
+msgid "client.weaver.created_image"
+msgstr "  الصورة: {image}"
+
+#: CLI: Weaver - Created TTL
+msgid "client.weaver.created_ttl"
+msgstr "  المدة:   {hours} ساعة"
+
+#: CLI: Weaver - Attaching
+msgid "client.weaver.attaching"
+msgstr "جارٍ الاتصال بـ weaver..."
+
+#: CLI: Weaver - Detached
+msgid "client.weaver.detached"
+msgstr "[تم فصل الاتصال من weaver {id}]"
+
+#: CLI: Weaver - Reattach hint
+msgid "client.weaver.reattach_hint"
+msgstr "لا يزال weaver يعمل. أعد الاتصال بـ: loom attach {id}"
+
+#: CLI: Weaver - No weavers
+msgid "client.weaver.no_weavers"
+msgstr "لا يوجد weavers قيد التشغيل."
+
+#: CLI: Weaver - List header
+msgid "client.weaver.list_header"
+msgstr "{id:<40} {image:<30} {status:<10} {age:<8} {ttl:<8}"
+
+#: CLI: Weaver - Deleting
+msgid "client.weaver.deleting"
+msgstr "جارٍ حذف weaver {id}..."
+
+#: CLI: Weaver - Deleted
+msgid "client.weaver.deleted"
+msgstr "تم حذف weaver."
+
+#: CLI: Weaver - Attach prefix
+msgid "client.weaver.attach_prefix"
+msgstr "[جارٍ الاتصال بـ weaver {id}]"
+
+# ============================================================================
+# Jobs: Scheduler
+# ============================================================================
+
+#: Jobs: Email Alert - Subject
+msgid "server.jobs.alert.subject"
+msgstr "[Loom] فشل المهمة: {job_name}"
+
+#: Jobs: Email Alert - Body intro
+msgid "server.jobs.alert.body"
+msgstr "فشلت المهمة \"{job_name}\" {consecutive_failures} مرات متتالية."
+
+#: Jobs: Email Alert - Job ID
+msgid "server.jobs.alert.job_id"
+msgstr "معرف المهمة: {job_id}"
+
+#: Jobs: Email Alert - Last error
+msgid "server.jobs.alert.last_error"
+msgstr "آخر خطأ: {error_message}"
+
+#: Jobs: Email Alert - Last run
+msgid "server.jobs.alert.last_run"
+msgstr "آخر تشغيل: {last_run_at}"
+
+#: Jobs: Email Alert - View history link
+msgid "server.jobs.alert.view_history"
+msgstr "عرض سجل المهمة: {url}"
+
+#: Jobs: API - Job not found
+msgid "server.jobs.error.not_found"
+msgstr "المهمة غير موجودة: {job_id}"
+
+#: Jobs: API - Scheduler not configured
+msgid "server.jobs.error.not_configured"
+msgstr "جدولة المهام غير مكونة"
+
+#: Jobs: API - Job triggered
+msgid "server.jobs.success.triggered"
+msgstr "تم تشغيل المهمة {job_id} بنجاح"
+
+#: Jobs: API - Job cancelled
+msgid "server.jobs.success.cancelled"
+msgstr "تم إلغاء المهمة {job_id}"
+
+#: Jobs: API - Job enabled
+msgid "server.jobs.success.enabled"
+msgstr "تم تفعيل المهمة {job_id}"
+
+#: Jobs: API - Job disabled
+msgid "server.jobs.success.disabled"
+msgstr "تم تعطيل المهمة {job_id}"
+
+# ============================================================================
+# SCM: Repository API responses
+# ============================================================================
+
+#: API: SCM Repo - Not found
+msgid "server.api.scm.repo.not_found"
+msgstr "المستودع غير موجود"
+
+#: API: SCM - Repository not found
+msgid "server.api.scm.repo_not_found"
+msgstr "المستودع غير موجود"
+
+#: API: SCM - Invalid repository name
+msgid "server.api.scm.invalid_repo_name"
+msgstr "يجب أن يكون اسم المستودع بين 1 و 100 حرف"
+
+#: API: SCM - Cannot create for other user
+msgid "server.api.scm.cannot_create_for_other_user"
+msgstr "لا يمكن إنشاء مستودع لمستخدم آخر"
+
+#: API: SCM - Not org member
+msgid "server.api.scm.not_org_member"
+msgstr "لست عضوًا في هذه المنظمة"
+
+#: API: SCM - Org admin required
+msgid "server.api.scm.org_admin_required"
+msgstr "يجب أن تكون مالكًا أو مسؤولًا في المنظمة لإنشاء المستودعات"
+
+#: API: SCM - Organization not found
+msgid "server.api.scm.org_not_found"
+msgstr "المنظمة غير موجودة"
+
+#: API: SCM - Repository already exists
+msgid "server.api.scm.repo_already_exists"
+msgstr "يوجد مستودع بهذا الاسم بالفعل"
+
+#: API: SCM - Failed to create repository
+msgid "server.api.scm.failed_to_create_repo"
+msgstr "فشل في إنشاء المستودع"
+
+#: API: SCM - Failed to initialize repo on disk
+msgid "server.api.scm.failed_to_init_repo_disk"
+msgstr "فشل في تهيئة المستودع على القرص"
+
+#: API: SCM - Failed to initialize git repo
+msgid "server.api.scm.failed_to_init_git_repo"
+msgstr "فشل في تهيئة مستودع git"
+
+#: API: SCM - Access denied
+msgid "server.api.scm.access_denied"
+msgstr "الوصول مرفوض"
+
+#: API: SCM - Admin required
+msgid "server.api.scm.admin_required"
+msgstr "مطلوب صلاحية المسؤول"
+
+#: API: SCM - Invalid default branch
+msgid "server.api.scm.invalid_default_branch"
+msgstr "لا يمكن أن يكون الفرع الافتراضي فارغًا"
+
+#: API: SCM - Failed to update repository
+msgid "server.api.scm.failed_to_update_repo"
+msgstr "فشل في تحديث المستودع"
+
+#: API: SCM - Failed to delete repository
+msgid "server.api.scm.failed_to_delete_repo"
+msgstr "فشل في حذف المستودع"
+
+#: API: SCM - User not found
+msgid "server.api.scm.user_not_found"
+msgstr "المستخدم غير موجود"
+
+#: API: SCM - Failed to list repositories
+msgid "server.api.scm.failed_to_list_repos"
+msgstr "فشل في سرد المستودعات"
+
+#: API: SCM - Not configured
+msgid "server.api.scm.not_configured"
+msgstr "إدارة الكود المصدري غير مُعدة"
+
+#: API: SCM - Internal error
+msgid "server.api.scm.internal_error"
+msgstr "حدث خطأ داخلي"
+
+# ============================================================================
+# SCM: Git API responses
+# ============================================================================
+
+#: API: SCM Git - Auth required for private repo
+msgid "server.api.scm.git.auth_required_private"
+msgstr "المصادقة مطلوبة للمستودع الخاص"
+
+#: API: SCM Git - Auth required for push
+msgid "server.api.scm.git.auth_required_push"
+msgstr "المصادقة مطلوبة للدفع"
+
+#: API: SCM Git - Auth required
+msgid "server.api.scm.git.auth_required"
+msgstr "المصادقة مطلوبة"
+
+#: API: SCM Git - Access denied
+msgid "server.api.scm.git.access_denied"
+msgstr "الوصول إلى المستودع مرفوض"
+
+#: API: SCM Git - Write access denied
+msgid "server.api.scm.git.write_access_denied"
+msgstr "صلاحية الكتابة للمستودع مرفوضة"
+
+# ============================================================================
+# SCM: Protection API responses
+# ============================================================================
+
+#: API: SCM Protection - Failed to load rules
+msgid "server.api.scm.protection.failed_to_load"
+msgstr "فشل في تحميل قواعد الحماية"
+
+#: API: SCM Protection - Failed to list rules
+msgid "server.api.scm.protection.failed_to_list"
+msgstr "فشل في سرد قواعد الحماية"
+
+#: API: SCM Protection - Invalid pattern
+msgid "server.api.scm.protection.invalid_pattern"
+msgstr "يجب أن يكون النمط بين 1 و 256 حرفًا"
+
+#: API: SCM Protection - Rule already exists
+msgid "server.api.scm.protection.already_exists"
+msgstr "توجد قاعدة حماية بهذا النمط بالفعل"
+
+#: API: SCM Protection - Failed to create rule
+msgid "server.api.scm.protection.failed_to_create"
+msgstr "فشل في إنشاء قاعدة الحماية"
+
+#: API: SCM Protection - Rule not found
+msgid "server.api.scm.protection.rule_not_found"
+msgstr "قاعدة الحماية غير موجودة"
+
+#: API: SCM Protection - Failed to delete rule
+msgid "server.api.scm.protection.failed_to_delete"
+msgstr "فشل في حذف قاعدة الحماية"
+
+# ============================================================================
+# SCM: Webhook API responses
+# ============================================================================
+
+#: API: SCM Webhook - Not found
+msgid "server.api.scm.webhook.not_found"
+msgstr "الويب هوك غير موجود"
+
+#: API: SCM Webhook - Admin required
+msgid "server.api.scm.webhook.admin_required"
+msgstr "مطلوب صلاحية المسؤول"
+
+#: API: SCM Webhook - URL required
+msgid "server.api.scm.webhook.url_required"
+msgstr "الرابط مطلوب"
+
+#: API: SCM Webhook - URL invalid protocol
+msgid "server.api.scm.webhook.url_invalid_protocol"
+msgstr "يجب أن يبدأ الرابط بـ http:// أو https://"
+
+#: API: SCM Webhook - URL too long
+msgid "server.api.scm.webhook.url_too_long"
+msgstr "يجب أن يكون الرابط أقل من 2048 حرفاً"
+
+#: API: SCM Webhook - Events required
+msgid "server.api.scm.webhook.events_required"
+msgstr "مطلوب حدث واحد على الأقل"
+
+#: API: SCM Webhook - Invalid event
+msgid "server.api.scm.webhook.invalid_event"
+msgstr "حدث غير صالح '{event}'. الأحداث الصالحة: {valid_events}"
+
+#: API: SCM Webhook - Secret required
+msgid "server.api.scm.webhook.secret_required"
+msgstr "المفتاح السري مطلوب"
+
+#: API: SCM Webhook - URL invalid
+msgid "server.api.scm.webhook.url_invalid"
+msgstr "صيغة الرابط غير صالحة"
+
+#: API: SCM Webhook - Localhost blocked
+msgid "server.api.scm.webhook.url_localhost_blocked"
+msgstr "روابط المضيف المحلي غير مسموح بها"
+
+#: API: SCM Webhook - Private IP blocked
+msgid "server.api.scm.webhook.url_private_ip_blocked"
+msgstr "عناوين IP الخاصة أو الداخلية غير مسموح بها"
+
+# ============================================================================
+# SCM: Maintenance API responses
+# ============================================================================
+
+#: API: SCM Maintenance - Not configured
+msgid "server.api.scm.maintenance.not_configured"
+msgstr "الصيانة غير مُعدة"
+
+#: API: SCM Maintenance - Job queued for repository
+msgid "server.api.scm.maintenance.job_queued"
+msgstr "تم وضع مهمة الصيانة '{task}' في قائمة الانتظار للمستودع"
+
+#: API: SCM Maintenance - Global sweep queued
+msgid "server.api.scm.maintenance.sweep_queued"
+msgstr "تم وضع عملية المسح الشاملة '{task}' في قائمة الانتظار"
+
+# ============================================================================
+# SCM: Mirror API responses
+# ============================================================================
+
+#: API: SCM Mirror - URL required
+msgid "server.api.scm.mirror.url_required"
+msgstr "عنوان URL للمرآة مطلوب"
+
+#: API: SCM Mirror - URL invalid protocol
+msgid "server.api.scm.mirror.url_invalid_protocol"
+msgstr "يجب أن يبدأ عنوان URL للمرآة بـ http:// أو https://"
+
+#: API: SCM Mirror - URL too long
+msgid "server.api.scm.mirror.url_too_long"
+msgstr "يجب أن يكون عنوان URL للمرآة أقل من 2048 حرفًا"
+
+#: API: SCM Mirror - URL invalid
+msgid "server.api.scm.mirror.url_invalid"
+msgstr "تنسيق عنوان URL للمرآة غير صالح"
+
+#: API: SCM Mirror - Localhost blocked
+msgid "server.api.scm.mirror.url_localhost_blocked"
+msgstr "عناوين localhost غير مسموح بها للمرايا"
+
+#: API: SCM Mirror - Private IP blocked
+msgid "server.api.scm.mirror.url_private_ip_blocked"
+msgstr "عناوين IP الخاصة أو الداخلية غير مسموح بها للمرايا"
+
+#: API: SCM Mirror - Not found
+msgid "server.api.scm.mirror.not_found"
+msgstr "المرآة غير موجودة"
+
+#: API: SCM Mirror - Disabled
+msgid "server.api.scm.mirror.disabled"
+msgstr "المرآة معطلة"
+
+#: API: SCM Mirror - Sync queued
+msgid "server.api.scm.mirror.sync_queued"
+msgstr "تم وضع مزامنة المرآة في قائمة الانتظار"
+
+#: API: SCM Mirror - Failed to delete
+msgid "server.api.scm.mirror.failed_to_delete"
+msgstr "فشل في حذف المرآة"
+
+#: API: SCM Mirror - Invalid path format
+msgid "server.api.scm.mirror.invalid_path"
+msgstr "تنسيق مسار المرآة غير صالح. المتوقع: mirrors/{platform}/{owner}/{repo}"
+
+#: API: SCM Mirror - Push not allowed
+msgid "server.api.scm.mirror.push_not_allowed"
+msgstr "الدفع غير مسموح به لمستودعات المرآة"
+
+#: API: SCM Mirror - Remote repository not found
+msgid "server.api.scm.mirror.remote_not_found"
+msgstr "المستودع البعيد غير موجود"
+
+#: API: SCM Mirror - Mirrors org not found
+msgid "server.api.scm.mirror.mirrors_org_not_found"
+msgstr "منظمة المرايا غير مُعدة. يرجى إنشاء منظمة باسم 'mirrors'."
+
+#: API: SCM Mirror - Clone failed
+msgid "server.api.scm.mirror.clone_failed"
+msgstr "فشل في استنساخ المستودع البعيد"
+
+# ============================================================================
+# Weaver API responses
+# ============================================================================
+
+#: API: Weaver - Invalid org ID
+msgid "server.api.weaver.invalid_org_id"
+msgstr "معرّف المنظمة غير صالح: {id}"
+
+#: API: Weaver - Not org member
+msgid "server.api.weaver.not_org_member"
+msgstr "أنت لست عضوًا في هذه المنظمة"
+
+#: API: Weaver - Membership check failed
+msgid "server.api.weaver.membership_check_failed"
+msgstr "فشل التحقق من عضوية المنظمة"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - User deleted
+msgid "server.api.admin.user_deleted"
+msgstr "تم حذف المستخدم بنجاح"
+
+#: API: Admin - Cannot delete self
+msgid "server.api.admin.cannot_delete_self"
+msgstr "لا يمكنك حذف حسابك الخاص"
+
+#: API: Admin - User not found
+msgid "server.api.admin.user_not_found"
+msgstr "المستخدم غير موجود"
+
+# ============================================================================
+# Admin Users UI
+# ============================================================================
+
+#: Admin Users - Delete button
+msgid "admin.users.delete"
+msgstr "حذف"
+
+#: Admin Users - Delete user title
+msgid "admin.users.deleteUser"
+msgstr "حذف المستخدم"
+
+#: Admin Users - Delete confirm title
+msgid "admin.users.deleteConfirmTitle"
+msgstr "حذف المستخدم"
+
+#: Admin Users - Delete confirm message
+msgid "admin.users.deleteConfirmMessage"
+msgstr "هل أنت متأكد أنك تريد حذف هذا المستخدم؟ سيؤدي هذا الإجراء إلى حذف الحساب بشكل مؤقت."
+
+#: Admin Users - Delete success
+msgid "admin.users.deleteSuccess"
+msgstr "تم حذف المستخدم بنجاح"
+
+#: Admin Users - Cancel button
+msgid "admin.users.cancel"
+msgstr "إلغاء"
+
+#: Admin Users - Confirm delete button
+msgid "admin.users.confirm"
+msgstr "تأكيد الحذف"
+
+# ============================================================================
+# SCM Git Browser API
+# ============================================================================
+
+#: API: SCM Browser - Failed to open repository
+msgid "server.api.scm.browser.failed_to_open_repo"
+msgstr "Failed to open repository"
+
+#: API: SCM Browser - File path required
+msgid "server.api.scm.browser.file_path_required"
+msgstr "File path is required"
+
+#: API: SCM Browser - Ref not found
+msgid "server.api.scm.browser.ref_not_found"
+msgstr "Reference not found: {ref}"
+
+#: API: SCM Browser - Failed to get object
+msgid "server.api.scm.browser.failed_to_get_object"
+msgstr "Failed to get object"
+
+#: API: SCM Browser - Failed to get commit
+msgid "server.api.scm.browser.failed_to_get_commit"
+msgstr "Failed to get commit"
+
+#: API: SCM Browser - Failed to get tree
+msgid "server.api.scm.browser.failed_to_get_tree"
+msgstr "Failed to get tree"
+
+#: API: SCM Browser - Failed to lookup path
+msgid "server.api.scm.browser.failed_to_lookup_path"
+msgstr "Failed to lookup path"
+
+#: API: SCM Browser - Path not found
+msgid "server.api.scm.browser.path_not_found"
+msgstr "Path not found: {path}"
+
+#: API: SCM Browser - Not a file
+msgid "server.api.scm.browser.not_a_file"
+msgstr "Not a file: {path}"
+
+#: API: SCM Browser - Not a directory
+msgid "server.api.scm.browser.not_a_directory"
+msgstr "Not a directory: {path}"
+
+# ============================================================================
+# Feature Flags API responses
+# ============================================================================
+
+#: API: Flags - Flag not found
+msgid "server.api.flags.flag_not_found"
+msgstr "علم الميزة غير موجود"
+
+#: API: Flags - Flag created
+msgid "server.api.flags.flag_created"
+msgstr "تم إنشاء علم الميزة"
+
+#: API: Flags - Flag updated
+msgid "server.api.flags.flag_updated"
+msgstr "تم تحديث علم الميزة"
+
+#: API: Flags - Flag archived
+msgid "server.api.flags.flag_archived"
+msgstr "تم أرشفة علم الميزة"
+
+#: API: Flags - Flag restored
+msgid "server.api.flags.flag_restored"
+msgstr "تم استعادة علم الميزة"
+
+#: API: Flags - Invalid flag key
+msgid "server.api.flags.invalid_flag_key"
+msgstr "مفتاح العلم غير صالح"
+
+#: API: Flags - Duplicate flag key
+msgid "server.api.flags.duplicate_flag_key"
+msgstr "مفتاح العلم موجود بالفعل"
+
+#: API: Flags - Variant not found
+msgid "server.api.flags.variant_not_found"
+msgstr "المتغير غير موجود"
+
+#: API: Flags - Default variant missing
+msgid "server.api.flags.default_variant_missing"
+msgstr "المتغير الافتراضي مفقود من قائمة المتغيرات"
+
+#: API: Flags - Circular prerequisite
+msgid "server.api.flags.circular_prerequisite"
+msgstr "تم اكتشاف تبعية دائرية للمتطلبات المسبقة"
+
+#: API: Flags - Prerequisite not found
+msgid "server.api.flags.prerequisite_not_found"
+msgstr "علم المتطلب المسبق غير موجود"
+
+#: API: Flags - Strategy not found
+msgid "server.api.flags.strategy_not_found"
+msgstr "استراتيجية الإطلاق غير موجودة"
+
+#: API: Flags - Strategy created
+msgid "server.api.flags.strategy_created"
+msgstr "تم إنشاء الاستراتيجية"
+
+#: API: Flags - Strategy updated
+msgid "server.api.flags.strategy_updated"
+msgstr "تم تحديث الاستراتيجية"
+
+#: API: Flags - Strategy deleted
+msgid "server.api.flags.strategy_deleted"
+msgstr "تم حذف الاستراتيجية"
+
+#: API: Flags - Strategy in use
+msgid "server.api.flags.strategy_in_use"
+msgstr "الاستراتيجية مستخدمة حالياً من قبل أعلام أخرى"
+
+#: API: Flags - Environment not found
+msgid "server.api.flags.environment_not_found"
+msgstr "البيئة غير موجودة"
+
+#: API: Flags - Environment created
+msgid "server.api.flags.environment_created"
+msgstr "تم إنشاء البيئة"
+
+#: API: Flags - Environment updated
+msgid "server.api.flags.environment_updated"
+msgstr "تم تحديث البيئة"
+
+#: API: Flags - Environment deleted
+msgid "server.api.flags.environment_deleted"
+msgstr "تم حذف البيئة"
+
+#: API: Flags - Environment has active keys
+msgid "server.api.flags.environment_has_active_keys"
+msgstr "لا يمكن حذف البيئة مع وجود مفاتيح SDK نشطة"
+
+#: API: Flags - Invalid environment name
+msgid "server.api.flags.invalid_environment_name"
+msgstr "اسم البيئة غير صالح"
+
+#: API: Flags - Invalid environment color
+msgid "server.api.flags.invalid_environment_color"
+msgstr "لون البيئة غير صالح"
+
+#: API: Flags - Duplicate environment name
+msgid "server.api.flags.duplicate_environment_name"
+msgstr "اسم البيئة موجود بالفعل"
+
+#: API: Flags - Flag config updated
+msgid "server.api.flags.flag_config_updated"
+msgstr "تم تحديث تكوين البيئة"
+
+#: API: Flags - Kill switch not found
+msgid "server.api.flags.kill_switch_not_found"
+msgstr "مفتاح القتل غير موجود"
+
+#: API: Flags - Kill switch created
+msgid "server.api.flags.kill_switch_created"
+msgstr "تم إنشاء مفتاح القتل"
+
+#: API: Flags - Kill switch updated
+msgid "server.api.flags.kill_switch_updated"
+msgstr "تم تحديث مفتاح القتل"
+
+#: API: Flags - Kill switch deleted
+msgid "server.api.flags.kill_switch_deleted"
+msgstr "تم حذف مفتاح القتل"
+
+#: API: Flags - Kill switch activated
+msgid "server.api.flags.kill_switch_activated"
+msgstr "تم تفعيل مفتاح القتل"
+
+#: API: Flags - Kill switch deactivated
+msgid "server.api.flags.kill_switch_deactivated"
+msgstr "تم إلغاء تفعيل مفتاح القتل"
+
+#: API: Flags - Invalid kill switch key
+msgid "server.api.flags.invalid_kill_switch_key"
+msgstr "مفتاح القتل غير صالح"
+
+#: API: Flags - Duplicate kill switch key
+msgid "server.api.flags.duplicate_kill_switch_key"
+msgstr "مفتاح القتل موجود بالفعل"
+
+#: API: Flags - Activation reason required
+msgid "server.api.flags.activation_reason_required"
+msgstr "سبب التفعيل مطلوب"
+
+#: API: Flags - SDK key not found
+msgid "server.api.flags.sdk_key_not_found"
+msgstr "مفتاح SDK غير موجود"
+
+#: API: Flags - SDK key created
+msgid "server.api.flags.sdk_key_created"
+msgstr "تم إنشاء مفتاح SDK"
+
+#: API: Flags - SDK key revoked
+msgid "server.api.flags.sdk_key_revoked"
+msgstr "تم إلغاء مفتاح SDK"
+
+#: API: Flags - SDK key revoked success
+msgid "server.api.flags.sdk_key_revoked_success"
+msgstr "تم إلغاء مفتاح SDK بنجاح"
+
+#: API: Flags - Invalid SDK key format
+msgid "server.api.flags.invalid_sdk_key_format"
+msgstr "تنسيق مفتاح SDK غير صالح"
+
+# ============================================================================
+# Exposure Tracking API responses
+# ============================================================================
+
+#: API: Flags - Exposure log created
+msgid "server.api.flags.exposure_created"
+msgstr "تم تسجيل التعرض بنجاح"
+
+#: API: Flags - Exposure tracking enabled
+msgid "server.api.flags.exposure_tracking_enabled"
+msgstr "تم تمكين تتبع التعرض للعلم"
+
+#: API: Flags - Exposure tracking disabled
+msgid "server.api.flags.exposure_tracking_disabled"
+msgstr "تم تعطيل تتبع التعرض للعلم"
+
+#: API: Flags - Invalid time range
+msgid "server.api.flags.invalid_time_range"
+msgstr "نطاق زمني غير صالح: يجب أن يكون وقت البدء قبل وقت الانتهاء"
+
+#: API: Flags - Export started
+msgid "server.api.flags.export_started"
+msgstr "بدأ تصدير سجل التعرض"
+
+#: API: Flags - No exposures found
+msgid "server.api.flags.no_exposures_found"
+msgstr "لم يتم العثور على تعرضات للمعايير المحددة"
+
+#: API: Flags - Exposure already logged
+msgid "server.api.flags.exposure_already_logged"
+msgstr "تم تسجيل التعرض بالفعل ضمن نافذة إزالة التكرار"
+
+# ============================================================================
+# Flag Stats API responses
+# ============================================================================
+
+#: API: Flags - Stats retrieved
+msgid "server.api.flags.stats_retrieved"
+msgstr "تم استرداد إحصائيات العلم بنجاح"
+
+#: API: Flags - Stale flags retrieved
+msgid "server.api.flags.stale_flags_retrieved"
+msgstr "تم استرداد الأعلام القديمة بنجاح"
+
+#: API: Flags - Flag is stale
+msgid "server.api.flags.flag_is_stale"
+msgstr "لم يتم تقييم هذا العلم منذ {days} يوم"
+
+#: API: Flags - No stale flags
+msgid "server.api.flags.no_stale_flags"
+msgstr "لم يتم العثور على أعلام قديمة"
+
+#: API: Flags - Never evaluated
+msgid "server.api.flags.never_evaluated"
+msgstr "لم يتم تقييم هذا العلم مطلقاً"
+
+#: API: Flags - Last evaluated
+msgid "server.api.flags.last_evaluated"
+msgstr "آخر تقييم: {date}"
+
+#: API: Flags - Evaluations 24h
+msgid "server.api.flags.evaluations_24h"
+msgstr "التقييمات في آخر 24 ساعة: {count}"
+
+#: API: Flags - Evaluations 7d
+msgid "server.api.flags.evaluations_7d"
+msgstr "التقييمات في آخر 7 أيام: {count}"
+
+#: API: Flags - Evaluations 30d
+msgid "server.api.flags.evaluations_30d"
+msgstr "التقييمات في آخر 30 يوم: {count}"
+
+#: API: Flags - Stale threshold
+msgid "server.api.flags.stale_threshold"
+msgstr "تعتبر الأعلام قديمة بعد {days} يوم بدون تقييم"
+
+# ============================================================================
+# CLI: Feature Flags SDK
+# ============================================================================
+
+#: Flags SDK: Invalid SDK key
+msgid "client.flags.error.invalid_sdk_key"
+msgstr "مفتاح SDK غير صالح أو مفقود"
+
+#: Flags SDK: Invalid base URL
+msgid "client.flags.error.invalid_base_url"
+msgstr "عنوان URL الأساسي غير صالح أو مفقود"
+
+#: Flags SDK: Connection failed
+msgid "client.flags.error.connection_failed"
+msgstr "فشل الاتصال بالخادم"
+
+#: Flags SDK: Request failed
+msgid "client.flags.error.request_failed"
+msgstr "فشل طلب HTTP"
+
+#: Flags SDK: Parse failed
+msgid "client.flags.error.parse_failed"
+msgstr "فشل في تحليل استجابة الخادم"
+
+#: Flags SDK: Server error
+msgid "client.flags.error.server_error"
+msgstr "أرجع الخادم خطأ"
+
+#: Flags SDK: Flag not found
+msgid "client.flags.error.flag_not_found"
+msgstr "لم يتم العثور على العلم"
+
+#: Flags SDK: SSE connection failed
+msgid "client.flags.error.sse_connection_failed"
+msgstr "فشل اتصال SSE"
+
+#: Flags SDK: SSE stream error
+msgid "client.flags.error.sse_stream_error"
+msgstr "خطأ في تدفق SSE"
+
+#: Flags SDK: Offline no cache
+msgid "client.flags.error.offline_no_cache"
+msgstr "العميل غير متصل ولا تتوفر بيانات مخزنة مؤقتاً"
+
+#: Flags SDK: Authentication failed
+msgid "client.flags.error.authentication_failed"
+msgstr "فشلت مصادقة مفتاح SDK"
+
+#: Flags SDK: Rate limited
+msgid "client.flags.error.rate_limited"
+msgstr "تم تجاوز حد الطلبات. أعد المحاولة بعد ثوانٍ"
+
+#: Flags SDK: Initialization timeout
+msgid "client.flags.error.initialization_timeout"
+msgstr "انتهت مهلة تهيئة العميل"
+
+#: Flags SDK: Client closed
+msgid "client.flags.error.client_closed"
+msgstr "تم إغلاق العميل"
+
+#: Flags SDK: Invalid value type
+msgid "client.flags.error.invalid_value_type"
+msgstr "نوع قيمة العلم غير صالح"
+
+#: Flags SDK: Initializing
+msgid "client.flags.status.initializing"
+msgstr "جارٍ تهيئة عميل الأعلام..."
+
+#: Flags SDK: Connected
+msgid "client.flags.status.connected"
+msgstr "تم توصيل عميل الأعلام"
+
+#: Flags SDK: Disconnected
+msgid "client.flags.status.disconnected"
+msgstr "تم قطع اتصال عميل الأعلام"
+
+#: Flags SDK: Reconnecting
+msgid "client.flags.status.reconnecting"
+msgstr "جارٍ إعادة الاتصال بخادم الأعلام..."
+
+#: Flags SDK: Using cached values
+msgid "client.flags.status.using_cache"
+msgstr "استخدام قيم الأعلام المخزنة مؤقتاً"
+
+#: Flags SDK: Cache initialized
+msgid "client.flags.status.cache_initialized"
+msgstr "تم تهيئة ذاكرة التخزين المؤقت للأعلام مع {count} أعلام"
+
+# ============================================================================
+# Platform Flags (Admin)
+# ============================================================================
+
+#: API: Platform Flags - Listed
+msgid "server.api.admin.flags.listed"
+msgstr "تم عرض أعلام المنصة"
+
+#: API: Platform Flags - Created
+msgid "server.api.admin.flags.created"
+msgstr "تم إنشاء علم المنصة بنجاح"
+
+#: API: Platform Flags - Updated
+msgid "server.api.admin.flags.updated"
+msgstr "تم تحديث علم المنصة بنجاح"
+
+#: API: Platform Flags - Archived
+msgid "server.api.admin.flags.archived"
+msgstr "تم أرشفة علم المنصة بنجاح"
+
+#: API: Platform Flags - Restored
+msgid "server.api.admin.flags.restored"
+msgstr "تم استعادة علم المنصة بنجاح"
+
+#: API: Platform Flags - Not found
+msgid "server.api.admin.flags.not_found"
+msgstr "لم يتم العثور على علم المنصة"
+
+#: API: Platform Flags - Duplicate key
+msgid "server.api.admin.flags.duplicate_key"
+msgstr "يوجد بالفعل علم منصة بهذا المفتاح"
+
+#: API: Platform Kill Switch - Listed
+msgid "server.api.admin.kill_switches.listed"
+msgstr "تم عرض مفاتيح إيقاف الطوارئ للمنصة"
+
+#: API: Platform Kill Switch - Created
+msgid "server.api.admin.kill_switches.created"
+msgstr "تم إنشاء مفتاح إيقاف الطوارئ للمنصة بنجاح"
+
+#: API: Platform Kill Switch - Updated
+msgid "server.api.admin.kill_switches.updated"
+msgstr "تم تحديث مفتاح إيقاف الطوارئ للمنصة بنجاح"
+
+#: API: Platform Kill Switch - Deleted
+msgid "server.api.admin.kill_switches.deleted"
+msgstr "تم حذف مفتاح إيقاف الطوارئ للمنصة بنجاح"
+
+#: API: Platform Kill Switch - Activated
+msgid "server.api.admin.kill_switches.activated"
+msgstr "تم تفعيل مفتاح إيقاف الطوارئ للمنصة"
+
+#: API: Platform Kill Switch - Deactivated
+msgid "server.api.admin.kill_switches.deactivated"
+msgstr "تم إلغاء تفعيل مفتاح إيقاف الطوارئ للمنصة"
+
+#: API: Platform Kill Switch - Not found
+msgid "server.api.admin.kill_switches.not_found"
+msgstr "لم يتم العثور على مفتاح إيقاف الطوارئ للمنصة"
+
+#: API: Platform Kill Switch - Duplicate key
+msgid "server.api.admin.kill_switches.duplicate_key"
+msgstr "يوجد بالفعل مفتاح إيقاف طوارئ للمنصة بهذا المفتاح"
+
+#: API: Platform Strategies - Listed
+msgid "server.api.admin.strategies.listed"
+msgstr "تم عرض استراتيجيات المنصة"
