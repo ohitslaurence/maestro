@@ -1201,4 +1201,404 @@ mod tests {
         assert!(json.contains("execute_tools"));
         assert!(json.contains("bash"));
     }
+
+    // ========================================================================
+    // State Transition Tests (§5, §6)
+    // ========================================================================
+
+    const TEST_SESSION_ID: &str = "sess_test";
+
+    /// Helper to create a minimal AgentState in a specific kind.
+    fn state_in(kind: AgentStateKind) -> AgentState {
+        AgentState {
+            kind,
+            ..Default::default()
+        }
+    }
+
+    // Valid transition: Ready + UserInput -> CallingLlm
+    #[test]
+    fn transition_ready_user_input_to_calling_llm() {
+        let mut state = state_in(AgentStateKind::Ready);
+        let event = AgentEvent::UserInput {
+            session_id: TEST_SESSION_ID.to_string(),
+            text: "hello".to_string(),
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID);
+        assert!(result.is_ok());
+        let result = result.unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::CallingLlm);
+        assert_eq!(state.kind, AgentStateKind::CallingLlm);
+        assert!(matches!(result.action, AgentAction::SendToHarness { .. }));
+        assert_eq!(result.reason, Some(StateChangeReason::UserInput));
+        assert!(state.active_stream_id.is_some());
+    }
+
+    // Valid transition: CallingLlm + HarnessStream(Completed) -> ProcessingResponse
+    #[test]
+    fn transition_calling_llm_stream_completed_to_processing() {
+        let mut state = state_in(AgentStateKind::CallingLlm);
+        let event = AgentEvent::HarnessStream {
+            session_id: TEST_SESSION_ID.to_string(),
+            stream_event: StreamEvent::Completed,
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::ProcessingResponse);
+        assert_eq!(state.kind, AgentStateKind::ProcessingResponse);
+        assert_eq!(result.reason, Some(StateChangeReason::StreamCompleted));
+    }
+
+    // Valid transition: ProcessingResponse with no tools -> Ready via finalize_response
+    #[test]
+    fn transition_processing_response_no_tools_to_ready() {
+        let mut state = state_in(AgentStateKind::ProcessingResponse);
+        state.pending_tool_calls.clear();
+
+        let result = state.finalize_response(TEST_SESSION_ID);
+
+        assert_eq!(result.new_kind, AgentStateKind::Ready);
+        assert_eq!(state.kind, AgentStateKind::Ready);
+    }
+
+    // Valid transition: ProcessingResponse with tools -> ExecutingTools via finalize_response
+    #[test]
+    fn transition_processing_response_with_tools_to_executing() {
+        let mut state = state_in(AgentStateKind::ProcessingResponse);
+        state.pending_tool_calls.push(ToolCall {
+            call_id: "call_1".to_string(),
+            name: "edit_file".to_string(),
+            arguments: serde_json::json!({}),
+            mutating: true,
+        });
+
+        let result = state.finalize_response(TEST_SESSION_ID);
+
+        assert_eq!(result.new_kind, AgentStateKind::ExecutingTools);
+        assert_eq!(state.kind, AgentStateKind::ExecutingTools);
+        assert!(matches!(result.action, AgentAction::ExecuteTools { .. }));
+    }
+
+    // Valid transition: StopRequested from Ready -> Stopping
+    #[test]
+    fn transition_stop_requested_from_ready() {
+        let mut state = state_in(AgentStateKind::Ready);
+        let event = AgentEvent::StopRequested {
+            session_id: TEST_SESSION_ID.to_string(),
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::Stopping);
+        assert_eq!(state.kind, AgentStateKind::Stopping);
+        assert!(matches!(result.action, AgentAction::StopHarness { .. }));
+    }
+
+    // Valid transition: Stopping + HarnessExited -> Stopped
+    #[test]
+    fn transition_stopping_harness_exited_to_stopped() {
+        let mut state = state_in(AgentStateKind::Stopping);
+        let event = AgentEvent::HarnessExited {
+            session_id: TEST_SESSION_ID.to_string(),
+            code: Some(0),
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::Stopped);
+        assert_eq!(state.kind, AgentStateKind::Stopped);
+    }
+
+    // Valid transition: Error + RetryTimeout(Llm) -> CallingLlm
+    #[test]
+    fn transition_error_retry_llm_to_calling_llm() {
+        let mut state = state_in(AgentStateKind::Error);
+        state.last_error = Some(AgentError {
+            code: "streaming_failed".to_string(),
+            message: "timeout".to_string(),
+            retryable: true,
+            source: ErrorSource::Harness,
+        });
+
+        let event = AgentEvent::RetryTimeout {
+            session_id: TEST_SESSION_ID.to_string(),
+            target: RetryTarget::Llm,
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::CallingLlm);
+        assert_eq!(state.kind, AgentStateKind::CallingLlm);
+        assert!(state.last_error.is_none());
+    }
+
+    // Valid transition: CallingLlm + stream error -> Error
+    #[test]
+    fn transition_calling_llm_stream_error_to_error() {
+        let mut state = state_in(AgentStateKind::CallingLlm);
+        let event = AgentEvent::HarnessStream {
+            session_id: TEST_SESSION_ID.to_string(),
+            stream_event: StreamEvent::Error {
+                message: "connection lost".to_string(),
+            },
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::Error);
+        assert_eq!(state.kind, AgentStateKind::Error);
+        assert!(state.last_error.is_some());
+        assert_eq!(state.last_error.as_ref().unwrap().code, "streaming_failed");
+    }
+
+    // Invalid transition: Idle + UserInput (Idle only transitions via spawn_session)
+    #[test]
+    fn invalid_transition_idle_user_input() {
+        let mut state = state_in(AgentStateKind::Idle);
+        let event = AgentEvent::UserInput {
+            session_id: TEST_SESSION_ID.to_string(),
+            text: "hello".to_string(),
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert_eq!(err.from, AgentStateKind::Idle);
+        assert_eq!(err.event_type, "UserInput");
+    }
+
+    // Invalid transition: Ready + ToolCompleted (wrong state for this event)
+    #[test]
+    fn invalid_transition_ready_tool_completed() {
+        let mut state = state_in(AgentStateKind::Ready);
+        let event = AgentEvent::ToolCompleted {
+            session_id: TEST_SESSION_ID.to_string(),
+            run_id: "toolrun_1".to_string(),
+            status: ToolRunStatus::Succeeded,
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert_eq!(err.from, AgentStateKind::Ready);
+        assert_eq!(err.event_type, "ToolCompleted");
+    }
+
+    // Invalid transition: Stopped + any event (terminal state)
+    #[test]
+    fn invalid_transition_stopped_is_terminal() {
+        let mut state = state_in(AgentStateKind::Stopped);
+        let event = AgentEvent::UserInput {
+            session_id: TEST_SESSION_ID.to_string(),
+            text: "hello".to_string(),
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert_eq!(err.from, AgentStateKind::Stopped);
+        assert!(err.message.contains("stopped"));
+    }
+
+    // Invalid transition: StopRequested from Stopped (already stopped)
+    #[test]
+    fn invalid_transition_stop_from_stopped() {
+        let mut state = state_in(AgentStateKind::Stopped);
+        let event = AgentEvent::StopRequested {
+            session_id: TEST_SESSION_ID.to_string(),
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.message.contains("already stopped"));
+    }
+
+    // Invalid transition: session ID mismatch
+    #[test]
+    fn invalid_transition_session_id_mismatch() {
+        let mut state = state_in(AgentStateKind::Ready);
+        let event = AgentEvent::StopRequested {
+            session_id: "other_session".to_string(),
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.message.contains("mismatch"));
+    }
+
+    // ExecutingTools: all tools completed with mutating -> PostToolsHook
+    #[test]
+    fn transition_executing_tools_mutating_to_post_hooks() {
+        let mut state = state_in(AgentStateKind::ExecutingTools);
+        state.tool_runs.push(ToolRunRecord {
+            run_id: "toolrun_1".to_string(),
+            call_id: "call_1".to_string(),
+            tool_name: "edit_file".to_string(),
+            mutating: true,
+            status: ToolRunStatus::Running,
+            started_at_ms: 0,
+            finished_at_ms: None,
+            attempt: 1,
+            error: None,
+        });
+
+        let event = AgentEvent::ToolCompleted {
+            session_id: TEST_SESSION_ID.to_string(),
+            run_id: "toolrun_1".to_string(),
+            status: ToolRunStatus::Succeeded,
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::PostToolsHook);
+        assert!(matches!(
+            result.action,
+            AgentAction::RunPostToolHooks { .. }
+        ));
+    }
+
+    // ExecutingTools: all tools completed non-mutating -> CallingLlm
+    #[test]
+    fn transition_executing_tools_non_mutating_to_calling_llm() {
+        let mut state = state_in(AgentStateKind::ExecutingTools);
+        state.tool_runs.push(ToolRunRecord {
+            run_id: "toolrun_1".to_string(),
+            call_id: "call_1".to_string(),
+            tool_name: "read_file".to_string(),
+            mutating: false,
+            status: ToolRunStatus::Running,
+            started_at_ms: 0,
+            finished_at_ms: None,
+            attempt: 1,
+            error: None,
+        });
+
+        let event = AgentEvent::ToolCompleted {
+            session_id: TEST_SESSION_ID.to_string(),
+            run_id: "toolrun_1".to_string(),
+            status: ToolRunStatus::Succeeded,
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::CallingLlm);
+        assert!(matches!(result.action, AgentAction::SendToHarness { .. }));
+    }
+
+    // ExecutingTools: tool failure -> Error
+    #[test]
+    fn transition_executing_tools_failure_to_error() {
+        let mut state = state_in(AgentStateKind::ExecutingTools);
+        state.tool_runs.push(ToolRunRecord {
+            run_id: "toolrun_1".to_string(),
+            call_id: "call_1".to_string(),
+            tool_name: "bash".to_string(),
+            mutating: true,
+            status: ToolRunStatus::Running,
+            started_at_ms: 0,
+            finished_at_ms: None,
+            attempt: 1,
+            error: None,
+        });
+
+        let event = AgentEvent::ToolCompleted {
+            session_id: TEST_SESSION_ID.to_string(),
+            run_id: "toolrun_1".to_string(),
+            status: ToolRunStatus::Failed,
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::Error);
+        assert!(state.last_error.is_some());
+        assert_eq!(
+            state.last_error.as_ref().unwrap().code,
+            "tool_execution_failed"
+        );
+    }
+
+    // PostToolsHook: all hooks completed -> CallingLlm
+    #[test]
+    fn transition_post_hooks_completed_to_calling_llm() {
+        let mut state = state_in(AgentStateKind::PostToolsHook);
+        state.hook_runs.push(HookRunRecord {
+            run_id: "hookrun_1".to_string(),
+            hook_name: "auto_commit".to_string(),
+            tool_run_ids: vec!["toolrun_1".to_string()],
+            status: HookRunStatus::Running,
+            started_at_ms: 0,
+            finished_at_ms: None,
+            attempt: 1,
+            error: None,
+        });
+
+        let event = AgentEvent::HookCompleted {
+            session_id: TEST_SESSION_ID.to_string(),
+            run_id: "hookrun_1".to_string(),
+            status: HookRunStatus::Succeeded,
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::CallingLlm);
+        assert!(matches!(result.action, AgentAction::SendToHarness { .. }));
+    }
+
+    // Stream deltas don't cause state transitions
+    #[test]
+    fn stream_delta_no_transition() {
+        let mut state = state_in(AgentStateKind::CallingLlm);
+        let event = AgentEvent::HarnessStream {
+            session_id: TEST_SESSION_ID.to_string(),
+            stream_event: StreamEvent::TextDelta {
+                content: "hello".to_string(),
+            },
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::CallingLlm);
+        assert!(matches!(result.action, AgentAction::Wait));
+        assert!(result.reason.is_none());
+    }
+
+    // Starting + HarnessExited(code=0) -> Ready
+    #[test]
+    fn transition_starting_harness_ready_to_ready() {
+        let mut state = state_in(AgentStateKind::Starting);
+        let event = AgentEvent::HarnessExited {
+            session_id: TEST_SESSION_ID.to_string(),
+            code: None, // None indicates ready signal
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::Ready);
+        assert_eq!(state.kind, AgentStateKind::Ready);
+    }
+
+    // Starting + HarnessExited(code=1) -> Stopped
+    #[test]
+    fn transition_starting_harness_failed_to_stopped() {
+        let mut state = state_in(AgentStateKind::Starting);
+        let event = AgentEvent::HarnessExited {
+            session_id: TEST_SESSION_ID.to_string(),
+            code: Some(1),
+        };
+
+        let result = state.handle_event(&event, TEST_SESSION_ID).unwrap();
+
+        assert_eq!(result.new_kind, AgentStateKind::Stopped);
+        assert_eq!(state.kind, AgentStateKind::Stopped);
+    }
 }
