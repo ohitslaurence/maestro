@@ -115,13 +115,13 @@ curl -X POST http://localhost:9100/session -H 'Content-Type: application/json' \
 
 Wire up the Claude Agent SDK to handle messages.
 
-- [ ] Create `src/sdk/agent.ts` wrapper around `query()` (Appendix A)
-- [ ] Implement `POST /session/:id/message` endpoint (§4, §5 Main Flow)
-- [ ] Configure SDK with Claude Code presets: systemPrompt, tools, settingSources (§10)
-- [ ] Pass `cwd`, `permissionMode`, `modelId` from session to SDK (§3, §10)
-- [ ] Handle SESSION_BUSY (409) for concurrent message attempts (§5 Edge Cases)
-- [ ] Emit `session.status { type: 'busy' }` on message start (§4)
-- [ ] Emit `session.status { type: 'idle' }` on completion (§4)
+- [x] Create `src/sdk/agent.ts` wrapper around `query()` (Appendix A)
+- [x] Implement `POST /session/:id/message` endpoint (§4, §5 Main Flow)
+- [x] Configure SDK with Claude Code options: cwd, permissionMode, model, resume (§10)
+- [x] Pass `cwd`, `permissionMode`, `modelId` from session to SDK (§3, §10)
+- [x] Handle SESSION_BUSY (409) for concurrent message attempts (§5 Edge Cases)
+- [x] Emit `session.status { type: 'busy' }` on message start (§4)
+- [x] Emit `session.status { type: 'idle' }` on completion (§4)
 
 **Verification:**
 ```bash
@@ -179,11 +179,11 @@ Validate the SSE event envelope + ordering against OpenCode expectations.
 
 Implement execution cancellation.
 
-- [ ] Track active SDK execution per session
-- [ ] Implement `POST /session/:id/abort` endpoint (§4, §5 Abort Flow)
-- [ ] Abort active SDK stream via AbortController
-- [ ] Emit `session.status { type: 'idle' }` after abort
-- [ ] Handle abort of non-busy session gracefully (no-op)
+- [x] Track active SDK execution per session
+- [x] Implement `POST /session/:id/abort` endpoint (§4, §5 Abort Flow)
+- [x] Abort active SDK stream via AbortController
+- [x] Emit `session.status { type: 'idle' }` after abort
+- [x] Handle abort of non-busy session gracefully (no-op)
 
 **Verification:**
 ```bash
@@ -197,9 +197,9 @@ curl -X POST "http://localhost:9100/session/$SESSION/abort"
 
 Support resuming previous conversations.
 
-- [ ] Persist `resumeId` from SDK result to session storage (§5 Resume Flow)
-- [ ] On `POST /session/:id/message`, load and pass `resumeId` to SDK
-- [ ] SDK automatically restores conversation context
+- [x] Persist `resumeId` from SDK result to session storage (§5 Resume Flow)
+- [x] On `POST /session/:id/message`, load and pass `resumeId` to SDK
+- [x] SDK automatically restores conversation context
 - [ ] Verify resume works after server restart
 
 **Verification:**

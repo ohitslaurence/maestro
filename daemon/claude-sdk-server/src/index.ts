@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import { sseEmitter } from './events/emitter';
 import { logger } from './logger';
 import { eventsRouter } from './routes/events';
+import { messagesRouter } from './routes/messages';
 import { sessionsRouter } from './routes/sessions';
 import { initSessionStore } from './storage/sessions';
 
@@ -46,6 +47,9 @@ app.get('/health', (c) => {
 
 // Session routes (§4)
 app.route('/session', sessionsRouter);
+
+// Message routes (§4) - mounted under /session for :id/message paths
+app.route('/session', messagesRouter);
 
 // SSE event stream (§4)
 app.route('/event', eventsRouter);
