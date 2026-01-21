@@ -1,2 +1,0 @@
-# Scripts directory for devenv tasks
-This directory contains bash scripts extracted from devenv.nix tasks for better maintainability and logging.
