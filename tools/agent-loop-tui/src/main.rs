@@ -44,6 +44,7 @@ struct ReportData {
     completion_iter: Option<String>,
     completion_mode: Option<String>,
     exit_reason: Option<String>,
+    postmortem_status: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -402,6 +403,19 @@ fn parse_report(report_path: &Path, repo_root: &Path) -> Result<ReportData> {
                     data.completion_mode = Some(mode.to_string());
                 }
             }
+            "POSTMORTEM_START" => {
+                data.postmortem_status = Some("running".to_string());
+            }
+            "POSTMORTEM_END" => {
+                let mut status = None;
+                for token in message.split_whitespace() {
+                    if let Some(value) = token.strip_prefix("status=") {
+                        status = Some(value.to_string());
+                        break;
+                    }
+                }
+                data.postmortem_status = status.or_else(|| Some("done".to_string()));
+            }
             "RUN_END" => {
                 if let Some(reason) = message.strip_prefix("reason=") {
                     data.exit_reason = Some(reason.to_string());
@@ -663,6 +677,17 @@ fn build_info_lines(app: &AppState) -> Vec<Line> {
         }
     }
 
+    if let Some(status) = app.report_data.postmortem_status.as_ref() {
+        let label = match status.as_str() {
+            "running" => "running",
+            "ok" => "ok",
+            "failed" => "failed",
+            "done" => "done",
+            other => other,
+        };
+        lines.push(info_line("Postmortem", label, label_style));
+    }
+
     if let Some(spec) = app.report_data.spec_path.as_ref() {
         lines.push(info_line("Spec", &spec.display().to_string(), label_style));
     }
@@ -715,6 +740,12 @@ fn status_label(app: &AppState) -> String {
     if app.shutdown_requested {
         return "Stopping".to_string();
     }
+    if matches!(app.report_data.postmortem_status.as_deref(), Some("running")) {
+        return "Postmortem".to_string();
+    }
+    if app.summary.is_some() || app.report_data.exit_reason.is_some() {
+        return "Finalizing".to_string();
+    }
     "Running".to_string()
 }
 
@@ -723,6 +754,12 @@ fn status_style(app: &AppState) -> Style {
         return Style::default().fg(Color::Green).add_modifier(Modifier::BOLD);
     }
     if app.shutdown_requested {
+        return Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD);
+    }
+    if app.report_data.postmortem_status.as_deref() == Some("running") {
+        return Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD);
+    }
+    if app.summary.is_some() || app.report_data.exit_reason.is_some() {
         return Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD);
     }
     Style::default().fg(Color::Blue).add_modifier(Modifier::BOLD)
