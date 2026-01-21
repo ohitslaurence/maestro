@@ -7,9 +7,21 @@
 import { randomUUID } from 'crypto';
 import { Hono } from 'hono';
 import { sseEmitter } from '../events/emitter';
-import { isTextBlock, isThinkingBlock, MessageMapper } from '../events/mapper';
+import {
+  isTextBlock,
+  isThinkingBlock,
+  isToolResultBlock,
+  isToolUseBlock,
+  MessageMapper,
+} from '../events/mapper';
 import { logger } from '../logger';
-import { executeQuery, isAssistantMessage, isResultMessage, type QueryResult } from '../sdk/agent';
+import {
+  executeQuery,
+  isAssistantMessage,
+  isResultMessage,
+  isUserMessage,
+  type QueryResult,
+} from '../sdk/agent';
 import { getSessionStore } from '../storage/sessions';
 import {
   ErrorCode,
@@ -20,6 +32,7 @@ import {
   type SendMessageRequest,
   type SendMessageResponse,
   type TextPart,
+  type ToolPart,
 } from '../types';
 
 export const messagesRouter = new Hono();
@@ -229,8 +242,46 @@ messagesRouter.post('/:id/message', async (c) => {
             }
           }
 
-          // TODO Phase 5: Map tool_use blocks to ToolPart with status transitions
-          // TODO Phase 5: Map tool_result blocks to ToolPart completion
+          // Map tool_use blocks to ToolPart with status transitions (Phase 5)
+          // Status flow: pending → running (§5 Main Flow step 6c, Appendix B)
+          if (isToolUseBlock(block)) {
+            const existing = mapper.getToolPart(block.id);
+            if (!existing) {
+              // First time seeing this tool_use - emit with 'pending' status
+              const part = mapper.mapToolUseBlock(block);
+              parts.push(part);
+              await store.upsertPart(sessionId, assistantMessageId, part);
+              sseEmitter.emitMessagePartUpdated(part);
+
+              // Immediately transition to 'running' status
+              const runningPart = mapper.updateToolRunning(block.id);
+              if (runningPart) {
+                await store.upsertPart(sessionId, assistantMessageId, runningPart);
+                sseEmitter.emitMessagePartUpdated(runningPart);
+              }
+            }
+          }
+        }
+      }
+
+      // Handle user messages containing tool_result blocks (Phase 5)
+      // Tool results appear in user messages after tool execution (§5 Main Flow step 6d)
+      if (isUserMessage(message)) {
+        for (const block of message.message.content) {
+          if (isToolResultBlock(block)) {
+            const updatedPart = mapper.mapToolResultBlock(block);
+            if (updatedPart) {
+              // Update the existing part in the parts array
+              const partIndex = parts.findIndex(
+                (p) => p.type === 'tool' && (p as ToolPart).toolUseId === block.tool_use_id
+              );
+              if (partIndex !== -1) {
+                parts[partIndex] = updatedPart;
+              }
+              await store.upsertPart(sessionId, assistantMessageId, updatedPart);
+              sseEmitter.emitMessagePartUpdated(updatedPart);
+            }
+          }
         }
       }
 

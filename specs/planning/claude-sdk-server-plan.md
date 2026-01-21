@@ -145,8 +145,8 @@ Map SDK messages to OpenCode-compatible events.
 - [x] Create `src/events/mapper.ts` for SDK message → Part mapping (§3, Appendix B)
 - [x] Map `text` content blocks to TextPart with delta streaming
 - [x] Map `thinking` content blocks to ReasoningPart
-- [ ] Map `tool_use` to ToolPart with status transitions (pending → running)
-- [ ] Map `tool_result` to ToolPart completion (status: completed/failed)
+- [x] Map `tool_use` to ToolPart with status transitions (pending → running)
+- [x] Map `tool_result` to ToolPart completion (status: completed/failed)
 - [ ] Emit `step-start` part at turn start and `step-finish` at turn end (§3)
 - [ ] Emit `message.updated` for message lifecycle (§4)
 - [ ] Emit `message.part.updated` for each part/delta (§4)
