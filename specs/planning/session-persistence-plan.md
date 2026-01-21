@@ -5,11 +5,11 @@ Reference: [session-persistence.md](../session-persistence.md)
 ## Phase 1: Storage foundation
 - [x] Add `storage/` module structure in `app/src-tauri/src` (See §2)
 - [x] Implement `write_atomic` and `read_json` helpers (See §4, §5)
-- [ ] Define shared record types in `app/src/types/session.ts` (See §3)
+- [x] Define shared record types in `app/src/types/session.ts` (See §3)
 
 Exit Criteria
 - [x] Atomic write helper writes temp + rename without panic (See §5)
-- [ ] Record types compile in TS and Rust (See §3)
+- [x] Record types compile in TS and Rust (See §3)
 - [x] Storage root resolves under `app_data_dir()` (See §2)
 
 ## Phase 2: Thread + session CRUD
