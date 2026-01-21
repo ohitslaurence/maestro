@@ -381,3 +381,78 @@ show_run_summary() {
     ui_log "WARN" "Full output captured in: $ITER_LOG_PATH"
   fi
 }
+
+# -----------------------------------------------------------------------------
+# Summary JSON output (spec §3.2, §4.1)
+# -----------------------------------------------------------------------------
+
+write_summary_json() {
+  local exit_reason="$1"
+  local last_exit_code="${2:-0}"
+
+  local run_end_ms
+  run_end_ms=$(get_epoch_ms)
+  local total_duration_ms=$((run_end_ms - RUN_START_MS))
+
+  # Calculate average iteration duration
+  local avg_duration_ms=0
+  if ((TOTAL_ITERATIONS > 0 && total_duration_ms > 0)); then
+    avg_duration_ms=$((total_duration_ms / TOTAL_ITERATIONS))
+  fi
+
+  local summary_path="$LOG_DIR/run-$RUN_ID-summary.json"
+
+  # Format nullable fields properly for JSON
+  local completed_iter_json="null"
+  [[ -n "$COMPLETED_ITERATION" ]] && completed_iter_json="$COMPLETED_ITERATION"
+
+  local completion_mode_json="null"
+  [[ -n "$COMPLETION_MODE" ]] && completion_mode_json="\"$COMPLETION_MODE\""
+
+  local last_iter_log_json="null"
+  [[ -n "$ITER_LOG_PATH" ]] && last_iter_log_json="\"$ITER_LOG_PATH\""
+
+  # Build JSON (avoiding jq dependency)
+  cat > "$summary_path" <<EOF
+{
+  "run_id": "$RUN_ID",
+  "start_ms": $RUN_START_MS,
+  "end_ms": $run_end_ms,
+  "total_duration_ms": $total_duration_ms,
+  "iterations_run": $TOTAL_ITERATIONS,
+  "completed_iteration": $completed_iter_json,
+  "avg_duration_ms": $avg_duration_ms,
+  "last_exit_code": $last_exit_code,
+  "completion_mode": $completion_mode_json,
+  "exit_reason": "$exit_reason",
+  "run_log": "$RUN_LOG",
+  "last_iteration_log": $last_iter_log_json
+}
+EOF
+
+  ui_log "INFO" "Summary JSON written to: $summary_path"
+}
+
+# -----------------------------------------------------------------------------
+# Completion screen with optional wait (spec §4.1, §5.1)
+# -----------------------------------------------------------------------------
+
+show_completion_screen() {
+  local no_wait="${1:-false}"
+
+  if [[ "$no_wait" == "true" ]]; then
+    return 0
+  fi
+
+  if [[ "$GUM_ENABLED" == "true" ]]; then
+    # Show styled completion message and wait for user confirmation (spec §4.1)
+    printf '\n'
+    gum style --foreground 46 --bold "✓ Agent loop finished"
+    gum confirm --default=true "Close" || true
+  else
+    # Plain text fallback
+    printf '\n✓ Agent loop finished\n'
+    printf 'Press Enter to close...'
+    read -r
+  fi
+}

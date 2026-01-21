@@ -219,6 +219,8 @@ EOF
     if [[ "$trimmed_result" == "<promise>COMPLETE</promise>" ]]; then
       record_completion "$i" "strict"
       show_run_summary "complete_strict" "0"
+      [[ "$summary_json" == "true" ]] && write_summary_json "complete_strict" "0"
+      show_completion_screen "$no_wait"
       printf '%s\n' "$trimmed_result"
       exit 0
     fi
@@ -227,6 +229,8 @@ EOF
     if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
       record_completion "$i" "lenient"
       show_run_summary "complete_lenient" "0"
+      [[ "$summary_json" == "true" ]] && write_summary_json "complete_lenient" "0"
+      show_completion_screen "$no_wait"
       printf '%s\n' "$result"
       exit 0
     fi
@@ -236,11 +240,15 @@ EOF
     # Exit on non-zero claude exit (spec §6)
     if ((claude_exit != 0)); then
       show_run_summary "claude_failed" "$claude_exit"
+      [[ "$summary_json" == "true" ]] && write_summary_json "claude_failed" "$claude_exit"
+      show_completion_screen "$no_wait"
       exit "$claude_exit"
     fi
   done
 
   show_run_summary "iterations_exhausted" "0"
+  [[ "$summary_json" == "true" ]] && write_summary_json "iterations_exhausted" "0"
+  show_completion_screen "$no_wait"
 }
 
 main "$@"
