@@ -5,6 +5,8 @@ set -euo pipefail
 
 LOG_DIR="logs/agent-loop"
 RUN_ID=""
+RUN_ANALYSIS=false
+MODEL="opus"
 
 usage() {
   cat <<EOF
@@ -15,12 +17,16 @@ Arguments:
 
 Options:
   --log-dir <path>    Log directory (default: logs/agent-loop)
+  --model <name>      Claude model or alias (default: opus)
+  --run               Run postmortem analysis and write reports
   -h, --help          Show this help
 
 Examples:
   $(basename "$0")
   $(basename "$0") 20260121-120045
   $(basename "$0") --log-dir /tmp/agent-loop
+  $(basename "$0") --run
+  $(basename "$0") 20260121-120045 --run --model opus
 EOF
 }
 
@@ -30,6 +36,14 @@ parse_args() {
       --log-dir)
         LOG_DIR="$2"
         shift 2
+        ;;
+      --model)
+        MODEL="$2"
+        shift 2
+        ;;
+      --run)
+        RUN_ANALYSIS=true
+        shift
         ;;
       -h|--help)
         usage
@@ -108,8 +122,84 @@ parse_report() {
   printf '%s|%s|%s|%s|%s\n' "$last_iter" "$last_iter_log" "$last_iter_tail" "$completion_iter" "$completion_mode"
 }
 
+parse_run_metadata() {
+  local report_path="$1"
+  local spec_path=""
+  local plan_path=""
+  local model=""
+
+  while IFS=$'\t' read -r timestamp kind iteration duration exit_code output_bytes output_lines output_path message; do
+    if [[ "$kind" == "kind" ]]; then
+      continue
+    fi
+
+    if [[ "$kind" == "RUN_START" ]]; then
+      for token in $message; do
+        case "$token" in
+          spec=*)
+            spec_path=${token#spec=}
+            ;;
+          plan=*)
+            plan_path=${token#plan=}
+            ;;
+          model=*)
+            model=${token#model=}
+            ;;
+        esac
+      done
+      break
+    fi
+  done < "$report_path"
+
+  printf '%s|%s|%s\n' "$spec_path" "$plan_path" "$model"
+}
+
+resolve_repo_root() {
+  if git rev-parse --show-toplevel >/dev/null 2>&1; then
+    git rev-parse --show-toplevel
+  else
+    pwd
+  fi
+}
+
+normalize_log_dir() {
+  local repo_root="$1"
+  if [[ "$LOG_DIR" != /* ]]; then
+    LOG_DIR="$repo_root/$LOG_DIR"
+  fi
+}
+
+capture_git_snapshot() {
+  local output_dir="$1"
+
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    return 0
+  fi
+
+  git status -sb > "$output_dir/git-status.txt"
+  git log -1 --stat > "$output_dir/git-last-commit.txt"
+  git show -1 --stat --patch > "$output_dir/git-last-commit.patch"
+  git diff > "$output_dir/git-diff.patch"
+}
+
+run_analysis_step() {
+  local label="$1"
+  local prompt="$2"
+  local prompt_path="$3"
+  local output_path="$4"
+
+  printf '%s\n' "$prompt" > "$prompt_path"
+  printf 'Running %s analysis...\n' "$label" >&2
+  claude --dangerously-skip-permissions --model "$MODEL" -p "$prompt" > "$output_path"
+}
+
 main() {
   parse_args "$@"
+
+  local repo_root
+  repo_root=$(resolve_repo_root)
+  normalize_log_dir "$repo_root"
+  cd "$repo_root"
 
   if [[ -z "$RUN_ID" ]]; then
     find_latest_run_id
@@ -121,8 +211,13 @@ main() {
   local prompt_snapshot="$run_dir/prompt.txt"
   local summary_json="$run_dir/summary.json"
   local analysis_prompt_path="$run_dir/analysis-prompt.txt"
+  local analysis_dir="$run_dir/analysis"
+  local legacy_layout=false
 
   if [[ ! -f "$run_report" ]]; then
+    legacy_layout=true
+    run_dir="$LOG_DIR"
+    analysis_dir="$LOG_DIR/run-$RUN_ID-analysis"
     run_report="$LOG_DIR/run-$RUN_ID-report.tsv"
     run_log="$LOG_DIR/run-$RUN_ID.log"
     prompt_snapshot="$LOG_DIR/run-$RUN_ID-prompt.txt"
@@ -141,6 +236,12 @@ main() {
   local last_iter last_iter_log last_iter_tail completion_iter completion_mode
   IFS='|' read -r last_iter last_iter_log last_iter_tail completion_iter completion_mode <<< "$parse_result"
 
+  local metadata_result
+  metadata_result=$(parse_run_metadata "$run_report")
+
+  local spec_path plan_path run_model
+  IFS='|' read -r spec_path plan_path run_model <<< "$metadata_result"
+
   local completion_display="not detected"
   if [[ -n "$completion_iter" ]]; then
     completion_display="iteration $completion_iter"
@@ -149,8 +250,18 @@ main() {
     fi
   fi
 
-  local prompt
-  prompt=$(cat <<EOF
+  if [[ ! -d "$analysis_dir" ]]; then
+    mkdir -p "$analysis_dir"
+  fi
+
+  if [[ -z "$run_model" ]]; then
+    run_model="$MODEL"
+  fi
+
+  capture_git_snapshot "$analysis_dir"
+
+  local run_prompt
+  run_prompt=$(cat <<EOF
 Analyze this agent-loop run. Focus on end-of-task behavior, completion protocol compliance, and
 actionable improvements to the spec templates and loop prompt.
 
@@ -158,6 +269,7 @@ Run metadata:
 - Run ID: $RUN_ID
 - Completion detected: $completion_display
 - Last iteration observed: ${last_iter:-unknown}
+- Model: $run_model
 
 Artifacts (read all that exist):
 - Run report (TSV): $run_report
@@ -176,9 +288,78 @@ Return:
 EOF
 )
 
-  printf '%s\n' "$prompt" > "$analysis_prompt_path"
-  printf '%s\n' "$prompt"
+  printf '%s\n' "$run_prompt" > "$analysis_prompt_path"
+  if [[ "$RUN_ANALYSIS" != "true" ]]; then
+    printf '%s\n' "$run_prompt"
+  fi
   printf 'Saved analysis prompt to: %s\n' "$analysis_prompt_path" >&2
+
+  if [[ "$RUN_ANALYSIS" == "true" ]]; then
+    if ! command -v claude >/dev/null 2>&1; then
+      printf 'Error: claude CLI not found; cannot run analysis\n' >&2
+      exit 1
+    fi
+
+    local spec_prompt
+    spec_prompt=$(cat <<EOF
+Analyze the implementation against the spec and plan. Determine whether the spec is clear and whether
+the implementation followed it. Highlight any changes required to fully reach the spec requirements.
+
+Context:
+- Spec: ${spec_path:-unknown}
+- Plan: ${plan_path:-unknown}
+- Model: $run_model
+
+Artifacts (read all that exist):
+- Spec: ${spec_path:-unknown}
+- Plan: ${plan_path:-unknown}
+- Git status: $analysis_dir/git-status.txt
+- Last commit summary: $analysis_dir/git-last-commit.txt
+- Last commit patch: $analysis_dir/git-last-commit.patch
+- Working tree diff: $analysis_dir/git-diff.patch
+- Run summary: $summary_json
+
+Return a Markdown report with sections:
+1) Compliance summary (pass/fail + rationale)
+2) Deviations (spec gap vs implementation deviation)
+3) Missing verification steps
+4) Required changes to meet the spec (bullet list)
+5) Spec/template edits to prevent recurrence
+EOF
+)
+
+    local run_prompt_path="$analysis_dir/run-quality-prompt.txt"
+    local run_output_path="$analysis_dir/run-quality.md"
+    local spec_prompt_path="$analysis_dir/spec-compliance-prompt.txt"
+    local spec_output_path="$analysis_dir/spec-compliance.md"
+    local summary_prompt_path="$analysis_dir/summary-prompt.txt"
+    local summary_output_path="$analysis_dir/summary.md"
+
+    run_analysis_step "spec compliance" "$spec_prompt" "$spec_prompt_path" "$spec_output_path"
+    run_analysis_step "run quality" "$run_prompt" "$run_prompt_path" "$run_output_path"
+
+    local summary_prompt
+    summary_prompt=$(cat <<EOF
+Synthesize the following reports into a final postmortem. Decide the primary root cause and provide
+actionable changes to specs, prompt, and tooling.
+
+Inputs:
+- Spec compliance report: $spec_output_path
+- Run quality report: $run_output_path
+
+Return a Markdown report with sections:
+1) Root cause classification (spec gap vs implementation deviation vs execution failure)
+2) Evidence (file/log references)
+3) Required changes to reach the spec (bullet list)
+4) Spec template changes
+5) Loop prompt changes
+6) Tooling/UX changes
+EOF
+)
+
+    run_analysis_step "postmortem summary" "$summary_prompt" "$summary_prompt_path" "$summary_output_path"
+    printf 'Postmortem reports written to: %s\n' "$analysis_dir" >&2
+  fi
 }
 
 main "$@"

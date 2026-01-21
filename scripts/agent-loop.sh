@@ -23,6 +23,8 @@ log_dir="logs/agent-loop"
 no_gum=false
 summary_json=false
 no_wait=false
+model="opus"
+postmortem=true
 
 # -----------------------------------------------------------------------------
 # Usage
@@ -38,6 +40,8 @@ Arguments:
 Options:
   --iterations <n>    Maximum loop iterations (default: 50)
   --log-dir <path>    Base log directory (default: logs/agent-loop)
+  --model <name>      Claude model or alias (default: opus)
+  --no-postmortem     Disable automatic post-run analysis
   --no-gum            Disable gum UI, use plain output
   --summary-json      Write summary JSON at end of run
   --no-wait           Skip completion screen wait
@@ -62,6 +66,18 @@ parse_args() {
       --log-dir)
         log_dir="$2"
         shift 2
+        ;;
+      --model)
+        model="$2"
+        shift 2
+        ;;
+      --postmortem)
+        postmortem=true
+        shift
+        ;;
+      --no-postmortem)
+        postmortem=false
+        shift
         ;;
       --no-gum)
         no_gum=true
@@ -152,6 +168,36 @@ validate_inputs() {
 }
 
 # -----------------------------------------------------------------------------
+# Postmortem automation
+# -----------------------------------------------------------------------------
+run_postmortem() {
+  local reason="$1"
+
+  if [[ "$postmortem" != "true" ]]; then
+    return 0
+  fi
+
+  if ! command -v claude >/dev/null 2>&1; then
+    ui_log "WARN" "Postmortem skipped: claude CLI not found"
+    return 0
+  fi
+
+  ui_header "Postmortem"
+  ui_log "INFO" "Postmortem analysis starting ($reason)"
+  report_event "POSTMORTEM_START" "" "" "" "" "" "" "reason=$reason"
+
+  if ! "$SCRIPT_DIR/agent-loop-analyze.sh" "$RUN_ID" --log-dir "$log_dir" --run --model "$model"; then
+    ui_log "WARN" "Postmortem analysis failed"
+    report_event "POSTMORTEM_END" "" "" "" "" "" "" "status=failed"
+    return 1
+  fi
+
+  ui_log "INFO" "Postmortem analysis complete"
+  report_event "POSTMORTEM_END" "" "" "" "" "" "" "status=ok"
+  return 0
+}
+
+# -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
 main() {
@@ -167,7 +213,7 @@ main() {
   setup_signal_traps
 
   # Show run header (spec §4)
-  show_run_header "$spec_path" "$plan_path" "$iterations"
+  show_run_header "$spec_path" "$plan_path" "$iterations" "$model"
 
   # Build prompt
   local prompt
@@ -224,7 +270,7 @@ EOF
     local claude_exit=0
 
     # Run claude with spinner and per-iteration logging (spec §5.1)
-    run_claude_iteration "$i" "$prompt" result || claude_exit=$?
+    run_claude_iteration "$i" "$prompt" "$model" result || claude_exit=$?
 
     # Trim whitespace for comparison
     local trimmed_result="$result"
@@ -236,6 +282,7 @@ EOF
       record_completion "$i" "strict"
       show_run_summary "complete_strict" "0"
       [[ "$summary_json" == "true" ]] && write_summary_json "complete_strict" "0"
+      run_postmortem "complete_strict" || true
       show_completion_screen "$no_wait"
       printf '%s\n' "$trimmed_result"
       exit 0
@@ -246,6 +293,7 @@ EOF
       record_completion "$i" "lenient"
       show_run_summary "complete_lenient" "0"
       [[ "$summary_json" == "true" ]] && write_summary_json "complete_lenient" "0"
+      run_postmortem "complete_lenient" || true
       show_completion_screen "$no_wait"
       printf '%s\n' "$result"
       exit 0
@@ -257,6 +305,7 @@ EOF
     if ((claude_exit != 0)); then
       show_run_summary "claude_failed" "$claude_exit"
       [[ "$summary_json" == "true" ]] && write_summary_json "claude_failed" "$claude_exit"
+      run_postmortem "claude_failed" || true
       show_completion_screen "$no_wait"
       exit "$claude_exit"
     fi
@@ -264,6 +313,7 @@ EOF
 
   show_run_summary "iterations_exhausted" "0"
   [[ "$summary_json" == "true" ]] && write_summary_json "iterations_exhausted" "0"
+  run_postmortem "iterations_exhausted" || true
   show_completion_screen "$no_wait"
 }
 

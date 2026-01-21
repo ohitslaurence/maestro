@@ -10,6 +10,7 @@ declare -g RUN_DIR=""
 declare -g RUN_LOG=""
 declare -g RUN_REPORT=""
 declare -g RUN_PROMPT_PATH=""
+declare -g RUN_MODEL=""
 declare -g RUN_START_MS=""
 
 # Per-iteration stats (spec §3.1 IterationStats)
@@ -235,7 +236,8 @@ record_completion() {
 run_claude_iteration() {
   local iteration="$1"
   local prompt="$2"
-  local -n output_ref=$3
+  local model="$3"
+  local -n output_ref=$4
 
   start_iteration "$iteration"
 
@@ -248,12 +250,12 @@ run_claude_iteration() {
   local spinner_index=0
 
   if [[ "$GUM_ENABLED" == "true" ]]; then
-    claude --dangerously-skip-permissions -p "$prompt" > "$temp_output" 2>&1 < /dev/null &
+    claude --dangerously-skip-permissions --model "$model" -p "$prompt" > "$temp_output" 2>&1 < /dev/null &
     pid=$!
   else
     # Plain output mode
     printf 'Iteration %d: Running claude...\n' "$iteration"
-    claude --dangerously-skip-permissions -p "$prompt" > "$temp_output" 2>&1 < /dev/null &
+    claude --dangerously-skip-permissions --model "$model" -p "$prompt" > "$temp_output" 2>&1 < /dev/null &
     pid=$!
   fi
 
@@ -443,17 +445,21 @@ show_run_header() {
   local spec_path="$1"
   local plan_path="$2"
   local iterations="$3"
+  local model="$4"
+
+  RUN_MODEL="$model"
 
   ui_header "Agent Loop"
   ui_status "Run ID:      $RUN_ID"
   ui_status "Spec:        $spec_path"
   ui_status "Plan:        $plan_path"
   ui_status "Iterations:  $iterations"
+  ui_status "Model:       $model"
   ui_status "Run dir:     $RUN_DIR"
   ui_status "Gum:         $GUM_ENABLED"
 
-  ui_log "RUN_START" "spec=$spec_path plan=$plan_path iterations=$iterations"
-  report_event "RUN_START" "" "" "" "" "" "" "spec=$spec_path plan=$plan_path iterations=$iterations"
+  ui_log "RUN_START" "spec=$spec_path plan=$plan_path iterations=$iterations model=$model"
+  report_event "RUN_START" "" "" "" "" "" "" "spec=$spec_path plan=$plan_path iterations=$iterations model=$model"
 }
 
 # -----------------------------------------------------------------------------
@@ -490,6 +496,7 @@ show_run_summary() {
     "Total Duration,$total_duration_str"
     "Avg Iteration,$avg_duration_str"
     "Last Exit Code,$last_exit_code"
+    "Model,$RUN_MODEL"
     "Run Log,$RUN_LOG"
     "Run Report,$RUN_REPORT"
     "Prompt Snapshot,$RUN_PROMPT_PATH"
@@ -576,6 +583,7 @@ write_summary_json() {
   "avg_duration_ms": $avg_duration_ms,
   "last_exit_code": $last_exit_code,
   "completion_mode": $completion_mode_json,
+  "model": "$RUN_MODEL",
   "exit_reason": "$exit_reason",
   "run_log": "$RUN_LOG",
   "run_report": "$RUN_REPORT",

@@ -23,6 +23,7 @@ timing, and results in real time, with durable logs for post-run inspection.
   includes extra text.
 - Present a final summary screen and a clear "close" affordance after completion.
 - Emit an analyzable run report and prompt snapshot for post-run analysis.
+- Automatically generate a postmortem report after completion using Opus.
 
 ### Non-Goals
 - Full-screen TUI navigation or interactive controls.
@@ -38,16 +39,19 @@ timing, and results in real time, with durable logs for post-run inspection.
 - **Spec Picker**: gum-driven selector that lists specs and resolves plan paths.
 - **Logging + Metrics**: run-level and per-iteration log files, in-memory stats aggregation.
 - **Signal Handler**: traps `INT`, `TERM`, and `EXIT` to print summary and restore terminal state.
+- **Postmortem Runner**: orchestrates analysis runs and produces compliance + summary reports.
 
 ### Dependencies
 - `gum` CLI (Charm gum).
 - Bash 3+ compatible shell features already used in the script.
 - Core utilities: `date`, `mktemp`, `printf`, `tee`, `wc`, `sed`.
+- `claude` CLI for automated postmortem analysis.
 
 ### Module/Folder Layout
 - `scripts/agent-loop.sh` (updated entry point)
 - `scripts/lib/agent-loop-ui.sh` (new helper library)
 - `scripts/lib/spec-picker.sh` (new helper for spec discovery)
+- `scripts/agent-loop-analyze.sh` (postmortem prompt + report generator)
 - `logs/agent-loop/` (run logs, created on demand)
 
 ---
@@ -63,6 +67,8 @@ timing, and results in real time, with durable logs for post-run inspection.
 | `log_dir` | string | yes | Base log directory |
 | `run_id` | string | yes | `YYYYmmdd-HHMMSS` timestamp |
 | `gum_enabled` | boolean | yes | Disabled when `--no-gum` or non-TTY |
+| `model` | string | yes | Claude model or alias (default `opus`) |
+| `postmortem` | boolean | yes | Run analysis reports after completion |
 
 **SpecEntry**
 | Field | Type | Required | Notes |
@@ -108,6 +114,14 @@ timing, and results in real time, with durable logs for post-run inspection.
   - Prompt snapshot: `logs/agent-loop/run-<run_id>/prompt.txt`
   - Per-iteration tail: `logs/agent-loop/run-<run_id>/iter-<NN>.tail.txt`
   - Analysis prompt: `logs/agent-loop/run-<run_id>/analysis-prompt.txt`
+  - Postmortem reports: `logs/agent-loop/run-<run_id>/analysis/`
+    - `spec-compliance.md`
+    - `run-quality.md`
+    - `summary.md`
+    - `git-status.txt`
+    - `git-last-commit.txt`
+    - `git-last-commit.patch`
+    - `git-diff.patch`
 
 ---
 
@@ -117,12 +131,19 @@ Script usage accepts positional arguments or interactive selection, with optiona
 
 ```
 ./scripts/agent-loop.sh [spec-path] [plan-path] \
-  [--iterations <n>] [--log-dir <path>] [--no-gum] [--summary-json] [--no-wait]
+  [--iterations <n>] [--log-dir <path>] [--model <name>] [--no-postmortem] [--no-gum] [--summary-json] [--no-wait]
+```
+
+Postmortem runner:
+```
+./scripts/agent-loop-analyze.sh [run-id] [--run] [--model <name>] [--log-dir <path>]
 ```
 
 Defaults:
 - `--iterations`: `50`
 - `--log-dir`: `logs/agent-loop`
+- `--model`: `opus`
+- `--postmortem`: enabled by default (disable with `--no-postmortem`)
 
 Completion behavior:
 - Strict mode: if output equals `<promise>COMPLETE</promise>` after trimming, mark `completion_mode=strict`.
@@ -163,7 +184,13 @@ Parse args -> optional spec picker -> validate paths -> resolve log dir -> init 
        detect COMPLETE (strict or lenient)
        update stats + status line
   -> print summary (table)
+  -> run postmortem analysis (if enabled)
   -> show completion screen and wait for user input unless --no-wait
+```
+
+### Postmortem Flow
+```
+Capture git snapshot -> generate analysis prompts -> run Opus analysis -> write reports
 ```
 
 ### Spec Picker Flow
@@ -215,6 +242,7 @@ No retries; the loop remains deterministic. Errors require a manual restart.
 - Run report captures structured events suitable for analysis.
 - Per-iteration tail files capture the final output chunk for quick review.
 - Analysis prompt generator (`scripts/agent-loop-analyze.sh`) emits a standard review prompt.
+- Postmortem reports capture spec compliance and run quality findings.
 
 ### Metrics
 - Total runtime, per-iteration duration, average duration, completed iteration.

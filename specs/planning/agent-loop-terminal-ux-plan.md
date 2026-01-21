@@ -6,6 +6,7 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 - [x] Add gum dependency checks, log directory creation, and run header output (see 2.1, 2.3, 4).
 - [x] Create UI helper module and wire into `scripts/agent-loop.sh` for headers/status lines (see 2.1, 2.3, 4.2).
 - [x] Add spec discovery + gum filter selection with Last Updated sorting when spec path is omitted (see 2.1, 2.3, 3.1, 4.1, 5.1).
+- [x] Add `--model` flag with default `opus` and log it in run metadata (see 3.1, 4.1).
 
 ## Phase 2: Live iteration feedback
 - [x] Wrap `claude` execution with gum spinner and capture per-iteration logs + stats (see 3.1, 3.2, 5.1).
@@ -15,6 +16,7 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 - [x] Add run summary table, completion screen with optional wait, and summary JSON output (see 3.2, 4.1, 7).
 - [x] Implement signal traps and `--no-gum` fallback for non-TTY runs (see 5.2, 6).
 - [x] Add analysis prompt generator script for run artifacts (see 7).
+- [x] Add automatic postmortem analysis after completion (see 5.1, 7).
 
 ## Files to Create
 - `scripts/lib/agent-loop-ui.sh`
@@ -25,6 +27,8 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 - `scripts/agent-loop.sh`
 - `specs/README.md`
 - `specs/agent-loop-terminal-ux.md`
+- `scripts/lib/agent-loop-ui.sh`
+- `scripts/agent-loop-analyze.sh`
 
 ## Verification Checklist
 - [x] Manual: run `scripts/agent-loop.sh <spec> <plan>` and confirm spinner/status/summary output.
