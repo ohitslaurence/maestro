@@ -116,6 +116,11 @@ Use SDK hooks to emit events:
 - Event payloads are compatible with OpenCode UI rendering pipeline
 - Supports sessions + resume without the CLI/TUI
 
+## Follow-up tasks
+
+- `023-claude-sdk-server-storage.md` for session/message persistence
+- `024-claude-sdk-server-streaming.md` for text streaming deltas
+
 ## Notes / Risks
 
 - Agent SDK uses API keys; must not rely on Claude.ai login

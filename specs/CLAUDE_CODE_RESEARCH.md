@@ -16,11 +16,15 @@ Both SDKs require Claude Code CLI as runtime:
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
+### Naming
+
+The Claude Code SDK is now branded as the **Claude Agent SDK** in docs and packages. The runtime is still the Claude Code CLI.
+
 ### Core Concepts
 
 1. **Agent SDK vs Client SDK**: The Agent SDK handles tool execution loop autonomously; the Client SDK requires manual implementation.
 
-2. **SDK vs CLI**: The SDK provides programmatic control; the CLI is the underlying runtime.
+2. **SDK vs CLI**: The SDK provides programmatic control; the CLI is the underlying runtime process.
 
 3. **Built-in Tools**:
    - `Read`, `Write`, `Edit` - File operations
@@ -30,13 +34,41 @@ curl -fsSL https://claude.ai/install.sh | bash
    - `Task` - Subagent spawning
    - `TodoWrite` - Task tracking
 
-4. **MCP Integration**: Full Model Context Protocol support for custom tools.
+4. **Settings Loading**: SDK does **not** load filesystem settings by default. You must opt in with `settingSources` to load `CLAUDE.md`, `.claude/settings.json`, skills, and slash commands.
 
-5. **Hooks System**: Event interception at PreToolUse, PostToolUse, etc.
+5. **Claude Code Presets**: Use `systemPrompt: { type: 'preset', preset: 'claude_code' }` and `tools: { type: 'preset', preset: 'claude_code' }` to mirror CLI defaults.
+
+6. **MCP Integration**: Full Model Context Protocol support for custom tools.
+
+7. **Hooks System**: Event interception at PreToolUse, PostToolUse, etc.
 
 ---
 
-## 2. Agent Lifecycle
+## 2. SDK vs CLI Behavior
+
+### Runtime Relationship
+
+- The Agent SDK shells out to the installed `claude` CLI binary.
+- CLI updates can change SDK runtime behavior even if the SDK package version is unchanged.
+- SDK API compatibility is controlled by the SDK package version; execution semantics are controlled by the CLI.
+
+### Default Behavior Differences
+
+| Area | CLI | SDK Default | SDK Override to Match CLI |
+|------|-----|-------------|---------------------------|
+| Settings | Loads user/project/local settings | Loads **none** | `settingSources: ['user','project','local']` |
+| System prompt | Claude Code preset | Minimal prompt | `systemPrompt: { type: 'preset', preset: 'claude_code' }` |
+| Tools | Claude Code default toolset | All tools unless limited | `tools: { type: 'preset', preset: 'claude_code' }` |
+| Skills/Slash commands | Enabled via `.claude/` | Disabled unless settings loaded | `settingSources` + preset system prompt |
+| Auth | Claude.ai / Console login | API key only | Set `ANTHROPIC_API_KEY` (or Bedrock/Vertex/Foundry envs) |
+
+### Headless CLI Mode
+
+`claude -p` is the supported programmatic CLI path. It supports JSON/stream output, structured outputs via JSON Schema, and the same flags as interactive mode.
+
+---
+
+## 3. Agent Lifecycle
 
 ### TypeScript: `query()` Function
 
@@ -150,7 +182,7 @@ const result = query({
 
 ---
 
-## 3. Event Model
+## 4. Event Model
 
 ### Message Types
 
@@ -272,7 +304,7 @@ const result = query({
 
 ---
 
-## 4. Integration Options for Maestro
+## 5. Integration Options for Maestro
 
 ### Option A: Use SDK Directly (Recommended)
 
@@ -355,20 +387,33 @@ export class ClaudeAgent {
 - Doesn't solve agent orchestration
 - Not suitable for our use case
 
+### Option D: Headless CLI Wrapper
+
+**Approach**: Run `claude -p` with `--output-format stream-json` and build a server wrapper around the CLI stream.
+
+**Pros**:
+- Matches CLI behavior and flags
+- Simple to prototype
+
+**Cons**:
+- Still spawns a CLI process per session
+- Less structured than SDK message types
+- Harder to manage long-lived sessions vs SDK `resume`
+
 ### Comparison Table
 
-| Aspect | SDK Direct | PTY Wrapper | MCP Tool |
-|--------|------------|-------------|----------|
-| Message parsing | Structured | Manual | N/A |
-| Tool events | Hooks | None | N/A |
-| Session mgmt | Built-in | Manual | N/A |
-| Rust integration | Via subprocess | Native | Native |
-| Complexity | Low | High | Medium |
-| Official support | Yes | No | Partial |
+| Aspect | SDK Direct | PTY Wrapper | MCP Tool | Headless CLI |
+|--------|------------|-------------|----------|--------------|
+| Message parsing | Structured | Manual | N/A | Semi-structured |
+| Tool events | Hooks | None | N/A | CLI stream only |
+| Session mgmt | Built-in | Manual | N/A | Manual |
+| Rust integration | Via subprocess | Native | Native | Via subprocess |
+| Complexity | Low | High | Medium | Medium |
+| Official support | Yes | No | Partial | Yes |
 
 ---
 
-## 5. Recommendations
+## 6. Recommendations
 
 ### Primary Approach
 
@@ -380,6 +425,14 @@ Rationale:
 3. Structured message types (no parsing needed)
 4. Session management built-in
 5. All Claude Code features accessible
+
+### Server-Oriented Design Notes
+
+- Treat the daemon as a **session broker**: map remote client IDs to SDK `session_id` values and persist them for resume.
+- Each session still requires a CLI subprocess under the hood; plan for process lifecycle, timeouts, and cleanup.
+- Use SDK presets + `settingSources` to mirror CLI behavior when you need terminal-equivalent sessions.
+- Expose operations over the server API: `start`, `resume`, `interrupt`, `setModel`, `setPermissionMode`, `rewindFiles`.
+- Stream `SDKMessage` events over your wire protocol; keep result events as definitive session boundaries.
 
 ### Architecture Pattern
 
@@ -469,9 +522,13 @@ Rationale:
 
 3. **Session Persistence**: Sessions are stored locally in `~/.claude/`. Resuming requires the session ID.
 
-4. **Background Agents**: The SDK supports background agent spawning via the `Task` tool, but orchestration is within the agent loop.
+4. **MCP Serve Is Not a Session Server**: `claude mcp serve` only exposes Claude Code tools to MCP clients; it does not expose an interactive Claude Code session loop.
 
-5. **Cost Tracking**: Available via `ResultMessage.total_cost_usd` and per-model usage stats.
+5. **SDK Auth**: SDK uses API keys (or Bedrock/Vertex/Foundry envs). Claude.ai OAuth login is CLI-only.
+
+6. **Background Agents**: The SDK supports background agent spawning via the `Task` tool, but orchestration is within the agent loop.
+
+7. **Cost Tracking**: Available via `ResultMessage.total_cost_usd` and per-model usage stats.
 
 ### Code Snippets
 
@@ -574,11 +631,13 @@ const options = {
 
 ---
 
-## 6. Questions Answered
+## 7. Questions Answered
 
 | Question | Answer |
 |----------|--------|
 | Does Claude Code have `app-server` mode? | **No.** Each session is a process spawned by the SDK. |
+| Does the SDK use Claude Code under the hood? | **Yes.** The SDK shells out to the `claude` CLI runtime. |
+| Does updating Claude Code change SDK behavior? | **Yes.** SDK execution semantics follow the installed CLI version. |
 | Is there a thread/message API? | **Yes.** `query()` returns async generator of typed messages. |
 | How do we receive real-time output? | **Streaming.** Iterate the generator; optionally enable `includePartialMessages`. |
 | Can we attach to running CLI sessions? | **No.** But can resume sessions by ID via `resume` option. |
@@ -586,7 +645,7 @@ const options = {
 
 ---
 
-## 7. Next Steps
+## 8. Next Steps
 
 1. Create Bun wrapper script (`packages/agent-wrapper/`)
 2. Define JSON protocol between Rust and Bun
@@ -604,3 +663,7 @@ const options = {
 - [Hooks Guide](https://platform.claude.com/docs/en/agent-sdk/hooks)
 - [SDK Examples](https://github.com/anthropics/claude-agent-sdk-demos)
 - [GitHub: claude-code](https://github.com/anthropics/claude-code)
+- [Claude Code CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [Claude Code Settings](https://code.claude.com/docs/en/settings)
+- [Claude Code Programmatic Usage](https://code.claude.com/docs/en/headless)
+- [Claude Code MCP](https://code.claude.com/docs/en/mcp)
