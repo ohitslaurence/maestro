@@ -13,12 +13,12 @@ Exit Criteria
 - [x] Envelope includes `schemaVersion`, `eventId`, `streamId`, `seq` (See §3)
 
 ## Phase 2: Harness adapters
-- [ ] Map OpenCode stream output to `StreamEvent` in session broker (See §2, §5)
+- [x] Map OpenCode stream output to `StreamEvent` in session broker (See §2, §5)
 - [ ] Map Claude Code stream output to `StreamEvent` in session broker (See §2, §5)
-- [ ] Attach `streamId` + `seq` + `eventId` for ordering (See §3, §5)
+- [x] Attach `streamId` + `seq` + `eventId` for ordering (See §3, §5)
 
 Exit Criteria
-- [ ] OpenCode streams emit ordered `text_delta` events (See §5)
+- [x] OpenCode streams emit ordered `text_delta` events (See §5)
 - [ ] Claude Code streams emit ordered `text_delta` events (See §5)
 - [ ] `completed` emitted once per `streamId` (See §5)
 
@@ -40,10 +40,13 @@ Exit Criteria
 
 ## Files to Create
 - `app/src/types/streaming.ts`
+- `app/src-tauri/src/daemon/opencode_adapter.rs`
 
 ## Files to Modify
 - `app/src-tauri/src/sessions.rs`
 - `app/src-tauri/src/lib.rs`
+- `app/src-tauri/src/daemon/mod.rs`
+- `app/src-tauri/src/daemon/client.rs`
 - `app/src/services/events.ts`
 - `app/src/features/opencode/hooks/useOpenCodeThread.ts`
 

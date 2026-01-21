@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 use std::time::Duration;
 
 use serde::de::DeserializeOwned;
@@ -14,7 +14,13 @@ use tokio::sync::{oneshot, Mutex, RwLock};
 use tokio::time::timeout;
 
 use super::config::DaemonConfig;
+use super::opencode_adapter::OpenCodeAdapter;
 use super::protocol::*;
+use crate::emit_stream_event;
+
+/// Global OpenCode adapter for stream event conversion (§2, §5).
+/// Maintains ordering state (streamId + seq) across all workspaces.
+static OPENCODE_ADAPTER: LazyLock<OpenCodeAdapter> = LazyLock::new(OpenCodeAdapter::new);
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
@@ -317,7 +323,13 @@ impl DaemonClient {
                 let _ = handle.emit("daemon:terminal_exited", params);
             }
             EVENT_OPENCODE => {
-                eprintln!("[tauri] Forwarding opencode event: {:?}", params);
+                // Adapt OpenCode event to StreamEvent schema (§2, §5)
+                if let Some(stream_events) = OPENCODE_ADAPTER.adapt(&params) {
+                    for event in stream_events {
+                        emit_stream_event(handle, &event);
+                    }
+                }
+                // Also emit legacy event for backwards compatibility during migration (§9)
                 let _ = handle.emit("daemon:opencode_event", params);
             }
             _ => {
