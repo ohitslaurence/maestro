@@ -10,10 +10,10 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 
 ## Phase 2: useDiffStyle Hook
 
-- [ ] Create `app/src/features/git/hooks/useDiffStyle.ts` (See §7.7)
-- [ ] Implement localStorage read/write with key `maestro:diffStyle` (See §3 Storage Schema)
-- [ ] Default to "split" if no stored value
-- [ ] Export from `app/src/features/git/index.ts`
+- [x] Create `app/src/features/git/hooks/useDiffStyle.ts` (See §7.7)
+- [x] Implement localStorage read/write with key `maestro:diffStyle` (See §3 Storage Schema)
+- [x] Default to "split" if no stored value
+- [x] Export from `app/src/features/git/index.ts`
 
 ## Phase 3: GitDiffPanel Component
 
