@@ -43,9 +43,11 @@ pub struct OpenCodeInnerEvent {
 #[serde(rename_all = "camelCase")]
 pub struct PartData {
     pub id: String,
-    #[serde(rename = "messageID")]
+    /// Accept both "messageID" (OpenCode) and "messageId" (Claude SDK server)
+    #[serde(alias = "messageID", alias = "messageId")]
     pub message_id: String,
-    #[serde(rename = "sessionID")]
+    /// Accept both "sessionID" (OpenCode) and "sessionId" (Claude SDK server)
+    #[serde(alias = "sessionID", alias = "sessionId")]
     pub session_id: String,
     #[serde(rename = "type")]
     pub part_type: String,
@@ -54,8 +56,11 @@ pub struct PartData {
     pub content: Option<String>, // For reasoning parts
     pub output: Option<String>,  // For tool parts
     // Tool-specific fields
+    /// Accept both "tool" (OpenCode) and "toolName" (Claude SDK server)
+    #[serde(alias = "tool", alias = "toolName")]
     pub tool: Option<String>,
-    #[serde(rename = "toolCallID")]
+    /// Accept both "toolCallID" (OpenCode) and "toolUseId" (Claude SDK server)
+    #[serde(alias = "toolCallID", alias = "toolUseId")]
     pub tool_call_id: Option<String>,
     pub input: Option<Value>,
     pub error: Option<String>,
@@ -73,7 +78,8 @@ pub struct PartTime {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionStatusProps {
-    #[serde(rename = "sessionID")]
+    /// Accept both "sessionID" (OpenCode) and "sessionId" (Claude SDK server)
+    #[serde(alias = "sessionID", alias = "sessionId")]
     pub session_id: Option<String>,
     pub status: Option<SessionStatusType>,
 }
@@ -89,7 +95,8 @@ pub struct SessionStatusType {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionErrorProps {
-    #[serde(rename = "sessionID")]
+    /// Accept both "sessionID" (OpenCode) and "sessionId" (Claude SDK server)
+    #[serde(alias = "sessionID", alias = "sessionId")]
     pub session_id: Option<String>,
     pub error: Option<String>,
 }

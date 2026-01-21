@@ -16,7 +16,7 @@ export const eventsRouter = new Hono();
  * SSE event stream for this workspace (§4).
  * Events are sent as: data: {"type":"...", "properties":{...}}\n\n
  */
-eventsRouter.get('/', (c) => {
+eventsRouter.get('/', (_c) => {
   const { stream, clientId } = sseEmitter.addClient();
 
   logger.info('sse client connected', { clientId });

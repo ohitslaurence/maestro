@@ -165,7 +165,8 @@ export type SSEEventType =
   | 'message.part.updated'
   | 'message.part.removed'
   | 'permission.asked'
-  | 'permission.replied';
+  | 'permission.replied'
+  | 'server.heartbeat';
 
 export interface SSEEvent<T = unknown> {
   type: SSEEventType;

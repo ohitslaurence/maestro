@@ -46,11 +46,8 @@ class SSEEmitter {
   addClient(): { stream: ReadableStream<string>; clientId: string } {
     const clientId = `client-${++this.clientIdCounter}`;
 
-    let clientController: ReadableStreamDefaultController<string>;
-
     const stream = new ReadableStream<string>({
       start: (controller) => {
-        clientController = controller;
         const client: SSEClient = {
           id: clientId,
           controller,
@@ -58,6 +55,11 @@ class SSEEmitter {
         };
         this.clients.set(clientId, client);
         logger.debug('sse client connected', { clientId, totalClients: this.clients.size });
+
+        // Send immediate heartbeat to prevent connection timeout
+        const heartbeat: SSEEvent<object> = { type: 'server.heartbeat', properties: {} };
+        const data = `data: ${JSON.stringify(heartbeat)}\n\n`;
+        controller.enqueue(data);
       },
       cancel: () => {
         this.removeClient(clientId);
