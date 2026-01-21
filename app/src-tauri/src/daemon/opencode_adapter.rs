@@ -70,6 +70,7 @@ pub struct PartData {
 
 #[derive(Debug, Deserialize)]
 pub struct PartTime {
+    #[allow(dead_code)]
     pub start: Option<u64>,
     pub end: Option<u64>,
 }
@@ -154,6 +155,7 @@ impl WorkspaceStreamState {
     }
 
     /// Check if a tool call was already completed.
+    #[allow(dead_code)]
     fn is_tool_completed(&self, tool_call_id: &str) -> bool {
         self.completed_tools.contains(tool_call_id)
     }

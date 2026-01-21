@@ -139,6 +139,7 @@ impl ThreadStore {
     }
 
     /// Get the storage path for threads.
+    #[allow(dead_code)]
     pub fn path(&self) -> &PathBuf {
         &self.root
     }
@@ -191,6 +192,7 @@ impl ThreadStore {
     }
 
     /// Check if a thread exists.
+    #[allow(dead_code)]
     pub async fn exists(&self, thread_id: &str) -> bool {
         self.thread_path(thread_id).exists()
     }

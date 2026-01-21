@@ -518,6 +518,7 @@ pub struct TransitionResult {
     /// The new state kind after the transition.
     pub new_kind: AgentStateKind,
     /// Action to execute (advisory; caller must handle I/O).
+    #[allow(dead_code)]
     pub action: AgentAction,
     /// Reason for the state change (for event emission).
     pub reason: Option<StateChangeReason>,
@@ -838,6 +839,7 @@ impl AgentState {
     }
 
     /// Called by orchestrator after ProcessingResponse to decide next state.
+    #[allow(dead_code)]
     pub fn finalize_response(&mut self, session_id: &str) -> TransitionResult {
         if self.kind != AgentStateKind::ProcessingResponse {
             // Not in ProcessingResponse; this is a no-op
@@ -1304,11 +1306,13 @@ impl AgentState {
     }
 
     /// Register tool runs before executing them.
+    #[allow(dead_code)]
     pub fn register_tool_runs(&mut self, records: Vec<ToolRunRecord>) {
         self.tool_runs.extend(records);
     }
 
     /// Register hook runs before executing them.
+    #[allow(dead_code)]
     pub fn register_hook_runs(&mut self, records: Vec<HookRunRecord>) {
         self.hook_runs.extend(records);
     }

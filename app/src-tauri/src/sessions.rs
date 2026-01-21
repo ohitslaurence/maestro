@@ -319,11 +319,13 @@ impl SessionRegistry {
     }
 
     /// Insert a new session into the registry.
+    #[allow(dead_code)]
     pub fn insert(&mut self, id: String, entry: SessionEntry) {
         self.sessions.insert(id, entry);
     }
 
     /// Get a session by ID.
+    #[allow(dead_code)]
     pub fn get(&self, id: &str) -> Option<&SessionEntry> {
         self.sessions.get(id)
     }
@@ -334,11 +336,13 @@ impl SessionRegistry {
     }
 
     /// Remove a session from the registry.
+    #[allow(dead_code)]
     pub fn remove(&mut self, id: &str) -> Option<SessionEntry> {
         self.sessions.remove(id)
     }
 
     /// List all sessions.
+    #[allow(dead_code)]
     pub fn list(&self) -> Vec<&AgentSession> {
         self.sessions.values().map(|e| &e.session).collect()
     }
@@ -396,6 +400,7 @@ pub fn process_event(
 
 /// Finalize response processing after stream completes.
 /// Called by orchestrator to transition from ProcessingResponse to either Ready or ExecutingTools.
+#[allow(dead_code)]
 pub fn finalize_response(entry: &mut SessionEntry) -> TransitionResult {
     let result = entry.state.finalize_response(&entry.session.id);
     entry.session.agent_state = entry.state.kind;

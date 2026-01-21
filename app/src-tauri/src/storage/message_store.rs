@@ -73,6 +73,7 @@ impl MessageStore {
     }
 
     /// Get the storage path for messages.
+    #[allow(dead_code)]
     pub fn path(&self) -> &PathBuf {
         &self.root
     }
@@ -88,6 +89,7 @@ impl MessageStore {
     }
 
     /// Load a message by thread ID and message ID.
+    #[allow(dead_code)]
     pub async fn load(&self, thread_id: &str, message_id: &str) -> StorageResult<MessageRecord> {
         let path = self.message_path(thread_id, message_id);
         let record: MessageRecord = read_json(&path).await?;
@@ -167,6 +169,7 @@ impl MessageStore {
     }
 
     /// List messages for a specific session within a thread.
+    #[allow(dead_code)]
     pub async fn list_by_session(
         &self,
         thread_id: &str,
@@ -180,6 +183,7 @@ impl MessageStore {
     }
 
     /// Check if a message exists.
+    #[allow(dead_code)]
     pub async fn exists(&self, thread_id: &str, message_id: &str) -> bool {
         self.message_path(thread_id, message_id).exists()
     }
@@ -187,6 +191,7 @@ impl MessageStore {
     /// Delete all messages for a thread.
     ///
     /// Used when deleting a thread.
+    #[allow(dead_code)]
     pub async fn delete_thread_messages(&self, thread_id: &str) -> StorageResult<()> {
         let thread_dir = self.thread_dir(thread_id);
         if thread_dir.exists() {
@@ -196,6 +201,7 @@ impl MessageStore {
     }
 
     /// Count messages in a thread.
+    #[allow(dead_code)]
     pub async fn count(&self, thread_id: &str) -> StorageResult<usize> {
         let messages = self.list_by_thread(thread_id).await?;
         Ok(messages.len())

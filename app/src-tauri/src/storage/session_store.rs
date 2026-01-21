@@ -113,6 +113,7 @@ impl SessionStore {
     }
 
     /// Get the storage path for sessions.
+    #[allow(dead_code)]
     pub fn path(&self) -> &PathBuf {
         &self.root
     }
@@ -196,6 +197,7 @@ impl SessionStore {
     }
 
     /// Add a tool run to a session.
+    #[allow(dead_code)]
     pub async fn add_tool_run(
         &self,
         session_id: &str,
@@ -207,6 +209,7 @@ impl SessionStore {
     }
 
     /// Delete a session by ID.
+    #[allow(dead_code)]
     pub async fn delete(&self, session_id: &str) -> StorageResult<()> {
         let path = self.session_path(session_id);
         if path.exists() {
@@ -216,11 +219,13 @@ impl SessionStore {
     }
 
     /// Check if a session exists.
+    #[allow(dead_code)]
     pub async fn exists(&self, session_id: &str) -> bool {
         self.session_path(session_id).exists()
     }
 
     /// List all sessions for a thread.
+    #[allow(dead_code)]
     pub async fn list_by_thread(&self, thread_id: &str) -> StorageResult<Vec<SessionRecord>> {
         // Ensure directory exists
         if !self.root.exists() {

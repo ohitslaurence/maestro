@@ -48,10 +48,12 @@ pub mod thread_store;
 
 pub use index_store::{IndexStore, ThreadIndex, INDEX_SCHEMA_VERSION};
 pub use message_store::{MessageRecord, MessageRole, MessageStore, MESSAGE_SCHEMA_VERSION};
+#[allow(unused_imports)]
 pub use session_store::{
     SessionAgentConfig, SessionRecord, SessionStatus, SessionStore, SessionToolRun,
     SessionToolRunStatus, SESSION_SCHEMA_VERSION,
 };
+#[allow(unused_imports)]
 pub use thread_store::{
     ThreadMetadata, ThreadPrivacy, ThreadRecord, ThreadStore, ThreadSummary, THREAD_SCHEMA_VERSION,
 };

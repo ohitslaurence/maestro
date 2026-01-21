@@ -41,10 +41,13 @@ pub enum SdkMessage {
     /// Streaming partial message (when includePartialMessages is enabled)
     PartialAssistant(SdkPartialAssistantMessage),
     /// Stream event (raw Anthropic API event)
+    #[allow(dead_code)]
     StreamEvent(SdkStreamEvent),
     /// User message (usually not needed for adapter)
+    #[allow(dead_code)]
     User(SdkUserMessage),
     /// System message
+    #[allow(dead_code)]
     System(SdkSystemMessage),
 }
 
@@ -54,12 +57,14 @@ pub struct SdkAssistantMessage {
     pub uuid: String,
     pub session_id: String,
     pub message: SdkMessageContent,
+    #[allow(dead_code)]
     pub parent_tool_use_id: Option<String>,
 }
 
 /// SDK message content wrapper.
 #[derive(Debug, Deserialize)]
 pub struct SdkMessageContent {
+    #[allow(dead_code)]
     pub role: String,
     pub content: Vec<ContentBlock>,
 }
@@ -92,12 +97,15 @@ pub enum ContentBlock {
 pub struct SdkResultMessage {
     pub subtype: String,
     pub session_id: String,
+    #[allow(dead_code)]
     pub duration_ms: u64,
     #[serde(default)]
     pub is_error: bool,
+    #[allow(dead_code)]
     #[serde(default)]
     pub num_turns: u32,
     pub result: Option<String>,
+    #[allow(dead_code)]
     #[serde(default)]
     pub total_cost_usd: f64,
     pub usage: Option<SdkUsage>,
@@ -110,8 +118,10 @@ pub struct SdkUsage {
     pub input_tokens: u64,
     #[serde(default)]
     pub output_tokens: u64,
+    #[allow(dead_code)]
     #[serde(default)]
     pub cache_creation_input_tokens: u64,
+    #[allow(dead_code)]
     #[serde(default)]
     pub cache_read_input_tokens: u64,
 }
@@ -127,19 +137,23 @@ pub struct SdkPartialAssistantMessage {
 /// Raw stream event from Anthropic API.
 #[derive(Debug, Deserialize)]
 pub struct SdkStreamEvent {
+    #[allow(dead_code)]
     pub event: Value,
 }
 
 /// User message (for completeness).
 #[derive(Debug, Deserialize)]
 pub struct SdkUserMessage {
+    #[allow(dead_code)]
     pub uuid: String,
+    #[allow(dead_code)]
     pub session_id: String,
 }
 
 /// System message (for completeness).
 #[derive(Debug, Deserialize)]
 pub struct SdkSystemMessage {
+    #[allow(dead_code)]
     pub session_id: Option<String>,
 }
 
@@ -496,6 +510,7 @@ impl ClaudeCodeAdapter {
     }
 
     /// Emit a status event for session state changes.
+    #[allow(dead_code)]
     pub fn emit_status(&self, session_id: &str, state: AgentProcessingState) -> StreamEvent {
         let payload = StatusPayload {
             state,

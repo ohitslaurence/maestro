@@ -169,6 +169,7 @@ impl IndexStore {
     }
 
     /// Check if the index file exists.
+    #[allow(dead_code)]
     pub fn exists(&self) -> bool {
         self.index_path().exists()
     }
@@ -176,6 +177,7 @@ impl IndexStore {
     /// Delete the index file.
     ///
     /// The next call to load_or_rebuild will trigger a rebuild.
+    #[allow(dead_code)]
     pub async fn delete(&self) -> StorageResult<()> {
         let path = self.index_path();
         if path.exists() {

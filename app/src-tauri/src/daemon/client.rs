@@ -17,9 +17,7 @@ use super::claudecode_adapter::ClaudeCodeAdapter;
 use super::config::DaemonConfig;
 use super::opencode_adapter::OpenCodeAdapter;
 use super::protocol::*;
-use crate::agent_state::{
-    AgentError, AgentEvent, ErrorSource, StateChangeReason, StreamEvent as StateMachineStreamEvent,
-};
+use crate::agent_state::{AgentError, AgentEvent, ErrorSource, StreamEvent as StateMachineStreamEvent};
 use crate::emit_stream_event;
 use crate::sessions::{
     process_event_with_tool_emission, new_session_registry, SharedSessionRegistry,

@@ -110,8 +110,10 @@ pub fn get_triggering_tool_run_ids(hook: &HookConfig, tool_runs: &[ToolRunRecord
 #[derive(Debug, Clone)]
 pub struct HookExecutionResult {
     pub status: HookRunStatus,
+    #[allow(dead_code)]
     pub output: String,
     pub error: Option<String>,
+    #[allow(dead_code)]
     pub started_at_ms: u64,
     pub finished_at_ms: u64,
 }

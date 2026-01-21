@@ -3,6 +3,8 @@
 //! This module provides the ToolRunner for normalizing tool calls and
 //! marking mutating tools. See specs/agent-state-machine.md §3 for the full spec.
 
+#![allow(dead_code)]
+
 use crate::agent_state::{ToolCall, ToolRunRecord, ToolRunStatus};
 
 // ============================================================================
