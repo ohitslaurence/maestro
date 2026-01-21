@@ -54,7 +54,7 @@ const DiffCard = memo(function DiffCard({
     () => ({
       diffStyle,
       hunkSeparators: "line-info" as const,
-      overflow: "scroll" as const,
+      overflow: "wrap" as const,
       unsafeCSS: DIFF_SCROLL_CSS,
       disableFileHeader: true,
     }),
