@@ -16,6 +16,21 @@ It is intended for agents who are asked to draft or update specs without any pri
 3. Create `specs/planning/<topic>-plan.md` with small, checkable phases.
 4. Update `specs/README.md` to link the spec and plan.
 
+## Checklist Conventions
+
+- `[ ]` — Agent-completable task (counts toward completion).
+- `[x]` — Completed task.
+- `[ ]?` — Manual QA item (human verification only; agents ignore for completion).
+
+## SDK Integration Verification (Required)
+
+When a spec references an external SDK/library:
+
+1. Verify the package name matches the registry (npm/PyPI/crates).
+2. Confirm API shapes against official docs/examples.
+3. State which SDK options are surfaced vs deferred.
+4. Mark API-key or network-dependent verification steps as `[ ]?`.
+
 ## Spec Requirements (Strict)
 
 - Use the metadata header exactly as shown.
@@ -147,6 +162,17 @@ Notes:
 - Mark completed work with `[x]` and add notes about commits or tests.
 - Required sections: Files to Create, Files to Modify, Verification Checklist (use `None` if empty).
 - Add Notes only when there is information useful to future phases (blockers, risks, edge cases, follow-ups).
+- If UI validation is required, reference the runbook in `AGENTS.md` and include `bun run ui:smoke` as an implementation checklist step.
+- If the spec requires feature-level UI validation, add a checklist item named "UI Feature Validation" and list the exact commands below.
+
+UI Feature Validation checklist snippet (copy/paste and fill in `<feature>`):
+
+```
+- [ ] UI Feature Validation:
+  - [ ] `cd daemon && cargo run -- --listen 127.0.0.1:55433 --insecure-no-auth`
+  - [ ] `cd app && bun run dev -- --host 127.0.0.1 --port 1420`
+  - [ ] `cd app && bun scripts/ui-<feature>.ts`
+```
 
 ## Updating the Index
 

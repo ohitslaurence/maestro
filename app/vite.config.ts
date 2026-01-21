@@ -140,6 +140,16 @@ function sendRpc(request: RpcRequest): Promise<unknown> {
     socket.on("error", (error) => {
       fail({ code: "rpc_connection", message: error.message });
     });
+
+    reader.on("error", (error) => {
+      fail({ code: "rpc_connection", message: String(error) });
+    });
+
+    socket.on("close", () => {
+      if (!done) {
+        fail({ code: "rpc_connection", message: "Connection closed" });
+      }
+    });
   });
 }
 
@@ -173,8 +183,13 @@ function handleEvents(req: IncomingMessage, res: ServerResponse) {
 
   const reader = readline.createInterface({ input: socket });
   let authed = false;
+  let closed = false;
 
   const cleanup = () => {
+    if (closed) {
+      return;
+    }
+    closed = true;
     reader.close();
     socket.destroy();
   };
@@ -217,6 +232,18 @@ function handleEvents(req: IncomingMessage, res: ServerResponse) {
       error: { code: "event_stream", message: error.message },
     });
     res.write(`data: ${errorPayload}\n\n`);
+    cleanup();
+  });
+
+  reader.on("error", (error) => {
+    const errorPayload = JSON.stringify({
+      error: { code: "event_stream", message: String(error) },
+    });
+    res.write(`data: ${errorPayload}\n\n`);
+    cleanup();
+  });
+
+  socket.on("close", () => {
     cleanup();
   });
 

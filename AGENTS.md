@@ -73,6 +73,64 @@ bun install
 bun run tauri:dev
 ```
 
+## Agent UI Runbook (Web + Playwright)
+
+Use this to let an agent drive the UI in a browser (not Tauri) and validate behavior.
+
+One-time setup (if needed):
+
+```bash
+cd app
+bun install
+bunx playwright install chromium
+```
+
+```bash
+cd daemon
+cargo run -- --listen 127.0.0.1:55433 --insecure-no-auth
+```
+
+```bash
+cd app
+bun run dev -- --host 127.0.0.1 --port 1420
+```
+
+```bash
+cd app
+bun run ui:smoke
+```
+
+Feature validation (required for UI specs):
+1. Duplicate the smoke script and add steps/assertions for the feature.
+2. Run the new script against a live daemon + web UI.
+
+```bash
+cp app/scripts/ui-smoke.ts app/scripts/ui-<feature>.ts
+```
+
+```bash
+cd daemon
+cargo run -- --listen 127.0.0.1:55433 --insecure-no-auth
+```
+
+```bash
+cd app
+bun run dev -- --host 127.0.0.1 --port 1420
+```
+
+```bash
+cd app
+bun scripts/ui-<feature>.ts
+```
+
+Keep feature scripts narrow: one flow, clear assertions, no shared state.
+
+Overrides (only if you change host/port):
+- `MAESTRO_DAEMON_HOST`, `MAESTRO_DAEMON_PORT`, `MAESTRO_DAEMON_TOKEN`, `MAESTRO_UI_URL`
+- `MAESTRO_HEADLESS=false` to watch the browser
+
+`ui:smoke` defaults to `MAESTRO_DAEMON_TOKEN=dev` (daemon ignores it with `--insecure-no-auth`).
+
 ## Building
 
 ```bash

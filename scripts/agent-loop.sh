@@ -487,7 +487,7 @@ Task:
    applies. If you cannot run a step, say why.
 4. Update the plan checklist: mark only the task(s) you completed with [x]. Leave others untouched.
 5. Make exactly one git commit for your changes using `gritty commit --accept`.
-6. If (and only if) all tasks in the plan are complete after your update, respond with EXACTLY:
+6. If (and only if) all `[ ]` tasks in the plan are complete after your update (ignore `[ ]?` manual QA items), respond with EXACTLY:
 <promise>COMPLETE</promise>
 
 Spec alignment guardrails (must follow):
@@ -502,12 +502,10 @@ Spec alignment guardrails (must follow):
   document the assumption in your response, and limit changes to what is unambiguous.
 
 Response format (strict):
-- ALL tasks complete: end your response with a line containing only `<promise>COMPLETE</promise>`.
-  You may include a brief sentence before it, but the final non-empty line must be the token.
-- If the loop continues after you emit COMPLETE, your output was malformed. Remove all extra text
-  and ensure the final line is exactly `<promise>COMPLETE</promise>`.
-- Tasks remain: output ONE sentence: "Completed [task]. [N] tasks remain." No bullet lists, code
-  fences, or detailed summaries.
+- ALL `[ ]` tasks complete: response must end with exactly `<promise>COMPLETE</promise>` on its own line.
+  One brief sentence before is allowed; nothing after.
+- Tasks remain: ONE sentence only: "Completed [task]. [N] tasks remain." (N = unchecked `[ ]` items only)
+  Multi-sentence output wastes context and delays completion.
 
 Constraints:
 - Do not modify files under `reference/`.

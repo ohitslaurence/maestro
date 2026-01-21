@@ -183,8 +183,8 @@ refresh_plan_progress() {
   fi
 
   totals=$(awk '
-    /^[[:space:]]*- \[[ xX]\]/ {total++}
-    /^[[:space:]]*- \[[xX]\]/ {done++}
+    /^[[:space:]]*- \[[ xX]\]([[:space:]]|$)/ {total++}
+    /^[[:space:]]*- \[[xX]\]([[:space:]]|$)/ {done++}
     END {printf "%d %d", done + 0, total + 0}
   ' "$plan_path")
 
@@ -320,6 +320,12 @@ run_claude_iteration() {
 
   ITER_OUTPUT_BYTES=$(wc -c < "$temp_output" | tr -d ' ')
   ITER_OUTPUT_LINES=$(wc -l < "$temp_output" | tr -d ' ')
+
+  local output_warn_threshold=200
+  if [[ "$ITER_OUTPUT_BYTES" =~ ^[0-9]+$ ]] && ((ITER_OUTPUT_BYTES > output_warn_threshold)); then
+    ui_log "WARN" "Large output (${ITER_OUTPUT_BYTES} bytes) in iteration $iteration"
+    report_event "WARN_OUTPUT_LARGE" "$iteration" "" "" "$ITER_OUTPUT_BYTES" "$ITER_OUTPUT_LINES" "$ITER_LOG_PATH" "threshold=$output_warn_threshold"
+  fi
 
   tail -n 200 "$temp_output" > "$ITER_TAIL_PATH"
   local tail_bytes
