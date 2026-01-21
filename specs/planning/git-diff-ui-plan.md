@@ -33,18 +33,18 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 
 ## Phase 4: GitDiffViewer Component
 
-- [ ] Create `app/src/features/git/components/GitDiffViewer.tsx` (See §4 Interfaces)
-- [ ] Import and configure `WorkerPoolContextProvider` from `@pierre/diffs/react` (See §7.1)
-- [ ] Set up `useVirtualizer` with `estimateSize: 260`, `overscan: 6` (See §7.3)
-- [ ] Create DiffCard subcomponent (memoized):
+- [x] Create `app/src/features/git/components/GitDiffViewer.tsx` (See §4 Interfaces)
+- [x] Import and configure `WorkerPoolContextProvider` from `@pierre/diffs/react` (See §7.1)
+- [x] Set up `useVirtualizer` with `estimateSize: 260`, `overscan: 6` (See §7.3)
+- [x] Create DiffCard subcomponent (memoized):
   - Header with status badge and file path
   - `FileDiff` from `@pierre/diffs` with `parsePatchFiles` (See §7.1)
   - Handle empty diff: show "No changes" placeholder
-- [ ] Render virtualized list with absolute positioning (See §7.3)
-- [ ] Add split/unified toggle button in header
-- [ ] Implement scroll-to-file effect with `scrollRequestId` tracking (See §7.4)
-- [ ] Implement active path tracking on scroll with rAF throttling (See §7.5)
-- [ ] Handle loading state, error state (See §6)
+- [x] Render virtualized list with absolute positioning (See §7.3)
+- [x] Add split/unified toggle button in header
+- [x] Implement scroll-to-file effect with `scrollRequestId` tracking (See §7.4)
+- [x] Implement active path tracking on scroll with rAF throttling (See §7.5)
+- [x] Handle loading state, error state (See §6)
 
 ## Phase 5: GitPanel Integration
 
