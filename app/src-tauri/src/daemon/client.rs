@@ -647,8 +647,8 @@ fn route_stream_event_to_state_machine(
     // Process through state machine with event emission
     if let Err(err) = process_event_with_tool_emission(handle, entry, &agent_event) {
         eprintln!(
-            "[state_machine_wiring] Invalid transition for session_id={}: {}",
-            session_id, err
+            "[state_machine_wiring] Invalid transition: session_id={}, stream_id={}, error={}",
+            session_id, stream_event.stream_id, err
         );
         // session_error is already emitted by process_event_with_tool_emission
     }

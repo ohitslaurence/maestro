@@ -19,7 +19,7 @@ Reference: [state-machine-wiring.md](../state-machine-wiring.md)
 ## Phase 3: Cleanup and regression coverage
 - [x] Remove temporary debug logging added to stream adapters or hooks once `agent:state_event`
   updates are verified (see `state-machine-wiring.md` §7).
-- [ ] Ensure state transition logs include `session_id` and `stream_id` for triage (see
+- [x] Ensure state transition logs include `session_id` and `stream_id` for triage (see
   `state-machine-wiring.md` §7).
 
 ## Files to Create
