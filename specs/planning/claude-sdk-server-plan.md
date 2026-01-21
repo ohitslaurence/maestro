@@ -214,11 +214,11 @@ Support resuming previous conversations.
 
 Emit permission events for UI awareness (auto-approve for MVP).
 
-- [ ] Create `src/sdk/permissions.ts` with auto-approve logic (§5 Permission Flow)
-- [ ] Register SDK hooks: `PreToolUse`, `PostToolUse`, `PermissionRequest`
-- [ ] Emit `permission.asked` event when SDK requests permission (§4)
-- [ ] Auto-approve based on `permissionMode` setting
-- [ ] Emit `permission.replied` event with decision (§4)
+- [x] Create `src/sdk/permissions.ts` with auto-approve logic (§5 Permission Flow)
+- [x] Register SDK hooks: `PreToolUse`, `PostToolUse`, `PermissionRequest`
+- [x] Emit `permission.asked` event when SDK requests permission (§4)
+- [x] Auto-approve based on `permissionMode` setting
+- [x] Emit `permission.replied` event with decision (§4)
 
 **Verification:**
 ```bash

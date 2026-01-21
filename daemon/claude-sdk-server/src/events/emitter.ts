@@ -9,6 +9,8 @@ import { logger } from '../logger';
 import type {
   MessagePartUpdatedEvent,
   MessageUpdatedEvent,
+  PermissionAskedEvent,
+  PermissionRepliedEvent,
   SSEEvent,
   SSEEventType,
   Session,
@@ -209,6 +211,20 @@ class SSEEmitter {
   emitMessagePartUpdated(part: MessagePartUpdatedEvent['part'], delta?: string): void {
     const properties: MessagePartUpdatedEvent = { part, delta };
     this.emit('message.part.updated', properties);
+  }
+
+  /**
+   * Emit permission.asked event (§4)
+   */
+  emitPermissionAsked(properties: PermissionAskedEvent): void {
+    this.emit('permission.asked', properties);
+  }
+
+  /**
+   * Emit permission.replied event (§4)
+   */
+  emitPermissionReplied(properties: PermissionRepliedEvent): void {
+    this.emit('permission.replied', properties);
   }
 }
 

@@ -6,6 +6,7 @@
 
 import { query } from '@anthropic-ai/claude-code';
 import type { Session } from '../types';
+import { buildHooksConfig, createCanUseTool } from './permissions';
 
 // --- Types ---
 
@@ -29,6 +30,8 @@ export interface QueryResult {
  * Note: The SDK's Options type doesn't include systemPrompt, tools, or
  * settingSources - these are CLI features not exposed via SDK API.
  * The SDK uses Claude Code defaults automatically.
+ *
+ * Includes canUseTool callback and hooks for permission handling (§5 Permission Flow).
  */
 function buildSdkOptions(
   session: Session,
@@ -42,6 +45,9 @@ function buildSdkOptions(
     model: session.modelId,
     abortController,
     resume: resumeId,
+    // Permission handling (§5 Permission Flow, Phase 8)
+    canUseTool: createCanUseTool(session.id, session.permission),
+    hooks: buildHooksConfig(session.id),
   };
 }
 
