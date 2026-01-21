@@ -66,12 +66,12 @@ Implement session management endpoints without SDK integration.
 
 - [x] Define types in `src/types.ts` (§3: Session, MessageInfo, Part)
 - [x] Implement in-memory session store in `src/storage/sessions.ts`
-- [ ] Implement `GET /session` endpoint (§4)
-- [ ] Implement `POST /session` endpoint (§4)
-- [ ] Implement `GET /session/:id` endpoint (§4)
-- [ ] Add file persistence: save sessions to `~/.maestro/claude/{workspace_id}/` (§3)
-- [ ] Persist messages + parts and maintain `index.json` (§3)
-- [ ] Handle errors: SESSION_NOT_FOUND (404), validation errors (400) (§6)
+- [x] Implement `GET /session` endpoint (§4)
+- [x] Implement `POST /session` endpoint (§4)
+- [x] Implement `GET /session/:id` endpoint (§4)
+- [x] Add file persistence: save sessions to `~/.maestro/claude/{workspace_id}/` (§3)
+- [x] Persist messages + parts and maintain `index.json` (§3)
+- [x] Handle errors: SESSION_NOT_FOUND (404), validation errors (400) (§6)
 
 **Verification:**
 ```bash
@@ -324,8 +324,8 @@ Connect frontend to Claude SDK sessions.
 ### Implementation Checklist
 - [x] `cd daemon/claude-sdk-server && bun run src/index.ts` starts without error
 - [x] `curl http://localhost:9100/health` returns `{ "ok": true }`
-- [ ] `curl http://localhost:9100/session` returns `[]`
-- [ ] Session CRUD works via curl
+- [x] `curl http://localhost:9100/session` returns `[]`
+- [x] Session CRUD works via curl
 - [ ] SSE events stream correctly
 - [ ] SDK query executes and streams events (requires API key)
 - [ ] Abort stops execution

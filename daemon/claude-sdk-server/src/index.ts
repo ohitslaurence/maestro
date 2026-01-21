@@ -7,6 +7,7 @@
 
 import { Hono } from 'hono';
 import { logger } from './logger';
+import { sessionsRouter } from './routes/sessions';
 import { initSessionStore } from './storage/sessions';
 
 // Parse CLI arguments
@@ -40,6 +41,9 @@ const app = new Hono();
 app.get('/health', (c) => {
   return c.json({ ok: true });
 });
+
+// Session routes (§4)
+app.route('/session', sessionsRouter);
 
 // Graceful shutdown handler
 let isShuttingDown = false;
