@@ -64,7 +64,7 @@ curl http://localhost:9100/health  # → { "ok": true }
 
 Implement session management endpoints without SDK integration.
 
-- [ ] Define types in `src/types.ts` (§3: Session, MessageInfo, Part)
+- [x] Define types in `src/types.ts` (§3: Session, MessageInfo, Part)
 - [ ] Implement in-memory session store in `src/storage/sessions.ts`
 - [ ] Implement `GET /session` endpoint (§4)
 - [ ] Implement `POST /session` endpoint (§4)
