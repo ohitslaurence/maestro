@@ -7,6 +7,8 @@ declare -g GUM_ENABLED=false
 declare -g LOG_DIR=""
 declare -g RUN_ID=""
 declare -g RUN_LOG=""
+declare -g RUN_REPORT=""
+declare -g RUN_PROMPT_PATH=""
 declare -g RUN_START_MS=""
 
 # Per-iteration stats (spec §3.1 IterationStats)
@@ -16,6 +18,9 @@ declare -g ITER_DURATION_MS=""
 declare -g ITER_EXIT_CODE=""
 declare -g ITER_COMPLETE_DETECTED=""
 declare -g ITER_LOG_PATH=""
+declare -g ITER_OUTPUT_BYTES=""
+declare -g ITER_OUTPUT_LINES=""
+declare -g ITER_TAIL_PATH=""
 
 # Aggregated stats
 declare -g TOTAL_ITERATIONS=0
@@ -46,6 +51,11 @@ init_ui() {
   fi
 
   RUN_LOG="$LOG_DIR/run-$RUN_ID.log"
+  RUN_REPORT="$LOG_DIR/run-$RUN_ID-report.tsv"
+  RUN_PROMPT_PATH="$LOG_DIR/run-$RUN_ID-prompt.txt"
+
+  # Initialize report file
+  printf 'timestamp_ms\tkind\titeration\tduration_ms\texit_code\toutput_bytes\toutput_lines\toutput_path\tmessage\n' > "$RUN_REPORT"
 
   # Determine gum availability
   if [[ "$no_gum" == "true" ]]; then
@@ -107,6 +117,54 @@ format_duration_ms() {
 }
 
 # -----------------------------------------------------------------------------
+# Report helpers
+# -----------------------------------------------------------------------------
+
+sanitize_field() {
+  local value="$1"
+  value=${value//$'\t'/ }
+  value=${value//$'\n'/ }
+  value=${value//$'\r'/ }
+  printf '%s' "$value"
+}
+
+report_event() {
+  local kind="$1"
+  local iteration="${2:-}"
+  local duration_ms="${3:-}"
+  local exit_code="${4:-}"
+  local output_bytes="${5:-}"
+  local output_lines="${6:-}"
+  local output_path="${7:-}"
+  local message="${8:-}"
+
+  local timestamp_ms
+  timestamp_ms=$(get_epoch_ms)
+
+  local safe_message
+  safe_message=$(sanitize_field "$message")
+
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$timestamp_ms" \
+    "$kind" \
+    "$iteration" \
+    "$duration_ms" \
+    "$exit_code" \
+    "$output_bytes" \
+    "$output_lines" \
+    "$output_path" \
+    "$safe_message" >> "$RUN_REPORT"
+}
+
+write_prompt_snapshot() {
+  local prompt="$1"
+
+  printf '%s\n' "$prompt" > "$RUN_PROMPT_PATH"
+  ui_log "INFO" "Prompt snapshot written to: $RUN_PROMPT_PATH"
+  report_event "PROMPT_SNAPSHOT" "" "" "" "" "" "$RUN_PROMPT_PATH" "prompt"
+}
+
+# -----------------------------------------------------------------------------
 # Iteration tracking (spec §3.1 IterationStats)
 # -----------------------------------------------------------------------------
 
@@ -116,9 +174,13 @@ start_iteration() {
   ITER_EXIT_CODE=""
   ITER_COMPLETE_DETECTED="false"
   ITER_LOG_PATH="$LOG_DIR/run-$RUN_ID-iter-$(printf '%02d' "$iteration").log"
+  ITER_OUTPUT_BYTES=""
+  ITER_OUTPUT_LINES=""
+  ITER_TAIL_PATH="$LOG_DIR/run-$RUN_ID-iter-$(printf '%02d' "$iteration").tail.txt"
   TOTAL_ITERATIONS=$iteration
 
   ui_log "ITERATION_START" "iteration=$iteration"
+  report_event "ITERATION_START" "$iteration" "" "" "" "" "" ""
 
   # Show iteration status
   local elapsed_ms=$((ITER_START_MS - RUN_START_MS))
@@ -143,6 +205,7 @@ end_iteration() {
   ITER_EXIT_CODE="$exit_code"
 
   ui_log "ITERATION_END" "iteration=$iteration exit_code=$exit_code duration_ms=$ITER_DURATION_MS"
+  report_event "ITERATION_END" "$iteration" "$ITER_DURATION_MS" "$exit_code" "$ITER_OUTPUT_BYTES" "$ITER_OUTPUT_LINES" "$ITER_LOG_PATH" ""
 }
 
 record_completion() {
@@ -154,6 +217,7 @@ record_completion() {
   COMPLETION_MODE="$mode"
 
   ui_log "COMPLETE_DETECTED" "mode=$mode iteration=$iteration"
+  report_event "COMPLETE_DETECTED" "$iteration" "" "" "" "" "$ITER_LOG_PATH" "mode=$mode"
 }
 
 # -----------------------------------------------------------------------------
@@ -171,18 +235,59 @@ run_claude_iteration() {
   temp_output=$(mktemp)
   local exit_code=0
 
+  local pid=""
+  local spinner='|/-\\'
+  local spinner_index=0
+
   if [[ "$GUM_ENABLED" == "true" ]]; then
-    # Run with gum spinner
-    gum spin --spinner dot --title "Iteration $iteration: Running claude..." -- \
-      bash -c "claude --dangerously-skip-permissions -p \"\$1\" > \"\$2\" 2>&1" \
-      -- "$prompt" "$temp_output" || exit_code=$?
+    claude --dangerously-skip-permissions -p "$prompt" > "$temp_output" 2>&1 < /dev/null &
+    pid=$!
   else
     # Plain output mode
     printf 'Iteration %d: Running claude...\n' "$iteration"
-    claude --dangerously-skip-permissions -p "$prompt" > "$temp_output" 2>&1 || exit_code=$?
+    claude --dangerously-skip-permissions -p "$prompt" > "$temp_output" 2>&1 < /dev/null &
+    pid=$!
   fi
 
+  while kill -0 "$pid" 2>/dev/null; do
+    local now_ms
+    now_ms=$(get_epoch_ms)
+    local run_elapsed_ms=$((now_ms - RUN_START_MS))
+    local iter_elapsed_ms=$((now_ms - ITER_START_MS))
+
+    local run_elapsed_str
+    run_elapsed_str=$(format_duration_ms "$run_elapsed_ms")
+    local iter_elapsed_str
+    iter_elapsed_str=$(format_duration_ms "$iter_elapsed_ms")
+
+    local spinner_char=${spinner:spinner_index%4:1}
+    spinner_index=$((spinner_index + 1))
+
+    local status_line="$spinner_char Iteration $iteration | Elapsed: $run_elapsed_str | Iter: $iter_elapsed_str"
+    if [[ -n "$ITER_DURATION_MS" ]]; then
+      local last_dur
+      last_dur=$(format_duration_ms "$ITER_DURATION_MS")
+      status_line="$status_line | Last: $last_dur"
+    fi
+
+    ui_status_inline "$status_line"
+    sleep 1
+  done
+
+  wait "$pid" || exit_code=$?
+  ui_status_done
+
   output_ref=$(cat "$temp_output")
+
+  ITER_OUTPUT_BYTES=$(wc -c < "$temp_output" | tr -d ' ')
+  ITER_OUTPUT_LINES=$(wc -l < "$temp_output" | tr -d ' ')
+
+  tail -n 200 "$temp_output" > "$ITER_TAIL_PATH"
+  local tail_bytes
+  tail_bytes=$(wc -c < "$ITER_TAIL_PATH" | tr -d ' ')
+  local tail_lines
+  tail_lines=$(wc -l < "$ITER_TAIL_PATH" | tr -d ' ')
+  report_event "ITERATION_TAIL" "$iteration" "" "" "$tail_bytes" "$tail_lines" "$ITER_TAIL_PATH" "last 200 lines"
 
   # Write to per-iteration log (spec §4.3)
   cp "$temp_output" "$ITER_LOG_PATH"
@@ -224,6 +329,33 @@ ui_status() {
   else
     printf '%s\n' "$line"
   fi
+}
+
+ui_status_inline() {
+  local line="$1"
+  if [[ ! -t 1 ]]; then
+    return
+  fi
+  if [[ "$GUM_ENABLED" == "true" ]]; then
+    local styled
+    styled=$(gum style --foreground 245 "$line" | tr -d '\n')
+    printf '\r'
+    tput el 2>/dev/null || true
+    printf '%s' "$styled"
+  else
+    printf '\r'
+    tput el 2>/dev/null || true
+    printf '%s' "$line"
+  fi
+}
+
+ui_status_done() {
+  if [[ ! -t 1 ]]; then
+    return
+  fi
+  printf '\r'
+  tput el 2>/dev/null || true
+  printf '\n'
 }
 
 ui_spinner() {
@@ -313,6 +445,7 @@ show_run_header() {
   ui_status "Gum:         $GUM_ENABLED"
 
   ui_log "RUN_START" "spec=$spec_path plan=$plan_path iterations=$iterations"
+  report_event "RUN_START" "" "" "" "" "" "" "spec=$spec_path plan=$plan_path iterations=$iterations"
 }
 
 # -----------------------------------------------------------------------------
@@ -338,6 +471,7 @@ show_run_summary() {
   fi
 
   ui_log "RUN_END" "reason=$exit_reason iterations=$TOTAL_ITERATIONS total_ms=$total_duration_ms"
+  report_event "RUN_END" "$TOTAL_ITERATIONS" "$total_duration_ms" "$last_exit_code" "" "" "" "reason=$exit_reason"
 
   # Build summary rows
   local -a rows=(
@@ -349,6 +483,8 @@ show_run_summary() {
     "Avg Iteration,$avg_duration_str"
     "Last Exit Code,$last_exit_code"
     "Run Log,$RUN_LOG"
+    "Run Report,$RUN_REPORT"
+    "Prompt Snapshot,$RUN_PROMPT_PATH"
   )
 
   if [[ -n "$COMPLETED_ITERATION" ]]; then
@@ -358,6 +494,10 @@ show_run_summary() {
 
   if [[ -n "$ITER_LOG_PATH" ]]; then
     rows+=("Last Iteration Log,$ITER_LOG_PATH")
+  fi
+
+  if [[ -n "$ITER_TAIL_PATH" ]]; then
+    rows+=("Last Output Tail,$ITER_TAIL_PATH")
   fi
 
   # Display summary
@@ -379,6 +519,7 @@ show_run_summary() {
   if [[ "$COMPLETION_MODE" == "lenient" ]]; then
     ui_log "WARN" "Completion detected with extra output - this violates the completion protocol"
     ui_log "WARN" "Full output captured in: $ITER_LOG_PATH"
+    report_event "COMPLETE_PROTOCOL_VIOLATION" "$COMPLETED_ITERATION" "" "" "" "" "$ITER_LOG_PATH" "mode=lenient"
   fi
 }
 
@@ -412,6 +553,9 @@ write_summary_json() {
   local last_iter_log_json="null"
   [[ -n "$ITER_LOG_PATH" ]] && last_iter_log_json="\"$ITER_LOG_PATH\""
 
+  local last_iter_tail_json="null"
+  [[ -n "$ITER_TAIL_PATH" ]] && last_iter_tail_json="\"$ITER_TAIL_PATH\""
+
   # Build JSON (avoiding jq dependency)
   cat > "$summary_path" <<EOF
 {
@@ -426,6 +570,9 @@ write_summary_json() {
   "completion_mode": $completion_mode_json,
   "exit_reason": "$exit_reason",
   "run_log": "$RUN_LOG",
+  "run_report": "$RUN_REPORT",
+  "prompt_snapshot": "$RUN_PROMPT_PATH",
+  "last_iteration_tail": $last_iter_tail_json,
   "last_iteration_log": $last_iter_log_json
 }
 EOF

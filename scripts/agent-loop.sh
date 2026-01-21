@@ -187,6 +187,17 @@ Task:
 6. If (and only if) all tasks in the plan are complete after your update, respond with EXACTLY:
 <promise>COMPLETE</promise>
 
+Spec alignment guardrails (must follow):
+- Before coding, identify the exact spec section(s) you are implementing and list the required data
+  shapes/behavior in your notes.
+- If the spec defines a schema/event payload, ensure serialization matches exactly (serde tags,
+  field names, nesting). Update both Rust and TS types together if needed.
+- Do not use placeholder values for required data (e.g., retry arguments). Persist and reuse the
+  real values.
+- If the spec defines event ordering or timestamps, implement it explicitly and verify in code.
+- If any spec detail is ambiguous, do not guess. Choose the safest minimal interpretation,
+  document the assumption in your response, and limit changes to what is unambiguous.
+
 Response format (strict):
 - If complete: output exactly `<promise>COMPLETE</promise>` and nothing else (no other text, no code
   fences, no leading/trailing whitespace, no newline commentary).
@@ -204,6 +215,8 @@ EOF
 
   prompt=${prompt//SPEC_PATH/$spec_path}
   prompt=${prompt//PLAN_PATH/$plan_path}
+
+  write_prompt_snapshot "$prompt"
 
   # Run loop
   for ((i=1; i<=iterations; i++)); do

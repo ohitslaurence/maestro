@@ -22,6 +22,7 @@ timing, and results in real time, with durable logs for post-run inspection.
 - Exit the loop immediately when the completion token is detected, even if the agent output
   includes extra text.
 - Present a final summary screen and a clear "close" affordance after completion.
+- Emit an analyzable run report and prompt snapshot for post-run analysis.
 
 ### Non-Goals
 - Full-screen TUI navigation or interactive controls.
@@ -82,6 +83,9 @@ timing, and results in real time, with durable logs for post-run inspection.
 | `exit_code` | number | yes | Exit status of `claude` |
 | `complete_detected` | boolean | yes | Output matched `<promise>COMPLETE</promise>` |
 | `log_path` | string | yes | Per-iteration log file |
+| `output_bytes` | number | no | Raw output size in bytes |
+| `output_lines` | number | no | Raw output line count |
+| `tail_path` | string | no | Last N lines for quick inspection |
 
 **RunSummary**
 | Field | Type | Required | Notes |
@@ -99,6 +103,10 @@ timing, and results in real time, with durable logs for post-run inspection.
 - Run log: `logs/agent-loop/run-<run_id>.log`
 - Per-iteration logs: `logs/agent-loop/run-<run_id>-iter-<NN>.log`
 - Optional summary JSON: `logs/agent-loop/run-<run_id>-summary.json`
+- Run report (TSV): `logs/agent-loop/run-<run_id>-report.tsv`
+- Prompt snapshot: `logs/agent-loop/run-<run_id>-prompt.txt`
+- Per-iteration tail: `logs/agent-loop/run-<run_id>-iter-<NN>.tail.txt`
+- Analysis prompt: `logs/agent-loop/run-<run_id>-analysis-prompt.txt`
 
 ---
 
@@ -146,6 +154,7 @@ Log markers written to the run log:
 ### Main Flow
 ```
 Parse args -> optional spec picker -> validate paths -> resolve log dir -> init UI
+  -> write prompt snapshot + report header
   -> for each iteration:
        show header + status
        run claude (spinner)
@@ -202,6 +211,9 @@ No retries; the loop remains deterministic. Errors require a manual restart.
 ### Logs
 - Run log includes timestamps and markers for each iteration.
 - Per-iteration logs capture raw `claude` output verbatim.
+- Run report captures structured events suitable for analysis.
+- Per-iteration tail files capture the final output chunk for quick review.
+- Analysis prompt generator (`scripts/agent-loop-analyze.sh`) emits a standard review prompt.
 
 ### Metrics
 - Total runtime, per-iteration duration, average duration, completed iteration.

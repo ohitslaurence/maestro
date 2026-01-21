@@ -14,14 +14,17 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 ## Phase 3: Summary + fallback modes
 - [x] Add run summary table, completion screen with optional wait, and summary JSON output (see 3.2, 4.1, 7).
 - [x] Implement signal traps and `--no-gum` fallback for non-TTY runs (see 5.2, 6).
+- [x] Add analysis prompt generator script for run artifacts (see 7).
 
 ## Files to Create
 - `scripts/lib/agent-loop-ui.sh`
 - `scripts/lib/spec-picker.sh`
+- `scripts/agent-loop-analyze.sh`
 
 ## Files to Modify
 - `scripts/agent-loop.sh`
 - `specs/README.md`
+- `specs/agent-loop-terminal-ux.md`
 
 ## Verification Checklist
 - [x] Manual: run `scripts/agent-loop.sh <spec> <plan>` and confirm spinner/status/summary output.
