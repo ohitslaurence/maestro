@@ -40,8 +40,9 @@ pub use storage::{
     ThreadRecord, ThreadSummary, ThreadPrivacy, ThreadMetadata, ThreadIndex,
     SessionRecord, SessionStatus, SessionAgentConfig, SessionToolRun, SessionToolRunStatus,
     MessageRecord, MessageRole, MESSAGE_SCHEMA_VERSION, INDEX_SCHEMA_VERSION,
+    ResumeResult, SessionResumedPayload, SESSION_RESUMED_EVENT,
     list_threads, load_thread, save_thread, delete_thread, create_session, mark_session_ended,
-    append_message, list_messages, rebuild_index,
+    append_message, list_messages, rebuild_index, resume_thread,
 };
 
 /// Emit a streaming event to the frontend via Tauri's event system.
@@ -133,6 +134,7 @@ pub fn run() {
             storage::append_message,
             storage::list_messages,
             storage::rebuild_index,
+            storage::resume_thread,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

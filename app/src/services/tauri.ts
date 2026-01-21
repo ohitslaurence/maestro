@@ -15,6 +15,7 @@ import type {
 } from "../types";
 import type {
   MessageRecord,
+  ResumeResult,
   SessionAgentConfig,
   SessionRecord,
   SessionStatus,
@@ -314,4 +315,18 @@ export async function deleteThread(threadId: string): Promise<void> {
 /** Rebuild the thread index (§5) */
 export async function rebuildIndex(): Promise<ThreadIndex> {
   return invokeCommand<ThreadIndex>("rebuild_index");
+}
+
+/**
+ * Resume a thread (§5: Resume Flow).
+ *
+ * Loads the thread, checks if the last session is still running,
+ * and either resumes it or creates a new session.
+ * Emits `session:resumed` event on success.
+ */
+export async function resumeThread(
+  threadId: string,
+  agentConfig: SessionAgentConfig,
+): Promise<ResumeResult> {
+  return invokeCommand<ResumeResult>("resume_thread", { threadId, agentConfig });
 }

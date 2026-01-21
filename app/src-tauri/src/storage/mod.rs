@@ -10,11 +10,36 @@
 //! Storage root: `app_data_dir()/sessions` (§3)
 
 use serde::de::DeserializeOwned;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::io;
 use std::path::{Path, PathBuf};
-use tauri::{AppHandle, Manager, Runtime};
+use tauri::{AppHandle, Emitter, Manager, Runtime};
 use tokio::fs;
+
+// ============================================================================
+// Event Constants and Payloads (§4)
+// ============================================================================
+
+/// Channel name for session:resumed event (§4).
+pub const SESSION_RESUMED_EVENT: &str = "session:resumed";
+
+/// Payload for session:resumed event (§4).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionResumedPayload {
+    pub thread_id: String,
+    pub session_id: String,
+}
+
+/// Result of resuming a thread, containing both thread and session records.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResumeResult {
+    pub thread: ThreadRecord,
+    pub session: SessionRecord,
+    /// True if a new session was created, false if existing session was resumed.
+    pub new_session: bool,
+}
 
 pub mod index_store;
 pub mod message_store;
@@ -240,6 +265,100 @@ pub async fn rebuild_index(app: tauri::AppHandle) -> Result<ThreadIndex, String>
     let root = storage_root(&app).map_err(|e| e.to_string())?;
     let store = IndexStore::new(root);
     store.rebuild().await.map_err(|e| e.to_string())
+}
+
+/// Resume a thread (§5: Resume Flow).
+///
+/// Loads the thread, checks if the last session is still running,
+/// and either resumes it or creates a new session.
+/// Emits `session:resumed` event on success.
+///
+/// Flow per spec §5:
+/// ```text
+/// UI -> load_thread -> SessionStore.load(lastSessionId)
+///   -> if session missing or ended: create_session
+///   -> emit session:resumed
+/// ```
+#[tauri::command]
+pub async fn resume_thread(
+    app: tauri::AppHandle,
+    thread_id: String,
+    agent_config: SessionAgentConfig,
+) -> Result<ResumeResult, String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let thread_store = ThreadStore::new(root.clone());
+    let session_store = SessionStore::new(root.clone());
+    let index_store = IndexStore::new(root);
+
+    // Load the thread
+    let mut thread = thread_store
+        .load(&thread_id)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    // Check if we have a last session that's still running
+    let (session, new_session) = if let Some(ref last_session_id) = thread.last_session_id {
+        match session_store.load(last_session_id).await {
+            Ok(session) if session.status == SessionStatus::Running => {
+                // Session exists and is still running, resume it
+                (session, false)
+            }
+            _ => {
+                // Session missing, ended, or failed to load - create new
+                let session = session_store
+                    .create(&thread_id, &thread.project_path, agent_config)
+                    .await
+                    .map_err(|e| e.to_string())?;
+                (session, true)
+            }
+        }
+    } else {
+        // No last session, create new
+        let session = session_store
+            .create(&thread_id, &thread.project_path, agent_config)
+            .await
+            .map_err(|e| e.to_string())?;
+        (session, true)
+    };
+
+    // Update thread's last session ID if we created a new session
+    if new_session {
+        thread.last_session_id = Some(session.id.clone());
+        let saved_thread = thread_store.save(thread).await.map_err(|e| e.to_string())?;
+
+        // Update index
+        let summary = ThreadSummary::from(&saved_thread);
+        index_store
+            .upsert_thread(summary)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        // Emit session:resumed event (§4)
+        let payload = SessionResumedPayload {
+            thread_id: saved_thread.id.clone(),
+            session_id: session.id.clone(),
+        };
+        let _ = app.emit(SESSION_RESUMED_EVENT, &payload);
+
+        Ok(ResumeResult {
+            thread: saved_thread,
+            session,
+            new_session: true,
+        })
+    } else {
+        // Emit session:resumed event for existing session too
+        let payload = SessionResumedPayload {
+            thread_id: thread.id.clone(),
+            session_id: session.id.clone(),
+        };
+        let _ = app.emit(SESSION_RESUMED_EVENT, &payload);
+
+        Ok(ResumeResult {
+            thread,
+            session,
+            new_session: false,
+        })
+    }
 }
 
 #[cfg(test)]

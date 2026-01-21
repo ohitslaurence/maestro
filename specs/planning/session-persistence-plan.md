@@ -32,11 +32,11 @@ Exit Criteria
 
 ## Phase 4: Index and resume
 - [x] Build `IndexStore` and automatic rebuild when missing (See §5)
-- [ ] Add resume flow and `session:resumed` event (See §5)
+- [x] Add resume flow and `session:resumed` event (See §5)
 
 Exit Criteria
 - [x] Deleting `index.json` triggers rebuild on next list (See §5)
-- [ ] Restarting app resumes last session for a thread (manual)
+- [ ]? Restarting app resumes last session for a thread (manual)
 
 ## Phase 5: Optional sync queue
 - [ ] Implement `SyncQueue` with retry/backoff (See §2, §5)

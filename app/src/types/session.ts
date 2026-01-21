@@ -232,6 +232,22 @@ export type ThreadIndex = {
 };
 
 // ============================================================================
+// Resume Result (§5)
+// ============================================================================
+
+/**
+ * Result of resuming a thread, containing both thread and session records.
+ */
+export type ResumeResult = {
+  /** The thread that was resumed. */
+  thread: ThreadRecord;
+  /** The session (new or existing) for the thread. */
+  session: SessionRecord;
+  /** True if a new session was created, false if existing session was resumed. */
+  newSession: boolean;
+};
+
+// ============================================================================
 // Event Payloads (§4)
 // ============================================================================
 
