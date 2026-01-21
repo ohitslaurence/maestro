@@ -14,6 +14,7 @@ Keep this file current whenever a new spec or plan is added.
 | [session-persistence.md](./session-persistence.md) | [planning/session-persistence-plan.md](./planning/session-persistence-plan.md) | app/src-tauri/src/storage | Local-first session persistence + sync queue |
 | [agent-loop-terminal-ux.md](./agent-loop-terminal-ux.md) | [planning/agent-loop-terminal-ux-plan.md](./planning/agent-loop-terminal-ux-plan.md) | scripts/agent-loop.sh | Gum-powered terminal UX, logging, and stats for the agent loop |
 | [git-diff-ui.md](./git-diff-ui.md) | [planning/git-diff-ui-plan.md](./planning/git-diff-ui-plan.md) | app/src/features/git | Professional git diff UI with split/unified views |
+| [claude-sdk-server.md](./claude-sdk-server.md) | [planning/claude-sdk-server-plan.md](./planning/claude-sdk-server-plan.md) | daemon/claude-sdk-server | Per-workspace HTTP server wrapping Claude Agent SDK |
 
 ## Research Notes
 
