@@ -918,6 +918,28 @@ async function runClaudeQuery(options: {
   const toolStartEmitted = new Set<string>();
   const subagentParts = new Map<string, { id: string; name: string; timeStart: number }>();
 
+  const mapPermissionForTool = (toolName: string, input: unknown) => {
+    const normalizedName = toolName.trim();
+    const metadata = input && typeof input === "object" ? input : { value: input };
+    const filePath = (input as { file_path?: unknown; path?: unknown })?.file_path
+      ?? (input as { file_path?: unknown; path?: unknown })?.path;
+    const patterns = typeof filePath === "string" ? [filePath] : [];
+
+    if (normalizedName === "Write" || normalizedName === "Edit") {
+      return { permission: "edit", patterns, metadata };
+    }
+
+    if (normalizedName === "Read" || normalizedName === "Glob" || normalizedName === "Grep") {
+      return { permission: "read", patterns, metadata };
+    }
+
+    if (normalizedName === "Bash") {
+      return { permission: "bash", patterns: [], metadata };
+    }
+
+    return { permission: normalizedName.toLowerCase(), patterns, metadata };
+  };
+
   const emitPartUpdated = (part: Record<string, unknown>, delta?: string) => {
     emitEvent("message.part.updated", {
       part,
@@ -988,6 +1010,54 @@ async function runClaudeQuery(options: {
         systemPrompt: defaultSystemPrompt,
         tools: defaultTools,
         ...(defaultPermissionMode ? { permissionMode: defaultPermissionMode } : {}),
+        canUseTool: async (toolName: string, input: unknown) => {
+          if (toolName === "AskUserQuestion") {
+            return {
+              behavior: "deny",
+              message: "Interactive questions are not supported in this session",
+            };
+          }
+
+          const { permission, patterns, metadata } = mapPermissionForTool(toolName, input);
+          const replyKey = permissionKey(permission, patterns);
+          const sessionPermissions = getPersistentPermissionReplies(session.record.id);
+          if (sessionPermissions.has(replyKey)) {
+            return { behavior: "allow", updatedInput: input };
+          }
+
+          const requestId = createId("permission");
+          emitEvent("permission.asked", {
+            id: requestId,
+            sessionID: session.record.id,
+            permission,
+            patterns,
+            metadata,
+            always: patterns,
+          });
+
+          const reply = await waitForPermissionReply({
+            requestID: requestId,
+            sessionID: session.record.id,
+            abortSignal: abortController.signal,
+          });
+
+          pendingPermissionRequests.delete(requestId);
+          if (reply === "always") {
+            sessionPermissions.add(replyKey);
+          }
+
+          emitEvent("permission.replied", {
+            sessionID: session.record.id,
+            requestID: requestId,
+            reply,
+          });
+
+          if (reply === "reject") {
+            return { behavior: "deny", message: "User denied permission" };
+          }
+
+          return { behavior: "allow", updatedInput: input };
+        },
         hooks: {
           PreToolUse: [
             {
@@ -1100,81 +1170,6 @@ async function runClaudeQuery(options: {
                 });
 
                 return {};
-              }],
-            },
-          ],
-          PermissionRequest: [
-            {
-              hooks: [async (input: any) => {
-                const permissionName =
-                  typeof input?.permission === "string"
-                    ? input.permission
-                    : typeof input?.permissionName === "string"
-                      ? input.permissionName
-                      : typeof input === "string"
-                        ? input
-                        : "permission";
-                const patterns = Array.isArray(input?.patterns)
-                  ? input.patterns.filter((pattern: unknown) => typeof pattern === "string")
-                  : [];
-                const always = Array.isArray(input?.always)
-                  ? input.always.filter((pattern: unknown) => typeof pattern === "string")
-                  : [];
-                const metadata = input?.metadata && typeof input.metadata === "object" ? input.metadata : {};
-                const callID =
-                  typeof input?.tool_use_id === "string"
-                    ? input.tool_use_id
-                    : typeof input?.toolUseId === "string"
-                      ? input.toolUseId
-                      : typeof input?.tool?.callID === "string"
-                        ? input.tool.callID
-                        : undefined;
-                const replyKey = permissionKey(permissionName, patterns);
-                const sessionPermissions = getPersistentPermissionReplies(session.record.id);
-
-                if (sessionPermissions.has(replyKey)) {
-                  return {
-                    hookSpecificOutput: {
-                      hookEventName: "PermissionRequest",
-                      permissionDecision: "allow",
-                    },
-                  };
-                }
-
-                const requestId = createId("permission");
-                emitEvent("permission.asked", {
-                  id: requestId,
-                  sessionID: session.record.id,
-                  permission: permissionName,
-                  patterns,
-                  metadata,
-                  always,
-                  tool: callID ? { messageID: assistantMessageInfo.id, callID } : undefined,
-                });
-
-                const reply = await waitForPermissionReply({
-                  requestID: requestId,
-                  sessionID: session.record.id,
-                  abortSignal: abortController.signal,
-                });
-
-                pendingPermissionRequests.delete(requestId);
-                if (reply === "always") {
-                  sessionPermissions.add(replyKey);
-                }
-
-                emitEvent("permission.replied", {
-                  sessionID: session.record.id,
-                  requestID: requestId,
-                  reply,
-                });
-
-                return {
-                  hookSpecificOutput: {
-                    hookEventName: "PermissionRequest",
-                    permissionDecision: reply === "reject" ? "deny" : "allow",
-                  },
-                };
               }],
             },
           ],
