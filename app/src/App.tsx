@@ -10,7 +10,7 @@ import {
   ConnectionMenu,
   SettingsModal,
 } from "./features/daemon";
-import { ThreadView } from "./features/opencode";
+import { AgentView } from "./features/agent";
 
 const DEFAULT_TERMINAL_ID = "main";
 
@@ -225,7 +225,7 @@ function App() {
                 <GitPanel sessionId={selectedSession} />
               )}
               {activeTab === "agent" && (
-                <ThreadView workspaceId={selectedSession} />
+                <AgentView workspaceId={selectedSession} />
               )}
             </div>
           </div>
