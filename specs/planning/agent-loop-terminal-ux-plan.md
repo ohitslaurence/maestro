@@ -8,7 +8,7 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 - [x] Add spec discovery + gum filter selection with Last Updated sorting when spec path is omitted (see 2.1, 2.3, 3.1, 4.1, 5.1).
 
 ## Phase 2: Live iteration feedback
-- [ ] Wrap `claude` execution with gum spinner and capture per-iteration logs + stats (see 3.1, 3.2, 5.1).
+- [x] Wrap `claude` execution with gum spinner and capture per-iteration logs + stats (see 3.1, 3.2, 5.1).
 - [ ] Emit completion detection (strict/lenient) and non-zero exit handling with summary output (see 5.1, 5.2, 6).
 
 ## Phase 3: Summary + fallback modes

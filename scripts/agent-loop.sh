@@ -204,33 +204,39 @@ EOF
 
   # Run loop
   for ((i=1; i<=iterations; i++)); do
-    ui_log "ITERATION_START" "iteration=$i"
+    local result=""
+    local claude_exit=0
 
-    result=$(claude --dangerously-skip-permissions -p "$prompt")
+    # Run claude with spinner and per-iteration logging (spec §5.1)
+    run_claude_iteration "$i" "$prompt" result || claude_exit=$?
 
     # Trim whitespace for comparison
     local trimmed_result="$result"
     trimmed_result="${trimmed_result#"${trimmed_result%%[!$'\t\n\r ']*}"}"
     trimmed_result="${trimmed_result%"${trimmed_result##*[!$'\t\n\r ']}"}"
 
-    ui_log "ITERATION_END" "iteration=$i"
-
     # Check for completion (spec §4.1 strict mode)
     if [[ "$trimmed_result" == "<promise>COMPLETE</promise>" ]]; then
-      ui_log "COMPLETE_DETECTED" "mode=strict iteration=$i"
+      record_completion "$i" "strict"
       printf '%s\n' "$trimmed_result"
       exit 0
     fi
 
     # Check for completion token anywhere (spec §4.1 lenient mode)
     if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
-      ui_log "COMPLETE_DETECTED" "mode=lenient iteration=$i"
+      record_completion "$i" "lenient"
       ui_log "WARN" "Completion token found with extra output - protocol violation"
       printf '%s\n' "$result"
       exit 0
     fi
 
     printf '%s\n' "$result"
+
+    # Exit on non-zero claude exit (spec §6)
+    if ((claude_exit != 0)); then
+      ui_log "RUN_END" "claude_failed exit_code=$claude_exit iteration=$i"
+      exit "$claude_exit"
+    fi
   done
 
   ui_log "RUN_END" "iterations_exhausted=$iterations"

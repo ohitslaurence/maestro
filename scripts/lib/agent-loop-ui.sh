@@ -7,6 +7,20 @@ declare -g GUM_ENABLED=false
 declare -g LOG_DIR=""
 declare -g RUN_ID=""
 declare -g RUN_LOG=""
+declare -g RUN_START_MS=""
+
+# Per-iteration stats (spec §3.1 IterationStats)
+declare -g ITER_START_MS=""
+declare -g ITER_END_MS=""
+declare -g ITER_DURATION_MS=""
+declare -g ITER_EXIT_CODE=""
+declare -g ITER_COMPLETE_DETECTED=""
+declare -g ITER_LOG_PATH=""
+
+# Aggregated stats
+declare -g TOTAL_ITERATIONS=0
+declare -g COMPLETED_ITERATION=""
+declare -g COMPLETION_MODE=""
 
 # -----------------------------------------------------------------------------
 # Gum detection and initialization
@@ -23,6 +37,7 @@ init_ui() {
   # Generate run ID
   RUN_ID=$(date +"%Y%m%d-%H%M%S")
   LOG_DIR="$log_dir"
+  RUN_START_MS=$(get_epoch_ms)
 
   # Create log directory
   if ! mkdir -p "$LOG_DIR"; then
@@ -61,6 +76,132 @@ EOF
     return 1
   fi
   return 0
+}
+
+# -----------------------------------------------------------------------------
+# Timing helpers (spec §3.1)
+# -----------------------------------------------------------------------------
+
+get_epoch_ms() {
+  # Use date with nanoseconds and truncate to milliseconds
+  # Compatible with GNU date (Linux) and BSD date (macOS with coreutils)
+  if date +%s%N &>/dev/null; then
+    echo $(( $(date +%s%N) / 1000000 ))
+  else
+    # Fallback to seconds only (macOS without coreutils)
+    echo $(( $(date +%s) * 1000 ))
+  fi
+}
+
+format_duration_ms() {
+  local ms="$1"
+  local seconds=$((ms / 1000))
+  local minutes=$((seconds / 60))
+  local remaining_seconds=$((seconds % 60))
+
+  if ((minutes > 0)); then
+    printf '%dm %ds' "$minutes" "$remaining_seconds"
+  else
+    printf '%ds' "$seconds"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# Iteration tracking (spec §3.1 IterationStats)
+# -----------------------------------------------------------------------------
+
+start_iteration() {
+  local iteration="$1"
+  ITER_START_MS=$(get_epoch_ms)
+  ITER_EXIT_CODE=""
+  ITER_COMPLETE_DETECTED="false"
+  ITER_LOG_PATH="$LOG_DIR/run-$RUN_ID-iter-$(printf '%02d' "$iteration").log"
+  TOTAL_ITERATIONS=$iteration
+
+  ui_log "ITERATION_START" "iteration=$iteration"
+
+  # Show iteration status
+  local elapsed_ms=$((ITER_START_MS - RUN_START_MS))
+  local elapsed_str
+  elapsed_str=$(format_duration_ms "$elapsed_ms")
+
+  local status_line="Iteration $iteration | Elapsed: $elapsed_str"
+  if [[ -n "$ITER_DURATION_MS" ]]; then
+    local last_dur
+    last_dur=$(format_duration_ms "$ITER_DURATION_MS")
+    status_line="$status_line | Last: $last_dur"
+  fi
+  ui_status "$status_line"
+}
+
+end_iteration() {
+  local iteration="$1"
+  local exit_code="$2"
+
+  ITER_END_MS=$(get_epoch_ms)
+  ITER_DURATION_MS=$((ITER_END_MS - ITER_START_MS))
+  ITER_EXIT_CODE="$exit_code"
+
+  ui_log "ITERATION_END" "iteration=$iteration exit_code=$exit_code duration_ms=$ITER_DURATION_MS"
+}
+
+record_completion() {
+  local iteration="$1"
+  local mode="$2"
+
+  ITER_COMPLETE_DETECTED="true"
+  COMPLETED_ITERATION="$iteration"
+  COMPLETION_MODE="$mode"
+
+  ui_log "COMPLETE_DETECTED" "mode=$mode iteration=$iteration"
+}
+
+# -----------------------------------------------------------------------------
+# Claude execution with spinner (spec §5.1)
+# -----------------------------------------------------------------------------
+
+run_claude_iteration() {
+  local iteration="$1"
+  local prompt="$2"
+  local -n output_ref=$3
+
+  start_iteration "$iteration"
+
+  local temp_output
+  temp_output=$(mktemp)
+  local exit_code=0
+
+  if [[ "$GUM_ENABLED" == "true" ]]; then
+    # Run with gum spinner
+    gum spin --spinner dot --title "Iteration $iteration: Running claude..." -- \
+      bash -c "claude --dangerously-skip-permissions -p \"\$1\" > \"\$2\" 2>&1" \
+      -- "$prompt" "$temp_output" || exit_code=$?
+  else
+    # Plain output mode
+    printf 'Iteration %d: Running claude...\n' "$iteration"
+    claude --dangerously-skip-permissions -p "$prompt" > "$temp_output" 2>&1 || exit_code=$?
+  fi
+
+  output_ref=$(cat "$temp_output")
+
+  # Write to per-iteration log (spec §4.3)
+  cp "$temp_output" "$ITER_LOG_PATH"
+  rm -f "$temp_output"
+
+  end_iteration "$iteration" "$exit_code"
+
+  # Warn on empty output
+  if [[ -z "$output_ref" ]]; then
+    ui_log "WARN" "Empty output from claude in iteration $iteration"
+  fi
+
+  # Handle non-zero exit
+  if ((exit_code != 0)); then
+    ui_log "ERROR" "claude exited with code $exit_code in iteration $iteration"
+    ui_log "ERROR" "See iteration log: $ITER_LOG_PATH"
+  fi
+
+  return "$exit_code"
 }
 
 # -----------------------------------------------------------------------------
