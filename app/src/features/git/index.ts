@@ -1,6 +1,7 @@
 export { GitStatusPanel } from "./components/GitStatusPanel";
 export { DiffViewer } from "./components/DiffViewer";
 export { GitPanel } from "./components/GitPanel";
+export { GitDiffPanel } from "./components/GitDiffPanel";
 export { useGitStatus } from "./hooks/useGitStatus";
 export { useGitDiffs } from "./hooks/useGitDiffs";
 export { useDiffStyle } from "./hooks/useDiffStyle";

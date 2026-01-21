@@ -17,19 +17,19 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 
 ## Phase 3: GitDiffPanel Component
 
-- [ ] Create `app/src/features/git/components/GitDiffPanel.tsx` (See §4 Interfaces)
-- [ ] Implement props interface: `branchName`, `stagedFiles`, `unstagedFiles`, `selectedPath`, `onSelectPath`, etc.
-- [ ] Render branch header with name (See §2 Components)
-- [ ] Render "Staged" section header with file count
-- [ ] Render "Changes" (unstaged) section header with file count
-- [ ] Implement FileRow subcomponent:
+- [x] Create `app/src/features/git/components/GitDiffPanel.tsx` (See §4 Interfaces)
+- [x] Implement props interface: `branchName`, `stagedFiles`, `unstagedFiles`, `selectedPath`, `onSelectPath`, etc.
+- [x] Render branch header with name (See §2 Components)
+- [x] Render "Staged" section header with file count
+- [x] Render "Changes" (unstaged) section header with file count
+- [x] Implement FileRow subcomponent:
   - Status badge with color (A=green, M=yellow, D=red) (See §8.3)
   - Split filename: base in primary color, extension in tertiary (See §8.2)
   - Directory path below filename in tertiary color
   - Additions/deletions stats on right
-- [ ] Highlight selected file with `--surface-card-active` background
-- [ ] Handle empty states: "Working tree clean", "No commits yet" (See §5.6)
-- [ ] Handle loading state
+- [x] Highlight selected file with `--surface-card-active` background
+- [x] Handle empty states: "Working tree clean", "No commits yet" (See §5.6)
+- [x] Handle loading state
 
 ## Phase 4: GitDiffViewer Component
 
