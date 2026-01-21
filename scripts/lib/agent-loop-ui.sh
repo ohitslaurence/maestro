@@ -314,3 +314,70 @@ show_run_header() {
 
   ui_log "RUN_START" "spec=$spec_path plan=$plan_path iterations=$iterations"
 }
+
+# -----------------------------------------------------------------------------
+# Run summary display (spec §3.2 RunSummary, §5.1, §7)
+# -----------------------------------------------------------------------------
+
+show_run_summary() {
+  local exit_reason="$1"
+  local last_exit_code="${2:-0}"
+
+  local run_end_ms
+  run_end_ms=$(get_epoch_ms)
+  local total_duration_ms=$((run_end_ms - RUN_START_MS))
+  local total_duration_str
+  total_duration_str=$(format_duration_ms "$total_duration_ms")
+
+  # Calculate average iteration duration
+  local avg_duration_ms=0
+  local avg_duration_str="N/A"
+  if ((TOTAL_ITERATIONS > 0 && total_duration_ms > 0)); then
+    avg_duration_ms=$((total_duration_ms / TOTAL_ITERATIONS))
+    avg_duration_str=$(format_duration_ms "$avg_duration_ms")
+  fi
+
+  ui_log "RUN_END" "reason=$exit_reason iterations=$TOTAL_ITERATIONS total_ms=$total_duration_ms"
+
+  # Build summary rows
+  local -a rows=(
+    "Metric,Value"
+    "Run ID,$RUN_ID"
+    "Exit Reason,$exit_reason"
+    "Iterations Run,$TOTAL_ITERATIONS"
+    "Total Duration,$total_duration_str"
+    "Avg Iteration,$avg_duration_str"
+    "Last Exit Code,$last_exit_code"
+    "Run Log,$RUN_LOG"
+  )
+
+  if [[ -n "$COMPLETED_ITERATION" ]]; then
+    rows+=("Completed Iteration,$COMPLETED_ITERATION")
+    rows+=("Completion Mode,$COMPLETION_MODE")
+  fi
+
+  if [[ -n "$ITER_LOG_PATH" ]]; then
+    rows+=("Last Iteration Log,$ITER_LOG_PATH")
+  fi
+
+  # Display summary
+  if [[ "$GUM_ENABLED" == "true" ]]; then
+    printf '\n'
+    gum style --border double --padding "0 1" --border-foreground 212 "Run Summary"
+    printf '%s\n' "${rows[@]}" | gum table --separator ","
+  else
+    printf '\n=== Run Summary ===\n'
+    for row in "${rows[@]:1}"; do
+      local key="${row%%,*}"
+      local val="${row#*,}"
+      printf '%-20s %s\n' "$key:" "$val"
+    done
+    printf '\n'
+  fi
+
+  # Warn about lenient mode (spec §5.2)
+  if [[ "$COMPLETION_MODE" == "lenient" ]]; then
+    ui_log "WARN" "Completion detected with extra output - this violates the completion protocol"
+    ui_log "WARN" "Full output captured in: $ITER_LOG_PATH"
+  fi
+}

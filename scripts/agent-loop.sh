@@ -218,6 +218,7 @@ EOF
     # Check for completion (spec §4.1 strict mode)
     if [[ "$trimmed_result" == "<promise>COMPLETE</promise>" ]]; then
       record_completion "$i" "strict"
+      show_run_summary "complete_strict" "0"
       printf '%s\n' "$trimmed_result"
       exit 0
     fi
@@ -225,7 +226,7 @@ EOF
     # Check for completion token anywhere (spec §4.1 lenient mode)
     if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
       record_completion "$i" "lenient"
-      ui_log "WARN" "Completion token found with extra output - protocol violation"
+      show_run_summary "complete_lenient" "0"
       printf '%s\n' "$result"
       exit 0
     fi
@@ -234,12 +235,12 @@ EOF
 
     # Exit on non-zero claude exit (spec §6)
     if ((claude_exit != 0)); then
-      ui_log "RUN_END" "claude_failed exit_code=$claude_exit iteration=$i"
+      show_run_summary "claude_failed" "$claude_exit"
       exit "$claude_exit"
     fi
   done
 
-  ui_log "RUN_END" "iterations_exhausted=$iterations"
+  show_run_summary "iterations_exhausted" "0"
 }
 
 main "$@"

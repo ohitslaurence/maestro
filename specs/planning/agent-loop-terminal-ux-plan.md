@@ -9,7 +9,7 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 
 ## Phase 2: Live iteration feedback
 - [x] Wrap `claude` execution with gum spinner and capture per-iteration logs + stats (see 3.1, 3.2, 5.1).
-- [ ] Emit completion detection (strict/lenient) and non-zero exit handling with summary output (see 5.1, 5.2, 6).
+- [x] Emit completion detection (strict/lenient) and non-zero exit handling with summary output (see 5.1, 5.2, 6).
 
 ## Phase 3: Summary + fallback modes
 - [ ] Add run summary table, completion screen with optional wait, and summary JSON output (see 3.2, 4.1, 7).
