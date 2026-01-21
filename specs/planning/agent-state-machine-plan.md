@@ -15,7 +15,7 @@ Exit Criteria
 ## Phase 2: Session integration and events
 - [x] Wire session loop to state machine in `app/src-tauri/src/sessions.rs` (See §2, §4)
 - [x] Emit `agent:state_event` from `app/src-tauri/src/lib.rs` (See §4)
-- [ ] Extend session summaries to include `AgentStateKind` (See §3)
+- [x] Extend session summaries to include `AgentStateKind` (See §3)
 
 Exit Criteria
 - [x] Spawning a session emits a `state_changed` event (`Starting` -> `Ready`) (See §4, §5)

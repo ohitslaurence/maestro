@@ -156,9 +156,14 @@ pub struct OpenCodeSessionMessagesParams {
 // --- Response types ---
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SessionInfo {
     pub path: String,
     pub name: String,
+    /// Agent state machine kind (local orchestration only; None for daemon sessions).
+    /// See §3 of agent-state-machine.md.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_state_kind: Option<crate::agent_state::AgentStateKind>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
