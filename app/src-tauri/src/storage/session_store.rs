@@ -391,7 +391,7 @@ mod tests {
         let store = SessionStore::new(dir.path().to_path_buf());
 
         // Create a session with wrong schema version
-        let mut record = SessionRecord {
+        let record = SessionRecord {
             schema_version: 999,
             id: "ses_old".to_string(),
             thread_id: "thr_123".to_string(),

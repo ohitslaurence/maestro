@@ -347,7 +347,7 @@ mod tests {
         let store = MessageStore::new(dir.path().to_path_buf());
 
         // Create a message with wrong schema version
-        let mut record = MessageRecord {
+        let record = MessageRecord {
             schema_version: 999,
             id: "msg_old".to_string(),
             thread_id: "thr_123".to_string(),
