@@ -7,6 +7,7 @@
 
 import { Hono } from 'hono';
 import { logger } from './logger';
+import { initSessionStore } from './storage/sessions';
 
 // Parse CLI arguments
 function parseArgs(): { port: number; directory: string; workspaceId: string } {
@@ -59,11 +60,20 @@ function shutdown(signal: string): void {
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
-// Start server
-logger.info('server starting', {
-  port: config.port,
-  directory: config.directory,
-  workspaceId: config.workspaceId,
+// Initialize session store and start server
+async function start(): Promise<void> {
+  logger.info('server starting', {
+    port: config.port,
+    directory: config.directory,
+    workspaceId: config.workspaceId,
+  });
+
+  await initSessionStore(config.workspaceId, config.directory);
+}
+
+start().catch((err) => {
+  logger.error('failed to start server', { error: String(err) });
+  process.exit(1);
 });
 
 export default {
