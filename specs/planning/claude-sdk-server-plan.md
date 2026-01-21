@@ -337,13 +337,13 @@ Connect frontend to Claude SDK sessions.
 - [x] `curl http://localhost:9100/session` returns `[]`
 - [x] Session CRUD works via curl
 - [x] SSE events stream correctly
-- [ ] SDK query executes and streams events (requires API key)
-- [ ] Abort stops execution
-- [ ] Resume continues conversation
 - [x] Daemon spawn/stop commands work (via claude_sdk_connect/disconnect_workspace)
 - [x] `bun run typecheck` passes in `app/`
 
 ### Manual QA Checklist (do not mark—human verification)
+- [ ]? SDK query executes and streams events (run `bun test:contract` with API key)
+- [ ]? Abort stops execution (test via curl during long task)
+- [ ]? Resume continues conversation (run `bun test:resume` with API key)
 - [ ]? Create Claude session in Maestro UI
 - [ ]? Send message, observe streaming text response
 - [ ]? Send message triggering tool use, observe tool events
