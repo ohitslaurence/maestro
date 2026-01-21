@@ -8,18 +8,32 @@ type ThreadMessagesProps = {
   items: OpenCodeThreadItem[];
   status: OpenCodeThreadStatus;
   processingStartedAt: number | null;
+  lastDurationMs: number | null;
 };
 
 const AUTO_SCROLL_THRESHOLD = 120;
 
+function formatDuration(ms: number): string {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  if (minutes > 0) {
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  }
+  return `${remainingSeconds}s`;
+}
+
 export function ThreadMessages({
   items,
   status,
-  processingStartedAt: _processingStartedAt,
+  processingStartedAt,
+  lastDurationMs,
 }: ThreadMessagesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const shouldAutoScrollRef = useRef(true);
+  const [elapsedMs, setElapsedMs] = useState(0);
 
   const handleToggle = useCallback((id: string) => {
     setExpandedIds((prev) => {
@@ -50,6 +64,24 @@ export function ThreadMessages({
 
     container.scrollTop = container.scrollHeight;
   }, [items]);
+
+  // Update elapsed time during processing
+  useEffect(() => {
+    if (status !== "processing" || !processingStartedAt) {
+      setElapsedMs(0);
+      return;
+    }
+
+    // Initial update
+    setElapsedMs(Date.now() - processingStartedAt);
+
+    // Update every second
+    const interval = setInterval(() => {
+      setElapsedMs(Date.now() - processingStartedAt);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [status, processingStartedAt]);
 
   const renderItem = (item: OpenCodeThreadItem) => {
     switch (item.kind) {
@@ -108,13 +140,22 @@ export function ThreadMessages({
 
   const isEmpty = items.length === 0;
 
+  // Format the processing indicator text
+  const processingText = status === "processing" && elapsedMs > 0
+    ? `Working... ${formatDuration(elapsedMs)}`
+    : "Working...";
+
+  // Format the "done" indicator if we just finished
+  const showDoneIndicator = status === "idle" && lastDurationMs !== null && lastDurationMs > 0;
+  const doneText = lastDurationMs !== null ? `Done in ${formatDuration(lastDurationMs)}` : "";
+
   return (
     <div
       ref={containerRef}
       className="oc-messages"
       onScroll={handleScroll}
     >
-      {isEmpty && status === "idle" && (
+      {isEmpty && status === "idle" && !showDoneIndicator && (
         <div className="oc-messages__empty">
           <p>No messages yet. Send a prompt to get started.</p>
         </div>
@@ -123,7 +164,12 @@ export function ThreadMessages({
       {status === "processing" && (
         <div className="oc-messages__processing">
           <span className="oc-messages__spinner" />
-          <span>Processing...</span>
+          <span>{processingText}</span>
+        </div>
+      )}
+      {showDoneIndicator && items.length > 0 && (
+        <div className="oc-messages__done">
+          <span>{doneText}</span>
         </div>
       )}
       {status === "error" && (

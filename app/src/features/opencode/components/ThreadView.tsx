@@ -41,6 +41,7 @@ export function ThreadView({ workspaceId }: ThreadViewProps) {
     items,
     status,
     processingStartedAt,
+    lastDurationMs,
     error: threadError,
   } = useOpenCodeThread({ workspaceId, sessionId, pendingUserMessages });
 
@@ -150,6 +151,7 @@ export function ThreadView({ workspaceId }: ThreadViewProps) {
         items={items}
         status={status}
         processingStartedAt={processingStartedAt}
+        lastDurationMs={lastDurationMs}
       />
       <ThreadComposer
         onSend={handleSend}
