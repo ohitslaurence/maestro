@@ -23,11 +23,11 @@ Exit Criteria
 - [ ] No panics when attaching to an existing session (manual smoke check)
 
 ## Phase 3: Tool lifecycle plumbing
-- [ ] Normalize tool calls and mark mutating tools in ToolRunner (See §3, §5)
+- [x] Normalize tool calls and mark mutating tools in ToolRunner (See §3, §5)
 - [ ] Emit `tool_lifecycle` events on start/complete (See §4)
 
 Exit Criteria
-- [ ] Tool run records include `mutating` flag and `attempt` count (See §3)
+- [x] Tool run records include `mutating` flag and `attempt` count (See §3)
 - [ ] `tool_lifecycle` events fire for start and completion (See §4, §5)
 - [ ] Mutating tool batch transitions to `PostToolsHook` (See §5)
 
@@ -50,6 +50,7 @@ Exit Criteria
 
 ## Files to Create
 - `app/src-tauri/src/agent_state.rs`
+- `app/src-tauri/src/tools.rs`
 - `app/src-tauri/src/hooks.rs`
 - `app/src/types/agent.ts`
 

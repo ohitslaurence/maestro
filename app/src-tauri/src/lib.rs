@@ -7,6 +7,7 @@ mod agent_state;
 mod daemon;
 mod sessions;
 mod terminal;
+mod tools;
 
 use daemon::DaemonConfig;
 
