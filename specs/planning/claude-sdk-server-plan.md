@@ -299,7 +299,7 @@ Connect frontend to Claude SDK sessions.
   - Connects to SSE stream
   - Maps events to existing ThreadView format
 - [x] Add Claude session type to session selector
-- [ ] Verify ThreadView renders Claude sessions correctly
+- [x] Verify ThreadView renders Claude sessions correctly
 
 **Verification:**
 - [ ]? Manual: Create Claude session in UI, send message, see streaming response
