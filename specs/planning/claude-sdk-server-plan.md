@@ -298,7 +298,7 @@ Connect frontend to Claude SDK sessions.
   - Spawns server via daemon
   - Connects to SSE stream
   - Maps events to existing ThreadView format
-- [ ] Add Claude session type to session selector
+- [x] Add Claude session type to session selector
 - [ ] Verify ThreadView renders Claude sessions correctly
 
 **Verification:**
