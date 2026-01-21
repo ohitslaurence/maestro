@@ -143,7 +143,7 @@ curl -X POST "http://localhost:9100/session/$SESSION/message" \
 Map SDK messages to OpenCode-compatible events.
 
 - [x] Create `src/events/mapper.ts` for SDK message → Part mapping (§3, Appendix B)
-- [ ] Map `text` content blocks to TextPart with delta streaming
+- [x] Map `text` content blocks to TextPart with delta streaming
 - [ ] Map `thinking` content blocks to ReasoningPart
 - [ ] Map `tool_use` to ToolPart with status transitions (pending → running)
 - [ ] Map `tool_result` to ToolPart completion (status: completed/failed)

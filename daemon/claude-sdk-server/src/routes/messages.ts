@@ -7,6 +7,7 @@
 import { randomUUID } from 'crypto';
 import { Hono } from 'hono';
 import { sseEmitter } from '../events/emitter';
+import { isTextBlock, MessageMapper } from '../events/mapper';
 import { logger } from '../logger';
 import { executeQuery, isAssistantMessage, isResultMessage, type QueryResult } from '../sdk/agent';
 import { getSessionStore } from '../storage/sessions';
@@ -135,6 +136,13 @@ messagesRouter.post('/:id/message', async (c) => {
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
 
+  // Create mapper for SDK message → Part conversion (§3, Appendix B)
+  const mapper = new MessageMapper(assistantMessageId);
+
+  // Track text accumulation for delta streaming
+  // Maps content block index to accumulated text for computing deltas
+  const textAccumulator = new Map<number, { partId: string; text: string }>();
+
   try {
     // Execute SDK query (§5 Main Flow steps 5-7)
     const queryGenerator = executeQuery({
@@ -159,20 +167,41 @@ messagesRouter.post('/:id/message', async (c) => {
       const message = iterResult.value;
 
       // Process SDK messages and emit SSE events
-      // Note: Detailed event mapping is Phase 5; for now emit basic text
       if (isAssistantMessage(message)) {
-        for (const block of message.message.content) {
+        for (let blockIndex = 0; blockIndex < message.message.content.length; blockIndex++) {
+          const block = message.message.content[blockIndex];
+
+          // Map text content blocks to TextPart with delta streaming (Phase 5)
           if (isTextBlock(block)) {
-            const textPart: TextPart = {
-              id: randomUUID(),
-              messageId: assistantMessageId,
-              type: 'text',
-              text: block.text,
-            };
-            parts.push(textPart);
-            await store.upsertPart(sessionId, assistantMessageId, textPart);
-            sseEmitter.emitMessagePartUpdated(textPart, block.text);
+            const existing = textAccumulator.get(blockIndex);
+
+            if (existing) {
+              // Compute delta: new text since last update
+              const delta = block.text.slice(existing.text.length);
+              if (delta.length > 0) {
+                existing.text = block.text;
+
+                // Find and update the existing part
+                const partIndex = parts.findIndex((p) => p.id === existing.partId);
+                if (partIndex !== -1 && parts[partIndex].type === 'text') {
+                  (parts[partIndex] as TextPart).text = block.text;
+                  await store.upsertPart(sessionId, assistantMessageId, parts[partIndex]);
+                  sseEmitter.emitMessagePartUpdated(parts[partIndex], delta);
+                }
+              }
+            } else {
+              // First time seeing this text block - create new part
+              const { part, delta } = mapper.mapTextBlock(block);
+              textAccumulator.set(blockIndex, { partId: part.id, text: block.text });
+              parts.push(part);
+              await store.upsertPart(sessionId, assistantMessageId, part);
+              sseEmitter.emitMessagePartUpdated(part, delta);
+            }
           }
+
+          // TODO Phase 5: Map thinking blocks to ReasoningPart
+          // TODO Phase 5: Map tool_use blocks to ToolPart with status transitions
+          // TODO Phase 5: Map tool_result blocks to ToolPart completion
         }
       }
 
@@ -287,17 +316,5 @@ messagesRouter.post('/:id/abort', async (c) => {
   // Return success (§5 Abort Flow step 4)
   return c.json({ ok: true });
 });
-
-// --- Helpers ---
-
-function isTextBlock(block: unknown): block is { type: 'text'; text: string } {
-  return (
-    typeof block === 'object' &&
-    block !== null &&
-    'type' in block &&
-    (block as { type: unknown }).type === 'text' &&
-    'text' in block
-  );
-}
 
 export { activeExecutions };
