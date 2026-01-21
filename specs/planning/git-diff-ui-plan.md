@@ -48,14 +48,14 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 
 ## Phase 5: GitPanel Integration
 
-- [ ] Update `app/src/features/git/components/GitPanel.tsx`:
+- [x] Update `app/src/features/git/components/GitPanel.tsx`:
   - Import new `GitDiffPanel`, `GitDiffViewer`, `useDiffStyle`
   - Add `scrollRequestId` state, increment on file selection (See §5.2)
   - Add `activePath` state for scroll sync from viewer (See §5.3)
   - Wire `useDiffStyle` for split/unified toggle (See §5.4)
   - Pass all required props to new components
-- [ ] Update keyboard navigation to include j/k and Home/End (See §7.6)
-- [ ] Combine staged + unstaged files for keyboard navigation path list
+- [x] Update keyboard navigation to include j/k and Home/End (See §7.6)
+- [x] Combine staged + unstaged files for keyboard navigation path list
 
 ## Phase 6: Styling
 

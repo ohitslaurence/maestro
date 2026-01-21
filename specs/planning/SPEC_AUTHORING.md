@@ -115,7 +115,7 @@ Reference: [<topic>.md](../<topic>.md)
 ## Phase 1: <phase name>
 - [ ] Task with citation to spec section (e.g., "See §2.3")
 
-## Phase 2: <phase name>
+## Phase 2: <phase name> [BLOCKED by: Phase 1]
 - [ ] Task with citation to spec section
 
 ## Files to Create
@@ -133,10 +133,12 @@ Reference: [<topic>.md](../<topic>.md)
 
 Notes:
 - Each task must map to a spec section or requirement.
-- Keep tasks small enough to complete in a single loop iteration.
+- Keep tasks small enough to complete in a single loop iteration; avoid bundling unrelated changes.
 - Do not assume sequential execution; each phase should be independently runnable.
 - Order phases by priority/impact, not dependency. The implementing agent may reorder based on impact.
-- If a phase depends on another, state it explicitly in the phase heading or first task ("Depends on: Phase X").
+- If a phase depends on another, state it explicitly in the phase heading or first task (use "[BLOCKED by: Phase X]").
+- Do not mark a phase complete until all verification steps tied to that phase pass. If the checklist is shared,
+  call out which steps apply to each phase in the phase notes.
 - Mark completed work with `[x]` and add notes about commits or tests.
 - Required sections: Files to Create, Files to Modify, Verification Checklist (use `None` if empty).
 - Add Notes only when there is information useful to future phases (blockers, risks, edge cases, follow-ups).

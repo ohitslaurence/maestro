@@ -206,9 +206,6 @@ fn handle_key_event(code: KeyCode, app: &mut AppState, child: &mut Child) -> Res
             }
             return Ok(true);
         }
-        KeyCode::Char('c') if matches!(app.exit_status, Some(_)) => {
-            return Ok(true);
-        }
         _ => {}
     }
     Ok(false)
@@ -527,10 +524,9 @@ fn infer_repo_root_from_script(script_path: &Path) -> Option<PathBuf> {
 fn send_sigint(child: &mut Child) -> Result<()> {
     #[cfg(unix)]
     {
-        if let Some(pid) = child.id() {
-            unsafe {
-                libc::kill(pid as i32, libc::SIGINT);
-            }
+        let pid = child.id();
+        unsafe {
+            libc::kill(pid as i32, libc::SIGINT);
         }
         return Ok(());
     }
@@ -684,10 +680,10 @@ fn build_info_lines(app: &AppState) -> Vec<Line> {
     lines
 }
 
-fn info_line(label: &str, value: &str, style: Style) -> Line {
+fn info_line(label: &str, value: &str, style: Style) -> Line<'static> {
     Line::from(vec![
         Span::styled(format!("{label}: "), style),
-        Span::raw(value),
+        Span::raw(value.to_string()),
     ])
 }
 

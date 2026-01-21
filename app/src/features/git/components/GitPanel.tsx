@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useGitStatus } from "../hooks/useGitStatus";
 import { useGitDiffs } from "../hooks/useGitDiffs";
-import { GitStatusPanel } from "./GitStatusPanel";
-import { DiffViewer } from "./DiffViewer";
+import { useDiffStyle } from "../hooks/useDiffStyle";
+import { GitDiffPanel } from "./GitDiffPanel";
+import { GitDiffViewer } from "./GitDiffViewer";
 
 type GitPanelProps = {
   sessionId: string | null;
@@ -20,38 +21,47 @@ export function GitPanel({ sessionId, hasGit = true }: GitPanelProps) {
     diffs,
     selectedPath,
     isLoading: diffsLoading,
+    error: diffsError,
     selectPath,
   } = useGitDiffs({ sessionId: hasGit ? sessionId : null });
 
-  const diffPaths = useMemo(() => diffs.map((diff) => diff.path), [diffs]);
+  const { diffStyle, setDiffStyle } = useDiffStyle();
 
-  const selectRelative = useCallback(
-    (direction: 1 | -1) => {
-      if (diffPaths.length === 0) {
-        return;
-      }
-      const currentIndex = selectedPath
-        ? diffPaths.indexOf(selectedPath)
-        : -1;
-      const nextIndex =
-        currentIndex === -1
-          ? 0
-          : (currentIndex + direction + diffPaths.length) % diffPaths.length;
-      selectPath(diffPaths[nextIndex]);
+  // scrollRequestId increments when user clicks a file to trigger scroll-to-file (§5.2)
+  const [scrollRequestId, setScrollRequestId] = useState(0);
+
+  // Combine staged + unstaged files for keyboard navigation (§7.6)
+  const allPaths = useMemo(() => {
+    const stagedPaths = (status?.stagedFiles ?? []).map((f) => f.path);
+    const unstagedPaths = (status?.unstagedFiles ?? []).map((f) => f.path);
+    return [...stagedPaths, ...unstagedPaths];
+  }, [status?.stagedFiles, status?.unstagedFiles]);
+
+  // Handle file selection from panel - increment scrollRequestId (§5.2)
+  const handleSelectPath = useCallback(
+    (path: string) => {
+      selectPath(path);
+      setScrollRequestId((prev) => prev + 1);
     },
-    [diffPaths, selectedPath, selectPath],
+    [selectPath],
   );
 
+  // Handle active path change from viewer scroll sync (§5.3)
+  const handleActivePathChange = useCallback(
+    (path: string) => {
+      // Update selection without triggering scroll-to-file
+      selectPath(path);
+    },
+    [selectPath],
+  );
+
+  // Keyboard navigation (§7.6) - includes j/k and Home/End
   useEffect(() => {
-    if (diffPaths.length === 0) {
+    if (allPaths.length === 0) {
       return;
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") {
-        return;
-      }
-
       const target = event.target as HTMLElement | null;
       if (target) {
         const tag = target.tagName.toLowerCase();
@@ -64,18 +74,41 @@ export function GitPanel({ sessionId, hasGit = true }: GitPanelProps) {
         }
       }
 
-      event.preventDefault();
-      selectRelative(event.key === "ArrowDown" ? 1 : -1);
+      const currentIndex = selectedPath ? allPaths.indexOf(selectedPath) : -1;
+      let nextIndex: number | null = null;
+
+      switch (event.key) {
+        case "ArrowDown":
+        case "j":
+          nextIndex =
+            currentIndex === -1 ? 0 : (currentIndex + 1) % allPaths.length;
+          break;
+        case "ArrowUp":
+        case "k":
+          nextIndex =
+            currentIndex === -1
+              ? allPaths.length - 1
+              : (currentIndex - 1 + allPaths.length) % allPaths.length;
+          break;
+        case "Home":
+          nextIndex = 0;
+          break;
+        case "End":
+          nextIndex = allPaths.length - 1;
+          break;
+      }
+
+      if (nextIndex !== null) {
+        event.preventDefault();
+        handleSelectPath(allPaths[nextIndex]);
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [diffPaths, selectRelative]);
-
-  // Find the selected diff
-  const selectedDiff = diffs.find((d) => d.path === selectedPath) ?? null;
+  }, [allPaths, selectedPath, handleSelectPath]);
 
   // Handle no session selected
   if (!sessionId) {
@@ -98,16 +131,28 @@ export function GitPanel({ sessionId, hasGit = true }: GitPanelProps) {
   return (
     <div className="git-panel">
       <div className="git-panel__status">
-        <GitStatusPanel
-          status={status}
-          isLoading={statusLoading}
-          error={statusError}
-          onFileSelect={selectPath}
+        <GitDiffPanel
+          branchName={status?.branchName ?? ""}
+          stagedFiles={status?.stagedFiles ?? []}
+          unstagedFiles={status?.unstagedFiles ?? []}
           selectedPath={selectedPath}
+          onSelectPath={handleSelectPath}
+          totalAdditions={status?.totalAdditions ?? 0}
+          totalDeletions={status?.totalDeletions ?? 0}
+          isLoading={statusLoading}
         />
       </div>
       <div className="git-panel__diff">
-        <DiffViewer diff={selectedDiff} isLoading={diffsLoading && !!selectedPath} />
+        <GitDiffViewer
+          diffs={diffs}
+          selectedPath={selectedPath}
+          scrollRequestId={scrollRequestId}
+          isLoading={diffsLoading}
+          error={diffsError ?? statusError ?? null}
+          diffStyle={diffStyle}
+          onDiffStyleChange={setDiffStyle}
+          onActivePathChange={handleActivePathChange}
+        />
       </div>
     </div>
   );

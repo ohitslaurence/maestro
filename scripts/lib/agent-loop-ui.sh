@@ -12,6 +12,9 @@ declare -g RUN_REPORT=""
 declare -g RUN_PROMPT_PATH=""
 declare -g RUN_MODEL=""
 declare -g RUN_START_MS=""
+declare -g PLAN_PATH=""
+declare -g PLAN_TASKS_DONE=0
+declare -g PLAN_TASKS_TOTAL=0
 
 # Per-iteration stats (spec §3.1 IterationStats)
 declare -g ITER_START_MS=""
@@ -64,7 +67,7 @@ init_ui() {
   RUN_PROMPT_PATH="$RUN_DIR/prompt.txt"
 
   # Initialize report file
-  printf 'timestamp_ms\tkind\titeration\tduration_ms\texit_code\toutput_bytes\toutput_lines\toutput_path\tmessage\n' > "$RUN_REPORT"
+  printf 'timestamp_ms\tkind\titeration\tduration_ms\texit_code\toutput_bytes\toutput_lines\toutput_path\tmessage\ttasks_done\ttasks_total\n' > "$RUN_REPORT"
 
   # Determine gum availability
   if [[ "$no_gum" == "true" ]]; then
@@ -146,6 +149,8 @@ report_event() {
   local output_lines="${6:-}"
   local output_path="${7:-}"
   local message="${8:-}"
+  local tasks_done="${9:-${PLAN_TASKS_DONE:-}}"
+  local tasks_total="${10:-${PLAN_TASKS_TOTAL:-}}"
 
   local timestamp_ms
   timestamp_ms=$(get_epoch_ms)
@@ -153,7 +158,7 @@ report_event() {
   local safe_message
   safe_message=$(sanitize_field "$message")
 
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
     "$timestamp_ms" \
     "$kind" \
     "$iteration" \
@@ -162,7 +167,29 @@ report_event() {
     "$output_bytes" \
     "$output_lines" \
     "$output_path" \
-    "$safe_message" >> "$RUN_REPORT"
+    "$safe_message" \
+    "$tasks_done" \
+    "$tasks_total" >> "$RUN_REPORT"
+}
+
+refresh_plan_progress() {
+  local plan_path="${PLAN_PATH:-}"
+  local totals
+
+  if [[ -z "$plan_path" || ! -f "$plan_path" ]]; then
+    PLAN_TASKS_DONE=0
+    PLAN_TASKS_TOTAL=0
+    return 0
+  fi
+
+  totals=$(awk '
+    /^[[:space:]]*- \[[ xX]\]/ {total++}
+    /^[[:space:]]*- \[[xX]\]/ {done++}
+    END {printf "%d %d", done + 0, total + 0}
+  ' "$plan_path")
+
+  PLAN_TASKS_DONE=${totals%% *}
+  PLAN_TASKS_TOTAL=${totals##* }
 }
 
 write_prompt_snapshot() {
@@ -179,6 +206,7 @@ write_prompt_snapshot() {
 
 start_iteration() {
   local iteration="$1"
+  refresh_plan_progress
   ITER_START_MS=$(get_epoch_ms)
   ITER_EXIT_CODE=""
   ITER_COMPLETE_DETECTED="false"
@@ -212,6 +240,7 @@ end_iteration() {
   ITER_END_MS=$(get_epoch_ms)
   ITER_DURATION_MS=$((ITER_END_MS - ITER_START_MS))
   ITER_EXIT_CODE="$exit_code"
+  refresh_plan_progress
 
   ui_log "ITERATION_END" "iteration=$iteration exit_code=$exit_code duration_ms=$ITER_DURATION_MS"
   report_event "ITERATION_END" "$iteration" "$ITER_DURATION_MS" "$exit_code" "$ITER_OUTPUT_BYTES" "$ITER_OUTPUT_LINES" "$ITER_LOG_PATH" ""
@@ -484,6 +513,12 @@ show_run_summary() {
     avg_duration_str=$(format_duration_ms "$avg_duration_ms")
   fi
 
+  if [[ "$COMPLETION_MODE" == "fuzzy" ]]; then
+    ui_log "WARN" "Completion detected with extra output - this violates the completion protocol"
+    ui_log "WARN" "Full output captured in: $ITER_LOG_PATH"
+    report_event "COMPLETE_PROTOCOL_VIOLATION" "$COMPLETED_ITERATION" "" "" "" "" "$ITER_LOG_PATH" "mode=fuzzy"
+  fi
+
   ui_log "RUN_END" "reason=$exit_reason iterations=$TOTAL_ITERATIONS total_ms=$total_duration_ms"
   report_event "RUN_END" "$TOTAL_ITERATIONS" "$total_duration_ms" "$last_exit_code" "" "" "" "reason=$exit_reason"
 
@@ -530,12 +565,7 @@ show_run_summary() {
     printf '\n'
   fi
 
-  # Warn about lenient mode (spec §5.2)
-  if [[ "$COMPLETION_MODE" == "lenient" ]]; then
-    ui_log "WARN" "Completion detected with extra output - this violates the completion protocol"
-    ui_log "WARN" "Full output captured in: $ITER_LOG_PATH"
-    report_event "COMPLETE_PROTOCOL_VIOLATION" "$COMPLETED_ITERATION" "" "" "" "" "$ITER_LOG_PATH" "mode=lenient"
-  fi
+  # Warning emitted before RUN_END for completion violations.
 }
 
 # -----------------------------------------------------------------------------

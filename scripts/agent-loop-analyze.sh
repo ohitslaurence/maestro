@@ -99,7 +99,7 @@ parse_report() {
   local completion_mode=""
   local completion_iter=""
 
-  while IFS=$'\t' read -r timestamp kind iteration duration exit_code output_bytes output_lines output_path message; do
+  while IFS=$'\t' read -r timestamp kind iteration duration exit_code output_bytes output_lines output_path message tasks_done tasks_total; do
     if [[ "$kind" == "kind" ]]; then
       continue
     fi
@@ -128,7 +128,7 @@ parse_run_metadata() {
   local plan_path=""
   local model=""
 
-  while IFS=$'\t' read -r timestamp kind iteration duration exit_code output_bytes output_lines output_path message; do
+  while IFS=$'\t' read -r timestamp kind iteration duration exit_code output_bytes output_lines output_path message tasks_done tasks_total; do
     if [[ "$kind" == "kind" ]]; then
       continue
     fi

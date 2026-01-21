@@ -21,10 +21,11 @@ plan_path=""
 iterations=50
 log_dir="logs/agent-loop"
 no_gum=false
-summary_json=false
+summary_json=true
 no_wait=false
 model="opus"
 postmortem=true
+completion_mode="exact"
 
 # -----------------------------------------------------------------------------
 # Usage
@@ -41,9 +42,10 @@ Options:
   --iterations <n>    Maximum loop iterations (default: 50)
   --log-dir <path>    Base log directory (default: logs/agent-loop)
   --model <name>      Claude model or alias (default: opus)
+  --completion-mode   Completion detection (exact|fuzzy, default: exact)
   --no-postmortem     Disable automatic post-run analysis
   --no-gum            Disable gum UI, use plain output
-  --summary-json      Write summary JSON at end of run
+  --summary-json      Write summary JSON at end of run (default: enabled)
   --no-wait           Skip completion screen wait
 
 Examples:
@@ -69,6 +71,10 @@ parse_args() {
         ;;
       --model)
         model="$2"
+        shift 2
+        ;;
+      --completion-mode)
+        completion_mode="$2"
         shift 2
         ;;
       --postmortem)
@@ -165,6 +171,11 @@ validate_inputs() {
     echo "Error: --iterations must be a positive integer" >&2
     exit 1
   fi
+
+  if [[ "$completion_mode" != "exact" && "$completion_mode" != "fuzzy" ]]; then
+    echo "Error: --completion-mode must be 'exact' or 'fuzzy'" >&2
+    exit 1
+  fi
 }
 
 # -----------------------------------------------------------------------------
@@ -197,6 +208,7 @@ run_postmortem() {
   return 0
 }
 
+
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
@@ -204,10 +216,14 @@ main() {
   parse_args "$@"
   validate_inputs
 
+  PLAN_PATH="$plan_path"
+
   # Initialize UI and logging (spec §2.1, §2.3)
   if ! init_ui "$log_dir" "$no_gum"; then
     exit 1
   fi
+
+  refresh_plan_progress
 
   # Set up signal handlers for clean exit (spec §2.1, §5.2)
   setup_signal_traps
@@ -218,7 +234,7 @@ main() {
   # Build prompt
   local prompt
   prompt=$(cat <<'EOF'
-@SPEC_PATH @PLAN_PATH @specs/README.md @specs/planning/SPEC_AUTHORING.md
+ @SPEC_PATH @PLAN_PATH @specs/README.md @specs/planning/SPEC_AUTHORING.md
 
 You are an implementation agent. Read the spec, the plan, and any referenced docs.
 Check the plan for notes or feedback from other agents before choosing work.
@@ -245,9 +261,10 @@ Spec alignment guardrails (must follow):
   document the assumption in your response, and limit changes to what is unambiguous.
 
 Response format (strict):
-- If complete: output exactly `<promise>COMPLETE</promise>` and nothing else (no other text, no code
-  fences, no leading/trailing whitespace, no newline commentary).
-- If not complete: do NOT output `<promise>COMPLETE</promise>` anywhere in your response.
+- ALL tasks complete: output exactly `<promise>COMPLETE</promise>` — no other text, whitespace, or
+  commentary.
+- Tasks remain: output ONE sentence: "Completed [task]. [N] tasks remain." No bullet lists, code
+  fences, or detailed summaries.
 
 Constraints:
 - Do not modify files under `reference/`.
@@ -277,26 +294,28 @@ EOF
     trimmed_result="${trimmed_result#"${trimmed_result%%[!$'\t\n\r ']*}"}"
     trimmed_result="${trimmed_result%"${trimmed_result##*[!$'\t\n\r ']}"}"
 
-    # Check for completion (spec §4.1 strict mode)
+    # Check for completion (spec §4.1 exact mode)
     if [[ "$trimmed_result" == "<promise>COMPLETE</promise>" ]]; then
-      record_completion "$i" "strict"
-      show_run_summary "complete_strict" "0"
-      [[ "$summary_json" == "true" ]] && write_summary_json "complete_strict" "0"
-      run_postmortem "complete_strict" || true
+      record_completion "$i" "exact"
+      show_run_summary "complete_exact" "0"
+      [[ "$summary_json" == "true" ]] && write_summary_json "complete_exact" "0"
+      run_postmortem "complete_exact" || true
       show_completion_screen "$no_wait"
       printf '%s\n' "$trimmed_result"
       exit 0
     fi
 
-    # Check for completion token anywhere (spec §4.1 lenient mode)
-    if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
-      record_completion "$i" "lenient"
-      show_run_summary "complete_lenient" "0"
-      [[ "$summary_json" == "true" ]] && write_summary_json "complete_lenient" "0"
-      run_postmortem "complete_lenient" || true
-      show_completion_screen "$no_wait"
-      printf '%s\n' "$result"
-      exit 0
+    # Check for completion token as a standalone line (fuzzy mode)
+    if [[ "$completion_mode" == "fuzzy" ]]; then
+      if printf '%s\n' "$result" | grep -qE '^[[:space:]]*<promise>COMPLETE</promise>[[:space:]]*$'; then
+        record_completion "$i" "fuzzy"
+        show_run_summary "complete_fuzzy" "0"
+        [[ "$summary_json" == "true" ]] && write_summary_json "complete_fuzzy" "0"
+        run_postmortem "complete_fuzzy" || true
+        show_completion_screen "$no_wait"
+        printf '%s\n' "$result"
+        exit 0
+      fi
     fi
 
     printf '%s\n' "$result"
@@ -317,4 +336,6 @@ EOF
   show_completion_screen "$no_wait"
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

@@ -19,8 +19,7 @@ timing, and results in real time, with durable logs for post-run inspection.
 - Avoid garbled output by keeping `claude` stdin closed and handling signals cleanly.
 - Provide interactive spec selection with searchable filtering when a spec path is not supplied.
 - Sort selectable specs by most recent `Last Updated` when available.
-- Exit the loop immediately when the completion token is detected, even if the agent output
-  includes extra text.
+- Exit the loop immediately when the completion token is detected as a standalone line.
 - Present a final summary screen and a clear "close" affordance after completion.
 - Emit an analyzable run report and prompt snapshot for post-run analysis.
 - Automatically generate a postmortem report after completion using Opus.
@@ -73,6 +72,7 @@ timing, and results in real time, with durable logs for post-run inspection.
 | `gum_enabled` | boolean | yes | Disabled when `--no-gum` or non-TTY |
 | `model` | string | yes | Claude model or alias (default `opus`) |
 | `postmortem` | boolean | yes | Run analysis reports after completion |
+| `completion_mode` | string | yes | `exact` or `fuzzy` |
 
 **SpecEntry**
 | Field | Type | Required | Notes |
@@ -96,6 +96,8 @@ timing, and results in real time, with durable logs for post-run inspection.
 | `output_bytes` | number | no | Raw output size in bytes |
 | `output_lines` | number | no | Raw output line count |
 | `tail_path` | string | no | Last N lines for quick inspection |
+| `tasks_done` | number | no | Completed plan tasks at iteration boundary |
+| `tasks_total` | number | no | Total plan tasks at iteration boundary |
 
 **RunSummary**
 | Field | Type | Required | Notes |
@@ -107,13 +109,13 @@ timing, and results in real time, with durable logs for post-run inspection.
 | `completed_iteration` | number | no | Iteration where COMPLETE occurred |
 | `avg_duration_ms` | number | yes | Average iteration time |
 | `last_exit_code` | number | yes | Exit code from last iteration |
-| `completion_mode` | string | yes | `strict` when exact match, `lenient` when token appears |
+| `completion_mode` | string | yes | `exact` when exact match, `fuzzy` when token appears as a line |
 
 ### Storage Schema (if any)
 - Run directory: `logs/agent-loop/run-<run_id>/`
   - Run log: `logs/agent-loop/run-<run_id>/run.log`
   - Per-iteration logs: `logs/agent-loop/run-<run_id>/iter-<NN>.log`
-  - Optional summary JSON: `logs/agent-loop/run-<run_id>/summary.json`
+  - Summary JSON: `logs/agent-loop/run-<run_id>/summary.json`
   - Run report (TSV): `logs/agent-loop/run-<run_id>/report.tsv`
   - Prompt snapshot: `logs/agent-loop/run-<run_id>/prompt.txt`
   - Per-iteration tail: `logs/agent-loop/run-<run_id>/iter-<NN>.tail.txt`
@@ -135,7 +137,7 @@ Script usage accepts positional arguments or interactive selection, with optiona
 
 ```
 ./scripts/agent-loop.sh [spec-path] [plan-path] \
-  [--iterations <n>] [--log-dir <path>] [--model <name>] [--no-postmortem] [--no-gum] [--summary-json] [--no-wait]
+  [--iterations <n>] [--log-dir <path>] [--model <name>] [--completion-mode <exact|fuzzy>] [--no-postmortem] [--no-gum] [--summary-json] [--no-wait]
 ```
 
 Postmortem runner:
@@ -147,12 +149,14 @@ Defaults:
 - `--iterations`: `50`
 - `--log-dir`: `logs/agent-loop`
 - `--model`: `opus`
+- `--completion-mode`: `exact`
 - `--postmortem`: enabled by default (disable with `--no-postmortem`)
 
 Completion behavior:
-- Strict mode: if output equals `<promise>COMPLETE</promise>` after trimming, mark `completion_mode=strict`.
-- Lenient mode: if the token appears anywhere else in the output, mark `completion_mode=lenient`,
-  emit a warning, but stop the loop.
+- Exact mode (`--completion-mode=exact`): if output equals `<promise>COMPLETE</promise>` after trimming,
+  mark `completion_mode=exact`.
+- Fuzzy mode (`--completion-mode=fuzzy`): if a standalone line matches `<promise>COMPLETE</promise>`,
+  mark `completion_mode=fuzzy`, emit a warning, but stop the loop.
 - Close affordance: use `gum confirm --default=true "Close"` unless `--no-wait` is set.
 
 Selection behavior:
@@ -185,7 +189,7 @@ Parse args -> optional spec picker -> validate paths -> resolve log dir -> init 
        show header + status
        run claude (spinner)
        write output to iteration log
-       detect COMPLETE (strict or lenient)
+       detect COMPLETE (exact or fuzzy)
        update stats + status line
   -> print summary (table)
   -> run postmortem analysis (if enabled)
@@ -244,6 +248,7 @@ No retries; the loop remains deterministic. Errors require a manual restart.
 - Run log includes timestamps and markers for each iteration.
 - Per-iteration logs capture raw `claude` output verbatim.
 - Run report captures structured events suitable for analysis.
+- Run report includes `tasks_done`/`tasks_total` columns for plan progress.
 - Per-iteration tail files capture the final output chunk for quick review.
 - Analysis prompt generator (`scripts/agent-loop-analyze.sh`) emits a standard review prompt.
 - Postmortem reports capture spec compliance and run quality findings.

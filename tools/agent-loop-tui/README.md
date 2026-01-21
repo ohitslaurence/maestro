@@ -6,7 +6,13 @@ Small Ratatui wrapper for `scripts/agent-loop.sh`. It runs the loop with `--no-g
 
 ## Usage
 
-From the repo root:
+Single word wrapper (recommended, with interactive picker if no spec is provided):
+
+```bash
+./agent-loop-tui specs/my-spec.md
+```
+
+From the repo root (direct cargo):
 
 ```bash
 cargo run --manifest-path tools/agent-loop-tui/Cargo.toml -- specs/my-spec.md
