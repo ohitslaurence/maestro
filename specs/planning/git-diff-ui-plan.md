@@ -59,7 +59,7 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 
 ## Phase 6: Styling
 
-- [ ] Update `app/src/styles/diff-viewer.css`:
+- [x] Update `app/src/styles/diff-viewer.css`:
   - Add `.git-file-name`, `.git-file-name-base`, `.git-file-name-ext` (See §8.2)
   - Add `.git-file-dir` styles
   - Update status badge colors to match spec (See §8.3)
@@ -69,10 +69,10 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 
 ## Phase 7: Cleanup
 
-- [ ] Delete `app/src/features/git/components/GitStatusPanel.tsx`
-- [ ] Delete `app/src/features/git/components/DiffViewer.tsx`
-- [ ] Update `app/src/features/git/index.ts` exports (remove old, add new)
-- [ ] Remove any orphaned CSS selectors from `diff-viewer.css`
+- [x] Delete `app/src/features/git/components/GitStatusPanel.tsx`
+- [x] Delete `app/src/features/git/components/DiffViewer.tsx`
+- [x] Update `app/src/features/git/index.ts` exports (remove old, add new)
+- [x] Remove any orphaned CSS selectors from `diff-viewer.css`
 
 ## Files to Create
 
@@ -95,7 +95,7 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 
 ## Verification Checklist
 
-- [ ] `bun run typecheck` passes
+- [x] `bun run typecheck` passes
 - [ ] Git tab displays branch name correctly
 - [ ] Staged section shows with file count and files
 - [ ] Unstaged section shows with file count and files
