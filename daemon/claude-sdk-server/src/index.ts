@@ -6,7 +6,9 @@
  */
 
 import { Hono } from 'hono';
+import { sseEmitter } from './events/emitter';
 import { logger } from './logger';
+import { eventsRouter } from './routes/events';
 import { sessionsRouter } from './routes/sessions';
 import { initSessionStore } from './storage/sessions';
 
@@ -45,6 +47,9 @@ app.get('/health', (c) => {
 // Session routes (§4)
 app.route('/session', sessionsRouter);
 
+// SSE event stream (§4)
+app.route('/event', eventsRouter);
+
 // Graceful shutdown handler
 let isShuttingDown = false;
 
@@ -53,6 +58,9 @@ function shutdown(signal: string): void {
   isShuttingDown = true;
 
   logger.info('shutdown initiated', { signal });
+
+  // Close all SSE connections
+  sseEmitter.closeAll();
 
   // Give connections time to close gracefully
   setTimeout(() => {

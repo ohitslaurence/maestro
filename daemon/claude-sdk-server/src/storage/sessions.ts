@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'fs/promises';
 import { homedir } from 'os';
 import { join } from 'path';
+import { sseEmitter } from '../events/emitter';
 import { logger } from '../logger';
 import type {
   CreateSessionRequest,
@@ -227,6 +228,9 @@ export class SessionStore {
     await this.persistSession(session);
     await this.updateIndex();
 
+    // Emit session.created SSE event (§4)
+    sseEmitter.emitSessionCreated(session);
+
     logger.info('session created', { sessionId: session.id, title: session.title });
     return session;
   }
@@ -251,6 +255,9 @@ export class SessionStore {
     this.sessions.set(id, updated);
     await this.persistSession(updated);
     await this.updateIndex();
+
+    // Emit session.updated SSE event (§4)
+    sseEmitter.emitSessionUpdated(updated);
 
     return updated;
   }

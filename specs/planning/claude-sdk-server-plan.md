@@ -92,12 +92,12 @@ curl http://localhost:9100/session/{id}
 
 Implement Server-Sent Events infrastructure.
 
-- [ ] Create `src/events/emitter.ts` with EventEmitter for SSE broadcast
-- [ ] Implement `GET /event` SSE endpoint (§4)
-- [ ] Add client connection tracking (connect/disconnect)
-- [ ] Emit `session.created` when session created (§4)
-- [ ] Emit `session.updated` when session modified (§4)
-- [ ] Add keep-alive ping every 30s to prevent connection timeout
+- [x] Create `src/events/emitter.ts` with EventEmitter for SSE broadcast
+- [x] Implement `GET /event` SSE endpoint (§4)
+- [x] Add client connection tracking (connect/disconnect)
+- [x] Emit `session.created` when session created (§4)
+- [x] Emit `session.updated` when session modified (§4)
+- [x] Add keep-alive ping every 30s to prevent connection timeout
 
 **Verification:**
 ```bash
@@ -326,7 +326,7 @@ Connect frontend to Claude SDK sessions.
 - [x] `curl http://localhost:9100/health` returns `{ "ok": true }`
 - [x] `curl http://localhost:9100/session` returns `[]`
 - [x] Session CRUD works via curl
-- [ ] SSE events stream correctly
+- [x] SSE events stream correctly
 - [ ] SDK query executes and streams events (requires API key)
 - [ ] Abort stops execution
 - [ ] Resume continues conversation
