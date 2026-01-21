@@ -15,4 +15,7 @@ logs/
 # Rust
 target/
 
+# Local-only reference material
+reference/
+
 CLAUDE.md
