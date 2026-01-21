@@ -120,8 +120,8 @@ daemon/
 ```typescript
 interface Session {
   id: string;                    // UUID
-  workspaceId: string;           // Matches daemon workspace
-  directory: string;             // Absolute path on VPS
+  workspaceId: string;           // Matches daemon workspace (server-assigned)
+  directory: string;             // Absolute path on VPS (server-assigned)
   title: string;                 // User-visible title
   parentId?: string;             // For branched sessions
   resumeId?: string;             // SDK resume token
@@ -135,6 +135,8 @@ interface Session {
 
 type PermissionMode = 'default' | 'acceptEdits' | 'bypassPermissions';
 ```
+
+workspaceId + directory are read-only; server populates from daemon spawn config.
 
 #### Message
 
@@ -227,6 +229,9 @@ Sessions and messages are stored as JSON files per workspace:
 └── index.json                   # Session list for fast queries
 ```
 
+Storage is single-process per workspace. Writes must be atomic (write temp + rename)
+to avoid corrupting JSON during concurrent requests.
+
 ---
 
 ## 4. Interfaces
@@ -234,6 +239,14 @@ Sessions and messages are stored as JSON files per workspace:
 ### Public APIs (HTTP)
 
 All endpoints are prefixed with the server's base URL (e.g., `http://localhost:{port}`).
+The server injects `workspaceId` + `directory` from its spawn config; clients never set
+those fields directly.
+
+#### `GET /health`
+
+Basic readiness check.
+
+**Response:** `{ "ok": true }`
 
 #### `GET /session`
 
@@ -295,7 +308,8 @@ Abort the current execution.
 
 SSE event stream for this workspace.
 
-**Response:** Server-Sent Events stream. Each event:
+**Response:** Server-Sent Events stream. Each event is a single `data:` frame
+(no `event:` field for MVP):
 ```
 data: {"type":"message.part.updated","properties":{...}}
 ```
@@ -336,6 +350,8 @@ enum ServerStatus {
 
 Event types match OpenCode SDK v2:
 
+Each SSE payload uses the OpenCode envelope: `{ type, properties }`.
+
 | Event | Payload | When |
 |-------|---------|------|
 | `session.created` | `{ info: Session }` | New session created |
@@ -347,6 +363,9 @@ Event types match OpenCode SDK v2:
 | `message.part.removed` | `{ sessionId, messageId, partId }` | Part removed |
 | `permission.asked` | `{ id, sessionId, permission, tool?, patterns? }` | Permission requested |
 | `permission.replied` | `{ sessionId, requestId, reply }` | Permission answered |
+
+Ordering: `message.updated` is emitted before any `message.part.updated` for the same
+message. Parts are emitted in the order received from the SDK stream.
 
 ---
 
@@ -371,7 +390,7 @@ Event types match OpenCode SDK v2:
 7. On SDK completion:
    a. Update assistant MessageInfo with tokens, cost
    b. Emit message.updated with completedAt
-   c. Save session.resumeId for future resume
+   c. Save session.resumeId for future resume (only on successful completion)
    d. Emit session.status { type: 'idle' }
 8. Return final { info, parts } to HTTP response
 ```
@@ -390,7 +409,7 @@ Event types match OpenCode SDK v2:
 
 ```
 1. Frontend calls POST /session/:id/abort
-2. Server sends SIGTERM to SDK subprocess (or uses SDK abort API)
+2. Server aborts the active SDK stream via AbortController (no subprocess)
 3. Emit session.status { type: 'idle' }
 4. Return { ok: true }
 ```
@@ -401,8 +420,8 @@ Event types match OpenCode SDK v2:
 1. SDK emits permission request via hook
 2. Server auto-approves based on permissionMode:
    - 'bypassPermissions': approve all
-   - 'acceptEdits': approve reads/writes, prompt for others
-   - 'default': prompt for all (but auto-approve for MVP)
+   - 'acceptEdits': approve reads/writes, auto-approve others for MVP
+   - 'default': auto-approve all for MVP
 3. Emit permission.asked and permission.replied events for UI awareness
 4. Return approval to SDK hook
 ```
@@ -443,6 +462,7 @@ SDK handles retry internally. Server exposes retry events:
 
 ```typescript
 enum ErrorCode {
+  INVALID_REQUEST = 'INVALID_REQUEST',
   SESSION_NOT_FOUND = 'SESSION_NOT_FOUND',
   SESSION_BUSY = 'SESSION_BUSY',
   SDK_ERROR = 'SDK_ERROR',
@@ -457,6 +477,17 @@ interface ApiError {
   details?: unknown;
 }
 ```
+
+### HTTP Error Responses
+
+All error responses return a JSON body with `ApiError`.
+
+| Status | Code | Example |
+|--------|------|---------|
+| 400 | INVALID_REQUEST | `{ "code":"INVALID_REQUEST","message":"Invalid request" }` |
+| 404 | SESSION_NOT_FOUND | `{ "code":"SESSION_NOT_FOUND","message":"Session not found" }` |
+| 409 | SESSION_BUSY | `{ "code":"SESSION_BUSY","message":"Session is busy" }` |
+| 500 | SDK_ERROR | `{ "code":"SDK_ERROR","message":"Claude SDK error" }` |
 
 ### Recovery Strategy
 
@@ -520,7 +551,8 @@ Not required for MVP. Future: OpenTelemetry integration.
 
 ### Compatibility Notes
 
-- Server implements OpenCode SDK v2 API shape exactly.
+- Server implements OpenCode SDK v2 API shape exactly (event schema as consumed by
+  ThreadView in Maestro).
 - Existing frontend ThreadView should work without changes.
 - claudecode_adapter.rs may need minor updates to match event shapes.
 

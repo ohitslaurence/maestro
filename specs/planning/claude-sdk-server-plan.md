@@ -44,13 +44,13 @@ The daemon is already running on the VPS. Use the deploy script to restart after
 
 Set up the Bun/TypeScript project structure and basic HTTP server.
 
-- [ ] Create `daemon/claude-sdk-server/` directory structure (§2)
-- [ ] Initialize Bun project with `package.json`, `tsconfig.json`
-- [ ] Add dependencies: `@anthropic-ai/claude-agent-sdk`, `hono`, `uuid`
-- [ ] Implement `src/index.ts` with Hono HTTP server on configurable port
-- [ ] Add health check endpoint `GET /health`
-- [ ] Add JSON logging utility (§7)
-- [ ] Add graceful shutdown handler (SIGTERM, SIGINT)
+- [x] Create `daemon/claude-sdk-server/` directory structure (§2)
+- [x] Initialize Bun project with `package.json`, `tsconfig.json`
+- [x] Add dependencies: `@anthropic-ai/claude-code`, `hono`, `uuid`
+- [x] Implement `src/index.ts` with Hono HTTP server on configurable port
+- [x] Add health check endpoint `GET /health`
+- [x] Add JSON logging utility (§7)
+- [x] Add graceful shutdown handler (SIGTERM, SIGINT)
 
 **Verification:**
 ```bash
@@ -70,6 +70,7 @@ Implement session management endpoints without SDK integration.
 - [ ] Implement `POST /session` endpoint (§4)
 - [ ] Implement `GET /session/:id` endpoint (§4)
 - [ ] Add file persistence: save sessions to `~/.maestro/claude/{workspace_id}/` (§3)
+- [ ] Persist messages + parts and maintain `index.json` (§3)
 - [ ] Handle errors: SESSION_NOT_FOUND (404), validation errors (400) (§6)
 
 **Verification:**
@@ -146,9 +147,9 @@ Map SDK messages to OpenCode-compatible events.
 - [ ] Map `thinking` content blocks to ReasoningPart
 - [ ] Map `tool_use` to ToolPart with status transitions (pending → running)
 - [ ] Map `tool_result` to ToolPart completion (status: completed/failed)
+- [ ] Emit `step-start` part at turn start and `step-finish` at turn end (§3)
 - [ ] Emit `message.updated` for message lifecycle (§4)
 - [ ] Emit `message.part.updated` for each part/delta (§4)
-- [ ] Emit `step-finish` part with usage/cost at turn end (§3)
 
 **Verification:**
 ```bash
@@ -159,13 +160,28 @@ Map SDK messages to OpenCode-compatible events.
 
 ---
 
+## Phase 5.5: Contract Validation
+
+Validate the SSE event envelope + ordering against OpenCode expectations.
+
+- [ ] Capture a golden SSE transcript for a simple prompt and a tool prompt
+- [ ] Verify payload shape is `{ type, properties }` and ordering matches spec
+- [ ] Confirm `message.updated` precedes `message.part.updated` for same message
+
+**Verification:**
+```bash
+# Manually inspect SSE transcript against expected OpenCode sequence
+```
+
+---
+
 ## Phase 6: Abort Support
 
 Implement execution cancellation.
 
 - [ ] Track active SDK execution per session
 - [ ] Implement `POST /session/:id/abort` endpoint (§4, §5 Abort Flow)
-- [ ] Signal SDK to stop (SIGTERM or SDK abort API)
+- [ ] Abort active SDK stream via AbortController
 - [ ] Emit `session.status { type: 'idle' }` after abort
 - [ ] Handle abort of non-busy session gracefully (no-op)
 
@@ -223,6 +239,7 @@ Add daemon RPC commands to spawn/stop servers.
 - [ ] Implement `stop_claude_server(workspace_id)`
 - [ ] Implement `list_claude_servers()` → server info list
 - [ ] Set `ANTHROPIC_API_KEY` env var on spawn
+- [ ] Pass `workspace_id` + `directory` to server (args or env) for session metadata
 - [ ] Capture server stderr for daemon logs
 - [ ] Implement auto-restart once on crash (§10)
 
@@ -305,8 +322,8 @@ Connect frontend to Claude SDK sessions.
 ## Verification Checklist
 
 ### Implementation Checklist
-- [ ] `cd daemon/claude-sdk-server && bun run src/index.ts` starts without error
-- [ ] `curl http://localhost:9100/health` returns `{ "ok": true }`
+- [x] `cd daemon/claude-sdk-server && bun run src/index.ts` starts without error
+- [x] `curl http://localhost:9100/health` returns `{ "ok": true }`
 - [ ] `curl http://localhost:9100/session` returns `[]`
 - [ ] Session CRUD works via curl
 - [ ] SSE events stream correctly
