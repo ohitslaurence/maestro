@@ -96,6 +96,78 @@ pub async fn write_json<T: Serialize>(path: &Path, value: &T) -> StorageResult<(
     write_atomic(path, &bytes).await
 }
 
+// ============================================================================
+// Tauri Commands (§4)
+// ============================================================================
+
+/// List all thread summaries (§4: list_threads).
+///
+/// Returns summaries sorted by updatedAt descending, with pinned threads first.
+#[tauri::command]
+pub async fn list_threads(app: tauri::AppHandle) -> Result<Vec<ThreadSummary>, String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let store = ThreadStore::new(root);
+    store.list().await.map_err(|e| e.to_string())
+}
+
+/// Load a thread by ID (§4: load_thread).
+#[tauri::command]
+pub async fn load_thread(app: tauri::AppHandle, thread_id: String) -> Result<ThreadRecord, String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let store = ThreadStore::new(root);
+    store.load(&thread_id).await.map_err(|e| e.to_string())
+}
+
+/// Save a thread (§4: save_thread).
+///
+/// Creates the thread if it doesn't exist, updates if it does.
+/// Returns the saved record with updated timestamp.
+#[tauri::command]
+pub async fn save_thread(
+    app: tauri::AppHandle,
+    thread: ThreadRecord,
+) -> Result<ThreadRecord, String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let store = ThreadStore::new(root);
+    store.save(thread).await.map_err(|e| e.to_string())
+}
+
+/// Create a new session (§4: create_session).
+///
+/// Generates a new session ID and persists the record.
+#[tauri::command]
+pub async fn create_session(
+    app: tauri::AppHandle,
+    thread_id: String,
+    workspace_root: String,
+    agent_config: SessionAgentConfig,
+) -> Result<SessionRecord, String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let store = SessionStore::new(root);
+    store
+        .create(&thread_id, &workspace_root, agent_config)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// Mark a session as ended (§4: mark_session_ended).
+///
+/// Updates the session status and sets the ended_at timestamp.
+#[tauri::command]
+pub async fn mark_session_ended(
+    app: tauri::AppHandle,
+    session_id: String,
+    status: SessionStatus,
+) -> Result<(), String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let store = SessionStore::new(root);
+    store
+        .mark_ended(&session_id, status)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

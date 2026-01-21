@@ -14,13 +14,13 @@ Exit Criteria
 
 ## Phase 2: Thread + session CRUD
 - [x] Implement `ThreadStore` and `SessionStore` (See §2, §4)
-- [ ] Add `list_threads`, `load_thread`, `save_thread` Tauri commands (See §4)
-- [ ] Add `create_session`, `mark_session_ended` commands (See §4)
+- [x] Add `list_threads`, `load_thread`, `save_thread` Tauri commands (See §4)
+- [x] Add `create_session`, `mark_session_ended` commands (See §4)
 
 Exit Criteria
-- [ ] Saving a thread creates `threads/<id>.json` (See §3, §5)
-- [ ] Listing threads returns persisted metadata (See §4)
-- [ ] Session record written on create and updated on end (See §4)
+- [x] Saving a thread creates `threads/<id>.json` (See §3, §5)
+- [x] Listing threads returns persisted metadata (See §4)
+- [x] Session record written on create and updated on end (See §4)
 
 ## Phase 3: Message storage
 - [ ] Implement append-only `MessageStore` (See §3)
