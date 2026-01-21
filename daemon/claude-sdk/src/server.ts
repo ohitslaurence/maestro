@@ -17,6 +17,8 @@ type PartInput = {
   [key: string]: unknown;
 };
 
+type PermissionReply = "once" | "always" | "reject";
+
 type SessionRecord = {
   id: string;
   slug: string;
@@ -77,6 +79,15 @@ class EventHub {
 
 const sessions = new Map<string, SessionState>();
 const events = new EventHub();
+const pendingPermissionRequests = new Map<
+  string,
+  {
+    sessionID: string;
+    resolve: (reply: PermissionReply) => void;
+    abort: () => void;
+  }
+>();
+const persistentPermissionReplies = new Map<string, Set<string>>();
 
 const statements = initStorage();
 loadSessions();
@@ -104,6 +115,11 @@ function slugify(input: string) {
 
 function createId(prefix: string) {
   return `${prefix}_${crypto.randomUUID()}`;
+}
+
+function permissionKey(permission: string, patterns: string[]) {
+  const normalizedPatterns = [...patterns].map((pattern) => pattern.trim()).filter(Boolean).sort();
+  return `${permission}:${normalizedPatterns.join(",")}`;
 }
 
 function buildSessionRecord(title?: string, parentID?: string): SessionRecord {
@@ -337,6 +353,42 @@ function serializeJson(value: unknown) {
     return null;
   }
   return JSON.stringify(value);
+}
+
+function getPersistentPermissionReplies(sessionID: string) {
+  const existing = persistentPermissionReplies.get(sessionID);
+  if (existing) {
+    return existing;
+  }
+  const created = new Set<string>();
+  persistentPermissionReplies.set(sessionID, created);
+  return created;
+}
+
+function waitForPermissionReply(options: {
+  requestID: string;
+  sessionID: string;
+  abortSignal: AbortSignal;
+}) {
+  if (options.abortSignal.aborted) {
+    return Promise.resolve<PermissionReply>("reject");
+  }
+
+  return new Promise<PermissionReply>((resolve) => {
+    const abort = () => {
+      pendingPermissionRequests.delete(options.requestID);
+      resolve("reject");
+    };
+    options.abortSignal.addEventListener("abort", abort, { once: true });
+    pendingPermissionRequests.set(options.requestID, {
+      sessionID: options.sessionID,
+      resolve: (reply) => {
+        options.abortSignal.removeEventListener("abort", abort);
+        resolve(reply);
+      },
+      abort,
+    });
+  });
 }
 
 function persistUserMessage(info: ReturnType<typeof buildUserMessageInfo>) {
@@ -863,6 +915,7 @@ async function runClaudeQuery(options: {
     input: unknown;
     timeStart: number;
   }>();
+  const toolStartEmitted = new Set<string>();
   const subagentParts = new Map<string, { id: string; name: string; timeStart: number }>();
 
   const emitPartUpdated = (part: Record<string, unknown>, delta?: string) => {
@@ -882,6 +935,14 @@ async function runClaudeQuery(options: {
     timeStart: number;
     timeEnd?: number;
   }) => {
+    if (!options.timeEnd && toolStartEmitted.has(options.id)) {
+      return;
+    }
+
+    if (!options.timeEnd) {
+      toolStartEmitted.add(options.id);
+    }
+
     persistToolPart({
       id: options.id,
       sessionID: session.record.id,
@@ -940,7 +1001,12 @@ async function runClaudeQuery(options: {
                 const toolInput = input?.tool_input ?? input?.toolInput ?? input?.input ?? null;
                 const callId = toolUseId ?? createId("tool");
                 const timeStarted = Date.now();
-                const partId = toolParts.get(callId)?.id ?? createId("part");
+                const existing = toolParts.get(callId);
+                if (existing) {
+                  return {};
+                }
+
+                const partId = createId("part");
 
                 toolParts.set(callId, {
                   id: partId,
@@ -1040,18 +1106,75 @@ async function runClaudeQuery(options: {
           PermissionRequest: [
             {
               hooks: [async (input: any) => {
+                const permissionName =
+                  typeof input?.permission === "string"
+                    ? input.permission
+                    : typeof input?.permissionName === "string"
+                      ? input.permissionName
+                      : typeof input === "string"
+                        ? input
+                        : "permission";
+                const patterns = Array.isArray(input?.patterns)
+                  ? input.patterns.filter((pattern: unknown) => typeof pattern === "string")
+                  : [];
+                const always = Array.isArray(input?.always)
+                  ? input.always.filter((pattern: unknown) => typeof pattern === "string")
+                  : [];
+                const metadata = input?.metadata && typeof input.metadata === "object" ? input.metadata : {};
+                const callID =
+                  typeof input?.tool_use_id === "string"
+                    ? input.tool_use_id
+                    : typeof input?.toolUseId === "string"
+                      ? input.toolUseId
+                      : typeof input?.tool?.callID === "string"
+                        ? input.tool.callID
+                        : undefined;
+                const replyKey = permissionKey(permissionName, patterns);
+                const sessionPermissions = getPersistentPermissionReplies(session.record.id);
+
+                if (sessionPermissions.has(replyKey)) {
+                  return {
+                    hookSpecificOutput: {
+                      hookEventName: "PermissionRequest",
+                      permissionDecision: "allow",
+                    },
+                  };
+                }
+
                 const requestId = createId("permission");
                 emitEvent("permission.asked", {
                   id: requestId,
                   sessionID: session.record.id,
-                  permission: input?.permission ?? input?.permissionName ?? input,
-                  patterns: input?.patterns ?? [],
-                  metadata: input?.metadata ?? null,
-                  always: Boolean(input?.always),
-                  tool: input?.tool_name ?? input?.tool ?? null,
+                  permission: permissionName,
+                  patterns,
+                  metadata,
+                  always,
+                  tool: callID ? { messageID: assistantMessageInfo.id, callID } : undefined,
                 });
 
-                return {};
+                const reply = await waitForPermissionReply({
+                  requestID: requestId,
+                  sessionID: session.record.id,
+                  abortSignal: abortController.signal,
+                });
+
+                pendingPermissionRequests.delete(requestId);
+                if (reply === "always") {
+                  sessionPermissions.add(replyKey);
+                }
+
+                emitEvent("permission.replied", {
+                  sessionID: session.record.id,
+                  requestID: requestId,
+                  reply,
+                });
+
+                return {
+                  hookSpecificOutput: {
+                    hookEventName: "PermissionRequest",
+                    permissionDecision: reply === "reject" ? "deny" : "allow",
+                  },
+                };
               }],
             },
           ],
@@ -1268,50 +1391,6 @@ async function runClaudeQuery(options: {
               tool_use_id?: unknown;
               content?: unknown;
             };
-
-            if (typedBlock.type === "tool_use") {
-              const callId = typeof typedBlock.id === "string" ? typedBlock.id : createId("tool");
-              if (!toolParts.has(callId)) {
-                const toolName = typeof typedBlock.name === "string" ? typedBlock.name : "tool";
-                const toolInput = typedBlock.input ?? null;
-                const timeStarted = Date.now();
-                const toolPartId = createId("part");
-                toolParts.set(callId, {
-                  id: toolPartId,
-                  tool: toolName,
-                  input: toolInput,
-                  timeStart: timeStarted,
-                });
-                emitToolPart({
-                  id: toolPartId,
-                  tool: toolName,
-                  callId,
-                  input: toolInput,
-                  timeStart: timeStarted,
-                });
-              }
-            }
-
-            if (typedBlock.type === "tool_result") {
-              const callId = typeof typedBlock.tool_use_id === "string" ? typedBlock.tool_use_id : null;
-              if (!callId) {
-                continue;
-              }
-              const existing = toolParts.get(callId);
-              const timeFinished = Date.now();
-              const partId = existing?.id ?? createId("part");
-              const toolName = existing?.tool ?? "tool";
-              const toolInput = existing?.input ?? null;
-              emitToolPart({
-                id: partId,
-                tool: toolName,
-                callId,
-                input: toolInput,
-                output: typedBlock.content ?? null,
-                timeStart: existing?.timeStart ?? timeFinished,
-                timeEnd: timeFinished,
-              });
-            }
           }
         }
       }
@@ -1484,6 +1563,35 @@ const server = Bun.serve({
 
       emitSessionStatus(session.record.id, "idle");
       return jsonResponse({ ok: true });
+    }
+
+    if (pathname.startsWith("/permission/") && pathname.endsWith("/reply") && req.method === "POST") {
+      const parts = pathname.split("/");
+      const requestID = parts[2];
+      if (!requestID) {
+        return jsonResponse({ error: "invalid_request" }, 400);
+      }
+
+      let body: { reply?: PermissionReply; message?: string } | null = null;
+      try {
+        body = (await req.json()) as typeof body;
+      } catch {
+        body = null;
+      }
+
+      const reply = body?.reply;
+      if (reply !== "once" && reply !== "always" && reply !== "reject") {
+        return jsonResponse({ error: "invalid_request" }, 400);
+      }
+
+      const pending = pendingPermissionRequests.get(requestID);
+      if (!pending) {
+        return jsonResponse({ error: "permission_not_found" }, 404);
+      }
+
+      pendingPermissionRequests.delete(requestID);
+      pending.resolve(reply);
+      return jsonResponse(true);
     }
 
     return jsonResponse({ error: "not_found" }, 404);
