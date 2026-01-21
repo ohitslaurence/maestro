@@ -163,6 +163,9 @@ main() {
     exit 1
   fi
 
+  # Set up signal handlers for clean exit (spec §2.1, §5.2)
+  setup_signal_traps
+
   # Show run header (spec §4)
   show_run_header "$spec_path" "$plan_path" "$iterations"
 

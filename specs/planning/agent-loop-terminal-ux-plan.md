@@ -13,7 +13,7 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 
 ## Phase 3: Summary + fallback modes
 - [x] Add run summary table, completion screen with optional wait, and summary JSON output (see 3.2, 4.1, 7).
-- [ ] Implement signal traps and `--no-gum` fallback for non-TTY runs (see 5.2, 6).
+- [x] Implement signal traps and `--no-gum` fallback for non-TTY runs (see 5.2, 6).
 
 ## Files to Create
 - `scripts/lib/agent-loop-ui.sh`

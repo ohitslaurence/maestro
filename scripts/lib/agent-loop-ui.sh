@@ -456,3 +456,55 @@ show_completion_screen() {
     read -r
   fi
 }
+
+# -----------------------------------------------------------------------------
+# Signal handling (spec §2.1, §5.2)
+# -----------------------------------------------------------------------------
+
+# Track whether cleanup has already run to avoid double-execution
+declare -g CLEANUP_DONE=false
+
+# Store signal info for proper exit codes
+declare -g SIGNAL_RECEIVED=""
+
+cleanup_on_signal() {
+  local signal="${1:-EXIT}"
+
+  # Avoid running cleanup twice
+  if [[ "$CLEANUP_DONE" == "true" ]]; then
+    return
+  fi
+  CLEANUP_DONE=true
+
+  SIGNAL_RECEIVED="$signal"
+
+  # Only print summary if we've started running (RUN_START_MS is set)
+  if [[ -n "$RUN_START_MS" ]]; then
+    case "$signal" in
+      INT)
+        ui_log "INFO" "Received SIGINT - interrupting"
+        show_run_summary "interrupted_sigint" "130"
+        ;;
+      TERM)
+        ui_log "INFO" "Received SIGTERM - terminating"
+        show_run_summary "interrupted_sigterm" "143"
+        ;;
+      EXIT)
+        # Normal exit - don't show summary here, it's handled by main flow
+        ;;
+    esac
+  fi
+
+  # Restore terminal state if gum was being used
+  if [[ "$GUM_ENABLED" == "true" ]]; then
+    # Reset any gum spinner or style that might be in progress
+    tput cnorm 2>/dev/null || true  # Show cursor
+    printf '\033[0m' 2>/dev/null || true  # Reset colors
+  fi
+}
+
+setup_signal_traps() {
+  trap 'cleanup_on_signal INT; exit 130' INT
+  trap 'cleanup_on_signal TERM; exit 143' TERM
+  trap 'cleanup_on_signal EXIT' EXIT
+}
