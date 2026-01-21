@@ -13,7 +13,7 @@ Exit Criteria
 - [x] Storage root resolves under `app_data_dir()` (See §2)
 
 ## Phase 2: Thread + session CRUD
-- [ ] Implement `ThreadStore` and `SessionStore` (See §2, §4)
+- [x] Implement `ThreadStore` and `SessionStore` (See §2, §4)
 - [ ] Add `list_threads`, `load_thread`, `save_thread` Tauri commands (See §4)
 - [ ] Add `create_session`, `mark_session_ended` commands (See §4)
 

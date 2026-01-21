@@ -21,8 +21,13 @@ pub mod session_store;
 pub mod thread_store;
 
 pub use message_store::MessageStore;
-pub use session_store::SessionStore;
-pub use thread_store::ThreadStore;
+pub use session_store::{
+    SessionAgentConfig, SessionRecord, SessionStatus, SessionStore, SessionToolRun,
+    SessionToolRunStatus, SESSION_SCHEMA_VERSION,
+};
+pub use thread_store::{
+    ThreadMetadata, ThreadPrivacy, ThreadRecord, ThreadStore, ThreadSummary, THREAD_SCHEMA_VERSION,
+};
 
 /// Error types for storage operations (§6).
 #[derive(Debug, thiserror::Error)]
