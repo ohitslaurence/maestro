@@ -125,7 +125,11 @@ Reference: [<topic>.md](../<topic>.md)
 - `path/to/file`
 
 ## Verification Checklist
-- [ ] `command` or manual verification step
+### Implementation Checklist
+- [ ] `command` or agent-verifiable step
+
+### Manual QA Checklist (do not mark—human verification)
+- [ ]? Manual QA item
 
 ## Notes (Optional)
 - Phase X: <note about blockers, edge cases, or follow-ups>
@@ -139,6 +143,7 @@ Notes:
 - If a phase depends on another, state it explicitly in the phase heading or first task (use "[BLOCKED by: Phase X]").
 - Do not mark a phase complete until all verification steps tied to that phase pass. If the checklist is shared,
   call out which steps apply to each phase in the phase notes.
+- Manual QA items must use `[ ]?` and should not be checked by agents. Human reviewers own these items.
 - Mark completed work with `[x]` and add notes about commits or tests.
 - Required sections: Files to Create, Files to Modify, Verification Checklist (use `None` if empty).
 - Add Notes only when there is information useful to future phases (blockers, risks, edge cases, follow-ups).
