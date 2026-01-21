@@ -6,7 +6,7 @@
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::io::{AsyncBufReadExt, AsyncRead, BufReader};
 use tokio::process::Command;
 use tokio::time::timeout;
 
@@ -155,7 +155,7 @@ pub async fn execute_hook(
     }
 
     // Spawn the process
-    let child = match cmd.spawn() {
+    let mut child = match cmd.spawn() {
         Ok(child) => child,
         Err(e) => {
             return HookExecutionResult {
@@ -170,7 +170,7 @@ pub async fn execute_hook(
 
     // Wait for completion with timeout
     let timeout_duration = Duration::from_millis(config.timeout_ms);
-    let result = timeout(timeout_duration, wait_for_hook(child)).await;
+    let result = timeout(timeout_duration, wait_for_hook(&mut child)).await;
 
     match result {
         Ok(Ok((output, exit_code))) => {
@@ -202,6 +202,8 @@ pub async fn execute_hook(
         },
         Err(_) => {
             // Timeout elapsed
+            let _ = child.kill().await;
+            let _ = child.wait().await;
             HookExecutionResult {
                 status: HookRunStatus::Failed,
                 output: String::new(),
@@ -217,46 +219,25 @@ pub async fn execute_hook(
 }
 
 /// Wait for hook process to complete and capture output.
-async fn wait_for_hook(
-    mut child: tokio::process::Child,
-) -> Result<(String, i32), String> {
-    let stdout = child
-        .stdout
-        .take()
-        .ok_or("Failed to capture stdout")?;
-    let stderr = child
-        .stderr
-        .take()
-        .ok_or("Failed to capture stderr")?;
+async fn wait_for_hook(child: &mut tokio::process::Child) -> Result<(String, i32), String> {
+    let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
+    let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
 
-    // Capture stdout and stderr concurrently
-    let stdout_handle = tokio::spawn(async move {
-        let mut reader = BufReader::new(stdout).lines();
-        let mut lines = Vec::new();
-        while let Ok(Some(line)) = reader.next_line().await {
-            lines.push(line);
-        }
-        lines
-    });
+    let stdout_future = read_lines(stdout);
+    let stderr_future = read_lines(stderr);
+    let status_future = async {
+        child
+            .wait()
+            .await
+            .map_err(|e| format!("Failed to wait for process: {}", e))
+    };
 
-    let stderr_handle = tokio::spawn(async move {
-        let mut reader = BufReader::new(stderr).lines();
-        let mut lines = Vec::new();
-        while let Ok(Some(line)) = reader.next_line().await {
-            lines.push(format!("[stderr] {}", line));
-        }
-        lines
-    });
+    let (stdout_lines, stderr_lines, status) =
+        tokio::try_join!(stdout_future, stderr_future, status_future)?;
 
-    // Wait for both readers to complete
-    let stdout_lines = stdout_handle
-        .await
-        .map_err(|e| format!("Failed to join stdout task: {}", e))?;
-    let stderr_lines = stderr_handle
-        .await
-        .map_err(|e| format!("Failed to join stderr task: {}", e))?;
+    let stderr_lines: Vec<String> =
+        stderr_lines.into_iter().map(|line| format!("[stderr] {}", line)).collect();
 
-    // Combine output
     let mut output = stdout_lines.join("\n");
     if !stderr_lines.is_empty() {
         if !output.is_empty() {
@@ -265,14 +246,23 @@ async fn wait_for_hook(
         output.push_str(&stderr_lines.join("\n"));
     }
 
-    // Wait for process to exit
-    let status = child
-        .wait()
-        .await
-        .map_err(|e| format!("Failed to wait for process: {}", e))?;
-
     let exit_code = status.code().unwrap_or(-1);
     Ok((output, exit_code))
+}
+
+async fn read_lines<R: AsyncRead + Unpin>(reader: R) -> Result<Vec<String>, String> {
+    let mut lines_reader = BufReader::new(reader).lines();
+    let mut lines = Vec::new();
+
+    while let Some(line) = lines_reader
+        .next_line()
+        .await
+        .map_err(|e| format!("Failed to read output: {}", e))?
+    {
+        lines.push(line);
+    }
+
+    Ok(lines)
 }
 
 /// Get allowlisted environment variables for hook execution.
