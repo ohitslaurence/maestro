@@ -6,6 +6,6 @@
     "serve": "bun run src/server.ts"
   },
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "^0.0.16"
+    "@anthropic-ai/claude-agent-sdk": "0.2.12"
   }
 }
