@@ -23,12 +23,12 @@ Exit Criteria
 - [x] Session record written on create and updated on end (See §4)
 
 ## Phase 3: Message storage
-- [ ] Implement append-only `MessageStore` (See §3)
+- [x] Implement append-only `MessageStore` (See §3)
 - [ ] Wire `append_message` command to session loop (See §4, §5)
 
 Exit Criteria
-- [ ] Message file created under `messages/<thread_id>/` (See §3)
-- [ ] Appending preserves order when reloaded (See §5)
+- [x] Message file created under `messages/<thread_id>/` (See §3)
+- [x] Appending preserves order when reloaded (See §5)
 
 ## Phase 4: Index and resume
 - [ ] Build `IndexStore` and automatic rebuild when missing (See §5)

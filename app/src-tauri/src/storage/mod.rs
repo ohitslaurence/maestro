@@ -20,7 +20,7 @@ pub mod message_store;
 pub mod session_store;
 pub mod thread_store;
 
-pub use message_store::MessageStore;
+pub use message_store::{MessageRecord, MessageRole, MessageStore, MESSAGE_SCHEMA_VERSION};
 pub use session_store::{
     SessionAgentConfig, SessionRecord, SessionStatus, SessionStore, SessionToolRun,
     SessionToolRunStatus, SESSION_SCHEMA_VERSION,
@@ -166,6 +166,30 @@ pub async fn mark_session_ended(
         .await
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+/// Append a message to the conversation log (§4: append_message).
+///
+/// Creates the message file under `messages/<thread_id>/<message_id>.json`.
+#[tauri::command]
+pub async fn append_message(app: tauri::AppHandle, message: MessageRecord) -> Result<(), String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let store = MessageStore::new(root);
+    store.append(message).await.map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+/// List all messages for a thread (§4).
+///
+/// Returns messages sorted by createdAt ascending.
+#[tauri::command]
+pub async fn list_messages(
+    app: tauri::AppHandle,
+    thread_id: String,
+) -> Result<Vec<MessageRecord>, String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let store = MessageStore::new(root);
+    store.list_by_thread(&thread_id).await.map_err(|e| e.to_string())
 }
 
 #[cfg(test)]
