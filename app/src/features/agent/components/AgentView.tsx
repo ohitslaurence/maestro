@@ -31,11 +31,13 @@ export function AgentView({ workspaceId }: AgentViewProps) {
         />
       </div>
       <div className="agent-view__content">
-        {provider === "open_code" ? (
+        {/* Keep both views mounted to preserve state on provider switch */}
+        <div style={{ display: provider === "open_code" ? "contents" : "none" }}>
           <ThreadView workspaceId={workspaceId} />
-        ) : (
+        </div>
+        <div style={{ display: provider === "claude_code" ? "contents" : "none" }}>
           <ClaudeThreadView workspaceId={workspaceId} />
-        )}
+        </div>
       </div>
     </div>
   );

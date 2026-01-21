@@ -380,8 +380,25 @@ export function useOpenCodeThread({
       newItems.push(...convertMessageToItems(msg));
     }
 
+    // Collect user message texts for deduplication
+    const userMessageTexts = new Set(
+      newItems
+        .filter((item): item is OpenCodeThreadItem & { kind: "user-message" } =>
+          item.kind === "user-message"
+        )
+        .map(item => item.text.trim().toLowerCase())
+    );
+
+    // Filter out assistant messages that exactly match user messages (likely echo/duplication)
+    const dedupedItems = newItems.filter(item => {
+      if (item.kind !== "assistant-message") return true;
+      const normalizedText = item.text.trim().toLowerCase();
+      // Skip assistant messages that are exact matches of user messages
+      return !userMessageTexts.has(normalizedText);
+    });
+
     // Apply normalization and bounds
-    const preparedItems = prepareThreadItems(newItems);
+    const preparedItems = prepareThreadItems(dedupedItems);
 
     // Preserve references for unchanged items to help React reconciliation
     const prevItems = prevItemsRef.current;
