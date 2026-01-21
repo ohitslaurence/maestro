@@ -64,6 +64,7 @@ pub const METHOD_OPENCODE_SESSION_LIST: &str = "opencode_session_list";
 pub const METHOD_OPENCODE_SESSION_CREATE: &str = "opencode_session_create";
 pub const METHOD_OPENCODE_SESSION_PROMPT: &str = "opencode_session_prompt";
 pub const METHOD_OPENCODE_SESSION_ABORT: &str = "opencode_session_abort";
+pub const METHOD_OPENCODE_SESSION_MESSAGES: &str = "opencode_session_messages";
 
 // --- Request params ---
 
@@ -142,6 +143,12 @@ pub struct OpenCodeSessionPromptParams {
 
 #[derive(Debug, Serialize)]
 pub struct OpenCodeSessionAbortParams {
+    pub workspace_id: String,
+    pub session_id: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OpenCodeSessionMessagesParams {
     pub workspace_id: String,
     pub session_id: String,
 }

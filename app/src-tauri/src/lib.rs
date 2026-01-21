@@ -73,6 +73,7 @@ pub fn run() {
             daemon::opencode_session_create,
             daemon::opencode_session_prompt,
             daemon::opencode_session_abort,
+            daemon::opencode_session_messages,
             // Local-only commands (agent harness - future)
             sessions::spawn_session,
             sessions::stop_session,

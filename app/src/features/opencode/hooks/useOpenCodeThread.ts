@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { OpenCodeThreadItem, OpenCodeThreadStatus } from "../../../types";
 import { subscribeOpenCodeEvents } from "../../../services/events";
+import { opencodeSessionMessages } from "../../../services/tauri";
 
 // === Constants for normalization ===
 const MAX_ITEMS_PER_THREAD = 500;
@@ -68,6 +69,34 @@ type TrackedMessage = {
   time?: { created?: number; completed?: number };
   userText?: string; // For user messages
   parts: Map<string, PartData>; // For assistant messages
+};
+
+// API response types for history loading
+type ApiPartResponse = {
+  id: string;
+  type: string;
+  text?: string;
+  content?: string;
+  tool?: string;
+  callID?: string;
+  title?: string;
+  input?: Record<string, unknown>;
+  output?: string;
+  error?: string;
+  hash?: string;
+  files?: string[];
+  cost?: number;
+  tokens?: { input: number; output: number; reasoning: number; cache?: { read: number; write: number } };
+  time?: { start?: number; end?: number };
+};
+
+type ApiMessageResponse = {
+  id: string;
+  sessionID?: string;
+  role: "user" | "assistant";
+  time?: { created?: number; completed?: number };
+  summary?: { title?: string };
+  parts?: ApiPartResponse[];
 };
 
 // === Streaming text merge ===
@@ -298,9 +327,25 @@ export function useOpenCodeThread({
   const rebuildItems = useCallback(() => {
     const messages = Array.from(messagesRef.current.values());
 
-    // Convert pending user messages to tracked messages (if not already in messages)
+    // De-dupe pending messages against server messages by content + timestamp
+    // A pending message is considered a duplicate if there's a server message with:
+    // 1. Same role (user)
+    // 2. Same text content (or close match)
+    // 3. Timestamp within a reasonable window (30 seconds)
+    const DEDUPE_WINDOW_MS = 30_000;
+    const isPendingDuplicate = (pending: PendingUserMessage) => {
+      return messages.some(m => {
+        if (m.role !== "user") return false;
+        if (m.userText !== pending.text) return false;
+        const serverTime = m.time?.created ?? 0;
+        const timeDiff = Math.abs(serverTime - pending.timestamp);
+        return timeDiff < DEDUPE_WINDOW_MS;
+      });
+    };
+
+    // Convert pending user messages to tracked messages (if not duplicated)
     const pendingAsTracked: TrackedMessage[] = pendingUserMessages
-      .filter(p => !messages.some(m => m.id === p.id))
+      .filter(p => !isPendingDuplicate(p))
       .map(p => ({
         id: p.id,
         sessionID: sessionId || "",
@@ -366,6 +411,64 @@ export function useOpenCodeThread({
     sessionId: null,
   });
 
+  // Load history from API and merge into tracked messages
+  const loadHistory = useCallback(async (wsId: string, sessId: string) => {
+    try {
+      const response = await opencodeSessionMessages(wsId, sessId) as ApiMessageResponse[];
+      if (!Array.isArray(response)) return;
+
+      for (const apiMsg of response) {
+        // Skip if we already have this message with parts
+        const existing = messagesRef.current.get(apiMsg.id);
+        if (existing && existing.parts.size > 0) continue;
+
+        const tracked: TrackedMessage = {
+          id: apiMsg.id,
+          sessionID: apiMsg.sessionID || sessId,
+          role: apiMsg.role,
+          time: apiMsg.time,
+          userText: apiMsg.role === "user" ? apiMsg.summary?.title : undefined,
+          parts: new Map(),
+        };
+
+        // Convert API parts to tracked parts
+        if (apiMsg.parts && Array.isArray(apiMsg.parts)) {
+          for (const apiPart of apiMsg.parts) {
+            const order = apiPart.time?.start ?? apiMsg.time?.created ?? Date.now();
+            const arrivalIndex = partArrivalCounterRef.current++;
+            tracked.parts.set(apiPart.id, {
+              id: apiPart.id,
+              messageID: apiMsg.id,
+              sessionID: apiMsg.sessionID || sessId,
+              type: apiPart.type,
+              text: apiPart.text,
+              content: apiPart.content,
+              tool: apiPart.tool,
+              callID: apiPart.callID,
+              title: apiPart.title,
+              input: apiPart.input,
+              output: apiPart.output,
+              error: apiPart.error,
+              hash: apiPart.hash,
+              files: apiPart.files,
+              cost: apiPart.cost,
+              tokens: apiPart.tokens,
+              time: apiPart.time,
+              order,
+              arrivalIndex,
+            });
+          }
+        }
+
+        messagesRef.current.set(apiMsg.id, tracked);
+      }
+
+      rebuildItemsRef.current();
+    } catch (err) {
+      console.warn("[useOpenCodeThread] Failed to load history:", err);
+    }
+  }, []);
+
   // Reset state only when switching between different sessions (not null → session)
   useEffect(() => {
     const prev = prevSessionRef.current;
@@ -386,7 +489,12 @@ export function useOpenCodeThread({
       setLastDurationMs(null);
       setError(undefined);
     }
-  }, [workspaceId, sessionId]);
+
+    // Load history for new session
+    if (workspaceId && sessionId) {
+      loadHistory(workspaceId, sessionId);
+    }
+  }, [workspaceId, sessionId, loadHistory]);
 
   // Keep rebuildItems in a ref to avoid subscription churn
   const rebuildItemsRef = useRef(rebuildItems);

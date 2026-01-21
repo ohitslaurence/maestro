@@ -48,6 +48,10 @@ const requestedPort = Number(process.env.MAESTRO_PORT ?? "0") || 0;
 const defaultModelId = process.env.MAESTRO_CLAUDE_MODEL ?? "claude-sonnet-4-20250514";
 const defaultAgent = process.env.MAESTRO_CLAUDE_AGENT ?? "claude-sdk";
 const defaultProvider = "anthropic";
+const defaultPermissionMode = process.env.MAESTRO_CLAUDE_PERMISSION_MODE;
+const defaultSettingSources = ["user", "project", "local"] as const;
+const defaultSystemPrompt = { type: "preset", preset: "claude_code" } as const;
+const defaultTools = { type: "preset", preset: "claude_code" } as const;
 const dataRoot = process.env.MAESTRO_DATA_DIR ?? path.join(homedir(), ".maestro");
 const claudeRoot = path.join(dataRoot, "claude");
 const workspaceHash = createHash("sha256").update(workspaceDir).digest("hex");
@@ -233,6 +237,9 @@ function initStorage() {
         error_payload=excluded.error_payload
     `),
     updateMessageCompletion: db.prepare("UPDATE messages SET completed_at=? WHERE id=?"),
+    updateMessageUsage: db.prepare(
+      "UPDATE messages SET cost=?, tokens_input=?, tokens_output=?, tokens_reasoning=?, tokens_cache_read=?, tokens_cache_write=? WHERE id=?"
+    ),
     updateMessageError: db.prepare(
       "UPDATE messages SET error_name=?, error_payload=?, completed_at=? WHERE id=?"
     ),
@@ -386,6 +393,60 @@ function persistAssistantMessage(info: ReturnType<typeof buildAssistantMessageIn
   );
 }
 
+function asNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function extractUsageFromResult(message: unknown) {
+  const typedMessage = message as {
+    usage?: Record<string, unknown>;
+    modelUsage?: Record<string, Record<string, unknown>>;
+    total_cost_usd?: unknown;
+    cost?: unknown;
+  };
+
+  let inputTokens = 0;
+  let outputTokens = 0;
+  let reasoningTokens = 0;
+  let cacheRead = 0;
+  let cacheWrite = 0;
+
+  if (typedMessage?.usage && typeof typedMessage.usage === "object") {
+    const usage = typedMessage.usage as Record<string, unknown>;
+    inputTokens = asNumber(usage.input_tokens ?? usage.inputTokens);
+    outputTokens = asNumber(usage.output_tokens ?? usage.outputTokens);
+    reasoningTokens = asNumber(usage.reasoning_tokens ?? usage.reasoningTokens);
+    cacheRead = asNumber(usage.cache_read_input_tokens ?? usage.cacheReadInputTokens);
+    cacheWrite = asNumber(usage.cache_creation_input_tokens ?? usage.cacheWriteInputTokens);
+  } else if (typedMessage?.modelUsage && typeof typedMessage.modelUsage === "object") {
+    for (const entry of Object.values(typedMessage.modelUsage)) {
+      if (!entry || typeof entry !== "object") {
+        continue;
+      }
+      inputTokens += asNumber(entry.input_tokens ?? entry.inputTokens);
+      outputTokens += asNumber(entry.output_tokens ?? entry.outputTokens);
+      reasoningTokens += asNumber(entry.reasoning_tokens ?? entry.reasoningTokens);
+      cacheRead += asNumber(entry.cache_read_input_tokens ?? entry.cacheReadInputTokens);
+      cacheWrite += asNumber(entry.cache_creation_input_tokens ?? entry.cacheWriteInputTokens);
+    }
+  }
+
+  const cost = asNumber(typedMessage?.total_cost_usd ?? typedMessage?.cost);
+
+  return {
+    cost,
+    tokens: {
+      input: inputTokens,
+      output: outputTokens,
+      reasoning: reasoningTokens,
+      cache: {
+        read: cacheRead,
+        write: cacheWrite,
+      },
+    },
+  };
+}
+
 function persistTextPart(options: {
   id: string;
   sessionID: string;
@@ -415,6 +476,115 @@ function persistTextPart(options: {
   );
 }
 
+function persistReasoningPart(options: {
+  id: string;
+  sessionID: string;
+  messageID: string;
+  text: string;
+  timeStart: number;
+  timeEnd: number;
+}) {
+  statements.insertPart.run(
+    options.id,
+    options.sessionID,
+    options.messageID,
+    "reasoning",
+    options.text,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    options.timeStart,
+    options.timeEnd,
+    null,
+  );
+}
+
+function serializePartValue(value: unknown) {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+function persistToolPart(options: {
+  id: string;
+  sessionID: string;
+  messageID: string;
+  tool: string;
+  callId: string | null;
+  input: unknown;
+  output?: unknown;
+  error?: unknown;
+  timeStart: number;
+  timeEnd?: number;
+}) {
+  statements.insertPart.run(
+    options.id,
+    options.sessionID,
+    options.messageID,
+    "tool",
+    null,
+    null,
+    options.tool,
+    options.callId,
+    null,
+    serializePartValue(options.input),
+    serializePartValue(options.output),
+    serializePartValue(options.error),
+    null,
+    null,
+    options.timeStart,
+    options.timeEnd ?? null,
+    null,
+  );
+}
+
+function persistSimplePart(options: {
+  id: string;
+  sessionID: string;
+  messageID: string;
+  type: string;
+  title?: string | null;
+  metadata?: unknown;
+  timeStart: number;
+  timeEnd?: number;
+}) {
+  statements.insertPart.run(
+    options.id,
+    options.sessionID,
+    options.messageID,
+    options.type,
+    null,
+    null,
+    null,
+    null,
+    options.title ?? null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    options.timeStart,
+    options.timeEnd ?? null,
+    serializePartValue(options.metadata),
+  );
+}
+
 function extractTextFromBlocks(blocks: unknown) {
   let fullText = "";
   let deltaText = "";
@@ -435,6 +605,39 @@ function extractTextFromBlocks(blocks: unknown) {
     }
 
     if (typedBlock.type === "text_delta" && typeof typedBlock.text === "string") {
+      deltaText += typedBlock.text;
+      hasDelta = true;
+    }
+  }
+
+  return { fullText, deltaText, hasDelta };
+}
+
+function extractReasoningFromBlocks(blocks: unknown) {
+  let fullText = "";
+  let deltaText = "";
+  let hasDelta = false;
+
+  if (!Array.isArray(blocks)) {
+    return { fullText, deltaText, hasDelta };
+  }
+
+  for (const block of blocks) {
+    if (!block || typeof block !== "object") {
+      continue;
+    }
+
+    const typedBlock = block as { type?: unknown; thinking?: unknown; text?: unknown };
+    if (typedBlock.type === "thinking" && typeof typedBlock.thinking === "string") {
+      fullText += typedBlock.thinking;
+    }
+
+    if (typedBlock.type === "thinking_delta" && typeof typedBlock.thinking === "string") {
+      deltaText += typedBlock.thinking;
+      hasDelta = true;
+    }
+
+    if (typedBlock.type === "thinking_delta" && typeof typedBlock.text === "string") {
       deltaText += typedBlock.text;
       hasDelta = true;
     }
@@ -651,8 +854,65 @@ async function runClaudeQuery(options: {
 }) {
   const { session, prompt, modelID, agent, assistantMessageInfo, abortController } = options;
   let assistantText = "";
+  let reasoningText = "";
   const partId = session.activeRun?.assistantPartId ?? createId("part");
   const timeStart = session.activeRun?.startedAt ?? Date.now();
+  const toolParts = new Map<string, {
+    id: string;
+    tool: string;
+    input: unknown;
+    timeStart: number;
+  }>();
+  const subagentParts = new Map<string, { id: string; name: string; timeStart: number }>();
+
+  const emitPartUpdated = (part: Record<string, unknown>, delta?: string) => {
+    emitEvent("message.part.updated", {
+      part,
+      ...(delta ? { delta } : {}),
+    });
+  };
+
+  const emitToolPart = (options: {
+    id: string;
+    tool: string;
+    callId: string | null;
+    input: unknown;
+    output?: unknown;
+    error?: unknown;
+    timeStart: number;
+    timeEnd?: number;
+  }) => {
+    persistToolPart({
+      id: options.id,
+      sessionID: session.record.id,
+      messageID: assistantMessageInfo.id,
+      tool: options.tool,
+      callId: options.callId,
+      input: options.input,
+      output: options.output,
+      error: options.error,
+      timeStart: options.timeStart,
+      timeEnd: options.timeEnd,
+    });
+
+    const time: Record<string, number> = { start: options.timeStart };
+    if (options.timeEnd) {
+      time.end = options.timeEnd;
+    }
+
+    emitPartUpdated({
+      id: options.id,
+      sessionID: session.record.id,
+      messageID: assistantMessageInfo.id,
+      type: "tool",
+      tool: options.tool,
+      callID: options.callId ?? undefined,
+      input: options.input,
+      output: options.output,
+      error: options.error,
+      time,
+    });
+  };
 
   try {
     const stream = query({
@@ -663,6 +923,235 @@ async function runClaudeQuery(options: {
         abortController,
         model: modelID,
         includePartialMessages: true,
+        settingSources: [...defaultSettingSources],
+        systemPrompt: defaultSystemPrompt,
+        tools: defaultTools,
+        ...(defaultPermissionMode ? { permissionMode: defaultPermissionMode } : {}),
+        hooks: {
+          PreToolUse: [
+            {
+              hooks: [async (input: any, toolUseId: string | undefined) => {
+                const toolName =
+                  typeof input?.tool_name === "string"
+                    ? input.tool_name
+                    : typeof input?.toolName === "string"
+                      ? input.toolName
+                      : "tool";
+                const toolInput = input?.tool_input ?? input?.toolInput ?? input?.input ?? null;
+                const callId = toolUseId ?? createId("tool");
+                const timeStarted = Date.now();
+                const partId = toolParts.get(callId)?.id ?? createId("part");
+
+                toolParts.set(callId, {
+                  id: partId,
+                  tool: toolName,
+                  input: toolInput,
+                  timeStart: timeStarted,
+                });
+
+                emitToolPart({
+                  id: partId,
+                  tool: toolName,
+                  callId,
+                  input: toolInput,
+                  timeStart: timeStarted,
+                });
+
+                return {};
+              }],
+            },
+          ],
+          PostToolUse: [
+            {
+              hooks: [async (input: any, toolUseId: string | undefined) => {
+                const toolName =
+                  typeof input?.tool_name === "string"
+                    ? input.tool_name
+                    : typeof input?.toolName === "string"
+                      ? input.toolName
+                      : "tool";
+                const toolInput = input?.tool_input ?? input?.toolInput ?? input?.input ?? null;
+                const toolOutput = input?.tool_response ?? input?.toolOutput ?? input?.output ?? null;
+                const callId = toolUseId ?? createId("tool");
+                const timeFinished = Date.now();
+                const existing = toolParts.get(callId);
+                const partId = existing?.id ?? createId("part");
+                const timeStart = existing?.timeStart ?? timeFinished;
+
+                toolParts.set(callId, {
+                  id: partId,
+                  tool: toolName,
+                  input: existing?.input ?? toolInput,
+                  timeStart,
+                });
+
+                emitToolPart({
+                  id: partId,
+                  tool: toolName,
+                  callId,
+                  input: existing?.input ?? toolInput,
+                  output: toolOutput,
+                  timeStart,
+                  timeEnd: timeFinished,
+                });
+
+                return {};
+              }],
+            },
+          ],
+          PostToolUseFailure: [
+            {
+              hooks: [async (input: any, toolUseId: string | undefined) => {
+                const toolName =
+                  typeof input?.tool_name === "string"
+                    ? input.tool_name
+                    : typeof input?.toolName === "string"
+                      ? input.toolName
+                      : "tool";
+                const toolInput = input?.tool_input ?? input?.toolInput ?? input?.input ?? null;
+                const error = input?.error ?? input?.message ?? input ?? "Tool failed";
+                const callId = toolUseId ?? createId("tool");
+                const timeFinished = Date.now();
+                const existing = toolParts.get(callId);
+                const partId = existing?.id ?? createId("part");
+                const timeStart = existing?.timeStart ?? timeFinished;
+
+                toolParts.set(callId, {
+                  id: partId,
+                  tool: toolName,
+                  input: existing?.input ?? toolInput,
+                  timeStart,
+                });
+
+                emitToolPart({
+                  id: partId,
+                  tool: toolName,
+                  callId,
+                  input: existing?.input ?? toolInput,
+                  error,
+                  timeStart,
+                  timeEnd: timeFinished,
+                });
+
+                return {};
+              }],
+            },
+          ],
+          PermissionRequest: [
+            {
+              hooks: [async (input: any) => {
+                const requestId = createId("permission");
+                emitEvent("permission.asked", {
+                  id: requestId,
+                  sessionID: session.record.id,
+                  permission: input?.permission ?? input?.permissionName ?? input,
+                  patterns: input?.patterns ?? [],
+                  metadata: input?.metadata ?? null,
+                  always: Boolean(input?.always),
+                  tool: input?.tool_name ?? input?.tool ?? null,
+                });
+
+                return {};
+              }],
+            },
+          ],
+          SessionStart: [
+            {
+              hooks: [async () => {
+                emitSessionStatus(session.record.id, "busy");
+                return {};
+              }],
+            },
+          ],
+          SubagentStart: [
+            {
+              hooks: [async (input: any) => {
+                const name = input?.agent ?? input?.name ?? "subagent";
+                const agentId = input?.id ?? createId("subagent");
+                const partId = createId("part");
+                const timeStarted = Date.now();
+                subagentParts.set(agentId, { id: partId, name, timeStart: timeStarted });
+                persistSimplePart({
+                  id: partId,
+                  sessionID: session.record.id,
+                  messageID: assistantMessageInfo.id,
+                  type: "agent",
+                  title: name,
+                  metadata: { agentId },
+                  timeStart: timeStarted,
+                });
+                emitPartUpdated({
+                  id: partId,
+                  sessionID: session.record.id,
+                  messageID: assistantMessageInfo.id,
+                  type: "agent",
+                  name,
+                  time: { start: timeStarted },
+                });
+                return {};
+              }],
+            },
+          ],
+          SubagentStop: [
+            {
+              hooks: [async (input: any, id: string | undefined) => {
+                const agentId = id ?? input?.id ?? null;
+                const timeFinished = Date.now();
+                const existing = agentId ? subagentParts.get(agentId) : undefined;
+                const partId = existing?.id ?? createId("part");
+                const name = existing?.name ?? "subagent";
+                if (agentId) {
+                  subagentParts.delete(agentId);
+                }
+                persistSimplePart({
+                  id: partId,
+                  sessionID: session.record.id,
+                  messageID: assistantMessageInfo.id,
+                  type: "agent",
+                  title: name,
+                  metadata: { agentId },
+                  timeStart: existing?.timeStart ?? timeFinished,
+                  timeEnd: timeFinished,
+                });
+                emitPartUpdated({
+                  id: partId,
+                  sessionID: session.record.id,
+                  messageID: assistantMessageInfo.id,
+                  type: "agent",
+                  name,
+                  time: { start: existing?.timeStart ?? timeFinished, end: timeFinished },
+                });
+                return {};
+              }],
+            },
+          ],
+          PreCompact: [
+            {
+              hooks: [async () => {
+                const partId = createId("part");
+                const now = Date.now();
+                persistSimplePart({
+                  id: partId,
+                  sessionID: session.record.id,
+                  messageID: assistantMessageInfo.id,
+                  type: "compaction",
+                  title: "Compacting context",
+                  timeStart: now,
+                  timeEnd: now,
+                });
+                emitPartUpdated({
+                  id: partId,
+                  sessionID: session.record.id,
+                  messageID: assistantMessageInfo.id,
+                  type: "compaction",
+                  title: "Compacting context",
+                  time: { start: now, end: now },
+                });
+                return {};
+              }],
+            },
+          ],
+        },
       },
     });
 
@@ -670,8 +1159,11 @@ async function runClaudeQuery(options: {
       if (message.type === "assistant") {
         const blocks = message.message?.content;
         const { fullText, deltaText, hasDelta } = extractTextFromBlocks(blocks);
+        const reasoning = extractReasoningFromBlocks(blocks);
         let nextText = assistantText;
         let delta = "";
+        let nextReasoning = reasoningText;
+        let reasoningDelta = "";
 
         if (hasDelta && deltaText) {
           delta = deltaText;
@@ -690,6 +1182,22 @@ async function runClaudeQuery(options: {
         } else if (typeof (message as { delta?: { text?: unknown } }).delta?.text === "string") {
           delta = (message as { delta?: { text?: string } }).delta?.text ?? "";
           nextText = assistantText + delta;
+        }
+
+        if (reasoning.hasDelta && reasoning.deltaText) {
+          reasoningDelta = reasoning.deltaText;
+          nextReasoning = reasoningText + reasoning.deltaText;
+        } else if (reasoning.fullText) {
+          if (reasoningText && reasoning.fullText.startsWith(reasoningText)) {
+            reasoningDelta = reasoning.fullText.slice(reasoningText.length);
+            nextReasoning = reasoning.fullText;
+          } else if (reasoningText) {
+            reasoningDelta = reasoning.fullText;
+            nextReasoning = reasoningText + reasoning.fullText;
+          } else {
+            reasoningDelta = reasoning.fullText;
+            nextReasoning = reasoning.fullText;
+          }
         }
 
         if (delta) {
@@ -718,12 +1226,113 @@ async function runClaudeQuery(options: {
             delta,
           });
         }
+
+        if (reasoningDelta) {
+          reasoningText = nextReasoning;
+          const timeEnd = Date.now();
+          const reasoningPartId = `${partId}-reasoning`;
+          persistReasoningPart({
+            id: reasoningPartId,
+            sessionID: session.record.id,
+            messageID: assistantMessageInfo.id,
+            text: reasoningText,
+            timeStart,
+            timeEnd,
+          });
+          emitPartUpdated(
+            {
+              id: reasoningPartId,
+              sessionID: session.record.id,
+              messageID: assistantMessageInfo.id,
+              type: "reasoning",
+              text: reasoningText,
+              time: {
+                start: timeStart,
+                end: timeEnd,
+              },
+            },
+            reasoningDelta,
+          );
+        }
+
+        if (Array.isArray(blocks)) {
+          for (const block of blocks) {
+            if (!block || typeof block !== "object") {
+              continue;
+            }
+            const typedBlock = block as {
+              type?: unknown;
+              id?: unknown;
+              name?: unknown;
+              input?: unknown;
+              tool_use_id?: unknown;
+              content?: unknown;
+            };
+
+            if (typedBlock.type === "tool_use") {
+              const callId = typeof typedBlock.id === "string" ? typedBlock.id : createId("tool");
+              if (!toolParts.has(callId)) {
+                const toolName = typeof typedBlock.name === "string" ? typedBlock.name : "tool";
+                const toolInput = typedBlock.input ?? null;
+                const timeStarted = Date.now();
+                const toolPartId = createId("part");
+                toolParts.set(callId, {
+                  id: toolPartId,
+                  tool: toolName,
+                  input: toolInput,
+                  timeStart: timeStarted,
+                });
+                emitToolPart({
+                  id: toolPartId,
+                  tool: toolName,
+                  callId,
+                  input: toolInput,
+                  timeStart: timeStarted,
+                });
+              }
+            }
+
+            if (typedBlock.type === "tool_result") {
+              const callId = typeof typedBlock.tool_use_id === "string" ? typedBlock.tool_use_id : null;
+              if (!callId) {
+                continue;
+              }
+              const existing = toolParts.get(callId);
+              const timeFinished = Date.now();
+              const partId = existing?.id ?? createId("part");
+              const toolName = existing?.tool ?? "tool";
+              const toolInput = existing?.input ?? null;
+              emitToolPart({
+                id: partId,
+                tool: toolName,
+                callId,
+                input: toolInput,
+                output: typedBlock.content ?? null,
+                timeStart: existing?.timeStart ?? timeFinished,
+                timeEnd: timeFinished,
+              });
+            }
+          }
+        }
       }
 
       if (message.type === "result") {
         if (message.session_id) {
           session.resumeId = message.session_id;
         }
+
+        const usage = extractUsageFromResult(message);
+        statements.updateMessageUsage.run(
+          usage.cost,
+          usage.tokens.input,
+          usage.tokens.output,
+          usage.tokens.reasoning,
+          usage.tokens.cache.read,
+          usage.tokens.cache.write,
+          assistantMessageInfo.id,
+        );
+        assistantMessageInfo.cost = usage.cost;
+        assistantMessageInfo.tokens = usage.tokens;
       }
     }
 

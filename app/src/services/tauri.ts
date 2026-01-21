@@ -237,3 +237,14 @@ export async function opencodeSessionAbort(
     sessionId,
   });
 }
+
+/** Get messages for an OpenCode session (history rehydration) */
+export async function opencodeSessionMessages(
+  workspaceId: string,
+  sessionId: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("opencode_session_messages", {
+    workspaceId,
+    sessionId,
+  });
+}

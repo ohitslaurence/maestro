@@ -34,6 +34,7 @@ pub async fn dispatch(
         METHOD_OPENCODE_SESSION_CREATE => opencode::handle_session_create(request, &state).await,
         METHOD_OPENCODE_SESSION_PROMPT => opencode::handle_session_prompt(request, &state).await,
         METHOD_OPENCODE_SESSION_ABORT => opencode::handle_session_abort(request, &state).await,
+        METHOD_OPENCODE_SESSION_MESSAGES => opencode::handle_session_messages(request, &state).await,
         METHOD_CLAUDE_SDK_CONNECT_WORKSPACE => claude_sdk::handle_connect(request, state).await,
         METHOD_CLAUDE_SDK_DISCONNECT_WORKSPACE => claude_sdk::handle_disconnect(request, &state).await,
         METHOD_CLAUDE_SDK_STATUS => claude_sdk::handle_status(request, &state).await,

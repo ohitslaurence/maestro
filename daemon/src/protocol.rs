@@ -72,6 +72,7 @@ pub const METHOD_OPENCODE_SESSION_LIST: &str = "opencode_session_list";
 pub const METHOD_OPENCODE_SESSION_CREATE: &str = "opencode_session_create";
 pub const METHOD_OPENCODE_SESSION_PROMPT: &str = "opencode_session_prompt";
 pub const METHOD_OPENCODE_SESSION_ABORT: &str = "opencode_session_abort";
+pub const METHOD_OPENCODE_SESSION_MESSAGES: &str = "opencode_session_messages";
 
 // Claude SDK method names
 pub const METHOD_CLAUDE_SDK_CONNECT_WORKSPACE: &str = "claude_sdk_connect_workspace";
@@ -164,6 +165,12 @@ pub struct OpenCodeSessionPromptParams {
 
 #[derive(Debug, Deserialize)]
 pub struct OpenCodeSessionAbortParams {
+    pub workspace_id: String,
+    pub session_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OpenCodeSessionMessagesParams {
     pub workspace_id: String,
     pub session_id: String,
 }

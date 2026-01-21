@@ -277,3 +277,40 @@ pub async fn handle_session_abort(request: &Request, state: &DaemonState) -> Str
         }
     }
 }
+
+/// Handle opencode_session_messages request - fetch session history
+pub async fn handle_session_messages(request: &Request, state: &DaemonState) -> String {
+    let params: OpenCodeSessionMessagesParams =
+        match serde_json::from_value(request.params.clone()) {
+            Ok(p) => p,
+            Err(e) => {
+                return serde_json::to_string(&ErrorResponse::new(
+                    request.id,
+                    INVALID_PARAMS,
+                    format!("Invalid params: {e}"),
+                ))
+                .unwrap();
+            }
+        };
+
+    let base_url = match state.get_opencode_server(&params.workspace_id).await {
+        Some(url) => url,
+        None => {
+            return serde_json::to_string(&ErrorResponse::new(
+                request.id,
+                OPENCODE_NOT_CONNECTED,
+                "OpenCode not connected for this workspace",
+            ))
+            .unwrap();
+        }
+    };
+
+    let path = format!("/session/{}/message", params.session_id);
+
+    match OpenCodeRegistry::proxy_get(&base_url, &path, None).await {
+        Ok(result) => serde_json::to_string(&SuccessResponse::new(request.id, result)).unwrap(),
+        Err(e) => {
+            serde_json::to_string(&ErrorResponse::new(request.id, OPENCODE_ERROR, e)).unwrap()
+        }
+    }
+}

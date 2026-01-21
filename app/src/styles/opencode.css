@@ -479,3 +479,121 @@
   background: var(--status-error);
   color: white;
 }
+
+/* -----------------------------------------------------------------------------
+   Markdown Rendering
+   ----------------------------------------------------------------------------- */
+
+.oc-md {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.oc-md__p {
+  margin: 0 0 var(--space-2) 0;
+}
+
+.oc-md__p:last-child {
+  margin-bottom: 0;
+}
+
+.oc-md__inline-code {
+  padding: 0.125em 0.375em;
+  background: var(--surface-panel);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--accent-secondary);
+}
+
+.oc-md__code-block {
+  margin: var(--space-2) 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-panel);
+}
+
+.oc-md__code-lang {
+  padding: var(--space-1) var(--space-3);
+  background: var(--surface-card);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.oc-md__pre {
+  margin: 0;
+  padding: var(--space-3);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.oc-md__pre code {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.oc-md__link {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.oc-md__link:hover {
+  text-decoration: underline;
+}
+
+.oc-md__ul,
+.oc-md__ol {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-5);
+}
+
+.oc-md__ul {
+  list-style-type: disc;
+}
+
+.oc-md__ol {
+  list-style-type: decimal;
+}
+
+.oc-md__li {
+  margin: var(--space-1) 0;
+}
+
+.oc-md__blockquote {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--border-default);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.oc-md__h1,
+.oc-md__h2,
+.oc-md__h3,
+.oc-md__h4 {
+  margin: var(--space-3) 0 var(--space-2) 0;
+  font-weight: var(--font-semibold);
+  line-height: 1.3;
+}
+
+.oc-md__h1 {
+  font-size: var(--text-xl);
+}
+
+.oc-md__h2 {
+  font-size: var(--text-lg);
+}
+
+.oc-md__h3 {
+  font-size: var(--text-base);
+}
+
+.oc-md__h4 {
+  font-size: var(--text-sm);
+}

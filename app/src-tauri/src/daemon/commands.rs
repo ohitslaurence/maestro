@@ -310,5 +310,22 @@ pub async fn opencode_session_abort(
         .await
 }
 
+#[tauri::command]
+pub async fn opencode_session_messages(
+    workspace_id: String,
+    session_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_OPENCODE_SESSION_MESSAGES,
+            Some(OpenCodeSessionMessagesParams {
+                workspace_id,
+                session_id,
+            }),
+        )
+        .await
+}
+
 // Helper to use serde_json::Value without importing in this file
 use serde_json::Value;
