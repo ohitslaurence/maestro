@@ -16,6 +16,7 @@
 # Parse a spec file and output: spec_path|plan_path|title|spec_status|last_updated
 parse_spec_entry() {
   local spec_file="$1"
+  local plans_root="${plans_dir:-specs/planning}"
   local spec_title=""
   local spec_status=""
   local spec_last_updated=""
@@ -39,7 +40,7 @@ parse_spec_entry() {
   # Compute plan path
   local spec_base
   spec_base=$(basename "$spec_file" .md)
-  local computed_plan_path="specs/planning/${spec_base}-plan.md"
+  local computed_plan_path="$plans_root/${spec_base}-plan.md"
 
   # Output as pipe-delimited record
   printf '%s|%s|%s|%s|%s\n' "$spec_file" "$computed_plan_path" "$spec_title" "$spec_status" "$spec_last_updated"
@@ -48,6 +49,7 @@ parse_spec_entry() {
 # Discover all spec files and return sorted entries
 # Output format: spec_path|plan_path|title|status|last_updated (one per line)
 discover_specs() {
+  local spec_root="${specs_dir:-specs}"
   local specs=()
   local entries=()
 
@@ -58,7 +60,7 @@ discover_specs() {
       continue
     fi
     specs+=("$spec_file")
-  done < <(find specs -maxdepth 1 -name '*.md' -type f -print0 2>/dev/null)
+  done < <(find "$spec_root" -maxdepth 1 -name '*.md' -type f -print0 2>/dev/null)
 
   if [[ ${#specs[@]} -eq 0 ]]; then
     return 1
@@ -132,6 +134,7 @@ spec_picker() {
   PICKED_SPEC_PATH=""
   # shellcheck disable=SC2034
   PICKED_PLAN_PATH=""
+  local spec_root="${specs_dir:-specs}"
 
   if ! check_gum; then
     ui_log "ERROR" "gum is required for spec picker"
@@ -145,7 +148,7 @@ spec_picker() {
   done < <(discover_specs)
 
   if [[ ${#entries[@]} -eq 0 ]]; then
-    ui_log "ERROR" "No specs found in specs/"
+    ui_log "ERROR" "No specs found in $spec_root"
     return 1
   fi
 

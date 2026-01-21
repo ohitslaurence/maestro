@@ -18,6 +18,8 @@ source "$SCRIPT_DIR/lib/spec-picker.sh"
 # -----------------------------------------------------------------------------
 spec_path=""
 plan_path=""
+specs_dir="specs"
+plans_dir="specs/planning"
 iterations=50
 log_dir="logs/agent-loop"
 no_gum=false
@@ -25,7 +27,9 @@ summary_json=true
 no_wait=false
 model="opus"
 postmortem=true
-completion_mode="exact"
+completion_mode="trailing"
+config_path="${AGENT_LOOP_CONFIG:-}"
+init_config=false
 
 # -----------------------------------------------------------------------------
 # Usage
@@ -36,23 +40,229 @@ Usage: $(basename "$0") [spec-path] [plan-path] [options]
 
 Arguments:
   spec-path           Path to spec file (optional if gum available)
-  plan-path           Path to plan file (defaults to specs/planning/<spec>-plan.md)
+  plan-path           Path to plan file (defaults to <plans_dir>/<spec>-plan.md)
 
 Options:
   --iterations <n>    Maximum loop iterations (default: 50)
   --log-dir <path>    Base log directory (default: logs/agent-loop)
   --model <name>      Claude model or alias (default: opus)
-  --completion-mode   Completion detection (exact|fuzzy, default: exact)
+  --completion-mode   Completion detection (exact|trailing, default: trailing)
   --no-postmortem     Disable automatic post-run analysis
   --no-gum            Disable gum UI, use plain output
   --summary-json      Write summary JSON at end of run (default: enabled)
   --no-wait           Skip completion screen wait
+  --config <path>     Load config file (overrides project config)
+  --init-config       Create a project config file and exit
+
+Config (project local):
+  .agent-loop/config (resolved from git root or current directory)
+
+Config keys:
+  specs_dir, plans_dir, log_dir, model, iterations, completion_mode,
+  postmortem, summary_json, no_wait, no_gum
 
 Examples:
   $(basename "$0") specs/my-feature.md
   $(basename "$0") specs/my-feature.md specs/planning/my-feature-plan.md --iterations 10
   $(basename "$0") --no-gum specs/my-feature.md
+  $(basename "$0") --init-config
 EOF
+}
+
+# -----------------------------------------------------------------------------
+# Config loading (safe key=value parsing)
+# -----------------------------------------------------------------------------
+trim_whitespace() {
+  local value="$1"
+  value="${value#"${value%%[!$' \t\n\r']*}"}"
+  value="${value%"${value##*[!$' \t\n\r']}"}"
+  printf '%s' "$value"
+}
+
+normalize_bool() {
+  case "$1" in
+    true|false)
+      printf '%s' "$1"
+      ;;
+    1|yes|y|on)
+      printf 'true'
+      ;;
+    0|no|n|off)
+      printf 'false'
+      ;;
+    *)
+      printf '%s' "$1"
+      ;;
+  esac
+}
+
+apply_config_value() {
+  local key="$1"
+  local value="$2"
+  local source="$3"
+
+  case "$key" in
+    specs_dir)
+      specs_dir="$value"
+      ;;
+    plans_dir)
+      plans_dir="$value"
+      ;;
+    log_dir)
+      log_dir="$value"
+      ;;
+    model)
+      model="$value"
+      ;;
+    iterations)
+      iterations="$value"
+      ;;
+    completion_mode)
+      completion_mode="$value"
+      ;;
+    postmortem|summary_json|no_wait|no_gum)
+      local normalized
+      normalized=$(normalize_bool "$value")
+      if [[ "$normalized" != "true" && "$normalized" != "false" ]]; then
+        echo "Warning: invalid boolean for $key in $source: $value" >&2
+        return 0
+      fi
+      case "$key" in
+        postmortem) postmortem="$normalized" ;;
+        summary_json) summary_json="$normalized" ;;
+        no_wait) no_wait="$normalized" ;;
+        no_gum) no_gum="$normalized" ;;
+      esac
+      ;;
+    *)
+      echo "Warning: unknown config key in $source: $key" >&2
+      ;;
+  esac
+}
+
+load_config_file() {
+  local path="$1"
+  local required="${2:-false}"
+
+  if [[ ! -f "$path" ]]; then
+    if [[ "$required" == "true" ]]; then
+      echo "Error: Config file not found: $path" >&2
+      exit 1
+    fi
+    return 0
+  fi
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    local trimmed
+    trimmed=$(trim_whitespace "$line")
+    if [[ -z "$trimmed" || "$trimmed" == \#* ]]; then
+      continue
+    fi
+
+    if [[ "$trimmed" != *"="* ]]; then
+      echo "Warning: invalid config line in $path: $line" >&2
+      continue
+    fi
+
+    local key="${trimmed%%=*}"
+    local value="${trimmed#*=}"
+    key=$(trim_whitespace "$key")
+    value=$(trim_whitespace "$value")
+
+    if [[ -z "$key" ]]; then
+      echo "Warning: invalid config line in $path: $line" >&2
+      continue
+    fi
+
+    if [[ ${#value} -ge 2 && ${value:0:1} == '"' && ${value: -1} == '"' ]]; then
+      value="${value:1:-1}"
+    elif [[ ${#value} -ge 2 && ${value:0:1} == "'" && ${value: -1} == "'" ]]; then
+      value="${value:1:-1}"
+    fi
+
+    apply_config_value "$key" "$value" "$path"
+  done < "$path"
+}
+
+resolve_project_root() {
+  if command -v git >/dev/null 2>&1; then
+    local git_root
+    git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
+    if [[ -n "$git_root" ]]; then
+      printf '%s' "$git_root"
+      return 0
+    fi
+  fi
+  pwd
+}
+
+load_config() {
+  local project_root
+  project_root=$(resolve_project_root)
+  local project_path="$project_root/.agent-loop/config"
+
+  load_config_file "$project_path"
+
+  if [[ -n "$config_path" ]]; then
+    load_config_file "$config_path" "true"
+  fi
+}
+
+find_early_flags() {
+  local args=("$@")
+  for ((i=0; i<${#args[@]}; i++)); do
+    case "${args[$i]}" in
+      --config)
+        if (( i + 1 < ${#args[@]} )); then
+          config_path="${args[$((i + 1))]}"
+        fi
+        ;;
+      --config=*)
+        config_path="${args[$i]#--config=}"
+        ;;
+      --init-config)
+        init_config=true
+        ;;
+    esac
+  done
+}
+
+init_config_file() {
+  local project_root
+  project_root=$(resolve_project_root)
+  local target_path
+  if [[ -n "$config_path" ]]; then
+    target_path="$config_path"
+  else
+    target_path="$project_root/.agent-loop/config"
+  fi
+
+  if [[ -e "$target_path" ]]; then
+    echo "Error: Config already exists: $target_path" >&2
+    return 1
+  fi
+
+  local target_dir
+  target_dir=$(dirname "$target_path")
+  if ! mkdir -p "$target_dir"; then
+    echo "Error: Cannot create config directory: $target_dir" >&2
+    return 1
+  fi
+
+  cat > "$target_path" <<EOF
+specs_dir="$specs_dir"
+plans_dir="$plans_dir"
+log_dir="$log_dir"
+model="$model"
+iterations=$iterations
+completion_mode="$completion_mode"
+postmortem=$postmortem
+summary_json=$summary_json
+no_wait=$no_wait
+no_gum=$no_gum
+EOF
+
+  printf 'Created config at %s\n' "$target_path"
 }
 
 # -----------------------------------------------------------------------------
@@ -72,6 +282,18 @@ parse_args() {
       --model)
         model="$2"
         shift 2
+        ;;
+      --config)
+        config_path="$2"
+        shift 2
+        ;;
+      --config=*)
+        config_path="${1#--config=}"
+        shift
+        ;;
+      --init-config)
+        init_config=true
+        shift
         ;;
       --completion-mode)
         completion_mode="$2"
@@ -146,11 +368,23 @@ validate_inputs() {
     fi
   fi
 
+  if [[ ! -f "$spec_path" && -n "$specs_dir" ]]; then
+    local candidate_spec="$specs_dir/$spec_path"
+    if [[ -f "$candidate_spec" ]]; then
+      spec_path="$candidate_spec"
+    fi
+  fi
+
   # Derive plan path if not provided
   if [[ -z "$plan_path" ]]; then
     local spec_base
     spec_base=$(basename "$spec_path")
-    plan_path="specs/planning/${spec_base%.md}-plan.md"
+    plan_path="$plans_dir/${spec_base%.md}-plan.md"
+  elif [[ ! -f "$plan_path" && -n "$plans_dir" ]]; then
+    local candidate_plan="$plans_dir/$(basename "$plan_path")"
+    if [[ -f "$candidate_plan" ]]; then
+      plan_path="$candidate_plan"
+    fi
   fi
 
   # Validate spec exists
@@ -172,8 +406,8 @@ validate_inputs() {
     exit 1
   fi
 
-  if [[ "$completion_mode" != "exact" && "$completion_mode" != "fuzzy" ]]; then
-    echo "Error: --completion-mode must be 'exact' or 'fuzzy'" >&2
+  if [[ "$completion_mode" != "exact" && "$completion_mode" != "trailing" ]]; then
+    echo "Error: --completion-mode must be 'exact' or 'trailing'" >&2
     exit 1
   fi
 }
@@ -213,6 +447,13 @@ run_postmortem() {
 # Main
 # -----------------------------------------------------------------------------
 main() {
+  find_early_flags "$@"
+  if [[ "$init_config" == "true" ]]; then
+    init_config_file
+    exit $?
+  fi
+
+  load_config
   parse_args "$@"
   validate_inputs
 
@@ -261,8 +502,10 @@ Spec alignment guardrails (must follow):
   document the assumption in your response, and limit changes to what is unambiguous.
 
 Response format (strict):
-- ALL tasks complete: output exactly `<promise>COMPLETE</promise>` — no other text, whitespace, or
-  commentary.
+- ALL tasks complete: end your response with a line containing only `<promise>COMPLETE</promise>`.
+  You may include a brief sentence before it, but the final non-empty line must be the token.
+- If the loop continues after you emit COMPLETE, your output was malformed. Remove all extra text
+  and ensure the final line is exactly `<promise>COMPLETE</promise>`.
 - Tasks remain: output ONE sentence: "Completed [task]. [N] tasks remain." No bullet lists, code
   fences, or detailed summaries.
 
@@ -294,6 +537,12 @@ EOF
     trimmed_result="${trimmed_result#"${trimmed_result%%[!$'\t\n\r ']*}"}"
     trimmed_result="${trimmed_result%"${trimmed_result##*[!$'\t\n\r ']}"}"
 
+    local last_nonempty_line
+    last_nonempty_line=$(printf '%s\n' "$result" | awk 'NF {line=$0} END {print line}')
+    local trimmed_last_line="$last_nonempty_line"
+    trimmed_last_line="${trimmed_last_line#"${trimmed_last_line%%[!$'\t\n\r ']*}"}"
+    trimmed_last_line="${trimmed_last_line%"${trimmed_last_line##*[!$'\t\n\r ']}"}"
+
     # Check for completion (spec §4.1 exact mode)
     if [[ "$trimmed_result" == "<promise>COMPLETE</promise>" ]]; then
       record_completion "$i" "exact"
@@ -305,17 +554,26 @@ EOF
       exit 0
     fi
 
-    # Check for completion token as a standalone line (fuzzy mode)
-    if [[ "$completion_mode" == "fuzzy" ]]; then
-      if printf '%s\n' "$result" | grep -qE '^[[:space:]]*<promise>COMPLETE</promise>[[:space:]]*$'; then
-        record_completion "$i" "fuzzy"
-        show_run_summary "complete_fuzzy" "0"
-        [[ "$summary_json" == "true" ]] && write_summary_json "complete_fuzzy" "0"
-        run_postmortem "complete_fuzzy" || true
+    # Check for completion token as final non-empty line (trailing mode)
+    if [[ "$completion_mode" == "trailing" ]]; then
+      if [[ "$trimmed_last_line" == "<promise>COMPLETE</promise>" ]]; then
+        record_completion "$i" "trailing"
+        show_run_summary "complete_trailing" "0"
+        [[ "$summary_json" == "true" ]] && write_summary_json "complete_trailing" "0"
+        run_postmortem "complete_trailing" || true
         show_completion_screen "$no_wait"
         printf '%s\n' "$result"
         exit 0
       fi
+    fi
+
+    if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
+      local output_head
+      output_head=${result//$'\n'/ }
+      output_head=${output_head//$'\r'/ }
+      output_head=${output_head:0:100}
+      ui_log "WARN" "Malformed COMPLETE output - token found but not accepted"
+      report_event "WARN_MALFORMED_COMPLETE" "$i" "" "" "" "" "$ITER_LOG_PATH" "output_head=$output_head"
     fi
 
     printf '%s\n' "$result"

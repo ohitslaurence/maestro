@@ -50,6 +50,26 @@ setup() {
   assert_output --partial "--completion-mode must be 'exact' or 'fuzzy'"
 }
 
+@test "load_config_file applies known keys" {
+  load_config_file "$BATS_TEST_DIRNAME/fixtures/.agent-loop/config"
+  assert_equal "$iterations" "12"
+  assert_equal "$model" "sonnet"
+  assert_equal "$postmortem" "false"
+}
+
+@test "init_config_file writes to .agent-loop" {
+  config_path="$BATS_TEST_TMPDIR/.agent-loop/config"
+  specs_dir="specs-custom"
+  plans_dir="specs-custom/planning"
+  model="sonnet"
+  iterations=7
+  init_config_file
+  assert_success
+  assert_file_exist "$config_path"
+  run awk -F= '$1 == "specs_dir" {print $2}' "$config_path"
+  assert_output "\"specs-custom\""
+}
+
 @test "validate_inputs requires spec when gum disabled" {
   spec_path=""
   plan_path=""
