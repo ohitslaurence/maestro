@@ -10,7 +10,7 @@ Reference: [agent-state-machine.md](../agent-state-machine.md)
 Exit Criteria
 - [x] `app/src-tauri/src/agent_state.rs` compiles with the new enums and transition logic (See §3, §5)
 - [x] Unit tests cover at least one valid and one invalid transition (See §5, §6)
-- [ ] `AgentStateKind` is included in session summaries (or stubbed with TODO if Phase 2 not started)
+- [x] `AgentStateKind` is included in session summaries (stubbed with TODO for Phase 2 wiring)
 
 ## Phase 2: Session integration and events
 - [ ] Wire session loop to state machine in `app/src-tauri/src/sessions.rs` (See §2, §4)

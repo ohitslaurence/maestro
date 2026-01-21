@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::process::Command;
 
+use crate::agent_state::AgentStateKind;
+
 /// Represents an agent session
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentSession {
@@ -10,6 +12,8 @@ pub struct AgentSession {
     pub harness: AgentHarness,
     pub project_path: String,
     pub status: SessionStatus,
+    /// Current state machine state (see §3 of agent-state-machine spec).
+    pub agent_state: AgentStateKind,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -275,6 +279,8 @@ pub async fn spawn_session(
         harness,
         project_path,
         status: SessionStatus::Running,
+        // TODO: Wire to actual state machine in Phase 2
+        agent_state: AgentStateKind::Idle,
     })
 }
 
