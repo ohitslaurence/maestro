@@ -14,13 +14,13 @@ Exit Criteria
 
 ## Phase 2: Harness adapters
 - [x] Map OpenCode stream output to `StreamEvent` in session broker (See §2, §5)
-- [ ] Map Claude Code stream output to `StreamEvent` in session broker (See §2, §5)
+- [x] Map Claude Code stream output to `StreamEvent` in session broker (See §2, §5)
 - [x] Attach `streamId` + `seq` + `eventId` for ordering (See §3, §5)
 
 Exit Criteria
 - [x] OpenCode streams emit ordered `text_delta` events (See §5)
-- [ ] Claude Code streams emit ordered `text_delta` events (See §5)
-- [ ] `completed` emitted once per `streamId` (See §5)
+- [x] Claude Code streams emit ordered `text_delta` events (See §5)
+- [x] `completed` emitted once per `streamId` (See §5)
 
 ## Phase 3: Frontend event hub
 - [ ] Add `agent:stream_event` hub in `app/src/services/events.ts` (See §4)
@@ -41,6 +41,7 @@ Exit Criteria
 ## Files to Create
 - `app/src/types/streaming.ts`
 - `app/src-tauri/src/daemon/opencode_adapter.rs`
+- `app/src-tauri/src/daemon/claudecode_adapter.rs`
 
 ## Files to Modify
 - `app/src-tauri/src/sessions.rs`

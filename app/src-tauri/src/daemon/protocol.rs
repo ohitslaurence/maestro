@@ -270,6 +270,7 @@ pub struct TerminalExitedParams {
 pub const EVENT_TERMINAL_OUTPUT: &str = "terminal_output";
 pub const EVENT_TERMINAL_EXITED: &str = "terminal_exited";
 pub const EVENT_OPENCODE: &str = "opencode:event";
+pub const EVENT_CLAUDECODE: &str = "claudecode:event";
 
 #[cfg(test)]
 mod tests {

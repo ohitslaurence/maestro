@@ -13,6 +13,7 @@ use tokio::net::TcpStream;
 use tokio::sync::{oneshot, Mutex, RwLock};
 use tokio::time::timeout;
 
+use super::claudecode_adapter::ClaudeCodeAdapter;
 use super::config::DaemonConfig;
 use super::opencode_adapter::OpenCodeAdapter;
 use super::protocol::*;
@@ -21,6 +22,10 @@ use crate::emit_stream_event;
 /// Global OpenCode adapter for stream event conversion (§2, §5).
 /// Maintains ordering state (streamId + seq) across all workspaces.
 static OPENCODE_ADAPTER: LazyLock<OpenCodeAdapter> = LazyLock::new(OpenCodeAdapter::new);
+
+/// Global Claude Code adapter for stream event conversion (§2, §5).
+/// Maintains ordering state (streamId + seq) across all sessions.
+static CLAUDECODE_ADAPTER: LazyLock<ClaudeCodeAdapter> = LazyLock::new(ClaudeCodeAdapter::new);
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
@@ -331,6 +336,16 @@ impl DaemonClient {
                 }
                 // Also emit legacy event for backwards compatibility during migration (§9)
                 let _ = handle.emit("daemon:opencode_event", params);
+            }
+            EVENT_CLAUDECODE => {
+                // Adapt Claude Code SDK event to StreamEvent schema (§2, §5)
+                if let Some(stream_events) = CLAUDECODE_ADAPTER.adapt(&params) {
+                    for event in stream_events {
+                        emit_stream_event(handle, &event);
+                    }
+                }
+                // Also emit legacy event for backwards compatibility during migration (§9)
+                let _ = handle.emit("daemon:claudecode_event", params);
             }
             _ => {
                 eprintln!("[tauri] Unknown event method: {}", method);
