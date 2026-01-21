@@ -1,6 +1,10 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, type DependencyList } from "react";
 import type { OpenCodeEvent, SessionStatus } from "../types";
+import {
+  AGENT_STATE_EVENT_CHANNEL,
+  type AgentStateEventEnvelope,
+} from "../types/agent";
 
 export type Unsubscribe = () => void;
 
@@ -234,6 +238,11 @@ const opencodeEventHub = createTransformingEventHub<
   event: raw.event,
 }));
 
+// Agent state events (state machine lifecycle)
+const agentStateEventHub = createEventHub<AgentStateEventEnvelope>(
+  AGENT_STATE_EVENT_CHANNEL,
+);
+
 // --- Subscription helpers ---
 
 export function subscribeTerminalOutput(
@@ -290,6 +299,13 @@ export function subscribeOpenCodeEvents(
   options?: SubscriptionOptions,
 ): Unsubscribe {
   return opencodeEventHub.subscribe(onEvent, options);
+}
+
+export function subscribeAgentStateEvents(
+  onEvent: (event: AgentStateEventEnvelope) => void,
+  options?: SubscriptionOptions,
+): Unsubscribe {
+  return agentStateEventHub.subscribe(onEvent, options);
 }
 
 // --- React hook helper ---

@@ -42,7 +42,7 @@ Exit Criteria
 
 ## Phase 5: Frontend wiring
 - [x] Add TS types in `app/src/types/agent.ts` (See §3, §4)
-- [ ] Subscribe to `agent:state_event` in event hub and update hooks (See §4, §5)
+- [x] Subscribe to `agent:state_event` in event hub and update hooks (See §4, §5)
 
 Exit Criteria
 - [x] Frontend compiles with new TS types (See §3, §4)
