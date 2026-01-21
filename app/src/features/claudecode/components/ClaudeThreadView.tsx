@@ -43,8 +43,6 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
 
   const {
     items,
-    // threadStatus retained for Phase 2 removal - status now derived from useAgentSession
-    status: _threadStatus,
     processingStartedAt,
     lastDurationMs,
     error: threadError,

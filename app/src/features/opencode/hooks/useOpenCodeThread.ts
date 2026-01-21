@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { OpenCodeThreadItem, OpenCodeThreadStatus } from "../../../types";
+import type { OpenCodeThreadItem } from "../../../types";
 import { subscribeStreamEvents } from "../../../services/events";
 import { opencodeSessionMessages } from "../../../services/tauri";
 import {
@@ -11,7 +11,6 @@ import {
   isToolCallCompleted,
   isCompleted,
   isError,
-  isStatus,
   isThinkingDelta,
 } from "../../../types/streaming";
 
@@ -35,9 +34,14 @@ type UseOpenCodeThreadOptions = {
   pendingUserMessages?: PendingUserMessage[];
 };
 
+/**
+ * Thread state returned by useOpenCodeThread.
+ *
+ * Per state-machine-wiring.md §2, §5: This hook focuses on message/thread payloads.
+ * Working/idle status is derived from useAgentSession in the UI layer.
+ */
 export type OpenCodeThreadState = {
   items: OpenCodeThreadItem[];
-  status: OpenCodeThreadStatus;
   processingStartedAt: number | null;
   lastDurationMs: number | null;
   error?: string;
@@ -207,7 +211,6 @@ export function useOpenCodeThread({
   pendingUserMessages = [],
 }: UseOpenCodeThreadOptions): OpenCodeThreadState {
   const [items, setItems] = useState<OpenCodeThreadItem[]>([]);
-  const [status, setStatus] = useState<OpenCodeThreadStatus>("idle");
   const [processingStartedAt, setProcessingStartedAt] = useState<number | null>(null);
   const [lastDurationMs, setLastDurationMs] = useState<number | null>(null);
   const [error, setError] = useState<string | undefined>();
@@ -416,21 +419,16 @@ export function useOpenCodeThread({
     prevItemsRef.current = mergedItems;
     setItems(mergedItems);
 
-    // Determine processing status from message state
+    // Track processing timing from incomplete assistant messages
     const hasIncompleteAssistant = allMessages.some(
       (m) => m.role === "assistant" && !m.time?.completed
     );
-    if (hasIncompleteAssistant) {
-      // Don't override if we already have a processingStartedAt
-      if (!processingStartedAtRef.current) {
-        const assistantMsg = allMessages.find(
-          (m) => m.role === "assistant" && !m.time?.completed
-        );
-        setProcessingStartedAt(assistantMsg?.time?.created ?? Date.now());
-      }
-      setStatus("processing");
+    if (hasIncompleteAssistant && !processingStartedAtRef.current) {
+      const assistantMsg = allMessages.find(
+        (m) => m.role === "assistant" && !m.time?.completed
+      );
+      setProcessingStartedAt(assistantMsg?.time?.created ?? Date.now());
     }
-    // Note: don't set idle here - let session.status events handle that
   }, [convertMessageToItems, pendingUserMessages, sessionId]);
 
   // Track previous session to detect real session switches
@@ -518,7 +516,6 @@ export function useOpenCodeThread({
       }
       gapTimeoutsRef.current.clear();
       setItems([]);
-      setStatus("idle");
       setProcessingStartedAt(null);
       setLastDurationMs(null);
       setError(undefined);
@@ -536,12 +533,11 @@ export function useOpenCodeThread({
     rebuildItemsRef.current = rebuildItems;
   }, [rebuildItems]);
 
-  // Rebuild when pending messages change and set immediate processing state
+  // Rebuild when pending messages change and track timing
   useEffect(() => {
     if (pendingUserMessages.length > 0) {
       rebuildItemsRef.current();
-      // Set processing immediately when user sends a message (before events arrive)
-      setStatus("processing");
+      // Track processing start time when user sends a message
       if (!processingStartedAtRef.current) {
         setProcessingStartedAt(Date.now());
       }
@@ -662,14 +658,11 @@ export function useOpenCodeThread({
       // Mark message as completed
       msg.time = { ...(msg.time || {}), completed: Date.now() };
 
-      // Calculate duration and set idle
+      // Calculate duration for timing display
       const startedAt = processingStartedAtRef.current;
       if (startedAt) {
         setLastDurationMs(Date.now() - startedAt);
       }
-      // Always set idle on completion - pending messages are cleared by
-      // the ThreadView effect after status transitions to idle
-      setStatus("idle");
       setProcessingStartedAt(null);
       return true;
     }
@@ -677,37 +670,10 @@ export function useOpenCodeThread({
     // Handle error (§6)
     if (isError(event)) {
       setError(event.payload.message);
-      setStatus("error");
       return true;
     }
 
-    // Handle status (§3)
-    if (isStatus(event)) {
-      console.log("[useOpenCodeThread] Status event:", event.payload.state);
-      if (event.payload.state === "processing") {
-        console.log("[useOpenCodeThread] Setting status to processing");
-        setStatus("processing");
-        if (!processingStartedAtRef.current) {
-          setProcessingStartedAt(Date.now());
-        }
-      } else if (event.payload.state === "idle") {
-        console.log("[useOpenCodeThread] Setting status to IDLE");
-        const startedAt = processingStartedAtRef.current;
-        if (startedAt) {
-          setLastDurationMs(Date.now() - startedAt);
-        }
-        // Always set idle - pending messages are cleared by ThreadView effect
-        setStatus("idle");
-        setProcessingStartedAt(null);
-      } else if (event.payload.state === "aborted") {
-        console.log("[useOpenCodeThread] Setting status to idle (aborted)");
-        setStatus("idle");
-        setProcessingStartedAt(null);
-      }
-      return false; // Status events don't affect message parts
-    }
-
-    return false; // Unknown event type
+    return false; // Unknown event type or status events (handled by useAgentSession)
   }, []);
 
   // Process buffered events in seq order (§5)
@@ -844,7 +810,6 @@ export function useOpenCodeThread({
 
   return {
     items,
-    status,
     processingStartedAt,
     lastDurationMs,
     error,
