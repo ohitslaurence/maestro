@@ -3,6 +3,7 @@ use std::sync::Arc;
 #[cfg(target_os = "macos")]
 use tauri::Manager;
 
+mod agent_state;
 mod daemon;
 mod sessions;
 mod terminal;

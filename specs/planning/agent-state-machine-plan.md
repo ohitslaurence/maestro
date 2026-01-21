@@ -3,7 +3,7 @@
 Reference: [agent-state-machine.md](../agent-state-machine.md)
 
 ## Phase 1: Core types and transitions
-- [ ] Add Rust enums/structs for `AgentStateKind`, `AgentEvent`, `AgentAction`, `ToolRunStatus` (See §3)
+- [x] Add Rust enums/structs for `AgentStateKind`, `AgentEvent`, `AgentAction`, `ToolRunStatus` (See §3)
 - [ ] Implement `handle_event` transition function in `app/src-tauri/src/agent_state.rs` (See §5)
 - [ ] Add minimal unit tests for valid/invalid transitions (See §5, §6)
 
