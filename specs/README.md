@@ -12,6 +12,7 @@ Keep this file current whenever a new spec or plan is added.
 | [agent-state-machine.md](./agent-state-machine.md) | [planning/agent-state-machine-plan.md](./planning/agent-state-machine-plan.md) | app/src-tauri/src/sessions.rs | Deterministic agent state machine + post-tool hooks |
 | [streaming-event-schema.md](./streaming-event-schema.md) | [planning/streaming-event-schema-plan.md](./planning/streaming-event-schema-plan.md) | app/src-tauri/src/sessions.rs | Unified streaming event schema |
 | [session-persistence.md](./session-persistence.md) | [planning/session-persistence-plan.md](./planning/session-persistence-plan.md) | app/src-tauri/src/storage | Local-first session persistence + sync queue |
+| [agent-loop-terminal-ux.md](./agent-loop-terminal-ux.md) | [planning/agent-loop-terminal-ux-plan.md](./planning/agent-loop-terminal-ux-plan.md) | scripts/agent-loop.sh | Gum-powered terminal UX, logging, and stats for the agent loop |
 
 ## Research Notes
 
