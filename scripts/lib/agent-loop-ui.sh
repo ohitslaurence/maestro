@@ -513,12 +513,6 @@ show_run_summary() {
     avg_duration_str=$(format_duration_ms "$avg_duration_ms")
   fi
 
-  if [[ "$COMPLETION_MODE" == "fuzzy" ]]; then
-    ui_log "WARN" "Completion detected with extra output - this violates the completion protocol"
-    ui_log "WARN" "Full output captured in: $ITER_LOG_PATH"
-    report_event "COMPLETE_PROTOCOL_VIOLATION" "$COMPLETED_ITERATION" "" "" "" "" "$ITER_LOG_PATH" "mode=fuzzy"
-  fi
-
   ui_log "RUN_END" "reason=$exit_reason iterations=$TOTAL_ITERATIONS total_ms=$total_duration_ms"
   report_event "RUN_END" "$TOTAL_ITERATIONS" "$total_duration_ms" "$last_exit_code" "" "" "" "reason=$exit_reason"
 

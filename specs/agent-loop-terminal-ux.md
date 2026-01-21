@@ -72,7 +72,7 @@ timing, and results in real time, with durable logs for post-run inspection.
 | `gum_enabled` | boolean | yes | Disabled when `--no-gum` or non-TTY |
 | `model` | string | yes | Claude model or alias (default `opus`) |
 | `postmortem` | boolean | yes | Run analysis reports after completion |
-| `completion_mode` | string | yes | `exact` or `fuzzy` |
+| `completion_mode` | string | yes | `exact` or `trailing` |
 
 **SpecEntry**
 | Field | Type | Required | Notes |
@@ -109,7 +109,7 @@ timing, and results in real time, with durable logs for post-run inspection.
 | `completed_iteration` | number | no | Iteration where COMPLETE occurred |
 | `avg_duration_ms` | number | yes | Average iteration time |
 | `last_exit_code` | number | yes | Exit code from last iteration |
-| `completion_mode` | string | yes | `exact` when exact match, `fuzzy` when token appears as a line |
+| `completion_mode` | string | yes | `exact` when exact match, `trailing` when token is last line |
 
 ### Storage Schema (if any)
 - Run directory: `logs/agent-loop/run-<run_id>/`
@@ -137,7 +137,7 @@ Script usage accepts positional arguments or interactive selection, with optiona
 
 ```
 ./scripts/agent-loop.sh [spec-path] [plan-path] \
-  [--iterations <n>] [--log-dir <path>] [--model <name>] [--completion-mode <exact|fuzzy>] [--no-postmortem] [--no-gum] [--summary-json] [--no-wait]
+  [--iterations <n>] [--log-dir <path>] [--model <name>] [--completion-mode <exact|trailing>] [--no-postmortem] [--no-gum] [--summary-json] [--no-wait]
 ```
 
 Postmortem runner:
@@ -149,14 +149,14 @@ Defaults:
 - `--iterations`: `50`
 - `--log-dir`: `logs/agent-loop`
 - `--model`: `opus`
-- `--completion-mode`: `exact`
+- `--completion-mode`: `trailing`
 - `--postmortem`: enabled by default (disable with `--no-postmortem`)
 
 Completion behavior:
 - Exact mode (`--completion-mode=exact`): if output equals `<promise>COMPLETE</promise>` after trimming,
   mark `completion_mode=exact`.
-- Fuzzy mode (`--completion-mode=fuzzy`): if a standalone line matches `<promise>COMPLETE</promise>`,
-  mark `completion_mode=fuzzy`, emit a warning, but stop the loop.
+- Trailing mode (`--completion-mode=trailing`): if the final non-empty line equals
+  `<promise>COMPLETE</promise>`, mark `completion_mode=trailing` and stop the loop.
 - Close affordance: use `gum confirm --default=true "Close"` unless `--no-wait` is set.
 
 Selection behavior:
@@ -176,6 +176,7 @@ Log markers written to the run log:
 - `RUN_START`, `RUN_END`
 - `ITERATION_START`, `ITERATION_END`
 - `COMPLETE_DETECTED`
+- `WARN_MALFORMED_COMPLETE`
 - `ERROR`
 
 ---
@@ -189,7 +190,7 @@ Parse args -> optional spec picker -> validate paths -> resolve log dir -> init 
        show header + status
        run claude (spinner)
        write output to iteration log
-       detect COMPLETE (exact or fuzzy)
+       detect COMPLETE (exact or trailing)
        update stats + status line
   -> print summary (table)
   -> run postmortem analysis (if enabled)
@@ -217,8 +218,8 @@ Discovery rules:
   install instructions.
 - **spec missing**: if no spec selected, exit with a clear message and list known specs.
 - **plan missing**: if the selected spec has no plan, exit with a path hint.
-- **completion protocol violation**: if token appears with extra output, log the full output and
-  surface a warning in the summary.
+- **completion protocol violation**: if token appears but is not accepted, emit
+  `WARN_MALFORMED_COMPLETE` with the output head and log the full output path.
 - **non-zero exit**: log error, emit summary, and exit non-zero.
 - **empty output**: log warning and continue.
 - **signal interrupt**: trap `INT`/`TERM`, print summary, and exit 130/143.
