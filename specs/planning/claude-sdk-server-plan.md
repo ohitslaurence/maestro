@@ -147,9 +147,9 @@ Map SDK messages to OpenCode-compatible events.
 - [x] Map `thinking` content blocks to ReasoningPart
 - [x] Map `tool_use` to ToolPart with status transitions (pending → running)
 - [x] Map `tool_result` to ToolPart completion (status: completed/failed)
-- [ ] Emit `step-start` part at turn start and `step-finish` at turn end (§3)
-- [ ] Emit `message.updated` for message lifecycle (§4)
-- [ ] Emit `message.part.updated` for each part/delta (§4)
+- [x] Emit `step-start` part at turn start and `step-finish` at turn end (§3)
+- [x] Emit `message.updated` for message lifecycle (§4)
+- [x] Emit `message.part.updated` for each part/delta (§4)
 
 **Verification:**
 ```bash

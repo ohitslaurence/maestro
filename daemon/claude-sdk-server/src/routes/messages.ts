@@ -31,6 +31,8 @@ import {
   type ReasoningPart,
   type SendMessageRequest,
   type SendMessageResponse,
+  type StepFinishPart,
+  type StepStartPart,
   type TextPart,
   type ToolPart,
 } from '../types';
@@ -152,6 +154,12 @@ messagesRouter.post('/:id/message', async (c) => {
 
   // Create mapper for SDK message → Part conversion (§3, Appendix B)
   const mapper = new MessageMapper(assistantMessageId);
+
+  // Emit step-start part at turn start (§3, §5 Main Flow)
+  const stepStart: StepStartPart = mapper.createStepStart();
+  parts.push(stepStart);
+  await store.upsertPart(sessionId, assistantMessageId, stepStart);
+  sseEmitter.emitMessagePartUpdated(stepStart);
 
   // Track content accumulation for delta streaming
   // Maps content block index to accumulated content for computing deltas
@@ -293,6 +301,15 @@ messagesRouter.post('/:id/message', async (c) => {
         }
       }
     }
+
+    // Emit step-finish part at turn end with usage/cost (§3, §5 Main Flow step 7, Appendix B)
+    const stepFinish: StepFinishPart = mapper.createStepFinish(
+      { input: totalInputTokens, output: totalOutputTokens },
+      totalCost
+    );
+    parts.push(stepFinish);
+    await store.upsertPart(sessionId, assistantMessageId, stepFinish);
+    sseEmitter.emitMessagePartUpdated(stepFinish);
 
     // Update assistant message with completion info (§5 Main Flow step 7a-b)
     const completedAt = Date.now();
