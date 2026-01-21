@@ -191,21 +191,13 @@ impl OpenCodeAdapter {
         let inner = &event.event;
         let props = inner.properties.as_ref();
 
-        eprintln!("[opencode_adapter] Adapting event type: {}", inner.event_type);
-
         match inner.event_type.as_str() {
             "message.part.updated" => self.adapt_part_updated(workspace_id, props),
-            "session.status" => {
-                eprintln!("[opencode_adapter] Processing session.status event: {:?}", props);
-                self.adapt_session_status(workspace_id, props)
-            }
+            "session.status" => self.adapt_session_status(workspace_id, props),
             "session.error" => self.adapt_session_error(workspace_id, props),
             "session.idle" => self.adapt_session_idle(workspace_id, props),
             // Ignored events (heartbeats, session.created, etc.)
-            _ => {
-                eprintln!("[opencode_adapter] Ignoring event type: {}", inner.event_type);
-                None
-            }
+            _ => None,
         }
     }
 
@@ -334,34 +326,16 @@ impl OpenCodeAdapter {
     /// Adapt session.status to status StreamEvent.
     fn adapt_session_status(&self, workspace_id: &str, props: Option<&Value>) -> Option<Vec<StreamEvent>> {
         let props = props?;
-        eprintln!("[opencode_adapter] session.status props: {:?}", props);
-
-        let status_props: SessionStatusProps = match serde_json::from_value(props.clone()) {
-            Ok(p) => p,
-            Err(e) => {
-                eprintln!("[opencode_adapter] Failed to parse SessionStatusProps: {}", e);
-                return None;
-            }
-        };
-
-        eprintln!("[opencode_adapter] Parsed status_props: session_id={:?}, status={:?}",
-                  status_props.session_id, status_props.status);
+        let status_props: SessionStatusProps = serde_json::from_value(props.clone()).ok()?;
 
         let session_id = status_props.session_id.unwrap_or_else(|| workspace_id.to_string());
         let status_type = status_props.status.as_ref()?.status_type.as_deref()?;
 
-        eprintln!("[opencode_adapter] status_type: {}", status_type);
-
         let state = match status_type {
             "busy" => AgentProcessingState::Processing,
             "idle" => AgentProcessingState::Idle,
-            _ => {
-                eprintln!("[opencode_adapter] Unknown status_type: {}", status_type);
-                return None;
-            }
+            _ => return None,
         };
-
-        eprintln!("[opencode_adapter] Emitting status event for session {}: {:?}", session_id, state);
 
         let payload = StatusPayload {
             state,

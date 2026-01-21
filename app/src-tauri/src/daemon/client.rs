@@ -390,7 +390,7 @@ impl DaemonClient {
                 let _ = handle.emit("daemon:claudecode_event", params);
             }
             _ => {
-                eprintln!("[tauri] Unknown event method: {}", method);
+                // Unknown event methods are silently ignored
             }
         }
     }
@@ -424,10 +424,6 @@ impl DaemonClient {
         {
             let mut writer = self.writer.lock().await;
             let json = serde_json::to_string(&request).map_err(|e| format!("Serialize error: {e}"))?;
-            // Debug log for opencode commands only
-            if method.starts_with("opencode") {
-                eprintln!("[daemon] Sending request: {}", json);
-            }
             writer
                 .write_all(json.as_bytes())
                 .await

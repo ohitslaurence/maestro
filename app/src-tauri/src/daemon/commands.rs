@@ -209,7 +209,6 @@ pub async fn opencode_connect_workspace(
     workspace_path: String,
     state: State<'_, Arc<DaemonState>>,
 ) -> Result<OpenCodeConnectResult, String> {
-    eprintln!("[opencode_connect_workspace] workspace_id={:?}, workspace_path={:?}", workspace_id, workspace_path);
     state
         .call(
             METHOD_OPENCODE_CONNECT_WORKSPACE,

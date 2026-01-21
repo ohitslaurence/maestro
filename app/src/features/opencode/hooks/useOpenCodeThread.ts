@@ -722,12 +722,8 @@ export function useOpenCodeThread({
     }
 
     const unsubscribe = subscribeStreamEvents((event: StreamEvent) => {
-      // DEBUG: Log all events
-      console.log("[useOpenCodeThread] StreamEvent received:", event.type, event);
-
       // Filter by session
       if (event.sessionId !== sessionId) {
-        console.log("[useOpenCodeThread] Filtered out - wrong session:", event.sessionId, "expected:", sessionId);
         return;
       }
 
