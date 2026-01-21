@@ -367,6 +367,780 @@ pub struct AgentStateEventEnvelope {
     pub payload: AgentStateEvent,
 }
 
+// ============================================================================
+// State Machine Transitions (§5)
+// ============================================================================
+
+/// Result of a state transition.
+#[derive(Debug, Clone)]
+pub struct TransitionResult {
+    /// The new state kind after the transition.
+    pub new_kind: AgentStateKind,
+    /// Action to execute (advisory; caller must handle I/O).
+    pub action: AgentAction,
+    /// Reason for the state change (for event emission).
+    pub reason: Option<StateChangeReason>,
+}
+
+/// Error when a transition is invalid.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InvalidTransition {
+    pub from: AgentStateKind,
+    pub event_type: &'static str,
+    pub message: String,
+}
+
+impl std::fmt::Display for InvalidTransition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Invalid transition from {:?} on {}: {}",
+            self.from, self.event_type, self.message
+        )
+    }
+}
+
+impl std::error::Error for InvalidTransition {}
+
+impl AgentState {
+    /// Handle an event and return the resulting action.
+    ///
+    /// This is the core state machine transition function. It is pure: no I/O occurs here.
+    /// The caller is responsible for executing the returned action and emitting events.
+    ///
+    /// See spec §5 for the state transition table.
+    pub fn handle_event(
+        &mut self,
+        event: &AgentEvent,
+        session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        // StopRequested can happen from any state except Stopped
+        if let AgentEvent::StopRequested { session_id: sid } = event {
+            if sid != session_id {
+                return Err(InvalidTransition {
+                    from: self.kind,
+                    event_type: "StopRequested",
+                    message: "Session ID mismatch".to_string(),
+                });
+            }
+            if self.kind == AgentStateKind::Stopped {
+                return Err(InvalidTransition {
+                    from: self.kind,
+                    event_type: "StopRequested",
+                    message: "Session already stopped".to_string(),
+                });
+            }
+            let _from = self.kind;
+            self.kind = AgentStateKind::Stopping;
+            return Ok(TransitionResult {
+                new_kind: AgentStateKind::Stopping,
+                action: AgentAction::StopHarness {
+                    session_id: session_id.to_string(),
+                },
+                reason: Some(StateChangeReason::StopRequested),
+            });
+        }
+
+        match self.kind {
+            AgentStateKind::Idle => self.handle_idle(event, session_id),
+            AgentStateKind::Starting => self.handle_starting(event, session_id),
+            AgentStateKind::Ready => self.handle_ready(event, session_id),
+            AgentStateKind::CallingLlm => self.handle_calling_llm(event, session_id),
+            AgentStateKind::ProcessingResponse => {
+                self.handle_processing_response(event, session_id)
+            }
+            AgentStateKind::ExecutingTools => self.handle_executing_tools(event, session_id),
+            AgentStateKind::PostToolsHook => self.handle_post_tools_hook(event, session_id),
+            AgentStateKind::Error => self.handle_error(event, session_id),
+            AgentStateKind::Stopping => self.handle_stopping(event, session_id),
+            AgentStateKind::Stopped => Err(InvalidTransition {
+                from: self.kind,
+                event_type: event_type_name(event),
+                message: "Session is stopped; no transitions allowed".to_string(),
+            }),
+        }
+    }
+
+    fn handle_idle(
+        &mut self,
+        event: &AgentEvent,
+        _session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        // Idle only transitions to Starting via spawn_session (external trigger)
+        // The state machine itself doesn't handle spawn; caller sets Starting directly.
+        Err(InvalidTransition {
+            from: self.kind,
+            event_type: event_type_name(event),
+            message: "Idle state only transitions via spawn_session".to_string(),
+        })
+    }
+
+    fn handle_starting(
+        &mut self,
+        event: &AgentEvent,
+        session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        match event {
+            AgentEvent::HarnessExited { code, .. } => {
+                // Successful harness init (code=0 or None for ready signal) -> Ready
+                // Non-zero exit -> Stopped
+                if *code == Some(0) || code.is_none() {
+                    self.kind = AgentStateKind::Ready;
+                    Ok(TransitionResult {
+                        new_kind: AgentStateKind::Ready,
+                        action: AgentAction::EmitStateChange {
+                            session_id: session_id.to_string(),
+                            from: AgentStateKind::Starting,
+                            to: AgentStateKind::Ready,
+                        },
+                        reason: Some(StateChangeReason::HarnessExited),
+                    })
+                } else {
+                    self.kind = AgentStateKind::Stopped;
+                    Ok(TransitionResult {
+                        new_kind: AgentStateKind::Stopped,
+                        action: AgentAction::EmitStateChange {
+                            session_id: session_id.to_string(),
+                            from: AgentStateKind::Starting,
+                            to: AgentStateKind::Stopped,
+                        },
+                        reason: Some(StateChangeReason::HarnessExited),
+                    })
+                }
+            }
+            AgentEvent::HarnessStream { stream_event, .. } => {
+                // Harness became ready via stream event
+                if matches!(stream_event, StreamEvent::Completed) {
+                    self.kind = AgentStateKind::Ready;
+                    Ok(TransitionResult {
+                        new_kind: AgentStateKind::Ready,
+                        action: AgentAction::EmitStateChange {
+                            session_id: session_id.to_string(),
+                            from: AgentStateKind::Starting,
+                            to: AgentStateKind::Ready,
+                        },
+                        reason: Some(StateChangeReason::StreamCompleted),
+                    })
+                } else {
+                    // Stream deltas during starting are ignored; no transition
+                    Ok(TransitionResult {
+                        new_kind: self.kind,
+                        action: AgentAction::Wait,
+                        reason: None,
+                    })
+                }
+            }
+            _ => Err(InvalidTransition {
+                from: self.kind,
+                event_type: event_type_name(event),
+                message: "Starting state expects HarnessExited or HarnessStream".to_string(),
+            }),
+        }
+    }
+
+    fn handle_ready(
+        &mut self,
+        event: &AgentEvent,
+        session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        match event {
+            AgentEvent::UserInput { text, .. } => {
+                // Create new stream and transition to CallingLlm
+                let stream_id = format!("turn_{}", uuid::Uuid::new_v4());
+                self.active_stream_id = Some(stream_id.clone());
+                self.retries = 1;
+                self.pending_tool_calls.clear();
+                self.kind = AgentStateKind::CallingLlm;
+
+                Ok(TransitionResult {
+                    new_kind: AgentStateKind::CallingLlm,
+                    action: AgentAction::SendToHarness {
+                        session_id: session_id.to_string(),
+                        input: text.clone(),
+                    },
+                    reason: Some(StateChangeReason::UserInput),
+                })
+            }
+            AgentEvent::HarnessExited { code: _, .. } => {
+                // Harness died while ready -> Stopped
+                self.kind = AgentStateKind::Stopped;
+                Ok(TransitionResult {
+                    new_kind: AgentStateKind::Stopped,
+                    action: AgentAction::EmitStateChange {
+                        session_id: session_id.to_string(),
+                        from: AgentStateKind::Ready,
+                        to: AgentStateKind::Stopped,
+                    },
+                    reason: Some(StateChangeReason::HarnessExited),
+                })
+            }
+            _ => Err(InvalidTransition {
+                from: self.kind,
+                event_type: event_type_name(event),
+                message: "Ready state expects UserInput or HarnessExited".to_string(),
+            }),
+        }
+    }
+
+    fn handle_calling_llm(
+        &mut self,
+        event: &AgentEvent,
+        session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        match event {
+            AgentEvent::HarnessStream { stream_event, .. } => match stream_event {
+                StreamEvent::TextDelta { .. } | StreamEvent::ToolCallDelta { .. } => {
+                    // Stream deltas don't cause state transitions
+                    Ok(TransitionResult {
+                        new_kind: self.kind,
+                        action: AgentAction::Wait,
+                        reason: None,
+                    })
+                }
+                StreamEvent::Completed => {
+                    // Stream completed -> ProcessingResponse
+                    self.kind = AgentStateKind::ProcessingResponse;
+                    Ok(TransitionResult {
+                        new_kind: AgentStateKind::ProcessingResponse,
+                        action: AgentAction::EmitStateChange {
+                            session_id: session_id.to_string(),
+                            from: AgentStateKind::CallingLlm,
+                            to: AgentStateKind::ProcessingResponse,
+                        },
+                        reason: Some(StateChangeReason::StreamCompleted),
+                    })
+                }
+                StreamEvent::Error { message } => {
+                    // Stream error -> Error
+                    self.kind = AgentStateKind::Error;
+                    self.last_error = Some(AgentError {
+                        code: "streaming_failed".to_string(),
+                        message: message.clone(),
+                        retryable: true,
+                        source: ErrorSource::Harness,
+                    });
+                    Ok(TransitionResult {
+                        new_kind: AgentStateKind::Error,
+                        action: AgentAction::EmitStateChange {
+                            session_id: session_id.to_string(),
+                            from: AgentStateKind::CallingLlm,
+                            to: AgentStateKind::Error,
+                        },
+                        reason: Some(StateChangeReason::StreamCompleted),
+                    })
+                }
+            },
+            AgentEvent::ToolRequested { call, .. } => {
+                // Accumulate tool calls (these come during streaming)
+                self.pending_tool_calls.push(call.clone());
+                Ok(TransitionResult {
+                    new_kind: self.kind,
+                    action: AgentAction::Wait,
+                    reason: None,
+                })
+            }
+            AgentEvent::HarnessExited { .. } => {
+                // Harness died during LLM call -> Error
+                self.kind = AgentStateKind::Error;
+                self.last_error = Some(AgentError {
+                    code: "harness_failed".to_string(),
+                    message: "Harness exited during LLM call".to_string(),
+                    retryable: true,
+                    source: ErrorSource::Harness,
+                });
+                Ok(TransitionResult {
+                    new_kind: AgentStateKind::Error,
+                    action: AgentAction::EmitStateChange {
+                        session_id: session_id.to_string(),
+                        from: AgentStateKind::CallingLlm,
+                        to: AgentStateKind::Error,
+                    },
+                    reason: Some(StateChangeReason::HarnessExited),
+                })
+            }
+            _ => Err(InvalidTransition {
+                from: self.kind,
+                event_type: event_type_name(event),
+                message: "CallingLlm expects HarnessStream, ToolRequested, or HarnessExited"
+                    .to_string(),
+            }),
+        }
+    }
+
+    fn handle_processing_response(
+        &mut self,
+        event: &AgentEvent,
+        _session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        match event {
+            AgentEvent::ToolRequested { call, .. } => {
+                // Final tool calls being registered
+                self.pending_tool_calls.push(call.clone());
+                Ok(TransitionResult {
+                    new_kind: self.kind,
+                    action: AgentAction::Wait,
+                    reason: None,
+                })
+            }
+            // ProcessingResponse is a transient state. The orchestrator should check
+            // pending_tool_calls and either:
+            // 1. Transition to ExecutingTools if there are tool calls
+            // 2. Transition to Ready if there are no tool calls
+            // This is done via external call to finalize_response()
+            _ => Err(InvalidTransition {
+                from: self.kind,
+                event_type: event_type_name(event),
+                message: "ProcessingResponse expects ToolRequested or finalize_response call"
+                    .to_string(),
+            }),
+        }
+    }
+
+    /// Called by orchestrator after ProcessingResponse to decide next state.
+    pub fn finalize_response(&mut self, session_id: &str) -> TransitionResult {
+        if self.kind != AgentStateKind::ProcessingResponse {
+            // Not in ProcessingResponse; this is a no-op
+            return TransitionResult {
+                new_kind: self.kind,
+                action: AgentAction::Wait,
+                reason: None,
+            };
+        }
+
+        if self.pending_tool_calls.is_empty() {
+            // No tools -> Ready
+            self.kind = AgentStateKind::Ready;
+            TransitionResult {
+                new_kind: AgentStateKind::Ready,
+                action: AgentAction::EmitStateChange {
+                    session_id: session_id.to_string(),
+                    from: AgentStateKind::ProcessingResponse,
+                    to: AgentStateKind::Ready,
+                },
+                reason: Some(StateChangeReason::StreamCompleted),
+            }
+        } else {
+            // Has tools -> ExecutingTools
+            let tools = self.pending_tool_calls.clone();
+            self.kind = AgentStateKind::ExecutingTools;
+            TransitionResult {
+                new_kind: AgentStateKind::ExecutingTools,
+                action: AgentAction::ExecuteTools {
+                    session_id: session_id.to_string(),
+                    tools,
+                },
+                reason: Some(StateChangeReason::ToolsRequested),
+            }
+        }
+    }
+
+    fn handle_executing_tools(
+        &mut self,
+        event: &AgentEvent,
+        session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        match event {
+            AgentEvent::ToolStarted { run_id, .. } => {
+                // Mark tool as running in tool_runs
+                if let Some(record) = self.tool_runs.iter_mut().find(|r| r.run_id == *run_id) {
+                    record.status = ToolRunStatus::Running;
+                }
+                Ok(TransitionResult {
+                    new_kind: self.kind,
+                    action: AgentAction::Wait,
+                    reason: None,
+                })
+            }
+            AgentEvent::ToolCompleted { run_id, status, .. } => {
+                // Update tool record
+                if let Some(record) = self.tool_runs.iter_mut().find(|r| r.run_id == *run_id) {
+                    record.status = *status;
+                }
+
+                // Check if this was a failure
+                if *status == ToolRunStatus::Failed {
+                    self.kind = AgentStateKind::Error;
+                    self.last_error = Some(AgentError {
+                        code: "tool_execution_failed".to_string(),
+                        message: format!("Tool {} failed", run_id),
+                        retryable: true,
+                        source: ErrorSource::Tool,
+                    });
+                    return Ok(TransitionResult {
+                        new_kind: AgentStateKind::Error,
+                        action: AgentAction::EmitStateChange {
+                            session_id: session_id.to_string(),
+                            from: AgentStateKind::ExecutingTools,
+                            to: AgentStateKind::Error,
+                        },
+                        reason: Some(StateChangeReason::ToolsCompleted),
+                    });
+                }
+
+                // Check if all tools are done
+                let all_done = self.tool_runs.iter().all(|r| {
+                    matches!(
+                        r.status,
+                        ToolRunStatus::Succeeded | ToolRunStatus::Failed | ToolRunStatus::Canceled
+                    )
+                });
+
+                if all_done {
+                    // Check if any tool was mutating
+                    let has_mutating = self.tool_runs.iter().any(|r| r.mutating);
+
+                    if has_mutating {
+                        // -> PostToolsHook
+                        let tool_run_ids: Vec<String> =
+                            self.tool_runs.iter().map(|r| r.run_id.clone()).collect();
+                        self.kind = AgentStateKind::PostToolsHook;
+                        Ok(TransitionResult {
+                            new_kind: AgentStateKind::PostToolsHook,
+                            action: AgentAction::RunPostToolHooks {
+                                session_id: session_id.to_string(),
+                                tool_runs: tool_run_ids,
+                            },
+                            reason: Some(StateChangeReason::ToolsCompleted),
+                        })
+                    } else {
+                        // No mutating tools -> CallingLlm with tool results
+                        self.kind = AgentStateKind::CallingLlm;
+                        self.pending_tool_calls.clear();
+                        Ok(TransitionResult {
+                            new_kind: AgentStateKind::CallingLlm,
+                            action: AgentAction::SendToHarness {
+                                session_id: session_id.to_string(),
+                                input: String::new(), // Tool results are appended by orchestrator
+                            },
+                            reason: Some(StateChangeReason::ToolsCompleted),
+                        })
+                    }
+                } else {
+                    // More tools still running
+                    Ok(TransitionResult {
+                        new_kind: self.kind,
+                        action: AgentAction::Wait,
+                        reason: None,
+                    })
+                }
+            }
+            AgentEvent::HarnessExited { .. } => {
+                // Harness died during tool execution -> Error
+                self.kind = AgentStateKind::Error;
+                self.last_error = Some(AgentError {
+                    code: "harness_failed".to_string(),
+                    message: "Harness exited during tool execution".to_string(),
+                    retryable: false,
+                    source: ErrorSource::Harness,
+                });
+                Ok(TransitionResult {
+                    new_kind: AgentStateKind::Error,
+                    action: AgentAction::EmitStateChange {
+                        session_id: session_id.to_string(),
+                        from: AgentStateKind::ExecutingTools,
+                        to: AgentStateKind::Error,
+                    },
+                    reason: Some(StateChangeReason::HarnessExited),
+                })
+            }
+            _ => Err(InvalidTransition {
+                from: self.kind,
+                event_type: event_type_name(event),
+                message: "ExecutingTools expects ToolStarted, ToolCompleted, or HarnessExited"
+                    .to_string(),
+            }),
+        }
+    }
+
+    fn handle_post_tools_hook(
+        &mut self,
+        event: &AgentEvent,
+        session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        match event {
+            AgentEvent::HookStarted { run_id, .. } => {
+                // Mark hook as running
+                if let Some(record) = self.hook_runs.iter_mut().find(|r| r.run_id == *run_id) {
+                    record.status = HookRunStatus::Running;
+                }
+                Ok(TransitionResult {
+                    new_kind: self.kind,
+                    action: AgentAction::Wait,
+                    reason: None,
+                })
+            }
+            AgentEvent::HookCompleted { run_id, status, .. } => {
+                // Update hook record
+                if let Some(record) = self.hook_runs.iter_mut().find(|r| r.run_id == *run_id) {
+                    record.status = *status;
+                }
+
+                // Check for failure (policy handling is done by hook runner)
+                if *status == HookRunStatus::Failed {
+                    // Hook runner decided this is a session-failing error
+                    self.kind = AgentStateKind::Error;
+                    self.last_error = Some(AgentError {
+                        code: "hook_execution_failed".to_string(),
+                        message: format!("Hook {} failed", run_id),
+                        retryable: false,
+                        source: ErrorSource::Hook,
+                    });
+                    return Ok(TransitionResult {
+                        new_kind: AgentStateKind::Error,
+                        action: AgentAction::EmitStateChange {
+                            session_id: session_id.to_string(),
+                            from: AgentStateKind::PostToolsHook,
+                            to: AgentStateKind::Error,
+                        },
+                        reason: Some(StateChangeReason::HooksCompleted),
+                    });
+                }
+
+                // Check if all hooks are done
+                let all_done = self.hook_runs.iter().all(|r| {
+                    matches!(
+                        r.status,
+                        HookRunStatus::Succeeded | HookRunStatus::Failed | HookRunStatus::Canceled
+                    )
+                });
+
+                if all_done {
+                    // All hooks done -> CallingLlm with tool results
+                    self.kind = AgentStateKind::CallingLlm;
+                    self.pending_tool_calls.clear();
+                    Ok(TransitionResult {
+                        new_kind: AgentStateKind::CallingLlm,
+                        action: AgentAction::SendToHarness {
+                            session_id: session_id.to_string(),
+                            input: String::new(), // Tool results appended by orchestrator
+                        },
+                        reason: Some(StateChangeReason::HooksCompleted),
+                    })
+                } else {
+                    Ok(TransitionResult {
+                        new_kind: self.kind,
+                        action: AgentAction::Wait,
+                        reason: None,
+                    })
+                }
+            }
+            AgentEvent::HarnessExited { .. } => {
+                self.kind = AgentStateKind::Error;
+                self.last_error = Some(AgentError {
+                    code: "harness_failed".to_string(),
+                    message: "Harness exited during hook execution".to_string(),
+                    retryable: false,
+                    source: ErrorSource::Harness,
+                });
+                Ok(TransitionResult {
+                    new_kind: AgentStateKind::Error,
+                    action: AgentAction::EmitStateChange {
+                        session_id: session_id.to_string(),
+                        from: AgentStateKind::PostToolsHook,
+                        to: AgentStateKind::Error,
+                    },
+                    reason: Some(StateChangeReason::HarnessExited),
+                })
+            }
+            _ => Err(InvalidTransition {
+                from: self.kind,
+                event_type: event_type_name(event),
+                message: "PostToolsHook expects HookStarted, HookCompleted, or HarnessExited"
+                    .to_string(),
+            }),
+        }
+    }
+
+    fn handle_error(
+        &mut self,
+        event: &AgentEvent,
+        session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        match event {
+            AgentEvent::RetryTimeout { target, .. } => {
+                match target {
+                    RetryTarget::Llm => {
+                        // Retry LLM call
+                        self.retries += 1;
+                        self.kind = AgentStateKind::CallingLlm;
+                        self.last_error = None;
+                        Ok(TransitionResult {
+                            new_kind: AgentStateKind::CallingLlm,
+                            action: AgentAction::SendToHarness {
+                                session_id: session_id.to_string(),
+                                input: String::new(), // Retry uses existing context
+                            },
+                            reason: Some(StateChangeReason::UserInput), // Treat as resuming
+                        })
+                    }
+                    RetryTarget::Tool { run_id } => {
+                        // Retry specific tool
+                        self.kind = AgentStateKind::ExecutingTools;
+                        self.last_error = None;
+                        // Find the tool call to retry
+                        let tools: Vec<ToolCall> = self
+                            .tool_runs
+                            .iter()
+                            .filter(|r| r.run_id == *run_id)
+                            .map(|r| ToolCall {
+                                call_id: r.call_id.clone(),
+                                name: r.tool_name.clone(),
+                                arguments: serde_json::Value::Null, // Orchestrator has full args
+                                mutating: r.mutating,
+                            })
+                            .collect();
+                        Ok(TransitionResult {
+                            new_kind: AgentStateKind::ExecutingTools,
+                            action: AgentAction::ExecuteTools {
+                                session_id: session_id.to_string(),
+                                tools,
+                            },
+                            reason: Some(StateChangeReason::ToolsRequested),
+                        })
+                    }
+                    RetryTarget::Hook { run_id } => {
+                        // Retry specific hook
+                        self.kind = AgentStateKind::PostToolsHook;
+                        self.last_error = None;
+                        let tool_runs: Vec<String> = self
+                            .hook_runs
+                            .iter()
+                            .filter(|r| r.run_id == *run_id)
+                            .flat_map(|r| r.tool_run_ids.clone())
+                            .collect();
+                        Ok(TransitionResult {
+                            new_kind: AgentStateKind::PostToolsHook,
+                            action: AgentAction::RunPostToolHooks {
+                                session_id: session_id.to_string(),
+                                tool_runs,
+                            },
+                            reason: Some(StateChangeReason::ToolsCompleted),
+                        })
+                    }
+                }
+            }
+            AgentEvent::HarnessExited { .. } => {
+                self.kind = AgentStateKind::Stopped;
+                Ok(TransitionResult {
+                    new_kind: AgentStateKind::Stopped,
+                    action: AgentAction::EmitStateChange {
+                        session_id: session_id.to_string(),
+                        from: AgentStateKind::Error,
+                        to: AgentStateKind::Stopped,
+                    },
+                    reason: Some(StateChangeReason::HarnessExited),
+                })
+            }
+            AgentEvent::UserInput { text, .. } => {
+                // User can send new input to recover from error
+                let stream_id = format!("turn_{}", uuid::Uuid::new_v4());
+                self.active_stream_id = Some(stream_id);
+                self.retries = 1;
+                self.pending_tool_calls.clear();
+                self.last_error = None;
+                self.kind = AgentStateKind::CallingLlm;
+
+                Ok(TransitionResult {
+                    new_kind: AgentStateKind::CallingLlm,
+                    action: AgentAction::SendToHarness {
+                        session_id: session_id.to_string(),
+                        input: text.clone(),
+                    },
+                    reason: Some(StateChangeReason::UserInput),
+                })
+            }
+            _ => Err(InvalidTransition {
+                from: self.kind,
+                event_type: event_type_name(event),
+                message: "Error state expects RetryTimeout, UserInput, or HarnessExited"
+                    .to_string(),
+            }),
+        }
+    }
+
+    fn handle_stopping(
+        &mut self,
+        event: &AgentEvent,
+        session_id: &str,
+    ) -> Result<TransitionResult, InvalidTransition> {
+        match event {
+            AgentEvent::HarnessExited { code: _, .. } => {
+                self.kind = AgentStateKind::Stopped;
+                Ok(TransitionResult {
+                    new_kind: AgentStateKind::Stopped,
+                    action: AgentAction::EmitStateChange {
+                        session_id: session_id.to_string(),
+                        from: AgentStateKind::Stopping,
+                        to: AgentStateKind::Stopped,
+                    },
+                    reason: Some(StateChangeReason::HarnessExited),
+                })
+            }
+            AgentEvent::ToolCompleted { run_id, .. } => {
+                // Tool completed while stopping -> mark as canceled
+                if let Some(record) = self.tool_runs.iter_mut().find(|r| r.run_id == *run_id) {
+                    record.status = ToolRunStatus::Canceled;
+                }
+                Ok(TransitionResult {
+                    new_kind: self.kind,
+                    action: AgentAction::Wait,
+                    reason: None,
+                })
+            }
+            AgentEvent::HookCompleted { run_id, .. } => {
+                // Hook completed while stopping -> mark as canceled
+                if let Some(record) = self.hook_runs.iter_mut().find(|r| r.run_id == *run_id) {
+                    record.status = HookRunStatus::Canceled;
+                }
+                Ok(TransitionResult {
+                    new_kind: self.kind,
+                    action: AgentAction::Wait,
+                    reason: None,
+                })
+            }
+            _ => {
+                // Ignore other events while stopping
+                Ok(TransitionResult {
+                    new_kind: self.kind,
+                    action: AgentAction::Wait,
+                    reason: None,
+                })
+            }
+        }
+    }
+
+    /// Transition from Idle to Starting (called by spawn_session).
+    pub fn start(&mut self) {
+        self.kind = AgentStateKind::Starting;
+    }
+
+    /// Register tool runs before executing them.
+    pub fn register_tool_runs(&mut self, records: Vec<ToolRunRecord>) {
+        self.tool_runs.extend(records);
+    }
+
+    /// Register hook runs before executing them.
+    pub fn register_hook_runs(&mut self, records: Vec<HookRunRecord>) {
+        self.hook_runs.extend(records);
+    }
+}
+
+/// Get a static name for an event type (for error messages).
+fn event_type_name(event: &AgentEvent) -> &'static str {
+    match event {
+        AgentEvent::UserInput { .. } => "UserInput",
+        AgentEvent::HarnessStream { .. } => "HarnessStream",
+        AgentEvent::ToolRequested { .. } => "ToolRequested",
+        AgentEvent::ToolStarted { .. } => "ToolStarted",
+        AgentEvent::ToolCompleted { .. } => "ToolCompleted",
+        AgentEvent::HookStarted { .. } => "HookStarted",
+        AgentEvent::HookCompleted { .. } => "HookCompleted",
+        AgentEvent::RetryTimeout { .. } => "RetryTimeout",
+        AgentEvent::StopRequested { .. } => "StopRequested",
+        AgentEvent::HarnessExited { .. } => "HarnessExited",
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

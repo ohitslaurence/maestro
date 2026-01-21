@@ -2192,6 +2192,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-process",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
