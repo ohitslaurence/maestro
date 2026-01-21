@@ -41,11 +41,11 @@ Exit Criteria
 - [x] `hook_lifecycle` events fire for each hook run (See §4)
 
 ## Phase 5: Frontend wiring
-- [ ] Add TS types in `app/src/types/agent.ts` (See §3, §4)
+- [x] Add TS types in `app/src/types/agent.ts` (See §3, §4)
 - [ ] Subscribe to `agent:state_event` in event hub and update hooks (See §4, §5)
 
 Exit Criteria
-- [ ] Frontend compiles with new TS types (See §3, §4)
+- [x] Frontend compiles with new TS types (See §3, §4)
 - [ ] UI reflects `AgentStateKind` updates for at least one session (manual)
 
 ## Files to Create
@@ -61,5 +61,5 @@ Exit Criteria
 - `app/src/hooks/useAgentSession.ts`
 
 ## Verification Checklist
-- [ ] `bun run typecheck`
+- [x] `bun run typecheck`
 - [ ] Manual: spawn session, observe state/tool/hook events in UI
