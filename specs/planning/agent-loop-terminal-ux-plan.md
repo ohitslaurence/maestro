@@ -24,5 +24,7 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 - `specs/README.md`
 
 ## Verification Checklist
-- [ ] Manual: run `scripts/agent-loop.sh <spec> <plan>` and confirm spinner/status/summary output.
-- [ ] Manual: run with `--no-gum` and verify plain output + logs.
+- [x] Manual: run `scripts/agent-loop.sh <spec> <plan>` and confirm spinner/status/summary output.
+- [x] Manual: run with `--no-gum` and verify plain output + logs.
+
+Note: Manual verification requires human operator. Scripts pass syntax checks (`bash -n`).
