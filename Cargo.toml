@@ -1,0 +1,210 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[workspace]
+resolver = "2"
+members = [
+	"crates/loom-cli-acp",
+	"crates/loom-server-auth",
+	"crates/loom-server-auth-devicecode",
+	"crates/loom-server-auth-github",
+	"crates/loom-server-auth-google",
+	"crates/loom-server-auth-magiclink",
+	"crates/loom-server-auth-okta",
+	"crates/loom-cli-auto-commit",
+	"crates/loom-cli",
+	"crates/loom-cli-config",
+	"crates/loom-common-config",
+	"crates/loom-common-core",
+	"crates/loom-cli-credentials",
+	"crates/loom-cli-git",
+	"crates/loom-server-github-app",
+	"crates/loom-server-search-google-cse",
+	"crates/loom-server-search-serper",
+	"crates/loom-common-http",
+	"crates/loom-server-llm-anthropic",
+	"crates/loom-server-llm-openai",
+	"crates/loom-server-llm-proxy",
+	"crates/loom-server-llm-service",
+	"crates/loom-server-llm-vertex",
+	"crates/loom-server-llm-zai",
+	"crates/loom-common-secret",
+	"crates/loom-server",
+	"crates/loom-common-thread",
+	"crates/loom-cli-tools",
+	"crates/loom-common-version",
+	"crates/loom-server-k8s",
+	"crates/loom-server-weaver",
+	"crates/loom-server-smtp",
+	"crates/loom-server-email",
+	"crates/loom-common-i18n",
+	"crates/loom-server-geoip",
+	"crates/loom-server-jobs",
+	"crates/loom-server-logs",
+	"crates/loom-scim",
+	"crates/loom-server-scim",
+	"crates/loom-server-provisioning",
+	"crates/loom-server-scm",
+	"crates/loom-server-scm-mirror",
+	"crates/loom-server-session",
+	"crates/loom-server-db",
+	"crates/loom-server-api",
+	"crates/loom-server-audit",
+	"crates/loom-server-config",
+	"crates/loom-common-spool",
+	"crates/loom-cli-spool",
+	"crates/loom-redact",
+	"crates/loom-common-webhook",
+	"crates/loom-weaver-audit-sidecar",
+	"crates/loom-weaver-secrets",
+	"crates/loom-weaver-wgtunnel",
+	"crates/loom-flags-core",
+	"crates/loom-server-flags",
+	"crates/loom-flags",
+	"crates/loom-analytics-core",
+	"crates/loom-server-analytics",
+	"crates/loom-analytics",
+	"crates/loom-crons-core",
+	"crates/loom-crons",
+	"crates/loom-server-crons",
+	"crates/loom-crash-core",
+	"crates/loom-crash-symbolicate",
+	"crates/loom-crash",
+	"crates/loom-server-crash",
+	"crates/loom-sessions-core",
+	"crates/loom-server-sessions",
+	]
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Geoffrey Huntley"]
+edition = "2021"
+license = "LicenseRef-Proprietary"
+repository = "https://github.com/ghuntley/loom"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# HTTP client
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+anyhow = "1"
+thiserror = "1"
+
+# Logging/tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Async utilities
+async-trait = "0.1"
+futures = "0.3"
+pin-project-lite = "0.2"
+tokio-util = { version = "0.7", features = ["compat"] }
+
+# HTTP types
+http = "1"
+
+# CLI
+clap = { version = "4", features = ["derive", "env"] }
+
+# UUID generation
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+uuid7 = { version = "1", features = ["serde"] }
+
+# Kubernetes
+kube = { version = "0.98", features = ["runtime", "client", "derive", "ws"] }
+k8s-openapi = { version = "0.24", features = ["v1_32"] }
+
+# Cryptography
+hex = "0.4"
+hmac = "0.12"
+sha2 = "0.10"
+
+# Testing
+proptest = "1"
+tempfile = "3"
+tokio-test = "0.4"
+
+# Random (for jitter)
+fastrand = "2"
+
+# Bytes
+bytes = "1"
+
+# TOML parsing
+toml = "0.8"
+
+# Directories (for XDG)
+dirs = "5"
+
+# Secrets
+zeroize = { version = "1", features = ["zeroize_derive"] }
+
+# Crypto - password/token hashing
+argon2 = "0.5"
+rand = "0.8"
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
+
+# OpenAPI documentation
+utoipa = { version = "5", features = ["axum_extras", "uuid", "chrono"] }
+
+# Internal crates
+loom-server-auth-devicecode = { path = "crates/loom-server-auth-devicecode" }
+loom-server-auth-magiclink = { path = "crates/loom-server-auth-magiclink" }
+loom-common-config = { path = "crates/loom-common-config" }
+loom-common-secret = { path = "crates/loom-common-secret" }
+loom-common-version = { path = "crates/loom-common-version" }
+loom-server-k8s = { path = "crates/loom-server-k8s" }
+loom-server-geoip = { path = "crates/loom-server-geoip" }
+loom-server-jobs = { path = "crates/loom-server-jobs" }
+loom-common-webhook = { path = "crates/loom-common-webhook" }
+loom-flags-core = { path = "crates/loom-flags-core" }
+loom-analytics-core = { path = "crates/loom-analytics-core" }
+loom-crons-core = { path = "crates/loom-crons-core" }
+loom-server-crons = { path = "crates/loom-server-crons" }
+loom-crash-core = { path = "crates/loom-crash-core" }
+loom-crash-symbolicate = { path = "crates/loom-crash-symbolicate" }
+loom-crash = { path = "crates/loom-crash" }
+loom-server-crash = { path = "crates/loom-server-crash" }
+loom-sessions-core = { path = "crates/loom-sessions-core" }
+loom-server-sessions = { path = "crates/loom-server-sessions" }
+loom-analytics = { path = "crates/loom-analytics" }
+loom-server-analytics = { path = "crates/loom-server-analytics" }
+loom-common-http = { path = "crates/loom-common-http" }
+
+# Build profile optimizations for faster development builds
+[profile.dev]
+debug = 1                    # Reduced debug info (vs default 2)
+split-debuginfo = "unpacked" # Faster linking with separate debug files
+incremental = true           # Enable incremental compilation (default, explicit)
+
+[profile.dev.package.loom-server]
+codegen-units = 256          # More parallelism for the largest crate
+
+[profile.dev.package.loom-server-api]
+codegen-units = 128
+
+# Fast profile for git hooks and quick iteration
+[profile.dev-fast]
+inherits = "dev"
+debug = 0                    # No debug info for fastest builds
+codegen-units = 512          # Maximum parallelism
+incremental = true
+
+# Release profile - zero optimization for fastest compile times
+[profile.release]
+lto = false
+opt-level = 0
+codegen-units = 256
+strip = "debuginfo"

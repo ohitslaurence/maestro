@@ -1,0 +1,19 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[package]
+name = "loom-common-webhook"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Shared webhook signature utilities for Loom"
+
+[dependencies]
+hex.workspace = true
+hmac.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

@@ -1,0 +1,56 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+[package]
+name = "loom-server-wgtunnel"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Server-side coordination APIs for the WireGuard tunnel system"
+
+[dependencies]
+loom-wgtunnel-common = { path = "../loom-wgtunnel-common" }
+loom-common-secret = { path = "../loom-common-secret" }
+loom-common-config = { path = "../loom-common-config" }
+loom-server-db = { path = "../loom-server-db" }
+
+# Database
+sqlx = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Async
+tokio = { workspace = true, features = ["sync"] }
+
+# HTTP types
+axum = "0.8"
+http = { workspace = true }
+
+# OpenAPI
+utoipa = { workspace = true }
+
+# UUID
+uuid = { workspace = true }
+
+# Date/time
+chrono = { workspace = true }
+
+# Networking
+ipnet = "2"
+
+# Error handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# Base64
+base64 = "0.22"
+
+[dev-dependencies]
+tokio-test = { workspace = true }

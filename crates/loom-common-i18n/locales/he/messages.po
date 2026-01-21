@@ -1,0 +1,1764 @@
+# Loom Server Translations - Hebrew
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>
+# SPDX-License-Identifier: Proprietary
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: he\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: Email: Magic Link - Subject
+msgid "server.email.magic_link.subject"
+msgstr "התחברות ל-Loom"
+
+#: Email: Magic Link - Body intro
+msgid "server.email.magic_link.body"
+msgstr "לחץ על הקישור למטה כדי להתחבר לחשבון Loom שלך."
+
+#: Email: Magic Link - Expiry notice
+msgid "server.email.magic_link.expires"
+msgstr "תוקף הקישור יפוג בעוד {minutes} דקות."
+
+#: Email: Magic Link - Ignore notice
+msgid "server.email.magic_link.ignore"
+msgstr "אם לא ביקשת את הדוא״ל הזה, תוכל להתעלם ממנו בבטחה."
+
+#: Email: Magic Link - Copy link instruction
+msgid "server.email.magic_link.copy_link"
+msgstr "או העתק והדבק את הקישור הזה:"
+
+#: Email: Org Invitation - Subject
+msgid "server.email.invitation.subject"
+msgstr "הוזמנת להצטרף ל-{org_name} ב-Loom"
+
+#: Email: Org Invitation - Body
+msgid "server.email.invitation.body"
+msgstr "{inviter_name} הזמין אותך להצטרף לארגון \"{org_name}\" ב-Loom."
+
+#: Email: Org Invitation - Action instruction
+msgid "server.email.invitation.action"
+msgstr "לחץ על הקישור למטה כדי לקבל את ההזמנה:"
+
+#: Email: Org Invitation - No expiry notice
+msgid "server.email.invitation.no_expiry"
+msgstr "תוקף ההזמנה לא יפוג, אך מנהל הארגון יכול לבטל אותה."
+
+#: Email: Security Alert - Subject
+msgid "server.email.security_alert.subject"
+msgstr "התראת אבטחה של Loom: {event}"
+
+#: Email: Security Alert - Body intro
+msgid "server.email.security_alert.body"
+msgstr "אירוע אבטחה התרחש בחשבון Loom שלך."
+
+#: Email: Security Alert - Event label
+msgid "server.email.security_alert.event"
+msgstr "אירוע: {event}"
+
+#: Email: Security Alert - Details label
+msgid "server.email.security_alert.details"
+msgstr "פרטים:"
+
+#: Email: Security Alert - Action instruction
+msgid "server.email.security_alert.action"
+msgstr "אם לא ביצעת פעולה זו, אנא בדוק את הגדרות האבטחה של חשבונך מיד."
+
+#: Email: Deletion Warning - Subject
+msgid "server.email.deletion_warning.subject"
+msgstr "חשבון Loom שלך מתוכנן למחיקה"
+
+#: Email: Deletion Warning - Body
+msgid "server.email.deletion_warning.body"
+msgstr "חשבון Loom שלך מתוכנן למחיקה קבועה בעוד {days} ימים."
+
+#: Email: Deletion Warning - Restore instruction
+msgid "server.email.deletion_warning.restore"
+msgstr "אם לא ביקשת מחיקה זו, או אם שינית את דעתך, תוכל לשחזר את חשבונך על ידי התחברות לפני תאריך המחיקה."
+
+#: Email: Deletion Warning - Permanent notice
+msgid "server.email.deletion_warning.permanent"
+msgstr "לאחר מחיקה קבועה, לא ניתן יהיה לשחזר את הנתונים שלך."
+
+#: Email: Deletion Scheduled - Subject
+msgid "server.email.deletion_scheduled.subject"
+msgstr "מחיקת חשבון תוזמנה"
+
+#: Email: Deletion Scheduled - Body
+msgid "server.email.deletion_scheduled.body"
+msgstr "החשבון שלך תוזמן למחיקה."
+
+#: Email: Deletion Scheduled - Grace period notice
+msgid "server.email.deletion_scheduled.grace"
+msgstr "יש לך {days} ימים לשחזר את חשבונך על ידי התחברות וביטול המחיקה."
+
+#: Email: Deletion Scheduled - Permanent notice
+msgid "server.email.deletion_scheduled.permanent"
+msgstr "לאחר תקופת החסד, החשבון שלך וכל הנתונים הקשורים אליו יימחקו לצמיתות."
+
+#: API: Auth - Check email response
+msgid "server.api.auth.check_email"
+msgstr "בדוק את הדוא״ל שלך לקבלת קישור התחברות"
+
+#: API: Auth - Logged out response
+msgid "server.api.auth.logged_out"
+msgstr "התנתקת בהצלחה"
+
+#: API: Error - Internal error
+msgid "server.api.error.internal"
+msgstr "אירעה שגיאה פנימית"
+
+#: API: Error - Not found
+msgid "server.api.error.not_found"
+msgstr "המשאב לא נמצא"
+
+#: API: Error - Unauthorized
+msgid "server.api.error.unauthorized"
+msgstr "נדרש אימות"
+
+#: API: Error - Forbidden
+msgid "server.api.error.forbidden"
+msgstr "הגישה נדחתה"
+
+#: API: Error - Bad request
+msgid "server.api.error.bad_request"
+msgstr "בקשה לא תקינה"
+
+#: API: Error - Conflict
+msgid "server.api.error.conflict"
+msgstr "התנגשות משאבים"
+
+#: API: Error - Gone
+msgid "server.api.error.gone"
+msgstr "המשאב אינו זמין יותר"
+
+#: API: Error - Not configured
+msgid "server.api.error.not_configured"
+msgstr "התכונה לא הוגדרה"
+
+# ============================================================================
+# Auth API responses
+# ============================================================================
+
+#: API: Auth - Invalid email
+msgid "server.api.auth.invalid_email"
+msgstr "אנא ספק כתובת דוא״ל תקינה"
+
+#: API: Auth - Device code authorized
+msgid "server.api.auth.device_authorized"
+msgstr "המכשיר אושר בהצלחה"
+
+#: API: Auth - Invalid device code
+msgid "server.api.auth.invalid_device_code"
+msgstr "קוד מכשיר לא תקין או שפג תוקפו"
+
+#: API: Auth - Invalid user code
+msgid "server.api.auth.invalid_user_code"
+msgstr "קוד משתמש לא תקין או שפג תוקפו"
+
+#: API: Auth - OAuth not configured
+msgid "server.api.auth.oauth_not_configured"
+msgstr "OAuth של {provider} לא הוגדר"
+
+#: API: Auth - Magic link sent (always shown to prevent enumeration)
+msgid "server.api.auth.magic_link_sent"
+msgstr "אם קיים חשבון עם דוא״ל זה, נשלח קישור התחברות"
+
+#: API: Auth - Email not verified (Google/Okta)
+msgid "server.api.auth.email_not_verified"
+msgstr "כתובת הדוא״ל לא אומתה על ידי הספק"
+
+#: API: Auth - No verified email (GitHub)
+msgid "server.api.auth.no_verified_email"
+msgstr "לא נמצאה כתובת דוא״ל מאומתת. אנא אמת את הדוא״ל שלך ב-GitHub ונסה שוב."
+
+#: API: Auth - Signups disabled
+msgid "server.api.auth.signups_disabled"
+msgstr "הרשמות משתמשים חדשים מושבתות כרגע. אנא פנה למנהל מערכת."
+
+# ============================================================================
+# User API responses
+# ============================================================================
+
+#: API: User - Not found
+msgid "server.api.user.not_found"
+msgstr "המשתמש לא נמצא"
+
+#: API: User - Invalid ID
+msgid "server.api.user.invalid_id"
+msgstr "פורמט מזהה משתמש לא תקין"
+
+#: API: User - Display name empty
+msgid "server.api.user.display_name_empty"
+msgstr "שם התצוגה לא יכול להיות ריק"
+
+#: API: User - Profile updated
+msgid "server.api.user.profile_updated"
+msgstr "הפרופיל עודכן בהצלחה"
+
+#: API: User - Deletion scheduled
+msgid "server.api.user.deletion_scheduled"
+msgstr "החשבון תוזמן למחיקה"
+
+#: API: User - Deletion already scheduled
+msgid "server.api.user.deletion_already_scheduled"
+msgstr "מחיקת החשבון כבר תוזמנה"
+
+#: API: User - Deletion failed
+msgid "server.api.user.deletion_failed"
+msgstr "תזמון מחיקת החשבון נכשל"
+
+#: API: User - No pending deletion
+msgid "server.api.user.no_pending_deletion"
+msgstr "אין מחיקה ממתינה לחשבון זה"
+
+#: API: User - Grace period expired
+msgid "server.api.user.grace_period_expired"
+msgstr "תקופת החסד פגה, לא ניתן לשחזר את החשבון"
+
+#: API: User - Account restored
+msgid "server.api.user.account_restored"
+msgstr "החשבון שוחזר בהצלחה"
+
+#: API: User - Identity unlinked
+msgid "server.api.user.identity_unlinked"
+msgstr "הזהות נותקה בהצלחה"
+
+#: API: User - Identity not found
+msgid "server.api.user.identity_not_found"
+msgstr "הזהות לא נמצאה"
+
+#: API: User - Cannot unlink last identity
+msgid "server.api.user.cannot_unlink_last_identity"
+msgstr "לא ניתן לנתק את הזהות האחרונה"
+
+#: API: User - Username updated
+msgid "server.api.user.username_updated"
+msgstr "שם המשתמש עודכן בהצלחה"
+
+#: API: User - Username invalid
+msgid "server.api.user.username_invalid"
+msgstr "פורמט שם משתמש לא חוקי"
+
+#: API: User - Username taken
+msgid "server.api.user.username_taken"
+msgstr "שם המשתמש כבר תפוס"
+
+#: API: User - Username too short
+msgid "server.api.user.username_too_short"
+msgstr "שם המשתמש חייב להכיל לפחות 3 תווים"
+
+#: API: User - Username too long
+msgid "server.api.user.username_too_long"
+msgstr "שם המשתמש יכול להכיל עד 39 תווים"
+
+#: API: User - Username reserved
+msgid "server.api.user.username_reserved"
+msgstr "שם משתמש זה שמור ולא ניתן להשתמש בו"
+
+#: API: User - Invalid locale
+msgid "server.api.user.invalid_locale"
+msgstr "הגדרות שפה לא תקינות"
+
+# ============================================================================
+# Organization API responses
+# ============================================================================
+
+#: API: Org - Not found
+msgid "server.api.org.not_found"
+msgstr "הארגון לא נמצא"
+
+#: API: Org - Invalid ID
+msgid "server.api.org.invalid_id"
+msgstr "מזהה ארגון לא תקין"
+
+#: API: Org - Invalid slug length
+msgid "server.api.org.invalid_slug_length"
+msgstr "הכינוי חייב להכיל בין 3 ל-50 תווים"
+
+#: API: Org - Invalid slug format
+msgid "server.api.org.invalid_slug_format"
+msgstr "הכינוי חייב להכיל רק אותיות קטנות באנגלית, מספרים ומקפים"
+
+#: API: Org - Slug exists
+msgid "server.api.org.slug_exists"
+msgstr "כבר קיים ארגון עם כינוי זה"
+
+#: API: Org - Slug reserved
+msgid "server.api.org.slug_reserved"
+msgstr "This organization slug is reserved"
+
+#: API: Org - Invalid role
+msgid "server.api.org.invalid_role"
+msgstr "התפקיד חייב להיות אחד מ: owner, admin, member"
+
+#: API: Org - List failed
+msgid "server.api.org.list_failed"
+msgstr "טעינת רשימת הארגונים נכשלה"
+
+#: API: Org - Create failed
+msgid "server.api.org.create_failed"
+msgstr "יצירת הארגון נכשלה"
+
+#: API: Org - Not a member
+msgid "server.api.org.not_a_member"
+msgstr "אינך חבר בארגון זה"
+
+#: API: Org - Already a member
+msgid "server.api.org.already_member"
+msgstr "המשתמש כבר חבר בארגון זה"
+
+#: API: Org - Member added
+msgid "server.api.org.member_added"
+msgstr "החבר נוסף לארגון"
+
+#: API: Org - Member removed
+msgid "server.api.org.member_removed"
+msgstr "החבר הוסר מהארגון"
+
+#: API: Org - Member not found
+msgid "server.api.org.member_not_found"
+msgstr "החבר לא נמצא בארגון זה"
+
+#: API: Org - Last owner
+msgid "server.api.org.last_owner"
+msgstr "לא ניתן להסיר או להוריד בדרגה את הבעלים האחרון"
+
+#: API: Org - Cannot delete personal org
+msgid "server.api.org.cannot_delete_personal"
+msgstr "לא ניתן למחוק ארגון אישי"
+
+#: API: Org - Deleted
+msgid "server.api.org.deleted"
+msgstr "הארגון נמחק"
+
+#: API: Org - Restored
+msgid "server.api.org.restored"
+msgstr "הארגון שוחזר"
+
+#: API: Org - Not deleted
+msgid "server.api.org.not_deleted"
+msgstr "הארגון לא נמחק"
+
+#: API: Org - Grace period expired
+msgid "server.api.org.grace_period_expired"
+msgstr "תקופת החסד פגה ולא ניתן לשחזר ארגון זה"
+
+#: API: Org - Owner required
+msgid "server.api.org.owner_required"
+msgstr "רק בעלים יכולים לבצע פעולה זו"
+
+#: API: Org - Role updated
+msgid "server.api.org.role_updated"
+msgstr "תפקיד החבר עודכן"
+
+#: API: Org - Join request for private org
+msgid "server.api.org.join_request_private"
+msgstr "לא ניתן לבקש להצטרף לארגון פרטי"
+
+#: API: Org - Join request pending
+msgid "server.api.org.join_request_pending"
+msgstr "כבר יש לך בקשת הצטרפות ממתינה לארגון זה"
+
+#: API: Org - Join request created
+msgid "server.api.org.join_request_created"
+msgstr "בקשת ההצטרפות נשלחה"
+
+#: API: Org - Join request not found
+msgid "server.api.org.join_request_not_found"
+msgstr "בקשת ההצטרפות לא נמצאה"
+
+#: API: Org - Join request approved
+msgid "server.api.org.join_request_approved"
+msgstr "בקשת ההצטרפות אושרה"
+
+#: API: Org - Join request rejected
+msgid "server.api.org.join_request_rejected"
+msgstr "בקשת ההצטרפות נדחתה"
+
+# ============================================================================
+# Team API responses
+# ============================================================================
+
+#: API: Team - Not found
+msgid "server.api.team.not_found"
+msgstr "הצוות לא נמצא"
+
+#: API: Team - Invalid ID
+msgid "server.api.team.invalid_id"
+msgstr "מזהה צוות לא תקין"
+
+#: API: Team - Invalid slug length
+msgid "server.api.team.invalid_slug_length"
+msgstr "הכינוי חייב להכיל בין 2 ל-50 תווים"
+
+#: API: Team - Invalid slug format
+msgid "server.api.team.invalid_slug_format"
+msgstr "הכינוי חייב להכיל רק אותיות קטנות באנגלית, מספרים ומקפים"
+
+#: API: Team - List failed
+msgid "server.api.team.list_failed"
+msgstr "טעינת רשימת הצוותים נכשלה"
+
+#: API: Team - Membership check failed
+msgid "server.api.team.membership_check_failed"
+msgstr "בדיקת החברות בארגון נכשלה"
+
+# ============================================================================
+# Invitation API responses
+# ============================================================================
+
+#: API: Invitation - Created
+msgid "server.api.invitation.created"
+msgstr "ההזמנה נשלחה בהצלחה"
+
+#: API: Invitation - Cancelled
+msgid "server.api.invitation.cancelled"
+msgstr "ההזמנה בוטלה"
+
+#: API: Invitation - Accepted
+msgid "server.api.invitation.accepted"
+msgstr "ההזמנה התקבלה"
+
+#: API: Invitation - Not found
+msgid "server.api.invitation.not_found"
+msgstr "ההזמנה לא נמצאה"
+
+#: API: Invitation - Expired
+msgid "server.api.invitation.expired"
+msgstr "תוקף ההזמנה פג"
+
+#: API: Invitation - Invalid token
+msgid "server.api.invitation.invalid_token"
+msgstr "אסימון הזמנה לא תקין"
+
+#: API: Invitation - Already accepted
+msgid "server.api.invitation.already_accepted"
+msgstr "ההזמנה כבר התקבלה"
+
+#: API: Invitation - List failed
+msgid "server.api.invitation.list_failed"
+msgstr "טעינת רשימת ההזמנות נכשלה"
+
+# ============================================================================
+# Join request API responses
+# ============================================================================
+
+#: API: Join request - Created
+msgid "server.api.join_request.created"
+msgstr "בקשת ההצטרפות נשלחה"
+
+#: API: Join request - Approved
+msgid "server.api.join_request.approved"
+msgstr "בקשת ההצטרפות אושרה"
+
+#: API: Join request - Rejected
+msgid "server.api.join_request.rejected"
+msgstr "בקשת ההצטרפות נדחתה"
+
+#: API: Join request - Already member
+msgid "server.api.join_request.already_member"
+msgstr "אתה כבר חבר בארגון זה"
+
+#: API: Join request - Already pending
+msgid "server.api.join_request.already_pending"
+msgstr "כבר יש לך בקשת הצטרפות ממתינה"
+
+#: API: Join request - Not found
+msgid "server.api.join_request.not_found"
+msgstr "בקשת ההצטרפות לא נמצאה"
+
+#: API: Join request - Private org
+msgid "server.api.join_request.private_org"
+msgstr "לא ניתן לבקש להצטרף לארגון פרטי"
+
+# ============================================================================
+# API Key responses
+# ============================================================================
+
+#: API: API Key - Invalid org ID
+msgid "server.api.api_key.invalid_org_id"
+msgstr "פורמט מזהה ארגון לא תקין"
+
+#: API: API Key - Name empty
+msgid "server.api.api_key.name_empty"
+msgstr "שם מפתח ה-API לא יכול להיות ריק"
+
+#: API: API Key - No scopes
+msgid "server.api.api_key.no_scopes"
+msgstr "יש לציין לפחות הרשאה אחת"
+
+#: API: API Key - Created
+msgid "server.api.api_key.created"
+msgstr "מפתח ה-API נוצר"
+
+#: API: API Key - Revoked
+msgid "server.api.api_key.revoked"
+msgstr "מפתח ה-API בוטל"
+
+#: API: API Key - Not found
+msgid "server.api.api_key.not_found"
+msgstr "מפתח ה-API לא נמצא"
+
+#: API: API Key - List failed
+msgid "server.api.api_key.list_failed"
+msgstr "טעינת רשימת מפתחות ה-API נכשלה"
+
+#: API: API Key - Create failed
+msgid "server.api.api_key.create_failed"
+msgstr "יצירת מפתח ה-API נכשלה"
+
+# ============================================================================
+# Session API responses
+# ============================================================================
+
+#: API: Session - Invalid ID
+msgid "server.api.session.invalid_id"
+msgstr "פורמט מזהה הפעלה לא תקין"
+
+#: API: Session - Not found
+msgid "server.api.session.not_found"
+msgstr "ההפעלה לא נמצאה"
+
+#: API: Session - Revoked
+msgid "server.api.session.revoked"
+msgstr "ההפעלה בוטלה בהצלחה"
+
+#: API: Session - List failed
+msgid "server.api.session.list_failed"
+msgstr "אחזור ההפעלות נכשל"
+
+#: API: Session - Revoke failed
+msgid "server.api.session.revoke_failed"
+msgstr "ביטול ההפעלה נכשל"
+
+#: API: Session - Ownership check failed
+msgid "server.api.session.ownership_check_failed"
+msgstr "אימות בעלות ההפעלה נכשל"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - System admin required
+msgid "server.api.admin.system_admin_required"
+msgstr "נדרש תפקיד מנהל מערכת"
+
+#: API: Admin - Cannot remove own admin
+msgid "server.api.admin.cannot_remove_own_admin"
+msgstr "לא ניתן להסיר את סטטוס המנהל שלך עצמך"
+
+#: API: Admin - User list failed
+msgid "server.api.admin.user_list_failed"
+msgstr "טעינת רשימת המשתמשים נכשלה"
+
+#: API: Admin - User update failed
+msgid "server.api.admin.user_update_failed"
+msgstr "עדכון המשתמש נכשל"
+
+#: API: Admin - Roles updated
+msgid "server.api.admin.roles_updated"
+msgstr "תפקידי המשתמש עודכנו"
+
+#: Auth: Device Page - Title
+msgid "server.auth.device.title"
+msgstr "אישור מכשיר - Loom"
+
+#: Auth: Device Page - Heading
+msgid "server.auth.device.heading"
+msgstr "אישור מכשיר"
+
+#: Auth: Device Page - Subtitle
+msgid "server.auth.device.subtitle"
+msgstr "הזן את הקוד שמוצג בטרמינל שלך"
+
+#: Auth: Device Page - Code label
+msgid "server.auth.device.code_label"
+msgstr "קוד אישור"
+
+#: Auth: Device Page - Submit button
+msgid "server.auth.device.submit"
+msgstr "אשר מכשיר"
+
+#: Auth: Device Page - Authorizing button
+msgid "server.auth.device.authorizing"
+msgstr "מאשר..."
+
+#: Auth: Device Page - Authorized button
+msgid "server.auth.device.authorized"
+msgstr "אושר"
+
+#: Auth: Device Page - Expiry help text
+msgid "server.auth.device.expiry_help"
+msgstr "תוקף הקוד יפוג לאחר 15 דקות."
+
+#: Auth: Device Page - Success message
+msgid "server.auth.device.success"
+msgstr "המכשיר אושר בהצלחה! תוכל לסגור חלון זה."
+
+#: Auth: Device Page - Invalid code format
+msgid "server.auth.device.invalid_format"
+msgstr "אנא הזן קוד תקין בפורמט XXX-XXX-XXX"
+
+#: Auth: Device Page - Generic error
+msgid "server.auth.device.error"
+msgstr "אירעה שגיאה. אנא נסה שוב."
+
+#: Auth: Device Page - Authorization failed
+msgid "server.auth.device.auth_failed"
+msgstr "האישור נכשל. אנא נסה שוב."
+
+# ============================================================================
+# Support Access API responses
+# ============================================================================
+
+#: API: Support Access - Not support staff
+msgid "server.api.support_access.not_support_staff"
+msgstr "רק צוות התמיכה יכול לבקש גישת תמיכה"
+
+#: API: Support Access - Thread not found
+msgid "server.api.support_access.thread_not_found"
+msgstr "השרשור לא נמצא"
+
+#: API: Support Access - Already requested
+msgid "server.api.support_access.already_requested"
+msgstr "גישת תמיכה כבר נתבקשה לשרשור זה"
+
+#: API: Support Access - Already active
+msgid "server.api.support_access.already_active"
+msgstr "גישת תמיכה כבר פעילה לשרשור זה"
+
+#: API: Support Access - Requested
+msgid "server.api.support_access.requested"
+msgstr "גישת תמיכה נתבקשה"
+
+#: API: Support Access - Request failed
+msgid "server.api.support_access.request_failed"
+msgstr "בקשת גישת תמיכה נכשלה"
+
+#: API: Support Access - Not owner
+msgid "server.api.support_access.not_owner"
+msgstr "רק בעל השרשור יכול לאשר או לבטל גישת תמיכה"
+
+#: API: Support Access - No pending request
+msgid "server.api.support_access.no_pending_request"
+msgstr "לא נמצאה בקשת גישת תמיכה ממתינה לשרשור זה"
+
+#: API: Support Access - Approved
+msgid "server.api.support_access.approved"
+msgstr "גישת תמיכה אושרה"
+
+#: API: Support Access - Approve failed
+msgid "server.api.support_access.approve_failed"
+msgstr "אישור גישת תמיכה נכשל"
+
+#: API: Support Access - No active access
+msgid "server.api.support_access.no_active_access"
+msgstr "לא נמצאה גישת תמיכה פעילה לשרשור זה"
+
+#: API: Support Access - Revoked
+msgid "server.api.support_access.revoked"
+msgstr "גישת תמיכה בוטלה"
+
+#: API: Support Access - Revoke failed
+msgid "server.api.support_access.revoke_failed"
+msgstr "ביטול גישת תמיכה נכשל"
+
+# ============================================================================
+# Share Link API responses
+# ============================================================================
+
+#: API: Share - Invalid thread ID
+msgid "server.api.share.invalid_thread_id"
+msgstr "פורמט מזהה שרשור לא תקין"
+
+#: API: Share - Thread not found
+msgid "server.api.share.thread_not_found"
+msgstr "השרשור לא נמצא"
+
+#: API: Share - Invalid expires_at
+msgid "server.api.share.invalid_expires_at"
+msgstr "פורמט תאריך תפוגה לא תקין. השתמש בפורמט RFC 3339."
+
+#: API: Share - Create failed
+msgid "server.api.share.create_failed"
+msgstr "יצירת קישור השיתוף נכשלה"
+
+#: API: Share - Link not found
+msgid "server.api.share.link_not_found"
+msgstr "לא נמצא קישור שיתוף פעיל לשרשור זה"
+
+#: API: Share - Revoked
+msgid "server.api.share.revoked"
+msgstr "קישור השיתוף בוטל"
+
+#: API: Share - Revoke failed
+msgid "server.api.share.revoke_failed"
+msgstr "ביטול קישור השיתוף נכשל"
+
+#: API: Share - Invalid or expired link
+msgid "server.api.share.invalid_or_expired"
+msgstr "קישור שיתוף לא תקין או שפג תוקפו"
+
+#: API: Share - Link revoked
+msgid "server.api.share.link_revoked"
+msgstr "קישור שיתוף זה בוטל"
+
+#: API: Share - Link expired
+msgid "server.api.share.link_expired"
+msgstr "תוקף קישור שיתוף זה פג"
+
+#: API: Share - Validation failed
+msgid "server.api.share.validation_failed"
+msgstr "אימות קישור השיתוף נכשל"
+
+#: API: Share - Fetch failed
+msgid "server.api.share.fetch_failed"
+msgstr "אחזור השרשור נכשל"
+
+#: API: Weaver - Provisioner not configured
+msgid "server.api.weaver.provisioner_not_configured"
+msgstr "מערכת הקצאת Weaver לא הוגדרה"
+
+#: API: Weaver - Invalid ID
+msgid "server.api.weaver.invalid_id"
+msgstr "מזהה Weaver לא תקין: {id}"
+
+#: API: Weaver - Not found
+msgid "server.api.weaver.not_found"
+msgstr "Weaver לא נמצא: {id}"
+
+#: API: Weaver - Access denied
+msgid "server.api.weaver.access_denied"
+msgstr "אין לך הרשאה לגשת ל-Weaver זה"
+
+#: API: Weaver - Attach denied
+msgid "server.api.weaver.attach_denied"
+msgstr "אין לך הרשאה להתחבר ל-Weaver זה"
+
+#: API: Weaver - Delete denied
+msgid "server.api.weaver.delete_denied"
+msgstr "אין לך הרשאה למחוק Weaver זה"
+
+#: API: Weaver - Read only attach
+msgid "server.api.weaver.read_only_attach"
+msgstr "התחברות לקריאה בלבד: הקלט מושבת למשתמשי תמיכה"
+
+#: API: Weaver - Logs access denied
+msgid "server.api.weaver.logs_denied"
+msgstr "אין לך הרשאה לגשת ליומנים של Weaver זה"
+
+# ============================================================================
+# CLI: Update command
+# ============================================================================
+
+#: CLI: Update - Current version
+msgid "client.update.current_version"
+msgstr "גרסה נוכחית: {version}"
+
+#: CLI: Update - Platform
+msgid "client.update.platform"
+msgstr "פלטפורמה: {platform}"
+
+#: CLI: Update - Checking
+msgid "client.update.checking"
+msgstr "בודק עדכונים..."
+
+#: CLI: Update - Already up to date
+msgid "client.update.up_to_date"
+msgstr "כבר מעודכן (SHA: {sha})"
+
+#: CLI: Update - Update available
+msgid "client.update.available"
+msgstr "עדכון זמין: {current} -> {remote}"
+
+#: CLI: Update - Downloading
+msgid "client.update.downloading"
+msgstr "מוריד מ-{url}..."
+
+#: CLI: Update - Downloaded
+msgid "client.update.downloaded"
+msgstr "הורדו {bytes} בתים (מאומת)"
+
+#: CLI: Update - Complete
+msgid "client.update.complete"
+msgstr "העדכון הושלם! אנא הפעל מחדש את loom."
+
+#: CLI: Update - Error: empty binary
+msgid "client.update.error.empty_binary"
+msgstr "הקובץ הבינארי שהורד ריק"
+
+#: CLI: Update - Error: SHA mismatch
+msgid "client.update.error.sha_mismatch"
+msgstr "אי התאמה ב-SHA של הקובץ הבינארי: צפוי {expected}, התקבל {actual}"
+
+#: CLI: Update - Error: env not set
+msgid "client.update.error.env_not_set"
+msgstr "יש להגדיר LOOM_UPDATE_BASE_URL או LOOM_THREAD_SYNC_URL לעדכונים"
+
+#: CLI: Update - Error: check failed
+msgid "client.update.error.check_failed"
+msgstr "בדיקת עדכונים נכשלה: {status}"
+
+# ============================================================================
+# CLI: Authentication
+# ============================================================================
+
+#: CLI: Auth - Visit URL prompt
+msgid "client.auth.visit_url"
+msgstr "בקר ב-{url} והזן קוד: {code}"
+
+#: CLI: Auth - Browser open failed
+msgid "client.auth.browser_failed"
+msgstr "(לא ניתן היה לפתוח את הדפדפן אוטומטית)"
+
+#: CLI: Auth - Waiting for authorization
+msgid "client.auth.waiting"
+msgstr "ממתין לאישור"
+
+#: CLI: Auth - Authorization timed out
+msgid "client.auth.timed_out"
+msgstr "זמן האישור פג"
+
+#: CLI: Auth - Login cancelled
+msgid "client.auth.cancelled"
+msgstr "ההתחברות בוטלה"
+
+#: CLI: Auth - Login successful
+msgid "client.auth.login_success"
+msgstr "התחברת בהצלחה ל-{server}"
+
+#: CLI: Auth - Device code expired
+msgid "client.auth.device_expired"
+msgstr "קוד המכשיר פג"
+
+#: CLI: Auth - Logged out
+msgid "client.auth.logged_out"
+msgstr "התנתקת מ-{server}"
+
+# ============================================================================
+# CLI: REPL
+# ============================================================================
+
+#: CLI: REPL - Welcome message
+msgid "client.repl.welcome"
+msgstr "ברוכים הבאים ל-Loom - עוזר קידוד מונחה בינה מלאכותית"
+
+#: CLI: REPL - Thread ID
+msgid "client.repl.thread_id"
+msgstr "שרשור: {id}"
+
+#: CLI: REPL - Instructions
+msgid "client.repl.instructions"
+msgstr "הקלד את ההודעה שלך ולחץ Enter. השתמש ב-Ctrl+C ליציאה."
+
+#: CLI: REPL - Interrupted
+msgid "client.repl.interrupted"
+msgstr "הופסק. השרשור נשמר. להתראות!"
+
+#: CLI: REPL - Error
+msgid "client.repl.error"
+msgstr "שגיאה: {error}"
+
+# ============================================================================
+# CLI: Search
+# ============================================================================
+
+#: CLI: Search - No results
+msgid "client.search.no_results"
+msgstr "לא נמצאו תוצאות עבור \"{query}\""
+
+#: CLI: Search - Results header
+msgid "client.search.results_header"
+msgstr "תוצאות עבור \"{query}\" ({count} התאמות):"
+
+#: CLI: Search - Local no results
+msgid "client.search.local_no_results"
+msgstr "לא נמצאו תוצאות עבור \"{query}\" (חיפוש מקומי)"
+
+#: CLI: Search - Local results header
+msgid "client.search.local_results_header"
+msgstr "תוצאות מקומיות עבור \"{query}\" ({count} התאמות):"
+
+# ============================================================================
+# CLI: Threads
+# ============================================================================
+
+#: CLI: Threads - No threads
+msgid "client.threads.no_threads"
+msgstr "לא נמצאו שרשורים."
+
+#: CLI: Threads - List header
+msgid "client.threads.list_header"
+msgstr "{id:<40} {title:<40} {updated:<20}"
+
+#: CLI: Threads - Private session
+msgid "client.threads.private_session"
+msgstr "מתחיל הפעלה פרטית (מקומית בלבד, לעולם לא מסונכרנת לשרת)."
+
+#: CLI: Threads - Shared with support
+msgid "client.threads.shared_support"
+msgstr "שרשור {id} שותף עם צוות התמיכה."
+
+#: CLI: Threads - Visibility changed
+msgid "client.threads.visibility_changed"
+msgstr "הנראות של שרשור {id} שונתה ל-{visibility}."
+
+# ============================================================================
+# CLI: Weaver
+# ============================================================================
+
+#: CLI: Weaver - Creating
+msgid "client.weaver.creating"
+msgstr "יוצר Weaver..."
+
+#: CLI: Weaver - Created ID
+msgid "client.weaver.created_id"
+msgstr "  מזהה:    {id}"
+
+#: CLI: Weaver - Created image
+msgid "client.weaver.created_image"
+msgstr "  תמונה: {image}"
+
+#: CLI: Weaver - Created TTL
+msgid "client.weaver.created_ttl"
+msgstr "  TTL:   {hours} שעות"
+
+#: CLI: Weaver - Attaching
+msgid "client.weaver.attaching"
+msgstr "מתחבר ל-Weaver..."
+
+#: CLI: Weaver - Detached
+msgid "client.weaver.detached"
+msgstr "[נותק מ-Weaver {id}]"
+
+#: CLI: Weaver - Reattach hint
+msgid "client.weaver.reattach_hint"
+msgstr "Weaver עדיין פועל. התחבר מחדש עם: loom attach {id}"
+
+#: CLI: Weaver - No weavers
+msgid "client.weaver.no_weavers"
+msgstr "אין Weavers פועלים."
+
+#: CLI: Weaver - List header
+msgid "client.weaver.list_header"
+msgstr "{id:<40} {image:<30} {status:<10} {age:<8} {ttl:<8}"
+
+#: CLI: Weaver - Deleting
+msgid "client.weaver.deleting"
+msgstr "מוחק Weaver {id}..."
+
+#: CLI: Weaver - Deleted
+msgid "client.weaver.deleted"
+msgstr "Weaver נמחק."
+
+#: CLI: Weaver - Attach prefix
+msgid "client.weaver.attach_prefix"
+msgstr "[מתחבר ל-Weaver {id}]"
+
+# ============================================================================
+# Weaver API responses
+# ============================================================================
+
+#: API: Weaver - Invalid org ID
+msgid "server.api.weaver.invalid_org_id"
+msgstr "מזהה ארגון לא חוקי: {id}"
+
+#: API: Weaver - Not org member
+msgid "server.api.weaver.not_org_member"
+msgstr "אינך חבר בארגון זה"
+
+#: API: Weaver - Membership check failed
+msgid "server.api.weaver.membership_check_failed"
+msgstr "נכשל האימות של חברות בארגון"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - Cannot remove last admin
+msgid "server.api.admin.cannot_remove_last_admin"
+msgstr "לא ניתן להסיר את מנהל המערכת האחרון"
+
+# ============================================================================
+# SCM: Repository API responses
+# ============================================================================
+
+#: API: SCM Repo - Not found
+msgid "server.api.scm.repo.not_found"
+msgstr "המאגר לא נמצא"
+
+#: API: SCM - Not configured
+msgid "server.api.scm.not_configured"
+msgstr "SCM לא הוגדר"
+
+#: API: SCM - Internal error
+msgid "server.api.scm.internal_error"
+msgstr "שגיאת שרת פנימית"
+
+#: API: SCM - Repository not found
+msgid "server.api.scm.repo_not_found"
+msgstr "המאגר לא נמצא"
+
+#: API: SCM - Invalid repository name
+msgid "server.api.scm.invalid_repo_name"
+msgstr "שם המאגר חייב להיות בין 1 ל-100 תווים"
+
+#: API: SCM - Cannot create for other user
+msgid "server.api.scm.cannot_create_for_other_user"
+msgstr "לא ניתן ליצור מאגר עבור משתמש אחר"
+
+#: API: SCM - Not org member
+msgid "server.api.scm.not_org_member"
+msgstr "אינך חבר בארגון זה"
+
+#: API: SCM - Org admin required
+msgid "server.api.scm.org_admin_required"
+msgstr "יש להיות בעלים או מנהל של הארגון כדי ליצור מאגרים"
+
+#: API: SCM - Organization not found
+msgid "server.api.scm.org_not_found"
+msgstr "הארגון לא נמצא"
+
+#: API: SCM - Repository already exists
+msgid "server.api.scm.repo_already_exists"
+msgstr "מאגר עם שם זה כבר קיים"
+
+#: API: SCM - Failed to create repository
+msgid "server.api.scm.failed_to_create_repo"
+msgstr "יצירת המאגר נכשלה"
+
+#: API: SCM - Failed to initialize repo on disk
+msgid "server.api.scm.failed_to_init_repo_disk"
+msgstr "אתחול המאגר בדיסק נכשל"
+
+#: API: SCM - Failed to initialize git repo
+msgid "server.api.scm.failed_to_init_git_repo"
+msgstr "אתחול מאגר git נכשל"
+
+#: API: SCM - Access denied
+msgid "server.api.scm.access_denied"
+msgstr "הגישה נדחתה"
+
+#: API: SCM - Admin required
+msgid "server.api.scm.admin_required"
+msgstr "נדרשת גישת מנהל"
+
+#: API: SCM - Invalid default branch
+msgid "server.api.scm.invalid_default_branch"
+msgstr "ענף ברירת המחדל לא יכול להיות ריק"
+
+#: API: SCM - Failed to update repository
+msgid "server.api.scm.failed_to_update_repo"
+msgstr "עדכון המאגר נכשל"
+
+#: API: SCM - Failed to delete repository
+msgid "server.api.scm.failed_to_delete_repo"
+msgstr "מחיקת המאגר נכשלה"
+
+#: API: SCM - User not found
+msgid "server.api.scm.user_not_found"
+msgstr "המשתמש לא נמצא"
+
+#: API: SCM - Failed to list repositories
+msgid "server.api.scm.failed_to_list_repos"
+msgstr "הצגת רשימת המאגרים נכשלה"
+
+# ============================================================================
+# SCM: Git API responses
+# ============================================================================
+
+#: API: SCM Git - Auth required for private repo
+msgid "server.api.scm.git.auth_required_private"
+msgstr "נדרש אימות למאגר פרטי"
+
+#: API: SCM Git - Auth required for push
+msgid "server.api.scm.git.auth_required_push"
+msgstr "נדרש אימות לדחיפה"
+
+#: API: SCM Git - Auth required
+msgid "server.api.scm.git.auth_required"
+msgstr "נדרש אימות"
+
+#: API: SCM Git - Access denied
+msgid "server.api.scm.git.access_denied"
+msgstr "הגישה למאגר נדחתה"
+
+#: API: SCM Git - Write access denied
+msgid "server.api.scm.git.write_access_denied"
+msgstr "גישת כתיבה למאגר נדחתה"
+
+# ============================================================================
+# SCM: Protection API responses
+# ============================================================================
+
+#: API: SCM Protection - Failed to load rules
+msgid "server.api.scm.protection.failed_to_load"
+msgstr "טעינת כללי ההגנה נכשלה"
+
+#: API: SCM Protection - Failed to list rules
+msgid "server.api.scm.protection.failed_to_list"
+msgstr "הצגת רשימת כללי ההגנה נכשלה"
+
+#: API: SCM Protection - Invalid pattern
+msgid "server.api.scm.protection.invalid_pattern"
+msgstr "התבנית חייבת להיות בין 1 ל-256 תווים"
+
+#: API: SCM Protection - Rule already exists
+msgid "server.api.scm.protection.already_exists"
+msgstr "כלל הגנה עם תבנית זו כבר קיים"
+
+#: API: SCM Protection - Failed to create rule
+msgid "server.api.scm.protection.failed_to_create"
+msgstr "יצירת כלל ההגנה נכשלה"
+
+#: API: SCM Protection - Rule not found
+msgid "server.api.scm.protection.rule_not_found"
+msgstr "כלל ההגנה לא נמצא"
+
+#: API: SCM Protection - Failed to delete rule
+msgid "server.api.scm.protection.failed_to_delete"
+msgstr "מחיקת כלל ההגנה נכשלה"
+
+# ============================================================================
+# SCM: Webhook API responses
+# ============================================================================
+
+#: API: SCM Webhook - Not found
+msgid "server.api.scm.webhook.not_found"
+msgstr "ה-Webhook לא נמצא"
+
+#: API: SCM Webhook - Admin required
+msgid "server.api.scm.webhook.admin_required"
+msgstr "נדרשת גישת מנהל"
+
+#: API: SCM Webhook - URL required
+msgid "server.api.scm.webhook.url_required"
+msgstr "נדרש URL"
+
+#: API: SCM Webhook - URL invalid protocol
+msgid "server.api.scm.webhook.url_invalid_protocol"
+msgstr "ה-URL חייב להתחיל ב-http:// או https://"
+
+#: API: SCM Webhook - URL too long
+msgid "server.api.scm.webhook.url_too_long"
+msgstr "ה-URL חייב להיות פחות מ-2048 תווים"
+
+#: API: SCM Webhook - Events required
+msgid "server.api.scm.webhook.events_required"
+msgstr "נדרש לפחות אירוע אחד"
+
+#: API: SCM Webhook - Invalid event
+msgid "server.api.scm.webhook.invalid_event"
+msgstr "אירוע לא חוקי '{event}'. אירועים חוקיים: {valid_events}"
+
+#: API: SCM Webhook - Secret required
+msgid "server.api.scm.webhook.secret_required"
+msgstr "נדרש סוד"
+
+#: API: SCM Webhook - URL invalid
+msgid "server.api.scm.webhook.url_invalid"
+msgstr "פורמט URL לא חוקי"
+
+#: API: SCM Webhook - Localhost blocked
+msgid "server.api.scm.webhook.url_localhost_blocked"
+msgstr "כתובות localhost אינן מותרות"
+
+#: API: SCM Webhook - Private IP blocked
+msgid "server.api.scm.webhook.url_private_ip_blocked"
+msgstr "כתובות IP פרטיות או פנימיות אינן מותרות"
+
+# ============================================================================
+# SCM: Maintenance API responses
+# ============================================================================
+
+#: API: SCM Maintenance - Not configured
+msgid "server.api.scm.maintenance.not_configured"
+msgstr "תחזוקה לא הוגדרה"
+
+#: API: SCM Maintenance - Job queued for repository
+msgid "server.api.scm.maintenance.job_queued"
+msgstr "משימת התחזוקה '{task}' הועמדה בתור למאגר"
+
+#: API: SCM Maintenance - Global sweep queued
+msgid "server.api.scm.maintenance.sweep_queued"
+msgstr "סריקת התחזוקה הגלובלית '{task}' הועמדה בתור"
+
+# ============================================================================
+# SCM: Mirror API responses
+# ============================================================================
+
+#: API: SCM Mirror - URL required
+msgid "server.api.scm.mirror.url_required"
+msgstr "נדרש URL של מראה"
+
+#: API: SCM Mirror - URL invalid protocol
+msgid "server.api.scm.mirror.url_invalid_protocol"
+msgstr "URL של מראה חייב להתחיל ב-http:// או https://"
+
+#: API: SCM Mirror - URL too long
+msgid "server.api.scm.mirror.url_too_long"
+msgstr "URL של מראה חייב להיות פחות מ-2048 תווים"
+
+#: API: SCM Mirror - URL invalid
+msgid "server.api.scm.mirror.url_invalid"
+msgstr "פורמט URL של מראה לא חוקי"
+
+#: API: SCM Mirror - Localhost blocked
+msgid "server.api.scm.mirror.url_localhost_blocked"
+msgstr "כתובות localhost אינן מותרות למראות"
+
+#: API: SCM Mirror - Private IP blocked
+msgid "server.api.scm.mirror.url_private_ip_blocked"
+msgstr "כתובות IP פרטיות או פנימיות אינן מותרות למראות"
+
+#: API: SCM Mirror - Not found
+msgid "server.api.scm.mirror.not_found"
+msgstr "המראה לא נמצאה"
+
+#: API: SCM Mirror - Disabled
+msgid "server.api.scm.mirror.disabled"
+msgstr "המראה מושבתת"
+
+#: API: SCM Mirror - Sync queued
+msgid "server.api.scm.mirror.sync_queued"
+msgstr "סנכרון המראה הועמד בתור"
+
+#: API: SCM Mirror - Failed to delete
+msgid "server.api.scm.mirror.failed_to_delete"
+msgstr "מחיקת המראה נכשלה"
+
+#: API: SCM Mirror - Invalid path format
+msgid "server.api.scm.mirror.invalid_path"
+msgstr "פורמט נתיב מראה לא חוקי. צפוי: mirrors/{platform}/{owner}/{repo}"
+
+#: API: SCM Mirror - Push not allowed
+msgid "server.api.scm.mirror.push_not_allowed"
+msgstr "דחיפה למאגרי מראה אינה מותרת"
+
+#: API: SCM Mirror - Remote repository not found
+msgid "server.api.scm.mirror.remote_not_found"
+msgstr "המאגר המרוחק לא נמצא"
+
+#: API: SCM Mirror - Mirrors org not found
+msgid "server.api.scm.mirror.mirrors_org_not_found"
+msgstr "ארגון המראות לא הוגדר. אנא צור ארגון בשם 'mirrors'."
+
+#: API: SCM Mirror - Clone failed
+msgid "server.api.scm.mirror.clone_failed"
+msgstr "שיבוט המאגר המרוחק נכשל"
+
+# ============================================================================
+# Jobs: Scheduler
+# ============================================================================
+
+#: Jobs: Email Alert - Subject
+msgid "server.jobs.alert.subject"
+msgstr "[Loom] משימה נכשלה: {job_name}"
+
+#: Jobs: Email Alert - Body intro
+msgid "server.jobs.alert.body"
+msgstr "המשימה \"{job_name}\" נכשלה {consecutive_failures} פעמים ברצף."
+
+#: Jobs: Email Alert - Job ID
+msgid "server.jobs.alert.job_id"
+msgstr "מזהה משימה: {job_id}"
+
+#: Jobs: Email Alert - Last error
+msgid "server.jobs.alert.last_error"
+msgstr "שגיאה אחרונה: {error_message}"
+
+#: Jobs: Email Alert - Last run
+msgid "server.jobs.alert.last_run"
+msgstr "הרצה אחרונה: {last_run_at}"
+
+#: Jobs: Email Alert - View history link
+msgid "server.jobs.alert.view_history"
+msgstr "צפה בהיסטוריית המשימות: {url}"
+
+#: Jobs: API - Job not found
+msgid "server.jobs.error.not_found"
+msgstr "המשימה לא נמצאה: {job_id}"
+
+#: Jobs: API - Scheduler not configured
+msgid "server.jobs.error.not_configured"
+msgstr "מתזמן המשימות לא הוגדר"
+
+#: Jobs: API - Job triggered
+msgid "server.jobs.success.triggered"
+msgstr "המשימה {job_id} הופעלה בהצלחה"
+
+#: Jobs: API - Job cancelled
+msgid "server.jobs.success.cancelled"
+msgstr "המשימה {job_id} בוטלה"
+
+#: Jobs: API - Job enabled
+msgid "server.jobs.success.enabled"
+msgstr "המשימה {job_id} הופעלה"
+
+#: Jobs: API - Job disabled
+msgid "server.jobs.success.disabled"
+msgstr "המשימה {job_id} הושבתה"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - User deleted
+msgid "server.api.admin.user_deleted"
+msgstr "המשתמש נמחק בהצלחה"
+
+#: API: Admin - Cannot delete self
+msgid "server.api.admin.cannot_delete_self"
+msgstr "לא ניתן למחוק את החשבון שלך"
+
+#: API: Admin - User not found
+msgid "server.api.admin.user_not_found"
+msgstr "המשתמש לא נמצא"
+
+# ============================================================================
+# Admin Users UI
+# ============================================================================
+
+#: Admin Users - Delete button
+msgid "admin.users.delete"
+msgstr "מחק"
+
+#: Admin Users - Delete user title
+msgid "admin.users.deleteUser"
+msgstr "מחק משתמש"
+
+#: Admin Users - Delete confirm title
+msgid "admin.users.deleteConfirmTitle"
+msgstr "מחק משתמש"
+
+#: Admin Users - Delete confirm message
+msgid "admin.users.deleteConfirmMessage"
+msgstr "האם אתה בטוח שברצונך למחוק משתמש זה? פעולה זו תבצע מחיקה רכה של החשבון."
+
+#: Admin Users - Delete success
+msgid "admin.users.deleteSuccess"
+msgstr "המשתמש נמחק בהצלחה"
+
+#: Admin Users - Cancel button
+msgid "admin.users.cancel"
+msgstr "ביטול"
+
+#: Admin Users - Confirm delete button
+msgid "admin.users.confirm"
+msgstr "אשר מחיקה"
+
+# ============================================================================
+# SCM Git Browser API
+# ============================================================================
+
+#: API: SCM Browser - Failed to open repository
+msgid "server.api.scm.browser.failed_to_open_repo"
+msgstr "Failed to open repository"
+
+#: API: SCM Browser - File path required
+msgid "server.api.scm.browser.file_path_required"
+msgstr "File path is required"
+
+#: API: SCM Browser - Ref not found
+msgid "server.api.scm.browser.ref_not_found"
+msgstr "Reference not found: {ref}"
+
+#: API: SCM Browser - Failed to get object
+msgid "server.api.scm.browser.failed_to_get_object"
+msgstr "Failed to get object"
+
+#: API: SCM Browser - Failed to get commit
+msgid "server.api.scm.browser.failed_to_get_commit"
+msgstr "Failed to get commit"
+
+#: API: SCM Browser - Failed to get tree
+msgid "server.api.scm.browser.failed_to_get_tree"
+msgstr "Failed to get tree"
+
+#: API: SCM Browser - Failed to lookup path
+msgid "server.api.scm.browser.failed_to_lookup_path"
+msgstr "Failed to lookup path"
+
+#: API: SCM Browser - Path not found
+msgid "server.api.scm.browser.path_not_found"
+msgstr "Path not found: {path}"
+
+#: API: SCM Browser - Not a file
+msgid "server.api.scm.browser.not_a_file"
+msgstr "Not a file: {path}"
+
+#: API: SCM Browser - Not a directory
+msgid "server.api.scm.browser.not_a_directory"
+msgstr "Not a directory: {path}"
+
+
+# ============================================================================
+# Feature Flags API responses
+# ============================================================================
+
+#: API: Flags - Flag not found
+msgid "server.api.flags.flag_not_found"
+msgstr "דגל תכונה לא נמצא"
+
+#: API: Flags - Flag created
+msgid "server.api.flags.flag_created"
+msgstr "דגל תכונה נוצר"
+
+#: API: Flags - Flag updated
+msgid "server.api.flags.flag_updated"
+msgstr "דגל תכונה עודכן"
+
+#: API: Flags - Flag archived
+msgid "server.api.flags.flag_archived"
+msgstr "דגל תכונה הועבר לארכיון"
+
+#: API: Flags - Flag restored
+msgid "server.api.flags.flag_restored"
+msgstr "דגל תכונה שוחזר"
+
+#: API: Flags - Invalid flag key
+msgid "server.api.flags.invalid_flag_key"
+msgstr "מפתח דגל לא חוקי"
+
+#: API: Flags - Duplicate flag key
+msgid "server.api.flags.duplicate_flag_key"
+msgstr "מפתח דגל כבר קיים"
+
+#: API: Flags - Variant not found
+msgid "server.api.flags.variant_not_found"
+msgstr "גרסה לא נמצאה"
+
+#: API: Flags - Default variant missing
+msgid "server.api.flags.default_variant_missing"
+msgstr "גרסת ברירת המחדל לא נמצאת ברשימת הגרסאות"
+
+#: API: Flags - Circular prerequisite
+msgid "server.api.flags.circular_prerequisite"
+msgstr "זוהתה תלות מעגלית של תנאי מוקדם"
+
+#: API: Flags - Prerequisite not found
+msgid "server.api.flags.prerequisite_not_found"
+msgstr "דגל תנאי מוקדם לא נמצא"
+
+#: API: Flags - Strategy not found
+msgid "server.api.flags.strategy_not_found"
+msgstr "אסטרטגיית פריסה לא נמצאה"
+
+#: API: Flags - Strategy created
+msgid "server.api.flags.strategy_created"
+msgstr "אסטרטגיה נוצרה"
+
+#: API: Flags - Strategy updated
+msgid "server.api.flags.strategy_updated"
+msgstr "אסטרטגיה עודכנה"
+
+#: API: Flags - Strategy deleted
+msgid "server.api.flags.strategy_deleted"
+msgstr "אסטרטגיה נמחקה"
+
+#: API: Flags - Strategy in use
+msgid "server.api.flags.strategy_in_use"
+msgstr "האסטרטגיה נמצאת כעת בשימוש על ידי דגלים אחרים"
+
+#: API: Flags - Environment not found
+msgid "server.api.flags.environment_not_found"
+msgstr "סביבה לא נמצאה"
+
+#: API: Flags - Environment created
+msgid "server.api.flags.environment_created"
+msgstr "סביבה נוצרה"
+
+#: API: Flags - Environment updated
+msgid "server.api.flags.environment_updated"
+msgstr "סביבה עודכנה"
+
+#: API: Flags - Environment deleted
+msgid "server.api.flags.environment_deleted"
+msgstr "סביבה נמחקה"
+
+#: API: Flags - Environment has active keys
+msgid "server.api.flags.environment_has_active_keys"
+msgstr "לא ניתן למחוק סביבה עם מפתחות SDK פעילים"
+
+#: API: Flags - Invalid environment name
+msgid "server.api.flags.invalid_environment_name"
+msgstr "שם סביבה לא חוקי"
+
+#: API: Flags - Invalid environment color
+msgid "server.api.flags.invalid_environment_color"
+msgstr "צבע סביבה לא חוקי"
+
+#: API: Flags - Duplicate environment name
+msgid "server.api.flags.duplicate_environment_name"
+msgstr "שם סביבה כבר קיים"
+
+#: API: Flags - Flag config updated
+msgid "server.api.flags.flag_config_updated"
+msgstr "תצורת סביבה עודכנה"
+
+#: API: Flags - Kill switch not found
+msgid "server.api.flags.kill_switch_not_found"
+msgstr "מתג חירום לא נמצא"
+
+#: API: Flags - Kill switch created
+msgid "server.api.flags.kill_switch_created"
+msgstr "מתג חירום נוצר"
+
+#: API: Flags - Kill switch updated
+msgid "server.api.flags.kill_switch_updated"
+msgstr "מתג חירום עודכן"
+
+#: API: Flags - Kill switch deleted
+msgid "server.api.flags.kill_switch_deleted"
+msgstr "מתג חירום נמחק"
+
+#: API: Flags - Kill switch activated
+msgid "server.api.flags.kill_switch_activated"
+msgstr "מתג חירום הופעל"
+
+#: API: Flags - Kill switch deactivated
+msgid "server.api.flags.kill_switch_deactivated"
+msgstr "מתג חירום הושבת"
+
+#: API: Flags - Invalid kill switch key
+msgid "server.api.flags.invalid_kill_switch_key"
+msgstr "מפתח מתג חירום לא חוקי"
+
+#: API: Flags - Duplicate kill switch key
+msgid "server.api.flags.duplicate_kill_switch_key"
+msgstr "מפתח מתג חירום כבר קיים"
+
+#: API: Flags - Activation reason required
+msgid "server.api.flags.activation_reason_required"
+msgstr "נדרשת סיבת הפעלה"
+
+#: API: Flags - SDK key not found
+msgid "server.api.flags.sdk_key_not_found"
+msgstr "מפתח SDK לא נמצא"
+
+#: API: Flags - SDK key created
+msgid "server.api.flags.sdk_key_created"
+msgstr "מפתח SDK נוצר"
+
+#: API: Flags - SDK key revoked
+msgid "server.api.flags.sdk_key_revoked"
+msgstr "מפתח SDK בוטל"
+
+#: API: Flags - SDK key revoked success
+msgid "server.api.flags.sdk_key_revoked_success"
+msgstr "מפתח SDK בוטל בהצלחה"
+
+#: API: Flags - Invalid SDK key format
+msgid "server.api.flags.invalid_sdk_key_format"
+msgstr "פורמט מפתח SDK לא חוקי"
+
+#: API: Flags - Export started
+msgid "server.api.flags.export_started"
+msgstr "ייצוא החשיפות החל"
+
+#: API: Flags - Exposure already logged
+msgid "server.api.flags.exposure_already_logged"
+msgstr "החשיפה כבר נרשמה"
+
+#: API: Flags - Exposure created
+msgid "server.api.flags.exposure_created"
+msgstr "החשיפה נוצרה"
+
+#: API: Flags - Exposure tracking disabled
+msgid "server.api.flags.exposure_tracking_disabled"
+msgstr "מעקב חשיפות הושבת"
+
+#: API: Flags - Exposure tracking enabled
+msgid "server.api.flags.exposure_tracking_enabled"
+msgstr "מעקב חשיפות הופעל"
+
+#: API: Flags - Invalid time range
+msgid "server.api.flags.invalid_time_range"
+msgstr "טווח זמן לא תקין"
+
+#: API: Flags - No exposures found
+msgid "server.api.flags.no_exposures_found"
+msgstr "לא נמצאו חשיפות"
+
+# ============================================================================
+# Flag Stats API responses
+# ============================================================================
+
+#: API: Flags - Stats retrieved
+msgid "server.api.flags.stats_retrieved"
+msgstr "Flag statistics retrieved successfully"
+
+#: API: Flags - Stale flags retrieved
+msgid "server.api.flags.stale_flags_retrieved"
+msgstr "Stale flags retrieved successfully"
+
+#: API: Flags - Flag is stale
+msgid "server.api.flags.flag_is_stale"
+msgstr "This flag has not been evaluated in {days} days"
+
+#: API: Flags - No stale flags
+msgid "server.api.flags.no_stale_flags"
+msgstr "No stale flags found"
+
+#: API: Flags - Never evaluated
+msgid "server.api.flags.never_evaluated"
+msgstr "This flag has never been evaluated"
+
+#: API: Flags - Last evaluated
+msgid "server.api.flags.last_evaluated"
+msgstr "Last evaluated: {date}"
+
+#: API: Flags - Evaluations 24h
+msgid "server.api.flags.evaluations_24h"
+msgstr "Evaluations in last 24 hours: {count}"
+
+#: API: Flags - Evaluations 7d
+msgid "server.api.flags.evaluations_7d"
+msgstr "Evaluations in last 7 days: {count}"
+
+#: API: Flags - Evaluations 30d
+msgid "server.api.flags.evaluations_30d"
+msgstr "Evaluations in last 30 days: {count}"
+
+#: API: Flags - Stale threshold
+msgid "server.api.flags.stale_threshold"
+msgstr "Flags are considered stale after {days} days without evaluation"
+
+# ============================================================================
+# CLI: Feature Flags SDK
+# ============================================================================
+
+#: Flags SDK: Invalid SDK key
+msgid "client.flags.error.invalid_sdk_key"
+msgstr "Invalid or missing SDK key"
+
+#: Flags SDK: Invalid base URL
+msgid "client.flags.error.invalid_base_url"
+msgstr "Invalid or missing base URL"
+
+#: Flags SDK: Connection failed
+msgid "client.flags.error.connection_failed"
+msgstr "Failed to connect to server"
+
+#: Flags SDK: Request failed
+msgid "client.flags.error.request_failed"
+msgstr "HTTP request failed"
+
+#: Flags SDK: Parse failed
+msgid "client.flags.error.parse_failed"
+msgstr "Failed to parse server response"
+
+#: Flags SDK: Server error
+msgid "client.flags.error.server_error"
+msgstr "Server returned an error"
+
+#: Flags SDK: Flag not found
+msgid "client.flags.error.flag_not_found"
+msgstr "Flag not found"
+
+#: Flags SDK: SSE connection failed
+msgid "client.flags.error.sse_connection_failed"
+msgstr "SSE connection failed"
+
+#: Flags SDK: SSE stream error
+msgid "client.flags.error.sse_stream_error"
+msgstr "SSE stream error"
+
+#: Flags SDK: Offline no cache
+msgid "client.flags.error.offline_no_cache"
+msgstr "Client is offline and no cached data is available"
+
+#: Flags SDK: Authentication failed
+msgid "client.flags.error.authentication_failed"
+msgstr "SDK key authentication failed"
+
+#: Flags SDK: Rate limited
+msgid "client.flags.error.rate_limited"
+msgstr "Rate limited. Retry after seconds"
+
+#: Flags SDK: Initialization timeout
+msgid "client.flags.error.initialization_timeout"
+msgstr "Client initialization timed out"
+
+#: Flags SDK: Client closed
+msgid "client.flags.error.client_closed"
+msgstr "Client has been closed"
+
+#: Flags SDK: Invalid value type
+msgid "client.flags.error.invalid_value_type"
+msgstr "Invalid flag value type"
+
+#: Flags SDK: Initializing
+msgid "client.flags.status.initializing"
+msgstr "Initializing flags client..."
+
+#: Flags SDK: Connected
+msgid "client.flags.status.connected"
+msgstr "Flags client connected"
+
+#: Flags SDK: Disconnected
+msgid "client.flags.status.disconnected"
+msgstr "Flags client disconnected"
+
+#: Flags SDK: Reconnecting
+msgid "client.flags.status.reconnecting"
+msgstr "Reconnecting to flags server..."
+
+#: Flags SDK: Using cached values
+msgid "client.flags.status.using_cache"
+msgstr "Using cached flag values"
+
+#: Flags SDK: Cache initialized
+msgid "client.flags.status.cache_initialized"
+msgstr "Flag cache initialized with {count} flags"
+
+
+msgid "server.api.admin.flags.listed"
+msgstr "Listed platform flags"
+
+msgid "server.api.admin.flags.created"
+msgstr "Platform flag created successfully"
+
+msgid "server.api.admin.flags.updated"
+msgstr "Platform flag updated successfully"
+
+msgid "server.api.admin.flags.archived"
+msgstr "Platform flag archived successfully"
+
+msgid "server.api.admin.flags.restored"
+msgstr "Platform flag restored successfully"
+
+msgid "server.api.admin.flags.not_found"
+msgstr "Platform flag not found"
+
+msgid "server.api.admin.flags.duplicate_key"
+msgstr "A platform flag with this key already exists"
+
+msgid "server.api.admin.kill_switches.listed"
+msgstr "Listed platform kill switches"
+
+msgid "server.api.admin.kill_switches.created"
+msgstr "Platform kill switch created successfully"
+
+msgid "server.api.admin.kill_switches.updated"
+msgstr "Platform kill switch updated successfully"
+
+msgid "server.api.admin.kill_switches.activated"
+msgstr "Platform kill switch activated"
+
+msgid "server.api.admin.kill_switches.deactivated"
+msgstr "Platform kill switch deactivated"
+
+msgid "server.api.admin.kill_switches.deleted"
+msgstr "Platform kill switch deleted"
+
+msgid "server.api.admin.kill_switches.not_found"
+msgstr "Platform kill switch not found"
+
+msgid "server.api.admin.kill_switches.duplicate_key"
+msgstr "A platform kill switch with this key already exists"
+
+msgid "server.api.admin.strategies.listed"
+msgstr "Listed platform strategies"
+

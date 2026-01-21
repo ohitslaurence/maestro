@@ -1,0 +1,6 @@
+---
+source: crates/loom-tui-widget-spinner/tests/render_test.rs
+assertion_line: 41
+expression: output
+---
+⠋

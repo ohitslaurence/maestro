@@ -1,0 +1,1760 @@
+# Loom Server Translations - Korean
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>
+# SPDX-License-Identifier: Proprietary
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ko\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: Email: Magic Link - Subject
+msgid "server.email.magic_link.subject"
+msgstr "Loom에 로그인"
+
+#: Email: Magic Link - Body intro
+msgid "server.email.magic_link.body"
+msgstr "아래 링크를 클릭하여 Loom 계정에 로그인하세요."
+
+#: Email: Magic Link - Expiry notice
+msgid "server.email.magic_link.expires"
+msgstr "이 링크는 {minutes}분 후에 만료됩니다."
+
+#: Email: Magic Link - Ignore notice
+msgid "server.email.magic_link.ignore"
+msgstr "이 이메일을 요청하지 않으셨다면 무시하셔도 됩니다."
+
+#: Email: Magic Link - Copy link instruction
+msgid "server.email.magic_link.copy_link"
+msgstr "또는 이 링크를 복사하여 붙여넣으세요:"
+
+#: Email: Org Invitation - Subject
+msgid "server.email.invitation.subject"
+msgstr "Loom에서 {org_name}에 초대되었습니다"
+
+#: Email: Org Invitation - Body
+msgid "server.email.invitation.body"
+msgstr "{inviter_name}님이 Loom의 \"{org_name}\" 조직에 초대했습니다."
+
+#: Email: Org Invitation - Action instruction
+msgid "server.email.invitation.action"
+msgstr "아래 링크를 클릭하여 초대를 수락하세요:"
+
+#: Email: Org Invitation - No expiry notice
+msgid "server.email.invitation.no_expiry"
+msgstr "이 초대는 만료되지 않지만 조직 관리자가 취소할 수 있습니다."
+
+#: Email: Security Alert - Subject
+msgid "server.email.security_alert.subject"
+msgstr "Loom 보안 알림: {event}"
+
+#: Email: Security Alert - Body intro
+msgid "server.email.security_alert.body"
+msgstr "Loom 계정에서 보안 이벤트가 발생했습니다."
+
+#: Email: Security Alert - Event label
+msgid "server.email.security_alert.event"
+msgstr "이벤트: {event}"
+
+#: Email: Security Alert - Details label
+msgid "server.email.security_alert.details"
+msgstr "상세 정보:"
+
+#: Email: Security Alert - Action instruction
+msgid "server.email.security_alert.action"
+msgstr "본인이 아닌 경우 즉시 계정 보안 설정을 확인하세요."
+
+#: Email: Deletion Warning - Subject
+msgid "server.email.deletion_warning.subject"
+msgstr "Loom 계정이 삭제 예정입니다"
+
+#: Email: Deletion Warning - Body
+msgid "server.email.deletion_warning.body"
+msgstr "Loom 계정이 {days}일 후에 영구 삭제될 예정입니다."
+
+#: Email: Deletion Warning - Restore instruction
+msgid "server.email.deletion_warning.restore"
+msgstr "삭제를 요청하지 않으셨거나 마음이 바뀌셨다면 삭제 날짜 전에 로그인하여 계정을 복구할 수 있습니다."
+
+#: Email: Deletion Warning - Permanent notice
+msgid "server.email.deletion_warning.permanent"
+msgstr "영구 삭제 후에는 데이터를 복구할 수 없습니다."
+
+#: Email: Deletion Scheduled - Subject
+msgid "server.email.deletion_scheduled.subject"
+msgstr "계정 삭제 예정"
+
+#: Email: Deletion Scheduled - Body
+msgid "server.email.deletion_scheduled.body"
+msgstr "계정이 삭제 예정으로 설정되었습니다."
+
+#: Email: Deletion Scheduled - Grace period notice
+msgid "server.email.deletion_scheduled.grace"
+msgstr "로그인하여 삭제를 취소하면 {days}일 이내에 계정을 복구할 수 있습니다."
+
+#: Email: Deletion Scheduled - Permanent notice
+msgid "server.email.deletion_scheduled.permanent"
+msgstr "유예 기간이 지나면 계정과 모든 관련 데이터가 영구 삭제됩니다."
+
+#: API: Auth - Check email response
+msgid "server.api.auth.check_email"
+msgstr "이메일에서 로그인 링크를 확인하세요"
+
+#: API: Auth - Logged out response
+msgid "server.api.auth.logged_out"
+msgstr "로그아웃되었습니다"
+
+#: API: Error - Internal error
+msgid "server.api.error.internal"
+msgstr "내부 오류가 발생했습니다"
+
+#: API: Error - Not found
+msgid "server.api.error.not_found"
+msgstr "리소스를 찾을 수 없습니다"
+
+#: API: Error - Unauthorized
+msgid "server.api.error.unauthorized"
+msgstr "인증이 필요합니다"
+
+#: API: Error - Forbidden
+msgid "server.api.error.forbidden"
+msgstr "접근이 거부되었습니다"
+
+#: API: Error - Bad request
+msgid "server.api.error.bad_request"
+msgstr "잘못된 요청입니다"
+
+#: API: Error - Conflict
+msgid "server.api.error.conflict"
+msgstr "리소스 충돌"
+
+#: API: Error - Gone
+msgid "server.api.error.gone"
+msgstr "리소스를 더 이상 사용할 수 없습니다"
+
+#: API: Error - Not configured
+msgid "server.api.error.not_configured"
+msgstr "기능이 구성되지 않았습니다"
+
+# ============================================================================
+# Auth API responses
+# ============================================================================
+
+#: API: Auth - Invalid email
+msgid "server.api.auth.invalid_email"
+msgstr "유효한 이메일 주소를 입력하세요"
+
+#: API: Auth - Device code authorized
+msgid "server.api.auth.device_authorized"
+msgstr "기기가 성공적으로 인증되었습니다"
+
+#: API: Auth - Invalid device code
+msgid "server.api.auth.invalid_device_code"
+msgstr "유효하지 않거나 만료된 기기 코드입니다"
+
+#: API: Auth - Invalid user code
+msgid "server.api.auth.invalid_user_code"
+msgstr "유효하지 않거나 만료된 사용자 코드입니다"
+
+#: API: Auth - OAuth not configured
+msgid "server.api.auth.oauth_not_configured"
+msgstr "{provider} OAuth가 구성되지 않았습니다"
+
+#: API: Auth - Magic link sent (always shown to prevent enumeration)
+msgid "server.api.auth.magic_link_sent"
+msgstr "이 이메일로 등록된 계정이 있으면 로그인 링크가 전송되었습니다"
+
+#: API: Auth - Email not verified (Google/Okta)
+msgid "server.api.auth.email_not_verified"
+msgstr "제공자가 이메일 주소를 확인하지 않았습니다"
+
+#: API: Auth - No verified email (GitHub)
+msgid "server.api.auth.no_verified_email"
+msgstr "확인된 이메일 주소를 찾을 수 없습니다. GitHub에서 이메일을 확인한 후 다시 시도하세요."
+
+#: API: Auth - Signups disabled
+msgid "server.api.auth.signups_disabled"
+msgstr "현재 신규 사용자 가입이 비활성화되어 있습니다. 관리자에게 문의하세요."
+
+# ============================================================================
+# User API responses
+# ============================================================================
+
+#: API: User - Not found
+msgid "server.api.user.not_found"
+msgstr "사용자를 찾을 수 없습니다"
+
+#: API: User - Invalid ID
+msgid "server.api.user.invalid_id"
+msgstr "유효하지 않은 사용자 ID 형식입니다"
+
+#: API: User - Display name empty
+msgid "server.api.user.display_name_empty"
+msgstr "표시 이름은 비워둘 수 없습니다"
+
+#: API: User - Profile updated
+msgid "server.api.user.profile_updated"
+msgstr "프로필이 성공적으로 업데이트되었습니다"
+
+#: API: User - Deletion scheduled
+msgid "server.api.user.deletion_scheduled"
+msgstr "계정 삭제가 예정되었습니다"
+
+#: API: User - Deletion already scheduled
+msgid "server.api.user.deletion_already_scheduled"
+msgstr "계정 삭제가 이미 예정되어 있습니다"
+
+#: API: User - Deletion failed
+msgid "server.api.user.deletion_failed"
+msgstr "계정 삭제 예약에 실패했습니다"
+
+#: API: User - No pending deletion
+msgid "server.api.user.no_pending_deletion"
+msgstr "이 계정에 대기 중인 삭제가 없습니다"
+
+#: API: User - Grace period expired
+msgid "server.api.user.grace_period_expired"
+msgstr "유예 기간이 만료되어 계정을 복구할 수 없습니다"
+
+#: API: User - Account restored
+msgid "server.api.user.account_restored"
+msgstr "계정이 성공적으로 복구되었습니다"
+
+#: API: User - Identity unlinked
+msgid "server.api.user.identity_unlinked"
+msgstr "ID 연결이 성공적으로 해제되었습니다"
+
+#: API: User - Identity not found
+msgid "server.api.user.identity_not_found"
+msgstr "ID를 찾을 수 없습니다"
+
+#: API: User - Cannot unlink last identity
+msgid "server.api.user.cannot_unlink_last_identity"
+msgstr "마지막 ID는 연결 해제할 수 없습니다"
+
+#: API: User - Username updated
+msgid "server.api.user.username_updated"
+msgstr "사용자 이름이 성공적으로 업데이트되었습니다"
+
+#: API: User - Username invalid
+msgid "server.api.user.username_invalid"
+msgstr "잘못된 사용자 이름 형식입니다"
+
+#: API: User - Username taken
+msgid "server.api.user.username_taken"
+msgstr "이미 사용 중인 사용자 이름입니다"
+
+#: API: User - Username too short
+msgid "server.api.user.username_too_short"
+msgstr "사용자 이름은 3자 이상이어야 합니다"
+
+#: API: User - Username too long
+msgid "server.api.user.username_too_long"
+msgstr "사용자 이름은 39자 이하여야 합니다"
+
+#: API: User - Username reserved
+msgid "server.api.user.username_reserved"
+msgstr "이 사용자 이름은 예약되어 있어 사용할 수 없습니다"
+
+#: API: User - Invalid locale
+msgid "server.api.user.invalid_locale"
+msgstr "잘못된 로케일"
+
+# ============================================================================
+# Organization API responses
+# ============================================================================
+
+#: API: Org - Not found
+msgid "server.api.org.not_found"
+msgstr "조직을 찾을 수 없습니다"
+
+#: API: Org - Invalid ID
+msgid "server.api.org.invalid_id"
+msgstr "유효하지 않은 조직 ID입니다"
+
+#: API: Org - Invalid slug length
+msgid "server.api.org.invalid_slug_length"
+msgstr "슬러그는 3자에서 50자 사이여야 합니다"
+
+#: API: Org - Invalid slug format
+msgid "server.api.org.invalid_slug_format"
+msgstr "슬러그는 소문자 영숫자와 하이픈만 포함할 수 있습니다"
+
+#: API: Org - Slug exists
+msgid "server.api.org.slug_exists"
+msgstr "이 슬러그를 사용하는 조직이 이미 존재합니다"
+
+#: API: Org - Slug reserved
+msgid "server.api.org.slug_reserved"
+msgstr "This organization slug is reserved"
+
+#: API: Org - Invalid role
+msgid "server.api.org.invalid_role"
+msgstr "역할은 owner, admin, member 중 하나여야 합니다"
+
+#: API: Org - List failed
+msgid "server.api.org.list_failed"
+msgstr "조직 목록 조회에 실패했습니다"
+
+#: API: Org - Create failed
+msgid "server.api.org.create_failed"
+msgstr "조직 생성에 실패했습니다"
+
+#: API: Org - Not a member
+msgid "server.api.org.not_a_member"
+msgstr "이 조직의 멤버가 아닙니다"
+
+#: API: Org - Already a member
+msgid "server.api.org.already_member"
+msgstr "사용자가 이미 이 조직의 멤버입니다"
+
+#: API: Org - Member added
+msgid "server.api.org.member_added"
+msgstr "멤버가 조직에 추가되었습니다"
+
+#: API: Org - Member removed
+msgid "server.api.org.member_removed"
+msgstr "멤버가 조직에서 제거되었습니다"
+
+#: API: Org - Member not found
+msgid "server.api.org.member_not_found"
+msgstr "이 조직에서 멤버를 찾을 수 없습니다"
+
+#: API: Org - Last owner
+msgid "server.api.org.last_owner"
+msgstr "마지막 소유자는 제거하거나 강등할 수 없습니다"
+
+#: API: Org - Cannot delete personal org
+msgid "server.api.org.cannot_delete_personal"
+msgstr "개인 조직은 삭제할 수 없습니다"
+
+#: API: Org - Deleted
+msgid "server.api.org.deleted"
+msgstr "조직이 삭제되었습니다"
+
+#: API: Org - Restored
+msgid "server.api.org.restored"
+msgstr "조직이 복구되었습니다"
+
+#: API: Org - Not deleted
+msgid "server.api.org.not_deleted"
+msgstr "조직이 삭제되지 않았습니다"
+
+#: API: Org - Grace period expired
+msgid "server.api.org.grace_period_expired"
+msgstr "유예 기간이 만료되어 이 조직을 복구할 수 없습니다"
+
+#: API: Org - Owner required
+msgid "server.api.org.owner_required"
+msgstr "소유자만 이 작업을 수행할 수 있습니다"
+
+#: API: Org - Role updated
+msgid "server.api.org.role_updated"
+msgstr "멤버 역할이 업데이트되었습니다"
+
+#: API: Org - Join request for private org
+msgid "server.api.org.join_request_private"
+msgstr "비공개 조직에 가입 요청할 수 없습니다"
+
+#: API: Org - Join request pending
+msgid "server.api.org.join_request_pending"
+msgstr "이 조직에 대한 가입 요청이 이미 대기 중입니다"
+
+#: API: Org - Join request created
+msgid "server.api.org.join_request_created"
+msgstr "가입 요청이 제출되었습니다"
+
+#: API: Org - Join request not found
+msgid "server.api.org.join_request_not_found"
+msgstr "가입 요청을 찾을 수 없습니다"
+
+#: API: Org - Join request approved
+msgid "server.api.org.join_request_approved"
+msgstr "가입 요청이 승인되었습니다"
+
+#: API: Org - Join request rejected
+msgid "server.api.org.join_request_rejected"
+msgstr "가입 요청이 거부되었습니다"
+
+# ============================================================================
+# Team API responses
+# ============================================================================
+
+#: API: Team - Not found
+msgid "server.api.team.not_found"
+msgstr "팀을 찾을 수 없습니다"
+
+#: API: Team - Invalid ID
+msgid "server.api.team.invalid_id"
+msgstr "유효하지 않은 팀 ID입니다"
+
+#: API: Team - Invalid slug length
+msgid "server.api.team.invalid_slug_length"
+msgstr "슬러그는 2자에서 50자 사이여야 합니다"
+
+#: API: Team - Invalid slug format
+msgid "server.api.team.invalid_slug_format"
+msgstr "슬러그는 소문자 영숫자와 하이픈만 포함할 수 있습니다"
+
+#: API: Team - List failed
+msgid "server.api.team.list_failed"
+msgstr "팀 목록 조회에 실패했습니다"
+
+#: API: Team - Membership check failed
+msgid "server.api.team.membership_check_failed"
+msgstr "조직 멤버십 확인에 실패했습니다"
+
+# ============================================================================
+# Invitation API responses
+# ============================================================================
+
+#: API: Invitation - Created
+msgid "server.api.invitation.created"
+msgstr "초대가 성공적으로 전송되었습니다"
+
+#: API: Invitation - Cancelled
+msgid "server.api.invitation.cancelled"
+msgstr "초대가 취소되었습니다"
+
+#: API: Invitation - Accepted
+msgid "server.api.invitation.accepted"
+msgstr "초대가 수락되었습니다"
+
+#: API: Invitation - Not found
+msgid "server.api.invitation.not_found"
+msgstr "초대를 찾을 수 없습니다"
+
+#: API: Invitation - Expired
+msgid "server.api.invitation.expired"
+msgstr "이 초대는 만료되었습니다"
+
+#: API: Invitation - Invalid token
+msgid "server.api.invitation.invalid_token"
+msgstr "유효하지 않은 초대 토큰입니다"
+
+#: API: Invitation - Already accepted
+msgid "server.api.invitation.already_accepted"
+msgstr "이 초대는 이미 수락되었습니다"
+
+#: API: Invitation - List failed
+msgid "server.api.invitation.list_failed"
+msgstr "초대 목록 조회에 실패했습니다"
+
+# ============================================================================
+# Join request API responses
+# ============================================================================
+
+#: API: Join request - Created
+msgid "server.api.join_request.created"
+msgstr "가입 요청이 제출되었습니다"
+
+#: API: Join request - Approved
+msgid "server.api.join_request.approved"
+msgstr "가입 요청이 승인되었습니다"
+
+#: API: Join request - Rejected
+msgid "server.api.join_request.rejected"
+msgstr "가입 요청이 거부되었습니다"
+
+#: API: Join request - Already member
+msgid "server.api.join_request.already_member"
+msgstr "이미 이 조직의 멤버입니다"
+
+#: API: Join request - Already pending
+msgid "server.api.join_request.already_pending"
+msgstr "이미 대기 중인 가입 요청이 있습니다"
+
+#: API: Join request - Not found
+msgid "server.api.join_request.not_found"
+msgstr "가입 요청을 찾을 수 없습니다"
+
+#: API: Join request - Private org
+msgid "server.api.join_request.private_org"
+msgstr "비공개 조직에 가입 요청할 수 없습니다"
+
+# ============================================================================
+# API Key responses
+# ============================================================================
+
+#: API: API Key - Invalid org ID
+msgid "server.api.api_key.invalid_org_id"
+msgstr "유효하지 않은 조직 ID 형식입니다"
+
+#: API: API Key - Name empty
+msgid "server.api.api_key.name_empty"
+msgstr "API 키 이름은 비워둘 수 없습니다"
+
+#: API: API Key - No scopes
+msgid "server.api.api_key.no_scopes"
+msgstr "하나 이상의 범위를 지정해야 합니다"
+
+#: API: API Key - Created
+msgid "server.api.api_key.created"
+msgstr "API 키가 생성되었습니다"
+
+#: API: API Key - Revoked
+msgid "server.api.api_key.revoked"
+msgstr "API 키가 취소되었습니다"
+
+#: API: API Key - Not found
+msgid "server.api.api_key.not_found"
+msgstr "API 키를 찾을 수 없습니다"
+
+#: API: API Key - List failed
+msgid "server.api.api_key.list_failed"
+msgstr "API 키 목록 조회에 실패했습니다"
+
+#: API: API Key - Create failed
+msgid "server.api.api_key.create_failed"
+msgstr "API 키 생성에 실패했습니다"
+
+# ============================================================================
+# Session API responses
+# ============================================================================
+
+#: API: Session - Invalid ID
+msgid "server.api.session.invalid_id"
+msgstr "유효하지 않은 세션 ID 형식입니다"
+
+#: API: Session - Not found
+msgid "server.api.session.not_found"
+msgstr "세션을 찾을 수 없습니다"
+
+#: API: Session - Revoked
+msgid "server.api.session.revoked"
+msgstr "세션이 성공적으로 취소되었습니다"
+
+#: API: Session - List failed
+msgid "server.api.session.list_failed"
+msgstr "세션 조회에 실패했습니다"
+
+#: API: Session - Revoke failed
+msgid "server.api.session.revoke_failed"
+msgstr "세션 취소에 실패했습니다"
+
+#: API: Session - Ownership check failed
+msgid "server.api.session.ownership_check_failed"
+msgstr "세션 소유권 확인에 실패했습니다"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - System admin required
+msgid "server.api.admin.system_admin_required"
+msgstr "시스템 관리자 역할이 필요합니다"
+
+#: API: Admin - Cannot remove own admin
+msgid "server.api.admin.cannot_remove_own_admin"
+msgstr "자신의 관리자 권한은 제거할 수 없습니다"
+
+#: API: Admin - User list failed
+msgid "server.api.admin.user_list_failed"
+msgstr "사용자 목록 조회에 실패했습니다"
+
+#: API: Admin - User update failed
+msgid "server.api.admin.user_update_failed"
+msgstr "사용자 업데이트에 실패했습니다"
+
+#: API: Admin - Roles updated
+msgid "server.api.admin.roles_updated"
+msgstr "사용자 역할이 업데이트되었습니다"
+
+#: Auth: Device Page - Title
+msgid "server.auth.device.title"
+msgstr "기기 인증 - Loom"
+
+#: Auth: Device Page - Heading
+msgid "server.auth.device.heading"
+msgstr "기기 인증"
+
+#: Auth: Device Page - Subtitle
+msgid "server.auth.device.subtitle"
+msgstr "터미널에 표시된 코드를 입력하세요"
+
+#: Auth: Device Page - Code label
+msgid "server.auth.device.code_label"
+msgstr "인증 코드"
+
+#: Auth: Device Page - Submit button
+msgid "server.auth.device.submit"
+msgstr "기기 인증"
+
+#: Auth: Device Page - Authorizing button
+msgid "server.auth.device.authorizing"
+msgstr "인증 중..."
+
+#: Auth: Device Page - Authorized button
+msgid "server.auth.device.authorized"
+msgstr "인증됨"
+
+#: Auth: Device Page - Expiry help text
+msgid "server.auth.device.expiry_help"
+msgstr "이 코드는 15분 후에 만료됩니다."
+
+#: Auth: Device Page - Success message
+msgid "server.auth.device.success"
+msgstr "기기가 성공적으로 인증되었습니다! 이 창을 닫아도 됩니다."
+
+#: Auth: Device Page - Invalid code format
+msgid "server.auth.device.invalid_format"
+msgstr "XXX-XXX-XXX 형식의 유효한 코드를 입력하세요"
+
+#: Auth: Device Page - Generic error
+msgid "server.auth.device.error"
+msgstr "오류가 발생했습니다. 다시 시도하세요."
+
+#: Auth: Device Page - Authorization failed
+msgid "server.auth.device.auth_failed"
+msgstr "인증에 실패했습니다. 다시 시도하세요."
+
+# ============================================================================
+# Support Access API responses
+# ============================================================================
+
+#: API: Support Access - Not support staff
+msgid "server.api.support_access.not_support_staff"
+msgstr "지원 담당자만 지원 액세스를 요청할 수 있습니다"
+
+#: API: Support Access - Thread not found
+msgid "server.api.support_access.thread_not_found"
+msgstr "스레드를 찾을 수 없습니다"
+
+#: API: Support Access - Already requested
+msgid "server.api.support_access.already_requested"
+msgstr "이 스레드에 대한 지원 액세스가 이미 요청되었습니다"
+
+#: API: Support Access - Already active
+msgid "server.api.support_access.already_active"
+msgstr "이 스레드에 대한 지원 액세스가 이미 활성화되어 있습니다"
+
+#: API: Support Access - Requested
+msgid "server.api.support_access.requested"
+msgstr "지원 액세스가 요청되었습니다"
+
+#: API: Support Access - Request failed
+msgid "server.api.support_access.request_failed"
+msgstr "지원 액세스 요청에 실패했습니다"
+
+#: API: Support Access - Not owner
+msgid "server.api.support_access.not_owner"
+msgstr "스레드 소유자만 지원 액세스를 승인하거나 취소할 수 있습니다"
+
+#: API: Support Access - No pending request
+msgid "server.api.support_access.no_pending_request"
+msgstr "이 스레드에 대한 대기 중인 지원 액세스 요청이 없습니다"
+
+#: API: Support Access - Approved
+msgid "server.api.support_access.approved"
+msgstr "지원 액세스가 승인되었습니다"
+
+#: API: Support Access - Approve failed
+msgid "server.api.support_access.approve_failed"
+msgstr "지원 액세스 승인에 실패했습니다"
+
+#: API: Support Access - No active access
+msgid "server.api.support_access.no_active_access"
+msgstr "이 스레드에 대한 활성 지원 액세스가 없습니다"
+
+#: API: Support Access - Revoked
+msgid "server.api.support_access.revoked"
+msgstr "지원 액세스가 취소되었습니다"
+
+#: API: Support Access - Revoke failed
+msgid "server.api.support_access.revoke_failed"
+msgstr "지원 액세스 취소에 실패했습니다"
+
+# ============================================================================
+# Share Link API responses
+# ============================================================================
+
+#: API: Share - Invalid thread ID
+msgid "server.api.share.invalid_thread_id"
+msgstr "유효하지 않은 스레드 ID 형식입니다"
+
+#: API: Share - Thread not found
+msgid "server.api.share.thread_not_found"
+msgstr "스레드를 찾을 수 없습니다"
+
+#: API: Share - Invalid expires_at
+msgid "server.api.share.invalid_expires_at"
+msgstr "유효하지 않은 만료 날짜 형식입니다. RFC 3339 형식을 사용하세요."
+
+#: API: Share - Create failed
+msgid "server.api.share.create_failed"
+msgstr "공유 링크 생성에 실패했습니다"
+
+#: API: Share - Link not found
+msgid "server.api.share.link_not_found"
+msgstr "이 스레드에 대한 활성 공유 링크가 없습니다"
+
+#: API: Share - Revoked
+msgid "server.api.share.revoked"
+msgstr "공유 링크가 취소되었습니다"
+
+#: API: Share - Revoke failed
+msgid "server.api.share.revoke_failed"
+msgstr "공유 링크 취소에 실패했습니다"
+
+#: API: Share - Invalid or expired link
+msgid "server.api.share.invalid_or_expired"
+msgstr "유효하지 않거나 만료된 공유 링크입니다"
+
+#: API: Share - Link revoked
+msgid "server.api.share.link_revoked"
+msgstr "이 공유 링크는 취소되었습니다"
+
+#: API: Share - Link expired
+msgid "server.api.share.link_expired"
+msgstr "이 공유 링크는 만료되었습니다"
+
+#: API: Share - Validation failed
+msgid "server.api.share.validation_failed"
+msgstr "공유 링크 검증에 실패했습니다"
+
+#: API: Share - Fetch failed
+msgid "server.api.share.fetch_failed"
+msgstr "스레드 가져오기에 실패했습니다"
+
+#: API: Weaver - Provisioner not configured
+msgid "server.api.weaver.provisioner_not_configured"
+msgstr "Weaver 프로비저너가 구성되지 않았습니다"
+
+#: API: Weaver - Invalid ID
+msgid "server.api.weaver.invalid_id"
+msgstr "유효하지 않은 Weaver ID: {id}"
+
+#: API: Weaver - Not found
+msgid "server.api.weaver.not_found"
+msgstr "Weaver를 찾을 수 없습니다: {id}"
+
+#: API: Weaver - Access denied
+msgid "server.api.weaver.access_denied"
+msgstr "이 Weaver에 접근할 권한이 없습니다"
+
+#: API: Weaver - Attach denied
+msgid "server.api.weaver.attach_denied"
+msgstr "이 Weaver에 연결할 권한이 없습니다"
+
+#: API: Weaver - Delete denied
+msgid "server.api.weaver.delete_denied"
+msgstr "이 Weaver를 삭제할 권한이 없습니다"
+
+#: API: Weaver - Read only attach
+msgid "server.api.weaver.read_only_attach"
+msgstr "읽기 전용 연결: 지원 사용자는 입력이 비활성화됩니다"
+
+#: API: Weaver - Logs access denied
+msgid "server.api.weaver.logs_denied"
+msgstr "이 Weaver의 로그에 접근할 권한이 없습니다"
+
+# ============================================================================
+# CLI: Update command
+# ============================================================================
+
+#: CLI: Update - Current version
+msgid "client.update.current_version"
+msgstr "현재 버전: {version}"
+
+#: CLI: Update - Platform
+msgid "client.update.platform"
+msgstr "플랫폼: {platform}"
+
+#: CLI: Update - Checking
+msgid "client.update.checking"
+msgstr "업데이트 확인 중..."
+
+#: CLI: Update - Already up to date
+msgid "client.update.up_to_date"
+msgstr "이미 최신 버전입니다 (SHA: {sha})"
+
+#: CLI: Update - Update available
+msgid "client.update.available"
+msgstr "업데이트 가능: {current} -> {remote}"
+
+#: CLI: Update - Downloading
+msgid "client.update.downloading"
+msgstr "{url}에서 다운로드 중..."
+
+#: CLI: Update - Downloaded
+msgid "client.update.downloaded"
+msgstr "{bytes} 바이트 다운로드 완료 (확인됨)"
+
+#: CLI: Update - Complete
+msgid "client.update.complete"
+msgstr "업데이트 완료! loom을 다시 시작하세요."
+
+#: CLI: Update - Error: empty binary
+msgid "client.update.error.empty_binary"
+msgstr "다운로드된 바이너리가 비어 있습니다"
+
+#: CLI: Update - Error: SHA mismatch
+msgid "client.update.error.sha_mismatch"
+msgstr "다운로드된 바이너리 SHA 불일치: 예상 {expected}, 실제 {actual}"
+
+#: CLI: Update - Error: env not set
+msgid "client.update.error.env_not_set"
+msgstr "업데이트를 위해 LOOM_UPDATE_BASE_URL 또는 LOOM_THREAD_SYNC_URL을 설정해야 합니다"
+
+#: CLI: Update - Error: check failed
+msgid "client.update.error.check_failed"
+msgstr "업데이트 확인 실패: {status}"
+
+# ============================================================================
+# CLI: Authentication
+# ============================================================================
+
+#: CLI: Auth - Visit URL prompt
+msgid "client.auth.visit_url"
+msgstr "{url}을 방문하여 코드를 입력하세요: {code}"
+
+#: CLI: Auth - Browser open failed
+msgid "client.auth.browser_failed"
+msgstr "(브라우저를 자동으로 열 수 없습니다)"
+
+#: CLI: Auth - Waiting for authorization
+msgid "client.auth.waiting"
+msgstr "인증 대기 중"
+
+#: CLI: Auth - Authorization timed out
+msgid "client.auth.timed_out"
+msgstr "인증 시간 초과"
+
+#: CLI: Auth - Login cancelled
+msgid "client.auth.cancelled"
+msgstr "로그인 취소됨"
+
+#: CLI: Auth - Login successful
+msgid "client.auth.login_success"
+msgstr "{server}에 성공적으로 로그인했습니다"
+
+#: CLI: Auth - Device code expired
+msgid "client.auth.device_expired"
+msgstr "기기 코드가 만료되었습니다"
+
+#: CLI: Auth - Logged out
+msgid "client.auth.logged_out"
+msgstr "{server}에서 로그아웃했습니다"
+
+# ============================================================================
+# CLI: REPL
+# ============================================================================
+
+#: CLI: REPL - Welcome message
+msgid "client.repl.welcome"
+msgstr "Loom에 오신 것을 환영합니다 - AI 기반 코딩 어시스턴트"
+
+#: CLI: REPL - Thread ID
+msgid "client.repl.thread_id"
+msgstr "스레드: {id}"
+
+#: CLI: REPL - Instructions
+msgid "client.repl.instructions"
+msgstr "메시지를 입력하고 Enter를 누르세요. 종료하려면 Ctrl+C를 사용하세요."
+
+#: CLI: REPL - Interrupted
+msgid "client.repl.interrupted"
+msgstr "중단됨. 스레드 저장됨. 안녕히 가세요!"
+
+#: CLI: REPL - Error
+msgid "client.repl.error"
+msgstr "오류: {error}"
+
+# ============================================================================
+# CLI: Search
+# ============================================================================
+
+#: CLI: Search - No results
+msgid "client.search.no_results"
+msgstr "\"{query}\"에 대한 결과가 없습니다"
+
+#: CLI: Search - Results header
+msgid "client.search.results_header"
+msgstr "\"{query}\" 검색 결과 ({count}건):"
+
+#: CLI: Search - Local no results
+msgid "client.search.local_no_results"
+msgstr "\"{query}\"에 대한 결과가 없습니다 (로컬 검색)"
+
+#: CLI: Search - Local results header
+msgid "client.search.local_results_header"
+msgstr "\"{query}\" 로컬 검색 결과 ({count}건):"
+
+# ============================================================================
+# CLI: Threads
+# ============================================================================
+
+#: CLI: Threads - No threads
+msgid "client.threads.no_threads"
+msgstr "스레드가 없습니다."
+
+#: CLI: Threads - List header
+msgid "client.threads.list_header"
+msgstr "{id:<40} {title:<40} {updated:<20}"
+
+#: CLI: Threads - Private session
+msgid "client.threads.private_session"
+msgstr "비공개 세션 시작 (로컬 전용, 서버에 동기화되지 않음)."
+
+#: CLI: Threads - Shared with support
+msgid "client.threads.shared_support"
+msgstr "스레드 {id}가 지원팀과 공유되었습니다."
+
+#: CLI: Threads - Visibility changed
+msgid "client.threads.visibility_changed"
+msgstr "스레드 {id} 공개 설정이 {visibility}(으)로 변경되었습니다."
+
+# ============================================================================
+# CLI: Weaver
+# ============================================================================
+
+#: CLI: Weaver - Creating
+msgid "client.weaver.creating"
+msgstr "Weaver 생성 중..."
+
+#: CLI: Weaver - Created ID
+msgid "client.weaver.created_id"
+msgstr "  ID:    {id}"
+
+#: CLI: Weaver - Created image
+msgid "client.weaver.created_image"
+msgstr "  이미지: {image}"
+
+#: CLI: Weaver - Created TTL
+msgid "client.weaver.created_ttl"
+msgstr "  TTL:   {hours}시간"
+
+#: CLI: Weaver - Attaching
+msgid "client.weaver.attaching"
+msgstr "Weaver에 연결 중..."
+
+#: CLI: Weaver - Detached
+msgid "client.weaver.detached"
+msgstr "[Weaver {id}에서 분리됨]"
+
+#: CLI: Weaver - Reattach hint
+msgid "client.weaver.reattach_hint"
+msgstr "Weaver가 아직 실행 중입니다. 다시 연결: loom attach {id}"
+
+#: CLI: Weaver - No weavers
+msgid "client.weaver.no_weavers"
+msgstr "실행 중인 Weaver가 없습니다."
+
+#: CLI: Weaver - List header
+msgid "client.weaver.list_header"
+msgstr "{id:<40} {image:<30} {status:<10} {age:<8} {ttl:<8}"
+
+#: CLI: Weaver - Deleting
+msgid "client.weaver.deleting"
+msgstr "Weaver {id} 삭제 중..."
+
+#: CLI: Weaver - Deleted
+msgid "client.weaver.deleted"
+msgstr "Weaver가 삭제되었습니다."
+
+#: CLI: Weaver - Attach prefix
+msgid "client.weaver.attach_prefix"
+msgstr "[Weaver {id}에 연결 중]"
+
+# ============================================================================
+# Weaver API responses
+# ============================================================================
+
+#: API: Weaver - Invalid org ID
+msgid "server.api.weaver.invalid_org_id"
+msgstr "잘못된 조직 ID: {id}"
+
+#: API: Weaver - Not org member
+msgid "server.api.weaver.not_org_member"
+msgstr "이 조직의 회원이 아닙니다"
+
+#: API: Weaver - Membership check failed
+msgid "server.api.weaver.membership_check_failed"
+msgstr "조직 회원 자격 확인 실패"
+
+# ============================================================================
+# Jobs: Scheduler
+# ============================================================================
+
+#: Jobs: Email Alert - Subject
+msgid "server.jobs.alert.subject"
+msgstr "[Loom] 작업 실패: {job_name}"
+
+#: Jobs: Email Alert - Body intro
+msgid "server.jobs.alert.body"
+msgstr "작업 \"{job_name}\"이(가) 연속 {consecutive_failures}회 실패했습니다."
+
+#: Jobs: Email Alert - Job ID
+msgid "server.jobs.alert.job_id"
+msgstr "작업 ID: {job_id}"
+
+#: Jobs: Email Alert - Last error
+msgid "server.jobs.alert.last_error"
+msgstr "마지막 오류: {error_message}"
+
+#: Jobs: Email Alert - Last run
+msgid "server.jobs.alert.last_run"
+msgstr "마지막 실행: {last_run_at}"
+
+#: Jobs: Email Alert - View history link
+msgid "server.jobs.alert.view_history"
+msgstr "작업 이력 보기: {url}"
+
+#: Jobs: API - Job not found
+msgid "server.jobs.error.not_found"
+msgstr "작업을 찾을 수 없습니다: {job_id}"
+
+#: Jobs: API - Scheduler not configured
+msgid "server.jobs.error.not_configured"
+msgstr "작업 스케줄러가 구성되지 않았습니다"
+
+#: Jobs: API - Job triggered
+msgid "server.jobs.success.triggered"
+msgstr "작업 {job_id}이(가) 성공적으로 트리거되었습니다"
+
+#: Jobs: API - Job cancelled
+msgid "server.jobs.success.cancelled"
+msgstr "작업 {job_id}이(가) 취소되었습니다"
+
+#: Jobs: API - Job enabled
+msgid "server.jobs.success.enabled"
+msgstr "작업 {job_id}이(가) 활성화되었습니다"
+
+#: Jobs: API - Job disabled
+msgid "server.jobs.success.disabled"
+msgstr "작업 {job_id}이(가) 비활성화되었습니다"
+
+# ============================================================================
+# SCM: Repository API responses
+# ============================================================================
+
+#: API: SCM Repo - Not found
+msgid "server.api.scm.repo.not_found"
+msgstr "리포지토리를 찾을 수 없습니다"
+
+#: API: SCM - Not configured
+msgid "server.api.scm.not_configured"
+msgstr "SCM이 구성되지 않았습니다"
+
+#: API: SCM - Internal error
+msgid "server.api.scm.internal_error"
+msgstr "내부 서버 오류"
+
+#: API: Admin - Cannot remove last admin
+msgid "server.api.admin.cannot_remove_last_admin"
+msgstr "마지막 시스템 관리자는 제거할 수 없습니다"
+
+#: API: SCM - Repository not found
+msgid "server.api.scm.repo_not_found"
+msgstr "리포지토리를 찾을 수 없습니다"
+
+#: API: SCM - Invalid repository name
+msgid "server.api.scm.invalid_repo_name"
+msgstr "리포지토리 이름은 1~100자 사이여야 합니다"
+
+#: API: SCM - Cannot create for other user
+msgid "server.api.scm.cannot_create_for_other_user"
+msgstr "다른 사용자를 위한 리포지토리를 만들 수 없습니다"
+
+#: API: SCM - Not org member
+msgid "server.api.scm.not_org_member"
+msgstr "이 조직의 회원이 아닙니다"
+
+#: API: SCM - Org admin required
+msgid "server.api.scm.org_admin_required"
+msgstr "리포지토리를 만들려면 조직 소유자 또는 관리자여야 합니다"
+
+#: API: SCM - Organization not found
+msgid "server.api.scm.org_not_found"
+msgstr "조직을 찾을 수 없습니다"
+
+#: API: SCM - Repository already exists
+msgid "server.api.scm.repo_already_exists"
+msgstr "이 이름의 리포지토리가 이미 존재합니다"
+
+#: API: SCM - Failed to create repository
+msgid "server.api.scm.failed_to_create_repo"
+msgstr "리포지토리 생성에 실패했습니다"
+
+#: API: SCM - Failed to initialize repo on disk
+msgid "server.api.scm.failed_to_init_repo_disk"
+msgstr "디스크에서 리포지토리 초기화에 실패했습니다"
+
+#: API: SCM - Failed to initialize git repo
+msgid "server.api.scm.failed_to_init_git_repo"
+msgstr "Git 리포지토리 초기화에 실패했습니다"
+
+#: API: SCM - Access denied
+msgid "server.api.scm.access_denied"
+msgstr "접근이 거부되었습니다"
+
+#: API: SCM - Admin required
+msgid "server.api.scm.admin_required"
+msgstr "관리자 접근 권한이 필요합니다"
+
+#: API: SCM - Invalid default branch
+msgid "server.api.scm.invalid_default_branch"
+msgstr "기본 브랜치는 비워둘 수 없습니다"
+
+#: API: SCM - Failed to update repository
+msgid "server.api.scm.failed_to_update_repo"
+msgstr "리포지토리 업데이트에 실패했습니다"
+
+#: API: SCM - Failed to delete repository
+msgid "server.api.scm.failed_to_delete_repo"
+msgstr "리포지토리 삭제에 실패했습니다"
+
+#: API: SCM - User not found
+msgid "server.api.scm.user_not_found"
+msgstr "사용자를 찾을 수 없습니다"
+
+#: API: SCM - Failed to list repositories
+msgid "server.api.scm.failed_to_list_repos"
+msgstr "리포지토리 목록 조회에 실패했습니다"
+
+# ============================================================================
+# SCM: Git API responses
+# ============================================================================
+
+#: API: SCM Git - Auth required for private repo
+msgid "server.api.scm.git.auth_required_private"
+msgstr "비공개 리포지토리에는 인증이 필요합니다"
+
+#: API: SCM Git - Auth required for push
+msgid "server.api.scm.git.auth_required_push"
+msgstr "푸시하려면 인증이 필요합니다"
+
+#: API: SCM Git - Auth required
+msgid "server.api.scm.git.auth_required"
+msgstr "인증이 필요합니다"
+
+#: API: SCM Git - Access denied
+msgid "server.api.scm.git.access_denied"
+msgstr "리포지토리 접근이 거부되었습니다"
+
+#: API: SCM Git - Write access denied
+msgid "server.api.scm.git.write_access_denied"
+msgstr "리포지토리 쓰기 접근이 거부되었습니다"
+
+# ============================================================================
+# SCM: Protection API responses
+# ============================================================================
+
+#: API: SCM Protection - Failed to load rules
+msgid "server.api.scm.protection.failed_to_load"
+msgstr "보호 규칙 로드에 실패했습니다"
+
+#: API: SCM Protection - Failed to list rules
+msgid "server.api.scm.protection.failed_to_list"
+msgstr "보호 규칙 목록 조회에 실패했습니다"
+
+#: API: SCM Protection - Invalid pattern
+msgid "server.api.scm.protection.invalid_pattern"
+msgstr "패턴은 1~256자 사이여야 합니다"
+
+#: API: SCM Protection - Rule already exists
+msgid "server.api.scm.protection.already_exists"
+msgstr "이 패턴의 보호 규칙이 이미 존재합니다"
+
+#: API: SCM Protection - Failed to create rule
+msgid "server.api.scm.protection.failed_to_create"
+msgstr "보호 규칙 생성에 실패했습니다"
+
+#: API: SCM Protection - Rule not found
+msgid "server.api.scm.protection.rule_not_found"
+msgstr "보호 규칙을 찾을 수 없습니다"
+
+#: API: SCM Protection - Failed to delete rule
+msgid "server.api.scm.protection.failed_to_delete"
+msgstr "보호 규칙 삭제에 실패했습니다"
+
+# ============================================================================
+# SCM: Webhook API responses
+# ============================================================================
+
+#: API: SCM Webhook - Not found
+msgid "server.api.scm.webhook.not_found"
+msgstr "웹훅을 찾을 수 없습니다"
+
+#: API: SCM Webhook - Admin required
+msgid "server.api.scm.webhook.admin_required"
+msgstr "관리자 접근 권한이 필요합니다"
+
+#: API: SCM Webhook - URL required
+msgid "server.api.scm.webhook.url_required"
+msgstr "URL이 필요합니다"
+
+#: API: SCM Webhook - URL invalid protocol
+msgid "server.api.scm.webhook.url_invalid_protocol"
+msgstr "URL은 http:// 또는 https://로 시작해야 합니다"
+
+#: API: SCM Webhook - URL too long
+msgid "server.api.scm.webhook.url_too_long"
+msgstr "URL은 2048자 미만이어야 합니다"
+
+#: API: SCM Webhook - Events required
+msgid "server.api.scm.webhook.events_required"
+msgstr "최소 하나의 이벤트가 필요합니다"
+
+#: API: SCM Webhook - Invalid event
+msgid "server.api.scm.webhook.invalid_event"
+msgstr "잘못된 이벤트 '{event}'. 유효한 이벤트: {valid_events}"
+
+#: API: SCM Webhook - Secret required
+msgid "server.api.scm.webhook.secret_required"
+msgstr "시크릿이 필요합니다"
+
+#: API: SCM Webhook - URL invalid
+msgid "server.api.scm.webhook.url_invalid"
+msgstr "잘못된 URL 형식입니다"
+
+#: API: SCM Webhook - Localhost blocked
+msgid "server.api.scm.webhook.url_localhost_blocked"
+msgstr "로컬호스트 URL은 허용되지 않습니다"
+
+#: API: SCM Webhook - Private IP blocked
+msgid "server.api.scm.webhook.url_private_ip_blocked"
+msgstr "비공개 또는 내부 IP 주소는 허용되지 않습니다"
+
+# ============================================================================
+# SCM: Maintenance API responses
+# ============================================================================
+
+#: API: SCM Maintenance - Not configured
+msgid "server.api.scm.maintenance.not_configured"
+msgstr "유지 관리가 구성되지 않았습니다"
+
+#: API: SCM Maintenance - Job queued for repository
+msgid "server.api.scm.maintenance.job_queued"
+msgstr "리포지토리의 유지 관리 작업 '{task}'이(가) 대기열에 추가되었습니다"
+
+#: API: SCM Maintenance - Global sweep queued
+msgid "server.api.scm.maintenance.sweep_queued"
+msgstr "전체 유지 관리 스윕 '{task}'이(가) 대기열에 추가되었습니다"
+
+# ============================================================================
+# SCM: Mirror API responses
+# ============================================================================
+
+#: API: SCM Mirror - URL required
+msgid "server.api.scm.mirror.url_required"
+msgstr "미러 URL이 필요합니다"
+
+#: API: SCM Mirror - URL invalid protocol
+msgid "server.api.scm.mirror.url_invalid_protocol"
+msgstr "미러 URL은 http:// 또는 https://로 시작해야 합니다"
+
+#: API: SCM Mirror - URL too long
+msgid "server.api.scm.mirror.url_too_long"
+msgstr "미러 URL은 2048자 미만이어야 합니다"
+
+#: API: SCM Mirror - URL invalid
+msgid "server.api.scm.mirror.url_invalid"
+msgstr "잘못된 미러 URL 형식입니다"
+
+#: API: SCM Mirror - Localhost blocked
+msgid "server.api.scm.mirror.url_localhost_blocked"
+msgstr "로컬호스트 URL은 미러에 허용되지 않습니다"
+
+#: API: SCM Mirror - Private IP blocked
+msgid "server.api.scm.mirror.url_private_ip_blocked"
+msgstr "비공개 또는 내부 IP 주소는 미러에 허용되지 않습니다"
+
+#: API: SCM Mirror - Not found
+msgid "server.api.scm.mirror.not_found"
+msgstr "미러를 찾을 수 없습니다"
+
+#: API: SCM Mirror - Disabled
+msgid "server.api.scm.mirror.disabled"
+msgstr "미러가 비활성화되어 있습니다"
+
+#: API: SCM Mirror - Sync queued
+msgid "server.api.scm.mirror.sync_queued"
+msgstr "미러 동기화가 대기열에 추가되었습니다"
+
+#: API: SCM Mirror - Failed to delete
+msgid "server.api.scm.mirror.failed_to_delete"
+msgstr "미러 삭제에 실패했습니다"
+
+#: API: SCM Mirror - Invalid path format
+msgid "server.api.scm.mirror.invalid_path"
+msgstr "잘못된 미러 경로 형식입니다. 예상 형식: mirrors/{platform}/{owner}/{repo}"
+
+#: API: SCM Mirror - Push not allowed
+msgid "server.api.scm.mirror.push_not_allowed"
+msgstr "미러 리포지토리에는 푸시가 허용되지 않습니다"
+
+#: API: SCM Mirror - Remote repository not found
+msgid "server.api.scm.mirror.remote_not_found"
+msgstr "원격 리포지토리를 찾을 수 없습니다"
+
+#: API: SCM Mirror - Mirrors org not found
+msgid "server.api.scm.mirror.mirrors_org_not_found"
+msgstr "미러 조직이 구성되지 않았습니다. 'mirrors'라는 이름의 조직을 만들어 주세요."
+
+#: API: SCM Mirror - Clone failed
+msgid "server.api.scm.mirror.clone_failed"
+msgstr "원격 리포지토리 복제에 실패했습니다"
+
+# ============================================================================
+# Admin API responses
+# ============================================================================
+
+#: API: Admin - User deleted
+msgid "server.api.admin.user_deleted"
+msgstr "사용자가 성공적으로 삭제되었습니다"
+
+#: API: Admin - Cannot delete self
+msgid "server.api.admin.cannot_delete_self"
+msgstr "본인 계정은 삭제할 수 없습니다"
+
+#: API: Admin - User not found
+msgid "server.api.admin.user_not_found"
+msgstr "사용자를 찾을 수 없습니다"
+
+# ============================================================================
+# Admin Users UI
+# ============================================================================
+
+#: Admin Users - Delete button
+msgid "admin.users.delete"
+msgstr "삭제"
+
+#: Admin Users - Delete user title
+msgid "admin.users.deleteUser"
+msgstr "사용자 삭제"
+
+#: Admin Users - Delete confirm title
+msgid "admin.users.deleteConfirmTitle"
+msgstr "사용자 삭제"
+
+#: Admin Users - Delete confirm message
+msgid "admin.users.deleteConfirmMessage"
+msgstr "이 사용자를 삭제하시겠습니까? 이 작업은 계정을 소프트 삭제합니다."
+
+#: Admin Users - Delete success
+msgid "admin.users.deleteSuccess"
+msgstr "사용자가 성공적으로 삭제되었습니다"
+
+#: Admin Users - Cancel button
+msgid "admin.users.cancel"
+msgstr "취소"
+
+#: Admin Users - Confirm delete button
+msgid "admin.users.confirm"
+msgstr "삭제 확인"
+
+# ============================================================================
+# SCM Git Browser API
+# ============================================================================
+
+#: API: SCM Browser - Failed to open repository
+msgid "server.api.scm.browser.failed_to_open_repo"
+msgstr "Failed to open repository"
+
+#: API: SCM Browser - File path required
+msgid "server.api.scm.browser.file_path_required"
+msgstr "File path is required"
+
+#: API: SCM Browser - Ref not found
+msgid "server.api.scm.browser.ref_not_found"
+msgstr "Reference not found: {ref}"
+
+#: API: SCM Browser - Failed to get object
+msgid "server.api.scm.browser.failed_to_get_object"
+msgstr "Failed to get object"
+
+#: API: SCM Browser - Failed to get commit
+msgid "server.api.scm.browser.failed_to_get_commit"
+msgstr "Failed to get commit"
+
+#: API: SCM Browser - Failed to get tree
+msgid "server.api.scm.browser.failed_to_get_tree"
+msgstr "Failed to get tree"
+
+#: API: SCM Browser - Failed to lookup path
+msgid "server.api.scm.browser.failed_to_lookup_path"
+msgstr "Failed to lookup path"
+
+#: API: SCM Browser - Path not found
+msgid "server.api.scm.browser.path_not_found"
+msgstr "Path not found: {path}"
+
+#: API: SCM Browser - Not a file
+msgid "server.api.scm.browser.not_a_file"
+msgstr "Not a file: {path}"
+
+#: API: SCM Browser - Not a directory
+msgid "server.api.scm.browser.not_a_directory"
+msgstr "Not a directory: {path}"
+
+
+# ============================================================================
+# Feature Flags API responses
+# ============================================================================
+
+#: API: Flags - Flag not found
+msgid "server.api.flags.flag_not_found"
+msgstr "기능 플래그를 찾을 수 없습니다"
+
+#: API: Flags - Flag created
+msgid "server.api.flags.flag_created"
+msgstr "기능 플래그가 생성되었습니다"
+
+#: API: Flags - Flag updated
+msgid "server.api.flags.flag_updated"
+msgstr "기능 플래그가 업데이트되었습니다"
+
+#: API: Flags - Flag archived
+msgid "server.api.flags.flag_archived"
+msgstr "기능 플래그가 보관되었습니다"
+
+#: API: Flags - Flag restored
+msgid "server.api.flags.flag_restored"
+msgstr "기능 플래그가 복원되었습니다"
+
+#: API: Flags - Invalid flag key
+msgid "server.api.flags.invalid_flag_key"
+msgstr "잘못된 플래그 키"
+
+#: API: Flags - Duplicate flag key
+msgid "server.api.flags.duplicate_flag_key"
+msgstr "플래그 키가 이미 존재합니다"
+
+#: API: Flags - Variant not found
+msgid "server.api.flags.variant_not_found"
+msgstr "변형을 찾을 수 없습니다"
+
+#: API: Flags - Default variant missing
+msgid "server.api.flags.default_variant_missing"
+msgstr "기본 변형이 변형 목록에 없습니다"
+
+#: API: Flags - Circular prerequisite
+msgid "server.api.flags.circular_prerequisite"
+msgstr "순환 선행 조건 종속성이 감지되었습니다"
+
+#: API: Flags - Prerequisite not found
+msgid "server.api.flags.prerequisite_not_found"
+msgstr "선행 조건 플래그를 찾을 수 없습니다"
+
+#: API: Flags - Strategy not found
+msgid "server.api.flags.strategy_not_found"
+msgstr "롤아웃 전략을 찾을 수 없습니다"
+
+#: API: Flags - Strategy created
+msgid "server.api.flags.strategy_created"
+msgstr "전략이 생성되었습니다"
+
+#: API: Flags - Strategy updated
+msgid "server.api.flags.strategy_updated"
+msgstr "전략이 업데이트되었습니다"
+
+#: API: Flags - Strategy deleted
+msgid "server.api.flags.strategy_deleted"
+msgstr "전략이 삭제되었습니다"
+
+#: API: Flags - Strategy in use
+msgid "server.api.flags.strategy_in_use"
+msgstr "전략이 현재 다른 플래그에서 사용 중입니다"
+
+#: API: Flags - Environment not found
+msgid "server.api.flags.environment_not_found"
+msgstr "환경을 찾을 수 없습니다"
+
+#: API: Flags - Environment created
+msgid "server.api.flags.environment_created"
+msgstr "환경이 생성되었습니다"
+
+#: API: Flags - Environment updated
+msgid "server.api.flags.environment_updated"
+msgstr "환경이 업데이트되었습니다"
+
+#: API: Flags - Environment deleted
+msgid "server.api.flags.environment_deleted"
+msgstr "환경이 삭제되었습니다"
+
+#: API: Flags - Environment has active keys
+msgid "server.api.flags.environment_has_active_keys"
+msgstr "활성 SDK 키가 있는 환경은 삭제할 수 없습니다"
+
+#: API: Flags - Invalid environment name
+msgid "server.api.flags.invalid_environment_name"
+msgstr "잘못된 환경 이름"
+
+#: API: Flags - Invalid environment color
+msgid "server.api.flags.invalid_environment_color"
+msgstr "잘못된 환경 색상"
+
+#: API: Flags - Duplicate environment name
+msgid "server.api.flags.duplicate_environment_name"
+msgstr "환경 이름이 이미 존재합니다"
+
+#: API: Flags - Flag config updated
+msgid "server.api.flags.flag_config_updated"
+msgstr "환경 구성이 업데이트되었습니다"
+
+#: API: Flags - Kill switch not found
+msgid "server.api.flags.kill_switch_not_found"
+msgstr "킬 스위치를 찾을 수 없습니다"
+
+#: API: Flags - Kill switch created
+msgid "server.api.flags.kill_switch_created"
+msgstr "킬 스위치가 생성되었습니다"
+
+#: API: Flags - Kill switch updated
+msgid "server.api.flags.kill_switch_updated"
+msgstr "킬 스위치가 업데이트되었습니다"
+
+#: API: Flags - Kill switch deleted
+msgid "server.api.flags.kill_switch_deleted"
+msgstr "킬 스위치가 삭제되었습니다"
+
+#: API: Flags - Kill switch activated
+msgid "server.api.flags.kill_switch_activated"
+msgstr "킬 스위치가 활성화되었습니다"
+
+#: API: Flags - Kill switch deactivated
+msgid "server.api.flags.kill_switch_deactivated"
+msgstr "킬 스위치가 비활성화되었습니다"
+
+#: API: Flags - Invalid kill switch key
+msgid "server.api.flags.invalid_kill_switch_key"
+msgstr "잘못된 킬 스위치 키"
+
+#: API: Flags - Duplicate kill switch key
+msgid "server.api.flags.duplicate_kill_switch_key"
+msgstr "킬 스위치 키가 이미 존재합니다"
+
+#: API: Flags - Activation reason required
+msgid "server.api.flags.activation_reason_required"
+msgstr "활성화 이유가 필요합니다"
+
+#: API: Flags - SDK key not found
+msgid "server.api.flags.sdk_key_not_found"
+msgstr "SDK 키를 찾을 수 없습니다"
+
+#: API: Flags - SDK key created
+msgid "server.api.flags.sdk_key_created"
+msgstr "SDK 키가 생성되었습니다"
+
+#: API: Flags - SDK key revoked
+msgid "server.api.flags.sdk_key_revoked"
+msgstr "SDK 키가 취소되었습니다"
+
+#: API: Flags - SDK key revoked success
+msgid "server.api.flags.sdk_key_revoked_success"
+msgstr "SDK 키가 성공적으로 취소되었습니다"
+
+#: API: Flags - Invalid SDK key format
+msgid "server.api.flags.invalid_sdk_key_format"
+msgstr "잘못된 SDK 키 형식"
+
+#: API: Flags - Export started
+msgid "server.api.flags.export_started"
+msgstr "노출 내보내기가 시작되었습니다"
+
+#: API: Flags - Exposure already logged
+msgid "server.api.flags.exposure_already_logged"
+msgstr "노출이 이미 기록되었습니다"
+
+#: API: Flags - Exposure created
+msgid "server.api.flags.exposure_created"
+msgstr "노출이 생성되었습니다"
+
+#: API: Flags - Exposure tracking disabled
+msgid "server.api.flags.exposure_tracking_disabled"
+msgstr "노출 추적이 비활성화되었습니다"
+
+#: API: Flags - Exposure tracking enabled
+msgid "server.api.flags.exposure_tracking_enabled"
+msgstr "노출 추적이 활성화되었습니다"
+
+#: API: Flags - Invalid time range
+msgid "server.api.flags.invalid_time_range"
+msgstr "잘못된 시간 범위"
+
+#: API: Flags - No exposures found
+msgid "server.api.flags.no_exposures_found"
+msgstr "노출을 찾을 수 없습니다"
+
+# ============================================================================
+# Flag Stats API responses
+# ============================================================================
+
+#: API: Flags - Stats retrieved
+msgid "server.api.flags.stats_retrieved"
+msgstr "Flag statistics retrieved successfully"
+
+#: API: Flags - Stale flags retrieved
+msgid "server.api.flags.stale_flags_retrieved"
+msgstr "Stale flags retrieved successfully"
+
+#: API: Flags - Flag is stale
+msgid "server.api.flags.flag_is_stale"
+msgstr "This flag has not been evaluated in {days} days"
+
+#: API: Flags - No stale flags
+msgid "server.api.flags.no_stale_flags"
+msgstr "No stale flags found"
+
+#: API: Flags - Never evaluated
+msgid "server.api.flags.never_evaluated"
+msgstr "This flag has never been evaluated"
+
+#: API: Flags - Last evaluated
+msgid "server.api.flags.last_evaluated"
+msgstr "Last evaluated: {date}"
+
+#: API: Flags - Evaluations 24h
+msgid "server.api.flags.evaluations_24h"
+msgstr "Evaluations in last 24 hours: {count}"
+
+#: API: Flags - Evaluations 7d
+msgid "server.api.flags.evaluations_7d"
+msgstr "Evaluations in last 7 days: {count}"
+
+#: API: Flags - Evaluations 30d
+msgid "server.api.flags.evaluations_30d"
+msgstr "Evaluations in last 30 days: {count}"
+
+#: API: Flags - Stale threshold
+msgid "server.api.flags.stale_threshold"
+msgstr "Flags are considered stale after {days} days without evaluation"
+
+# ============================================================================
+# CLI: Feature Flags SDK
+# ============================================================================
+
+#: Flags SDK: Invalid SDK key
+msgid "client.flags.error.invalid_sdk_key"
+msgstr "Invalid or missing SDK key"
+
+#: Flags SDK: Invalid base URL
+msgid "client.flags.error.invalid_base_url"
+msgstr "Invalid or missing base URL"
+
+#: Flags SDK: Connection failed
+msgid "client.flags.error.connection_failed"
+msgstr "Failed to connect to server"
+
+#: Flags SDK: Request failed
+msgid "client.flags.error.request_failed"
+msgstr "HTTP request failed"
+
+#: Flags SDK: Parse failed
+msgid "client.flags.error.parse_failed"
+msgstr "Failed to parse server response"
+
+#: Flags SDK: Server error
+msgid "client.flags.error.server_error"
+msgstr "Server returned an error"
+
+#: Flags SDK: Flag not found
+msgid "client.flags.error.flag_not_found"
+msgstr "Flag not found"
+
+#: Flags SDK: SSE connection failed
+msgid "client.flags.error.sse_connection_failed"
+msgstr "SSE connection failed"
+
+#: Flags SDK: SSE stream error
+msgid "client.flags.error.sse_stream_error"
+msgstr "SSE stream error"
+
+#: Flags SDK: Offline no cache
+msgid "client.flags.error.offline_no_cache"
+msgstr "Client is offline and no cached data is available"
+
+#: Flags SDK: Authentication failed
+msgid "client.flags.error.authentication_failed"
+msgstr "SDK key authentication failed"
+
+#: Flags SDK: Rate limited
+msgid "client.flags.error.rate_limited"
+msgstr "Rate limited. Retry after seconds"
+
+#: Flags SDK: Initialization timeout
+msgid "client.flags.error.initialization_timeout"
+msgstr "Client initialization timed out"
+
+#: Flags SDK: Client closed
+msgid "client.flags.error.client_closed"
+msgstr "Client has been closed"
+
+#: Flags SDK: Invalid value type
+msgid "client.flags.error.invalid_value_type"
+msgstr "Invalid flag value type"
+
+#: Flags SDK: Initializing
+msgid "client.flags.status.initializing"
+msgstr "Initializing flags client..."
+
+#: Flags SDK: Connected
+msgid "client.flags.status.connected"
+msgstr "Flags client connected"
+
+#: Flags SDK: Disconnected
+msgid "client.flags.status.disconnected"
+msgstr "Flags client disconnected"
+
+#: Flags SDK: Reconnecting
+msgid "client.flags.status.reconnecting"
+msgstr "Reconnecting to flags server..."
+
+#: Flags SDK: Using cached values
+msgid "client.flags.status.using_cache"
+msgstr "Using cached flag values"
+
+#: Flags SDK: Cache initialized
+msgid "client.flags.status.cache_initialized"
+msgstr "Flag cache initialized with {count} flags"
+
+
+msgid "server.api.admin.flags.listed"
+msgstr "Listed platform flags"
+
+msgid "server.api.admin.flags.created"
+msgstr "Platform flag created successfully"
+
+msgid "server.api.admin.flags.updated"
+msgstr "Platform flag updated successfully"
+
+msgid "server.api.admin.flags.archived"
+msgstr "Platform flag archived successfully"
+
+msgid "server.api.admin.flags.restored"
+msgstr "Platform flag restored successfully"
+
+msgid "server.api.admin.flags.not_found"
+msgstr "Platform flag not found"
+
+msgid "server.api.admin.flags.duplicate_key"
+msgstr "A platform flag with this key already exists"
+
+msgid "server.api.admin.kill_switches.listed"
+msgstr "Listed platform kill switches"
+
+msgid "server.api.admin.kill_switches.created"
+msgstr "Platform kill switch created successfully"
+
+msgid "server.api.admin.kill_switches.updated"
+msgstr "Platform kill switch updated successfully"
+
+msgid "server.api.admin.kill_switches.activated"
+msgstr "Platform kill switch activated"
+
+msgid "server.api.admin.kill_switches.deactivated"
+msgstr "Platform kill switch deactivated"
+
+msgid "server.api.admin.kill_switches.deleted"
+msgstr "Platform kill switch deleted"
+
+msgid "server.api.admin.kill_switches.not_found"
+msgstr "Platform kill switch not found"
+
+msgid "server.api.admin.kill_switches.duplicate_key"
+msgstr "A platform kill switch with this key already exists"
+
+msgid "server.api.admin.strategies.listed"
+msgstr "Listed platform strategies"
+

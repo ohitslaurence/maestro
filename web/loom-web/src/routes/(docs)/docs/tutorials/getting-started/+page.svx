@@ -1,0 +1,75 @@
+---
+title: Getting Started with Loom
+summary: Create your first thread and learn the basics of AI-assisted coding.
+diataxis: tutorial
+order: 10
+tags:
+  - onboarding
+  - beginner
+---
+
+<script>
+	import { Callout, LinkCard } from '$lib/docs/components';
+</script>
+
+# Getting Started with Loom
+
+Welcome to Loom! This tutorial will walk you through creating your first AI-assisted coding session.
+
+<Callout variant="info" title="Prerequisites">
+	Before you begin, make sure you have a Loom account, Node.js 20+ installed, and a terminal application.
+</Callout>
+
+## Step 1: Install the CLI
+
+Install the Loom CLI using your preferred package manager:
+
+```bash
+pnpm add -g loom-cli
+```
+
+## Step 2: Authenticate
+
+Log in to your Loom account:
+
+```bash
+loom login
+```
+
+This will open a browser window for authentication.
+
+## Step 3: Verify Installation
+
+Check that everything is working:
+
+```bash
+loom --version
+```
+
+## Creating Your First Thread
+
+A **thread** is a conversation with the Loom AI agent. Let's create one:
+
+```bash
+loom new "Help me write a React component"
+```
+
+The agent will respond with suggestions and code. You can continue the conversation naturally.
+
+<Callout variant="tip">
+	Use descriptive prompts to get better results. Include context about your project, coding style preferences, and specific requirements.
+</Callout>
+
+## Next Steps
+
+<LinkCard 
+	href="/docs/tutorials/first-thread" 
+	title="Your First Thread" 
+	description="Deep dive into thread management and conversation flow"
+/>
+
+<LinkCard 
+	href="/docs/how-to/configure-auth" 
+	title="Configure Authentication" 
+	description="Set up OAuth and API keys"
+/>

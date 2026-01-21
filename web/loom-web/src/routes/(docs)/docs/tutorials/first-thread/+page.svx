@@ -1,0 +1,69 @@
+---
+title: Your First Thread
+summary: Deep dive into thread management and conversation flow.
+diataxis: tutorial
+order: 20
+tags:
+  - threads
+  - beginner
+---
+
+<script>
+	import { Callout } from '$lib/docs/components';
+</script>
+
+# Your First Thread
+
+This tutorial explores thread management in depth. You'll learn how to:
+
+- Start and manage conversations
+- Use tools effectively
+- Save and restore threads
+
+## Understanding Threads
+
+A thread represents a complete conversation with the Loom agent. Each thread maintains:
+
+- **Context**: The agent remembers previous messages
+- **State**: Current progress in multi-step tasks
+- **Tool History**: Record of all tool executions
+
+## Working with Threads
+
+### List Your Threads
+
+View all your threads:
+
+```bash
+loom threads list
+```
+
+### Continue a Thread
+
+Resume a previous conversation:
+
+```bash
+loom threads attach <thread-id>
+```
+
+### Export a Thread
+
+Save a thread for later reference:
+
+```bash
+loom threads export <thread-id> > my-thread.json
+```
+
+<Callout variant="warning">
+	Threads are stored on the server. Local exports are snapshots and won't sync updates.
+</Callout>
+
+## Thread States
+
+| State | Description |
+|-------|-------------|
+| `idle` | Ready for input |
+| `weaving` | Agent is processing |
+| `waiting` | Waiting for tool completion |
+| `complete` | Task finished |
+| `error` | Something went wrong |

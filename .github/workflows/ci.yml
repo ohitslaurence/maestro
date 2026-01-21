@@ -1,0 +1,190 @@
+# Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
+name: "ci: loom"
+
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Rust checks via devenv
+  rust-checks:
+    name: Rust Checks
+    runs-on: namespace-profile-cached-amd64
+
+    steps:
+      - name: Checkout repository
+        uses: namespacelabs/nscloud-checkout-action@v7
+
+      - name: Set up Nix cache
+        run: |
+          sudo mkdir -p /cache/nix /nix
+          sudo mount --bind /cache/nix /nix
+          sudo chown runner /nix
+
+      - name: Setup Nix
+        uses: cachix/install-nix-action@9aaadd8b85853f67fcdf488e6a4e9efa94ee96e2
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@ee79db531bfb851a7cf47035057b7cca88d26449
+        with:
+          name: devenv
+
+      - name: Install devenv.sh
+        run: nix profile install nixpkgs#devenv
+
+      - name: Format check
+        run: devenv shell -- cargo fmt --all -- --check
+
+      - name: Clippy
+        run: devenv shell -- cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Cargo check
+        run: devenv shell -- cargo check --workspace --all-targets
+
+      - name: Run tests
+        run: devenv shell -- cargo test --workspace --lib --bins
+
+      - name: Run doc tests
+        run: devenv shell -- cargo test --doc --workspace
+
+      - name: Check docs
+        run: devenv shell -- cargo doc --no-deps --document-private-items
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+
+  # Nix builds (reproducible)
+  nix-build:
+    name: Nix Build
+    runs-on: namespace-profile-cached-amd64
+
+    steps:
+      - name: Checkout repository
+        uses: namespacelabs/nscloud-checkout-action@v7
+
+      - name: Set up Nix cache
+        run: |
+          sudo mkdir -p /cache/nix /nix
+          sudo mount --bind /cache/nix /nix
+          sudo chown runner /nix
+
+      - name: Setup Nix
+        uses: cachix/install-nix-action@9aaadd8b85853f67fcdf488e6a4e9efa94ee96e2
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@ee79db531bfb851a7cf47035057b7cca88d26449
+        with:
+          name: devenv
+
+      - name: Flake check
+        run: nix flake check
+
+      - name: Build loom-cli (cargo2nix)
+        run: nix build .#loom-cli-c2n
+
+      - name: Build loom-server (cargo2nix)
+        run: nix build .#loom-server-c2n
+
+      - name: Build loom-web
+        run: nix build .#loom-web --impure
+        env:
+          NIXPKGS_ALLOW_UNFREE: "1"
+
+  # Security audit
+  security-audit:
+    name: Security Audit
+    runs-on: namespace-profile-cached-amd64
+
+    steps:
+      - name: Checkout repository
+        uses: namespacelabs/nscloud-checkout-action@v7
+
+      - name: Set up Nix cache
+        run: |
+          sudo mkdir -p /cache/nix /nix
+          sudo mount --bind /cache/nix /nix
+          sudo chown runner /nix
+
+      - name: Setup Nix
+        uses: cachix/install-nix-action@9aaadd8b85853f67fcdf488e6a4e9efa94ee96e2
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@ee79db531bfb851a7cf47035057b7cca88d26449
+        with:
+          name: devenv
+
+      - name: Install devenv.sh
+        run: nix profile install nixpkgs#devenv
+
+      - name: Install cargo-audit
+        run: devenv shell -- cargo install cargo-audit
+
+      - name: Run security audit
+        run: devenv shell -- cargo audit
+
+  # Dependency analysis
+  dependencies:
+    name: Dependency Check
+    runs-on: namespace-profile-cached-amd64
+
+    steps:
+      - name: Checkout repository
+        uses: namespacelabs/nscloud-checkout-action@v7
+
+      - name: Set up Nix cache
+        run: |
+          sudo mkdir -p /cache/nix /nix
+          sudo mount --bind /cache/nix /nix
+          sudo chown runner /nix
+
+      - name: Setup Nix
+        uses: cachix/install-nix-action@9aaadd8b85853f67fcdf488e6a4e9efa94ee96e2
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@ee79db531bfb851a7cf47035057b7cca88d26449
+        with:
+          name: devenv
+
+      - name: Install devenv.sh
+        run: nix profile install nixpkgs#devenv
+
+      - name: Install cargo-deny
+        run: devenv shell -- cargo install cargo-deny
+
+      - name: Run cargo-deny
+        run: devenv shell -- cargo deny check --all-features
+
+  # Combined status check
+  ci-complete:
+    name: CI Complete
+    needs: [rust-checks, nix-build, security-audit, dependencies]
+    runs-on: namespace-profile-cached-amd64
+    if: always()
+
+    steps:
+      - name: Check job status
+        run: |
+          if [[ "${{ needs.rust-checks.result }}" != "success" ]]; then
+            echo "::error::Rust checks failed"
+            exit 1
+          fi
+          if [[ "${{ needs.nix-build.result }}" != "success" ]]; then
+            echo "::error::Nix build failed"
+            exit 1
+          fi
+          if [[ "${{ needs.security-audit.result }}" != "success" ]]; then
+            echo "::error::Security audit failed"
+            exit 1
+          fi
+          if [[ "${{ needs.dependencies.result }}" != "success" ]]; then
+            echo "::error::Dependency check failed"
+            exit 1
+          fi
+          echo "✓ All CI checks passed"

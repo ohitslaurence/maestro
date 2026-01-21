@@ -1,0 +1,439 @@
+/**
+ * Copyright (c) 2025 Geoffrey Huntley <ghuntley@ghuntley.com>. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
+@import "tailwindcss";
+
+/* ============================================
+   Commit Mono Font
+   ============================================
+   Font files from https://github.com/eigilnikolajsen/commit-mono
+   Available weights: 400 (Regular), 700 (Bold)
+   ============================================ */
+
+@font-face {
+  font-family: 'CommitMono';
+  src: url('/fonts/CommitMono-400-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CommitMono';
+  src: url('/fonts/CommitMono-400-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CommitMono';
+  src: url('/fonts/CommitMono-400-Regular.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CommitMono';
+  src: url('/fonts/CommitMono-700-Regular.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CommitMono';
+  src: url('/fonts/CommitMono-700-Regular.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CommitMono';
+  src: url('/fonts/CommitMono-700-Italic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================
+   Threadwork Design System
+   ============================================ */
+
+@theme {
+  /* Typography */
+  --font-mono: 'CommitMono', 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  --font-sans: 'CommitMono', system-ui, sans-serif;
+
+  /* Type Scale */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+
+  /* Custom colors mapped from CSS variables */
+  --color-bg: var(--color-bg-value);
+  --color-bg-muted: var(--color-bg-muted-value);
+  --color-bg-subtle: var(--color-bg-subtle-value);
+  --color-fg: var(--color-fg-value);
+  --color-fg-muted: var(--color-fg-muted-value);
+  --color-fg-subtle: var(--color-fg-subtle-value);
+  --color-accent: var(--color-accent-value);
+  --color-accent-soft: var(--color-accent-soft-value);
+  --color-accent-hover: var(--color-accent-hover-value);
+  --color-border: var(--color-border-value);
+  --color-border-muted: var(--color-border-muted-value);
+  --color-thread: var(--color-thread-value);
+  --color-thread-muted: var(--color-thread-muted-value);
+  --color-error: var(--color-error-value);
+  --color-error-soft: var(--color-error-soft-value);
+  --color-warning: var(--color-warning-value);
+  --color-warning-soft: var(--color-warning-soft-value);
+  --color-success: var(--color-success-value);
+  --color-success-soft: var(--color-success-soft-value);
+  --color-info: var(--color-info-value);
+  --color-info-soft: var(--color-info-soft-value);
+
+  /* Spacing Scale */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Border Radius */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+
+  /* Animations */
+  --animate-thread-idle: thread-idle 3s ease-in-out infinite;
+  --animate-thread-weaving: thread-weaving 1.5s ease-in-out infinite;
+  --animate-thread-waiting: thread-waiting 2s ease-in-out infinite;
+  --animate-thread-snap: thread-snap 0.5s ease-out forwards;
+  --animate-thread-complete: thread-complete 0.6s ease-out forwards;
+}
+
+/* ============================================
+   Dark Mode (Default)
+   ============================================ */
+
+:root {
+  /* Background - Loom Black to Shuttle Gray */
+  --color-bg-value: #0D0C0B;
+  --color-bg-muted-value: #1A1816;
+  --color-bg-subtle-value: #2D2926;
+
+  /* Foreground - Thread Silver to Raw Linen */
+  --color-fg-value: #F7F4F0;
+  --color-fg-muted-value: #9C9590;
+  --color-fg-subtle-value: #6B6560;
+
+  /* Accent - Indigo Thread */
+  --color-accent-value: #7B9BC7;
+  --color-accent-soft-value: #1E2A3D;
+  --color-accent-hover-value: #4A6FA5;
+
+  /* Border */
+  --color-border-value: #3D3632;
+  --color-border-muted-value: #2D2926;
+
+  /* Thread */
+  --color-thread-value: #4A6FA5;
+  --color-thread-muted-value: rgba(74, 111, 165, 0.3);
+
+  /* Status - Madder Red (Error) */
+  --color-error-value: #A63D2F;
+  --color-error-soft-value: #2D1A17;
+
+  /* Status - Weld Gold (Warning) */
+  --color-warning-value: #C9A227;
+  --color-warning-soft-value: #2D2615;
+
+  /* Status - Lichen Green (Success) */
+  --color-success-value: #4A7C59;
+  --color-success-soft-value: #1A2D1F;
+
+  /* Status - Woad Blue (Info) */
+  --color-info-value: #4A6FA5;
+  --color-info-soft-value: #1E2A3D;
+
+  /* Weaver Identity Colors */
+  --weaver-indigo: #4A6FA5;
+  --weaver-madder: #A63D2F;
+  --weaver-weld: #C9A227;
+  --weaver-lichen: #4A7C59;
+  --weaver-cochineal: #8B3A62;
+  --weaver-walnut: #6B5344;
+  --weaver-copper: #7B6B4E;
+  --weaver-iron: #4A4A4A;
+}
+
+/* ============================================
+   Light Mode
+   ============================================ */
+
+.light {
+  /* Background - Raw Linen to Woven Cream */
+  --color-bg-value: #F7F4F0;
+  --color-bg-muted-value: #EDE8E3;
+  --color-bg-subtle-value: #E3DDD6;
+
+  /* Foreground - Spindle Brown */
+  --color-fg-value: #3D3632;
+  --color-fg-muted-value: #6B6560;
+  --color-fg-subtle-value: #9C9590;
+
+  /* Accent - Deep Indigo */
+  --color-accent-value: #2C3E6B;
+  --color-accent-soft-value: #E8ECF4;
+  --color-accent-hover-value: #4A6FA5;
+
+  /* Border */
+  --color-border-value: #D4CEC7;
+  --color-border-muted-value: #E3DDD6;
+
+  /* Thread */
+  --color-thread-value: #2C3E6B;
+  --color-thread-muted-value: rgba(44, 62, 107, 0.3);
+
+  /* Status */
+  --color-error-value: #A63D2F;
+  --color-error-soft-value: #F9EFED;
+
+  --color-warning-value: #9A7B1E;
+  --color-warning-soft-value: #FBF6E8;
+
+  --color-success-value: #3D6B4A;
+  --color-success-soft-value: #EDF5EF;
+
+  --color-info-value: #2C3E6B;
+  --color-info-soft-value: #E8ECF4;
+}
+
+/* ============================================
+   Thread Animation Keyframes
+   ============================================ */
+
+/* Idle - subtle pulse */
+@keyframes thread-idle {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Weaving - horizontal shimmer */
+@keyframes thread-weaving {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Waiting - gentle sway */
+@keyframes thread-waiting {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* Error - snap effect */
+@keyframes thread-snap {
+  0% { transform: scaleX(1); opacity: 1; }
+  20% { transform: scaleX(1.1); }
+  40% { transform: scaleX(0.5); opacity: 0.8; }
+  60% { transform: scaleX(0); opacity: 0; }
+  100% { transform: scaleX(0); opacity: 0; }
+}
+
+/* Complete - knot tie-off */
+@keyframes thread-complete {
+  0% { width: 100%; }
+  50% { width: 50%; }
+  100% {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+  }
+}
+
+/* ============================================
+   Visual Motifs
+   ============================================ */
+
+/* Thread Divider */
+.thread-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-thread-muted) 10%,
+    var(--color-thread-muted) 90%,
+    transparent 100%
+  );
+  margin: var(--space-6) 0;
+}
+
+/* Thread Divider with Knot */
+.thread-divider-knot {
+  position: relative;
+  height: 1px;
+  background: var(--color-thread-muted);
+  margin: var(--space-6) 0;
+}
+
+.thread-divider-knot::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background: var(--color-thread);
+  border-radius: var(--radius-full);
+}
+
+/* Loom Frame - Corner Brackets */
+.loom-frame {
+  position: relative;
+  padding: var(--space-6);
+}
+
+.loom-frame::before,
+.loom-frame::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-thread-muted);
+}
+
+/* Top-left corner */
+.loom-frame::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* Bottom-right corner */
+.loom-frame::after {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+body {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fg-subtle);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent), 0 0 0 4px var(--color-bg);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* ============================================
+   RTL Support
+   ============================================ */
+
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* Flip icons and directional elements for RTL */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* Logical properties fallbacks for older browsers */
+[dir="rtl"] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+[dir="rtl"] .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+[dir="rtl"] .ml-4 { margin-left: 0; margin-right: 1rem; }
+[dir="rtl"] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+[dir="rtl"] .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+[dir="rtl"] .mr-4 { margin-right: 0; margin-left: 1rem; }
+[dir="rtl"] .pl-2 { padding-left: 0; padding-right: 0.5rem; }
+[dir="rtl"] .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+[dir="rtl"] .pl-4 { padding-left: 0; padding-right: 1rem; }
+[dir="rtl"] .pr-2 { padding-right: 0; padding-left: 0.5rem; }
+[dir="rtl"] .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+[dir="rtl"] .pr-4 { padding-right: 0; padding-left: 1rem; }
+[dir="rtl"] .left-0 { left: auto; right: 0; }
+[dir="rtl"] .right-0 { right: auto; left: 0; }
+[dir="rtl"] .text-left { text-align: right; }
+[dir="rtl"] .text-right { text-align: left; }
+
+/* Flex direction for RTL */
+[dir="rtl"] .flex-row { flex-direction: row-reverse; }
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+[dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* Keep certain elements LTR (code, numbers) */
+[dir="rtl"] code,
+[dir="rtl"] pre,
+[dir="rtl"] .font-mono {
+  direction: ltr;
+  text-align: left;
+}
