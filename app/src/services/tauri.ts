@@ -13,6 +13,14 @@ import type {
   SessionInfoResult,
   TerminalSession,
 } from "../types";
+import type {
+  MessageRecord,
+  SessionAgentConfig,
+  SessionRecord,
+  SessionStatus,
+  ThreadRecord,
+  ThreadSummary,
+} from "../types/session";
 
 async function invokeCommand<T>(
   command: string,
@@ -247,4 +255,52 @@ export async function opencodeSessionMessages(
     workspaceId,
     sessionId,
   });
+}
+
+// --- Storage commands (session-persistence §4) ---
+
+/** List all thread summaries */
+export async function listThreads(): Promise<ThreadSummary[]> {
+  return invokeCommand<ThreadSummary[]>("list_threads");
+}
+
+/** Load a thread by ID */
+export async function loadThread(threadId: string): Promise<ThreadRecord> {
+  return invokeCommand<ThreadRecord>("load_thread", { threadId });
+}
+
+/** Save a thread (create or update) */
+export async function saveThread(thread: ThreadRecord): Promise<ThreadRecord> {
+  return invokeCommand<ThreadRecord>("save_thread", { thread });
+}
+
+/** Create a new session for a thread */
+export async function createSession(
+  threadId: string,
+  workspaceRoot: string,
+  agentConfig: SessionAgentConfig,
+): Promise<SessionRecord> {
+  return invokeCommand<SessionRecord>("create_session", {
+    threadId,
+    workspaceRoot,
+    agentConfig,
+  });
+}
+
+/** Mark a session as ended */
+export async function markSessionEnded(
+  sessionId: string,
+  status: SessionStatus,
+): Promise<void> {
+  return invokeCommand("mark_session_ended", { sessionId, status });
+}
+
+/** Append a message to the conversation log */
+export async function appendMessage(message: MessageRecord): Promise<void> {
+  return invokeCommand("append_message", { message });
+}
+
+/** List all messages for a thread */
+export async function listMessages(threadId: string): Promise<MessageRecord[]> {
+  return invokeCommand<MessageRecord[]>("list_messages", { threadId });
 }

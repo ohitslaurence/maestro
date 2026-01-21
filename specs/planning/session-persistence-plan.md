@@ -24,7 +24,7 @@ Exit Criteria
 
 ## Phase 3: Message storage
 - [x] Implement append-only `MessageStore` (See §3)
-- [ ] Wire `append_message` command to session loop (See §4, §5)
+- [x] Wire `append_message` command to session loop (See §4, §5)
 
 Exit Criteria
 - [x] Message file created under `messages/<thread_id>/` (See §3)
