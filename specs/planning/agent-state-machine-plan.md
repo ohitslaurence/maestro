@@ -24,11 +24,11 @@ Exit Criteria
 
 ## Phase 3: Tool lifecycle plumbing
 - [x] Normalize tool calls and mark mutating tools in ToolRunner (See §3, §5)
-- [ ] Emit `tool_lifecycle` events on start/complete (See §4)
+- [x] Emit `tool_lifecycle` events on start/complete (See §4)
 
 Exit Criteria
 - [x] Tool run records include `mutating` flag and `attempt` count (See §3)
-- [ ] `tool_lifecycle` events fire for start and completion (See §4, §5)
+- [x] `tool_lifecycle` events fire for start and completion (See §4, §5)
 - [ ] Mutating tool batch transitions to `PostToolsHook` (See §5)
 
 ## Phase 4: Post-tool hooks

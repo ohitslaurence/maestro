@@ -6,7 +6,8 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use crate::agent_state::{
-    AgentEvent, AgentState, AgentStateKind, InvalidTransition, TransitionResult,
+    emit_tool_lifecycle, AgentEvent, AgentState, AgentStateKind, InvalidTransition,
+    ToolRunRecord, TransitionResult,
 };
 
 /// Represents an agent session
@@ -133,6 +134,66 @@ pub fn finalize_response(entry: &mut SessionEntry) -> TransitionResult {
         _ => SessionStatus::Running,
     };
     result
+}
+
+// ============================================================================
+// Tool Lifecycle Event Emission (§4)
+// ============================================================================
+
+/// Process an event and emit tool lifecycle events as appropriate.
+///
+/// Per spec §4 (Event Emission Ordering):
+/// - Emit `tool_lifecycle` completion before `state_changed` to `PostToolsHook` or `CallingLlm`.
+/// - Events fire for both start and completion.
+///
+/// This function wraps `process_event` and handles emission for tool-related events.
+pub fn process_event_with_tool_emission<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    entry: &mut SessionEntry,
+    event: &AgentEvent,
+) -> Result<EventProcessingResult, InvalidTransition> {
+    // Clone session_id to avoid borrow conflicts
+    let session_id = entry.session.id.clone();
+
+    // For ToolStarted/ToolCompleted events, we need to find the record and emit
+    match event {
+        AgentEvent::ToolStarted { run_id, .. } => {
+            let run_id = run_id.clone();
+
+            // Process the event first (updates tool status to Running)
+            let result = process_event(entry, event)?;
+
+            // Find the updated record and emit lifecycle event
+            if let Some(record) = find_tool_run(&entry.state.tool_runs, &run_id) {
+                emit_tool_lifecycle(app, &session_id, record);
+            }
+
+            Ok(result)
+        }
+        AgentEvent::ToolCompleted { run_id, .. } => {
+            let run_id = run_id.clone();
+
+            // Process the event first (updates tool status)
+            let result = process_event(entry, event)?;
+
+            // Find the updated record and emit lifecycle event
+            // Per spec §5: emit tool_lifecycle completion BEFORE state_changed
+            if let Some(record) = find_tool_run(&entry.state.tool_runs, &run_id) {
+                emit_tool_lifecycle(app, &session_id, record);
+            }
+
+            Ok(result)
+        }
+        _ => {
+            // Non-tool events: just process without emission
+            process_event(entry, event)
+        }
+    }
+}
+
+/// Find a tool run record by run_id.
+fn find_tool_run<'a>(tool_runs: &'a [ToolRunRecord], run_id: &str) -> Option<&'a ToolRunRecord> {
+    tool_runs.iter().find(|r| r.run_id == run_id)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -692,7 +753,7 @@ pub async fn get_git_log_local(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::agent_state::AgentEvent;
+    use crate::agent_state::{AgentEvent, ToolRunRecord, ToolRunStatus};
 
     // ========================================================================
     // Session Registry Tests
@@ -877,6 +938,151 @@ mod tests {
         assert_eq!(entries[0].summary, "Fix bug");
         assert_eq!(entries[0].author, "Jane");
         assert_eq!(entries[0].timestamp, 1699999999);
+    }
+
+    // ========================================================================
+    // Tool Lifecycle Emission Tests (§4)
+    // ========================================================================
+
+    #[test]
+    fn find_tool_run_finds_existing_record() {
+        let records = vec![
+            ToolRunRecord {
+                run_id: "toolrun_1".to_string(),
+                call_id: "call_1".to_string(),
+                tool_name: "edit_file".to_string(),
+                mutating: true,
+                status: ToolRunStatus::Running,
+                started_at_ms: 1000,
+                finished_at_ms: None,
+                attempt: 1,
+                error: None,
+            },
+            ToolRunRecord {
+                run_id: "toolrun_2".to_string(),
+                call_id: "call_2".to_string(),
+                tool_name: "read_file".to_string(),
+                mutating: false,
+                status: ToolRunStatus::Queued,
+                started_at_ms: 0,
+                finished_at_ms: None,
+                attempt: 1,
+                error: None,
+            },
+        ];
+
+        let found = find_tool_run(&records, "toolrun_1");
+        assert!(found.is_some());
+        assert_eq!(found.unwrap().tool_name, "edit_file");
+
+        let found2 = find_tool_run(&records, "toolrun_2");
+        assert!(found2.is_some());
+        assert_eq!(found2.unwrap().tool_name, "read_file");
+    }
+
+    #[test]
+    fn find_tool_run_returns_none_for_missing() {
+        let records = vec![ToolRunRecord {
+            run_id: "toolrun_1".to_string(),
+            call_id: "call_1".to_string(),
+            tool_name: "edit_file".to_string(),
+            mutating: true,
+            status: ToolRunStatus::Running,
+            started_at_ms: 1000,
+            finished_at_ms: None,
+            attempt: 1,
+            error: None,
+        }];
+
+        let found = find_tool_run(&records, "toolrun_nonexistent");
+        assert!(found.is_none());
+    }
+
+    #[test]
+    fn process_event_updates_tool_run_status_on_started() {
+        let session_id = "sess_test".to_string();
+        let mut entry = SessionEntry {
+            session: AgentSession {
+                id: session_id.clone(),
+                name: "test".to_string(),
+                harness: AgentHarness::ClaudeCode,
+                project_path: "/tmp/test".to_string(),
+                status: SessionStatus::Running,
+                agent_state: AgentStateKind::ExecutingTools,
+            },
+            state: AgentState {
+                kind: AgentStateKind::ExecutingTools,
+                tool_runs: vec![ToolRunRecord {
+                    run_id: "toolrun_1".to_string(),
+                    call_id: "call_1".to_string(),
+                    tool_name: "edit_file".to_string(),
+                    mutating: true,
+                    status: ToolRunStatus::Queued,
+                    started_at_ms: 0,
+                    finished_at_ms: None,
+                    attempt: 1,
+                    error: None,
+                }],
+                ..Default::default()
+            },
+        };
+
+        let event = AgentEvent::ToolStarted {
+            session_id: session_id.clone(),
+            run_id: "toolrun_1".to_string(),
+        };
+
+        let result = process_event(&mut entry, &event);
+        assert!(result.is_ok());
+
+        // Verify tool run status was updated to Running
+        let tool_run = find_tool_run(&entry.state.tool_runs, "toolrun_1");
+        assert!(tool_run.is_some());
+        assert_eq!(tool_run.unwrap().status, ToolRunStatus::Running);
+    }
+
+    #[test]
+    fn process_event_updates_tool_run_status_on_completed() {
+        let session_id = "sess_test".to_string();
+        let mut entry = SessionEntry {
+            session: AgentSession {
+                id: session_id.clone(),
+                name: "test".to_string(),
+                harness: AgentHarness::ClaudeCode,
+                project_path: "/tmp/test".to_string(),
+                status: SessionStatus::Running,
+                agent_state: AgentStateKind::ExecutingTools,
+            },
+            state: AgentState {
+                kind: AgentStateKind::ExecutingTools,
+                tool_runs: vec![ToolRunRecord {
+                    run_id: "toolrun_1".to_string(),
+                    call_id: "call_1".to_string(),
+                    tool_name: "read_file".to_string(),
+                    mutating: false,
+                    status: ToolRunStatus::Running,
+                    started_at_ms: 1000,
+                    finished_at_ms: None,
+                    attempt: 1,
+                    error: None,
+                }],
+                ..Default::default()
+            },
+        };
+
+        let event = AgentEvent::ToolCompleted {
+            session_id: session_id.clone(),
+            run_id: "toolrun_1".to_string(),
+            status: ToolRunStatus::Succeeded,
+        };
+
+        let result = process_event(&mut entry, &event);
+        assert!(result.is_ok());
+
+        // Verify tool run status was updated to Succeeded
+        let tool_run = find_tool_run(&entry.state.tool_runs, "toolrun_1");
+        assert!(tool_run.is_some());
+        assert_eq!(tool_run.unwrap().status, ToolRunStatus::Succeeded);
     }
 }
 
