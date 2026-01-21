@@ -1,8 +1,13 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Command;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
-use crate::agent_state::AgentStateKind;
+use crate::agent_state::{
+    AgentEvent, AgentState, AgentStateKind, InvalidTransition, TransitionResult,
+};
 
 /// Represents an agent session
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -12,8 +17,122 @@ pub struct AgentSession {
     pub harness: AgentHarness,
     pub project_path: String,
     pub status: SessionStatus,
-    /// Current state machine state (see §3 of agent-state-machine spec).
+    /// Current state machine state kind (see §3 of agent-state-machine spec).
     pub agent_state: AgentStateKind,
+}
+
+// ============================================================================
+// Session Registry (§2)
+// ============================================================================
+
+/// Internal session entry holding full state machine state.
+#[derive(Debug)]
+pub struct SessionEntry {
+    pub session: AgentSession,
+    pub state: AgentState,
+}
+
+/// Session registry: holds all active sessions with their state machines.
+/// Sessions are isolated; events for a session are processed in arrival order.
+#[derive(Debug, Default)]
+pub struct SessionRegistry {
+    sessions: HashMap<String, SessionEntry>,
+}
+
+impl SessionRegistry {
+    pub fn new() -> Self {
+        Self {
+            sessions: HashMap::new(),
+        }
+    }
+
+    /// Insert a new session into the registry.
+    pub fn insert(&mut self, id: String, entry: SessionEntry) {
+        self.sessions.insert(id, entry);
+    }
+
+    /// Get a session by ID.
+    pub fn get(&self, id: &str) -> Option<&SessionEntry> {
+        self.sessions.get(id)
+    }
+
+    /// Get a mutable reference to a session by ID.
+    pub fn get_mut(&mut self, id: &str) -> Option<&mut SessionEntry> {
+        self.sessions.get_mut(id)
+    }
+
+    /// Remove a session from the registry.
+    pub fn remove(&mut self, id: &str) -> Option<SessionEntry> {
+        self.sessions.remove(id)
+    }
+
+    /// List all sessions.
+    pub fn list(&self) -> Vec<&AgentSession> {
+        self.sessions.values().map(|e| &e.session).collect()
+    }
+}
+
+/// Thread-safe session registry for use with Tauri state.
+pub type SharedSessionRegistry = Arc<RwLock<SessionRegistry>>;
+
+/// Create a new shared session registry.
+pub fn new_session_registry() -> SharedSessionRegistry {
+    Arc::new(RwLock::new(SessionRegistry::new()))
+}
+
+// ============================================================================
+// Session Event Processing (§2, §4)
+// ============================================================================
+
+/// Result of processing an event through the session's state machine.
+#[derive(Debug)]
+pub struct EventProcessingResult {
+    pub transition: TransitionResult,
+    pub previous_kind: AgentStateKind,
+}
+
+/// Process an event for a session. This is the main entry point for the session event loop.
+///
+/// Per spec §2:
+/// - All state transitions happen in `handle_event` and are synchronous.
+/// - I/O occurs outside the state machine.
+/// - `AgentAction` is advisory; callers must emit events for success/failure outcomes.
+///
+/// Returns the transition result or an error if the transition is invalid.
+pub fn process_event(
+    entry: &mut SessionEntry,
+    event: &AgentEvent,
+) -> Result<EventProcessingResult, InvalidTransition> {
+    let previous_kind = entry.state.kind;
+    let transition = entry.state.handle_event(event, &entry.session.id)?;
+
+    // Sync the AgentStateKind to the session summary for UI consumption
+    entry.session.agent_state = entry.state.kind;
+
+    // Update session status based on state kind
+    entry.session.status = match entry.state.kind {
+        AgentStateKind::Idle | AgentStateKind::Starting => SessionStatus::Idle,
+        AgentStateKind::Stopped => SessionStatus::Stopped,
+        _ => SessionStatus::Running,
+    };
+
+    Ok(EventProcessingResult {
+        transition,
+        previous_kind,
+    })
+}
+
+/// Finalize response processing after stream completes.
+/// Called by orchestrator to transition from ProcessingResponse to either Ready or ExecutingTools.
+pub fn finalize_response(entry: &mut SessionEntry) -> TransitionResult {
+    let result = entry.state.finalize_response(&entry.session.id);
+    entry.session.agent_state = entry.state.kind;
+    entry.session.status = match entry.state.kind {
+        AgentStateKind::Idle | AgentStateKind::Starting => SessionStatus::Idle,
+        AgentStateKind::Stopped => SessionStatus::Stopped,
+        _ => SessionStatus::Running,
+    };
+    result
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -73,7 +192,7 @@ pub enum AgentHarness {
     // Future harnesses can be added here
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SessionStatus {
     Running,
@@ -263,6 +382,11 @@ pub async fn list_sessions_local() -> Result<Vec<String>, String> {
     Ok(sessions)
 }
 
+/// Generate a session ID per spec §3: `sess_<uuid>`
+fn generate_session_id() -> String {
+    format!("sess_{}", uuid::Uuid::new_v4())
+}
+
 #[tauri::command]
 pub async fn spawn_session(
     harness: AgentHarness,
@@ -273,15 +397,25 @@ pub async fn spawn_session(
         .next()
         .unwrap_or("session")
         .to_string();
-    Ok(AgentSession {
-        id: format!("{}-stub", name),
+    let id = generate_session_id();
+
+    // Initialize state machine and transition to Starting (per spec §5)
+    let mut state = AgentState::default();
+    state.start(); // Idle -> Starting
+
+    let session = AgentSession {
+        id,
         name,
         harness,
         project_path,
-        status: SessionStatus::Running,
-        // TODO: Wire to actual state machine in Phase 2
-        agent_state: AgentStateKind::Idle,
-    })
+        status: SessionStatus::Idle, // Starting maps to Idle status
+        agent_state: state.kind,
+    };
+
+    // TODO: Add to shared registry when Tauri state is wired in Phase 2
+    // For now, return the session with proper state machine initialization
+
+    Ok(session)
 }
 
 #[tauri::command]
@@ -557,7 +691,157 @@ pub async fn get_git_log_local(
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_log_output, parse_numstat, parse_porcelain_status};
+    use super::*;
+    use crate::agent_state::AgentEvent;
+
+    // ========================================================================
+    // Session Registry Tests
+    // ========================================================================
+
+    #[test]
+    fn session_registry_crud_operations() {
+        let mut registry = SessionRegistry::new();
+        let session_id = "sess_test_123".to_string();
+
+        let entry = SessionEntry {
+            session: AgentSession {
+                id: session_id.clone(),
+                name: "test".to_string(),
+                harness: AgentHarness::ClaudeCode,
+                project_path: "/tmp/test".to_string(),
+                status: SessionStatus::Idle,
+                agent_state: AgentStateKind::Idle,
+            },
+            state: AgentState::default(),
+        };
+
+        registry.insert(session_id.clone(), entry);
+        assert!(registry.get(&session_id).is_some());
+        assert_eq!(registry.list().len(), 1);
+
+        let removed = registry.remove(&session_id);
+        assert!(removed.is_some());
+        assert!(registry.get(&session_id).is_none());
+    }
+
+    // ========================================================================
+    // Event Processing Tests (§2, §4)
+    // ========================================================================
+
+    #[test]
+    fn process_event_transitions_ready_to_calling_llm() {
+        let session_id = "sess_test".to_string();
+        let mut entry = SessionEntry {
+            session: AgentSession {
+                id: session_id.clone(),
+                name: "test".to_string(),
+                harness: AgentHarness::ClaudeCode,
+                project_path: "/tmp/test".to_string(),
+                status: SessionStatus::Idle,
+                agent_state: AgentStateKind::Ready,
+            },
+            state: AgentState {
+                kind: AgentStateKind::Ready,
+                ..Default::default()
+            },
+        };
+
+        let event = AgentEvent::UserInput {
+            session_id: session_id.clone(),
+            text: "hello".to_string(),
+        };
+
+        let result = process_event(&mut entry, &event);
+        assert!(result.is_ok());
+
+        let result = result.unwrap();
+        assert_eq!(result.previous_kind, AgentStateKind::Ready);
+        assert_eq!(result.transition.new_kind, AgentStateKind::CallingLlm);
+
+        // Verify session summary is synced
+        assert_eq!(entry.session.agent_state, AgentStateKind::CallingLlm);
+        assert_eq!(entry.session.status, SessionStatus::Running);
+    }
+
+    #[test]
+    fn process_event_invalid_transition_preserves_state() {
+        let session_id = "sess_test".to_string();
+        let mut entry = SessionEntry {
+            session: AgentSession {
+                id: session_id.clone(),
+                name: "test".to_string(),
+                harness: AgentHarness::ClaudeCode,
+                project_path: "/tmp/test".to_string(),
+                status: SessionStatus::Idle,
+                agent_state: AgentStateKind::Idle,
+            },
+            state: AgentState::default(), // Idle
+        };
+
+        // UserInput is invalid from Idle (need to spawn first)
+        let event = AgentEvent::UserInput {
+            session_id: session_id.clone(),
+            text: "hello".to_string(),
+        };
+
+        let result = process_event(&mut entry, &event);
+        assert!(result.is_err());
+
+        // State should be unchanged
+        assert_eq!(entry.state.kind, AgentStateKind::Idle);
+        assert_eq!(entry.session.agent_state, AgentStateKind::Idle);
+    }
+
+    #[test]
+    fn finalize_response_transitions_to_ready_when_no_tools() {
+        let session_id = "sess_test".to_string();
+        let mut entry = SessionEntry {
+            session: AgentSession {
+                id: session_id.clone(),
+                name: "test".to_string(),
+                harness: AgentHarness::ClaudeCode,
+                project_path: "/tmp/test".to_string(),
+                status: SessionStatus::Running,
+                agent_state: AgentStateKind::ProcessingResponse,
+            },
+            state: AgentState {
+                kind: AgentStateKind::ProcessingResponse,
+                pending_tool_calls: vec![], // No tools
+                ..Default::default()
+            },
+        };
+
+        let result = finalize_response(&mut entry);
+        assert_eq!(result.new_kind, AgentStateKind::Ready);
+        assert_eq!(entry.session.agent_state, AgentStateKind::Ready);
+        assert_eq!(entry.session.status, SessionStatus::Running);
+    }
+
+    #[test]
+    fn spawn_session_initializes_state_machine() {
+        // This test verifies spawn_session creates proper session IDs
+        // and initializes the state machine to Starting
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let session = rt.block_on(spawn_session(
+            AgentHarness::ClaudeCode,
+            "/tmp/test-project".to_string(),
+        ));
+
+        assert!(session.is_ok());
+        let session = session.unwrap();
+
+        // Session ID should match spec format: sess_<uuid>
+        assert!(session.id.starts_with("sess_"));
+        assert!(session.id.len() > 5); // "sess_" + uuid
+
+        // State should be Starting (after state.start())
+        assert_eq!(session.agent_state, AgentStateKind::Starting);
+        assert_eq!(session.name, "test-project");
+    }
+
+    // ========================================================================
+    // Git Parsing Tests (existing)
+    // ========================================================================
 
     #[test]
     fn parse_porcelain_status_splits_staged_and_unstaged() {

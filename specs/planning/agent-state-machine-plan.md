@@ -13,7 +13,7 @@ Exit Criteria
 - [x] `AgentStateKind` is included in session summaries (stubbed with TODO for Phase 2 wiring)
 
 ## Phase 2: Session integration and events
-- [ ] Wire session loop to state machine in `app/src-tauri/src/sessions.rs` (See §2, §4)
+- [x] Wire session loop to state machine in `app/src-tauri/src/sessions.rs` (See §2, §4)
 - [ ] Emit `agent:state_event` from `app/src-tauri/src/lib.rs` (See §4)
 - [ ] Extend session summaries to include `AgentStateKind` (See §3)
 
