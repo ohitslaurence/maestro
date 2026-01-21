@@ -272,12 +272,16 @@ curl http://localhost:9100/health
 
 Expose daemon Claude server commands to frontend.
 
-- [ ] Add Tauri commands in `lib.rs`:
-  - `claude_spawn_server(workspace_id, directory)` → port
-  - `claude_stop_server(workspace_id)`
-  - `claude_list_servers()`
-- [ ] Add TypeScript wrappers in `services/tauri.ts`
-- [ ] Wire to existing daemon client
+- [x] Add Tauri commands in `lib.rs` and `commands.rs`:
+  - `claude_sdk_connect_workspace(workspace_id, workspace_path)` → {workspace_id, base_url}
+  - `claude_sdk_disconnect_workspace(workspace_id)`
+  - `claude_sdk_status(workspace_id)`
+  - `claude_sdk_session_list(workspace_id)`
+  - `claude_sdk_session_create(workspace_id, title?)`
+  - `claude_sdk_session_prompt(workspace_id, session_id, message)`
+  - `claude_sdk_session_abort(workspace_id, session_id)`
+- [x] Add TypeScript wrappers in `services/tauri.ts`
+- [x] Wire to existing daemon client (via protocol.rs method constants)
 
 **Verification:**
 ```bash
@@ -337,7 +341,7 @@ Connect frontend to Claude SDK sessions.
 - [ ] Abort stops execution
 - [ ] Resume continues conversation
 - [x] Daemon spawn/stop commands work (via claude_sdk_connect/disconnect_workspace)
-- [ ] `bun run typecheck` passes in `app/`
+- [x] `bun run typecheck` passes in `app/`
 
 ### Manual QA Checklist (do not mark—human verification)
 - [ ]? Create Claude session in Maestro UI

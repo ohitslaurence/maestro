@@ -121,6 +121,14 @@ pub fn run() {
             daemon::opencode_session_prompt,
             daemon::opencode_session_abort,
             daemon::opencode_session_messages,
+            // Claude SDK commands (proxied to daemon, spec §4)
+            daemon::claude_sdk_connect_workspace,
+            daemon::claude_sdk_disconnect_workspace,
+            daemon::claude_sdk_status,
+            daemon::claude_sdk_session_list,
+            daemon::claude_sdk_session_create,
+            daemon::claude_sdk_session_prompt,
+            daemon::claude_sdk_session_abort,
             // Local-only commands (agent harness - future)
             sessions::spawn_session,
             sessions::stop_session,

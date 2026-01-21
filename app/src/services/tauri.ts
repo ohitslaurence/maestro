@@ -259,6 +259,74 @@ export async function opencodeSessionMessages(
   });
 }
 
+// --- Claude SDK commands (mirrors OpenCode API per claude-sdk-server spec §4) ---
+
+/** Connect to Claude SDK server for a workspace */
+export async function claudeSdkConnectWorkspace(
+  workspaceId: string,
+  workspacePath: string,
+): Promise<OpenCodeConnectResult> {
+  return invokeCommand<OpenCodeConnectResult>("claude_sdk_connect_workspace", {
+    workspaceId,
+    workspacePath,
+  });
+}
+
+/** Disconnect Claude SDK server for a workspace */
+export async function claudeSdkDisconnectWorkspace(
+  workspaceId: string,
+): Promise<{ ok: boolean }> {
+  return invokeCommand<{ ok: boolean }>("claude_sdk_disconnect_workspace", {
+    workspaceId,
+  });
+}
+
+/** Get Claude SDK status for a workspace */
+export async function claudeSdkStatus(
+  workspaceId: string,
+): Promise<OpenCodeStatusResult> {
+  return invokeCommand<OpenCodeStatusResult>("claude_sdk_status", { workspaceId });
+}
+
+/** List Claude SDK sessions for a workspace */
+export async function claudeSdkSessionList(
+  workspaceId: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("claude_sdk_session_list", { workspaceId });
+}
+
+/** Create a new Claude SDK session */
+export async function claudeSdkSessionCreate(
+  workspaceId: string,
+  title?: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("claude_sdk_session_create", { workspaceId, title });
+}
+
+/** Send a prompt to a Claude SDK session */
+export async function claudeSdkSessionPrompt(
+  workspaceId: string,
+  sessionId: string,
+  message: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("claude_sdk_session_prompt", {
+    workspaceId,
+    sessionId,
+    message,
+  });
+}
+
+/** Abort a Claude SDK session */
+export async function claudeSdkSessionAbort(
+  workspaceId: string,
+  sessionId: string,
+): Promise<unknown> {
+  return invokeCommand<unknown>("claude_sdk_session_abort", {
+    workspaceId,
+    sessionId,
+  });
+}
+
 // --- Storage commands (session-persistence §4) ---
 
 /** List all thread summaries */

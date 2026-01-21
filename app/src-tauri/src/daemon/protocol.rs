@@ -66,6 +66,15 @@ pub const METHOD_OPENCODE_SESSION_PROMPT: &str = "opencode_session_prompt";
 pub const METHOD_OPENCODE_SESSION_ABORT: &str = "opencode_session_abort";
 pub const METHOD_OPENCODE_SESSION_MESSAGES: &str = "opencode_session_messages";
 
+// Claude SDK method names (mirrors OpenCode API shape per claude-sdk-server spec §4)
+pub const METHOD_CLAUDE_SDK_CONNECT_WORKSPACE: &str = "claude_sdk_connect_workspace";
+pub const METHOD_CLAUDE_SDK_DISCONNECT_WORKSPACE: &str = "claude_sdk_disconnect_workspace";
+pub const METHOD_CLAUDE_SDK_STATUS: &str = "claude_sdk_status";
+pub const METHOD_CLAUDE_SDK_SESSION_LIST: &str = "claude_sdk_session_list";
+pub const METHOD_CLAUDE_SDK_SESSION_CREATE: &str = "claude_sdk_session_create";
+pub const METHOD_CLAUDE_SDK_SESSION_PROMPT: &str = "claude_sdk_session_prompt";
+pub const METHOD_CLAUDE_SDK_SESSION_ABORT: &str = "claude_sdk_session_abort";
+
 // --- Request params ---
 
 #[derive(Debug, Serialize)]

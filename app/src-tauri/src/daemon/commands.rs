@@ -327,5 +327,114 @@ pub async fn opencode_session_messages(
         .await
 }
 
+// --- Claude SDK Commands (Proxy to Daemon) ---
+// Per claude-sdk-server spec §4, mirrors OpenCode API shape
+
+#[tauri::command]
+pub async fn claude_sdk_connect_workspace(
+    workspace_id: String,
+    workspace_path: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<OpenCodeConnectResult, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_CONNECT_WORKSPACE,
+            Some(OpenCodeConnectParams {
+                workspace_id,
+                workspace_path,
+            }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn claude_sdk_disconnect_workspace(
+    workspace_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_DISCONNECT_WORKSPACE,
+            Some(OpenCodeWorkspaceParams { workspace_id }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn claude_sdk_status(
+    workspace_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<OpenCodeStatusResult, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_STATUS,
+            Some(OpenCodeWorkspaceParams { workspace_id }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn claude_sdk_session_list(
+    workspace_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_SESSION_LIST,
+            Some(OpenCodeWorkspaceParams { workspace_id }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn claude_sdk_session_create(
+    workspace_id: String,
+    title: Option<String>,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_SESSION_CREATE,
+            Some(OpenCodeSessionCreateParams { workspace_id, title }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn claude_sdk_session_prompt(
+    workspace_id: String,
+    session_id: String,
+    message: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_SESSION_PROMPT,
+            Some(OpenCodeSessionPromptParams {
+                workspace_id,
+                session_id,
+                message,
+            }),
+        )
+        .await
+}
+
+#[tauri::command]
+pub async fn claude_sdk_session_abort(
+    workspace_id: String,
+    session_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_SESSION_ABORT,
+            Some(OpenCodeSessionAbortParams {
+                workspace_id,
+                session_id,
+            }),
+        )
+        .await
+}
+
 // Helper to use serde_json::Value without importing in this file
 use serde_json::Value;
