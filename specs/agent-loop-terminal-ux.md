@@ -26,7 +26,7 @@ timing, and results in real time, with durable logs for post-run inspection.
 - Automatically generate a postmortem report after completion using Opus.
 
 ### Non-Goals
-- Full-screen TUI navigation or interactive controls.
+- Full-screen TUI inside the bash loop; any TUI should be a separate companion wrapper.
 - Changing the `claude` prompt or loop semantics.
 - Remote log shipping or telemetry outside the local machine.
 
@@ -40,18 +40,22 @@ timing, and results in real time, with durable logs for post-run inspection.
 - **Logging + Metrics**: run-level and per-iteration log files, in-memory stats aggregation.
 - **Signal Handler**: traps `INT`, `TERM`, and `EXIT` to print summary and restore terminal state.
 - **Postmortem Runner**: orchestrates analysis runs and produces compliance + summary reports.
+- **TUI Wrapper (optional)**: `tools/agent-loop-tui` runs the loop with `--no-gum` and renders
+  live state by tailing run logs.
 
 ### Dependencies
 - `gum` CLI (Charm gum).
 - Bash 3+ compatible shell features already used in the script.
 - Core utilities: `date`, `mktemp`, `printf`, `tee`, `wc`, `sed`.
 - `claude` CLI for automated postmortem analysis.
+- Optional: Rust + Ratatui + Crossterm for `tools/agent-loop-tui`.
 
 ### Module/Folder Layout
 - `scripts/agent-loop.sh` (updated entry point)
 - `scripts/lib/agent-loop-ui.sh` (new helper library)
 - `scripts/lib/spec-picker.sh` (new helper for spec discovery)
 - `scripts/agent-loop-analyze.sh` (postmortem prompt + report generator)
+- `tools/agent-loop-tui/` (optional Ratatui wrapper)
 - `logs/agent-loop/` (run logs, created on demand)
 
 ---
