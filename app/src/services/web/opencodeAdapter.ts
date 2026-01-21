@@ -151,7 +151,10 @@ export class OpenCodeAdapter {
     if (existing) {
       return existing;
     }
-    const next = { streams: new Map(), completedTools: new Set() };
+    const next: WorkspaceStreamState = {
+      streams: new Map<string, StreamState>(),
+      completedTools: new Set<string>(),
+    };
     this.workspaces.set(workspaceId, next);
     return next;
   }

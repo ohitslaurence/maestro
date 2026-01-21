@@ -201,12 +201,17 @@ Support resuming previous conversations.
 - [x] Persist `resumeId` from SDK result to session storage (§5 Resume Flow)
 - [x] On `POST /session/:id/message`, load and pass `resumeId` to SDK
 - [x] SDK automatically restores conversation context
-- [ ] Verify resume works after server restart
+- [x] Verify resume works after server restart
 
 **Verification:**
 ```bash
-# Send message, stop server, restart, send another message
-# Second message should have context from first
+# Quick test (same server instance):
+bun run test:resume
+
+# Full restart test:
+bun run test:resume -- --step 1  # Creates session, sends message, shows resumeId
+# Restart server
+bun run test:resume -- --step 2 --session <session-id>  # Verifies context preserved
 ```
 
 ---

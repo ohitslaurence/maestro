@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
-    "test:contract": "bun run test/contract-validation.ts"
+    "test:contract": "bun run test/contract-validation.ts",
+    "test:resume": "bun run test/resume-verification.ts"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.0",

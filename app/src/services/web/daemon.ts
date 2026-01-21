@@ -181,6 +181,17 @@ async function rpcCall(method: string, params?: Record<string, unknown> | null) 
   if (!response.ok || data?.error) {
     const code = data?.error?.code ?? "rpc_error";
     const message = data?.error?.message ?? response.statusText ?? "RPC error";
+
+    if (code === "auth_failed" || code === "auth_required") {
+      throw "daemon_auth_failed";
+    }
+    if (code === "rpc_connection") {
+      throw `daemon_connection_failed: ${message}`;
+    }
+    if (code === "rpc_timeout") {
+      throw "daemon_connection_failed: timeout";
+    }
+
     throw new Error(`${code}: ${message}`);
   }
 
@@ -203,7 +214,18 @@ function startEventStream() {
 
   eventSource.onmessage = (event) => {
     try {
-      const message = JSON.parse(event.data) as { method?: string; params?: unknown };
+      const message = JSON.parse(event.data) as {
+        method?: string;
+        params?: unknown;
+        error?: { code?: string; message?: string };
+      };
+      if (message.error) {
+        emitEvent("daemon:debug", {
+          message: "web:event_error",
+          data: message.error,
+        });
+        return;
+      }
       handleDaemonEvent(message);
     } catch (error) {
       emitEvent("daemon:debug", {
