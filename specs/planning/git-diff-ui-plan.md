@@ -5,7 +5,7 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 ## Phase 1: Dependencies & Setup
 
 - [x] Run `bun add @pierre/diffs @tanstack/react-virtual` (See §2 Dependencies)
-- [ ] Create `app/src/utils/diffsWorker.ts` with worker factory (See §7.2)
+- [x] Create `app/src/utils/diffsWorker.ts` with worker factory (See §7.2)
 - [x] Run `bun run typecheck` to verify dependencies installed correctly
 
 ## Phase 2: useDiffStyle Hook
