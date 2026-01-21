@@ -24,11 +24,11 @@ Exit Criteria
 
 ## Phase 3: Frontend event hub
 - [x] Add `agent:stream_event` hub in `app/src/services/events.ts` (See §4)
-- [ ] Update UI reducers to consume `StreamEvent` (See §5)
+- [x] Update UI reducers to consume `StreamEvent` (See §5)
 
 Exit Criteria
 - [ ] UI renders assistant text via `agent:stream_event` (manual)
-- [ ] `seq` gaps are handled without crashing the reducer (See §5)
+- [x] `seq` gaps are handled without crashing the reducer (See §5)
 
 ## Phase 4: Deprecate legacy events
 - [ ] Remove OpenCode-specific stream events after migration (See §9)
@@ -52,5 +52,5 @@ Exit Criteria
 - `app/src/features/opencode/hooks/useOpenCodeThread.ts`
 
 ## Verification Checklist
-- [ ] `bun run typecheck`
+- [x] `bun run typecheck`
 - [ ] Manual: verify ordered text/tool deltas in UI

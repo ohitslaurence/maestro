@@ -1,12 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { OpenCodeThreadItem, OpenCodeThreadStatus } from "../../../types";
-import { subscribeOpenCodeEvents } from "../../../services/events";
+import { subscribeStreamEvents } from "../../../services/events";
 import { opencodeSessionMessages } from "../../../services/tauri";
+import {
+  type StreamEvent,
+  type StreamBuffer,
+  createStreamBuffer,
+  isTextDelta,
+  isToolCallDelta,
+  isToolCallCompleted,
+  isCompleted,
+  isError,
+  isStatus,
+  isThinkingDelta,
+} from "../../../types/streaming";
 
 // === Constants for normalization ===
 const MAX_ITEMS_PER_THREAD = 500;
 const MAX_ITEM_TEXT = 20000;
 const TOOL_OUTPUT_RECENT_ITEMS = 40;
+
+// === Stream buffering constants (§5) ===
+const STREAM_GAP_TIMEOUT_MS = 5_000;
 
 type PendingUserMessage = {
   id: string;
@@ -50,15 +65,6 @@ type PartData = {
   // Ordering fields
   order: number; // Timestamp-based order for deterministic sorting
   arrivalIndex: number; // Stable index within arrival order
-};
-
-// Message metadata from message.updated events
-type MessageInfo = {
-  id: string;
-  sessionID: string;
-  role: "user" | "assistant";
-  time?: { created?: number; completed?: number };
-  summary?: { title?: string };
 };
 
 // Internal tracked message
@@ -214,6 +220,11 @@ export function useOpenCodeThread({
 
   // Global part arrival counter for stable ordering
   const partArrivalCounterRef = useRef(0);
+
+  // Stream buffers by streamId for seq ordering (§5)
+  const streamBuffersRef = useRef<Map<string, StreamBuffer>>(new Map());
+  // Gap timeout handles by streamId
+  const gapTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Refs for values accessed in event handlers to avoid stale closures
   const processingStartedAtRef = useRef(processingStartedAt);
@@ -483,6 +494,12 @@ export function useOpenCodeThread({
       messagesRef.current.clear();
       prevItemsRef.current = [];
       partArrivalCounterRef.current = 0;
+      // Clear stream buffers and gap timeouts
+      streamBuffersRef.current.clear();
+      for (const timeout of gapTimeoutsRef.current.values()) {
+        clearTimeout(timeout);
+      }
+      gapTimeoutsRef.current.clear();
       setItems([]);
       setStatus("idle");
       setProcessingStartedAt(null);
@@ -514,149 +531,147 @@ export function useOpenCodeThread({
     }
   }, [pendingUserMessages]);
 
-  // Subscribe to OpenCode events - stable deps to avoid churn
-  useEffect(() => {
-    if (!workspaceId) {
-      return;
+  // Process a single StreamEvent and update tracked messages
+  const processStreamEvent = useCallback((event: StreamEvent) => {
+    const messageId = event.messageId ?? event.streamId;
+    const order = event.timestampMs;
+    const arrivalIndex = partArrivalCounterRef.current++;
+
+    // Get or create the message
+    let msg = messagesRef.current.get(messageId);
+    if (!msg) {
+      msg = {
+        id: messageId,
+        sessionID: event.sessionId,
+        role: "assistant",
+        parts: new Map(),
+      };
+      messagesRef.current.set(messageId, msg);
     }
 
-    const unsubscribe = subscribeOpenCodeEvents((event) => {
-      // Filter by workspace
-      if (event.workspaceId !== workspaceId) {
-        return;
+    // Handle text_delta (§3)
+    if (isTextDelta(event)) {
+      const partId = `${messageId}-text`;
+      const existingPart = msg.parts.get(partId);
+      msg.parts.set(partId, {
+        id: partId,
+        messageID: messageId,
+        sessionID: event.sessionId,
+        type: "text",
+        text: existingPart
+          ? mergeStreamingText(existingPart.text || "", event.payload.text)
+          : event.payload.text,
+        order: existingPart?.order ?? order,
+        arrivalIndex: existingPart?.arrivalIndex ?? arrivalIndex,
+      });
+      return true;
+    }
+
+    // Handle thinking_delta (§3)
+    if (isThinkingDelta(event)) {
+      const partId = `${messageId}-thinking`;
+      const existingPart = msg.parts.get(partId);
+      msg.parts.set(partId, {
+        id: partId,
+        messageID: messageId,
+        sessionID: event.sessionId,
+        type: "reasoning",
+        content: existingPart
+          ? mergeStreamingText(existingPart.content || "", event.payload.text)
+          : event.payload.text,
+        order: existingPart?.order ?? order,
+        arrivalIndex: existingPart?.arrivalIndex ?? arrivalIndex,
+      });
+      return true;
+    }
+
+    // Handle tool_call_delta (§3)
+    if (isToolCallDelta(event)) {
+      const partId = event.payload.callId;
+      const existingPart = msg.parts.get(partId);
+      msg.parts.set(partId, {
+        id: partId,
+        messageID: messageId,
+        sessionID: event.sessionId,
+        type: "tool",
+        tool: event.payload.toolName,
+        callID: event.payload.callId,
+        // Accumulate arguments delta as input preview (will be replaced on completion)
+        input: existingPart?.input ?? {},
+        order: existingPart?.order ?? order,
+        arrivalIndex: existingPart?.arrivalIndex ?? arrivalIndex,
+      });
+      return true;
+    }
+
+    // Handle tool_call_completed (§3)
+    if (isToolCallCompleted(event)) {
+      const partId = event.payload.callId;
+      const existingPart = msg.parts.get(partId);
+      msg.parts.set(partId, {
+        id: partId,
+        messageID: messageId,
+        sessionID: event.sessionId,
+        type: "tool",
+        tool: event.payload.toolName,
+        callID: event.payload.callId,
+        input: event.payload.arguments,
+        output: event.payload.output,
+        error: event.payload.errorMessage,
+        order: existingPart?.order ?? order,
+        arrivalIndex: existingPart?.arrivalIndex ?? arrivalIndex,
+      });
+      return true;
+    }
+
+    // Handle completed (§3) - terminal for streamId
+    if (isCompleted(event)) {
+      // Add step-finish part with usage info
+      const partId = `${messageId}-finish`;
+      msg.parts.set(partId, {
+        id: partId,
+        messageID: messageId,
+        sessionID: event.sessionId,
+        type: "step-finish",
+        tokens: {
+          input: event.payload.usage.inputTokens,
+          output: event.payload.usage.outputTokens,
+          reasoning: event.payload.usage.reasoningTokens ?? 0,
+        },
+        order,
+        arrivalIndex,
+      });
+
+      // Mark message as completed
+      msg.time = { ...(msg.time || {}), completed: Date.now() };
+
+      // Calculate duration and set idle
+      const startedAt = processingStartedAtRef.current;
+      if (startedAt) {
+        setLastDurationMs(Date.now() - startedAt);
       }
-
-      // Extract the actual event type from the nested event object
-      const innerEvent = event.event as { type: string; properties?: Record<string, unknown> };
-      const eventType = innerEvent?.type;
-      const props = innerEvent?.properties;
-
-      // Handle message.part.updated - streaming parts with delta accumulation
-      if (eventType === "message.part.updated" && props?.part) {
-        const rawPart = props.part as Omit<PartData, "order" | "arrivalIndex"> & { order?: number; arrivalIndex?: number };
-        const delta = props.delta as string | undefined;
-
-        // Filter by session (use current sessionId from closure, but accept if no session set yet)
-        if (sessionId && rawPart.sessionID !== sessionId) {
-          return;
-        }
-
-        // Get or create the message
-        let msg = messagesRef.current.get(rawPart.messageID);
-        if (!msg) {
-          msg = {
-            id: rawPart.messageID,
-            sessionID: rawPart.sessionID,
-            role: "assistant", // Parts are always from assistant
-            parts: new Map(),
-          };
-          messagesRef.current.set(rawPart.messageID, msg);
-        }
-
-        // Get existing part or create new one
-        const existingPart = msg.parts.get(rawPart.id);
-        const arrivalIndex = existingPart?.arrivalIndex ?? partArrivalCounterRef.current++;
-        const order = rawPart.time?.start ?? existingPart?.order ?? Date.now();
-
-        // Build the updated part with streaming merge
-        const updatedPart: PartData = {
-          ...rawPart,
-          order,
-          arrivalIndex,
-          // Merge streaming text if delta is present
-          text: existingPart && delta
-            ? mergeStreamingText(existingPart.text || "", delta)
-            : rawPart.text ?? existingPart?.text,
-          content: existingPart && delta && rawPart.type === "reasoning"
-            ? mergeStreamingText(existingPart.content || "", delta)
-            : rawPart.content ?? existingPart?.content,
-          output: existingPart && delta && rawPart.type === "tool"
-            ? mergeStreamingText(existingPart.output || "", delta)
-            : rawPart.output ?? existingPart?.output,
-        };
-
-        msg.parts.set(rawPart.id, updatedPart);
-        rebuildItemsRef.current();
-        return;
+      if (pendingUserMessagesRef.current.length === 0) {
+        setStatus("idle");
+        setProcessingStartedAt(null);
       }
+      return true;
+    }
 
-      // Handle message.updated - message metadata
-      if (eventType === "message.updated" && props?.info) {
-        const info = props.info as MessageInfo;
+    // Handle error (§6)
+    if (isError(event)) {
+      setError(event.payload.message);
+      setStatus("error");
+      return true;
+    }
 
-        // Filter by session
-        if (sessionId && info.sessionID !== sessionId) {
-          return;
+    // Handle status (§3)
+    if (isStatus(event)) {
+      if (event.payload.state === "processing") {
+        setStatus("processing");
+        if (!processingStartedAtRef.current) {
+          setProcessingStartedAt(Date.now());
         }
-
-        // Get or create the message
-        let msg = messagesRef.current.get(info.id);
-        if (!msg) {
-          msg = {
-            id: info.id,
-            sessionID: info.sessionID,
-            role: info.role,
-            parts: new Map(),
-          };
-          messagesRef.current.set(info.id, msg);
-        }
-
-        // Update metadata
-        msg.role = info.role;
-        msg.time = info.time;
-
-        // For user messages, extract text from summary
-        if (info.role === "user" && info.summary?.title) {
-          msg.userText = info.summary.title;
-        }
-
-        rebuildItemsRef.current();
-        return;
-      }
-
-      // Handle session.error
-      if (eventType === "session.error") {
-        const errProps = props as { error?: string } | undefined;
-        setError(errProps?.error || "Unknown error");
-        setStatus("error");
-        return;
-      }
-
-      // Handle session.status - provides immediate processing feedback
-      if (eventType === "session.status") {
-        const statusProps = props as { sessionID?: string; status?: { type?: string } } | undefined;
-        // Filter by session if we have one
-        if (sessionId && statusProps?.sessionID !== sessionId) {
-          return;
-        }
-        const statusType = statusProps?.status?.type;
-        if (statusType === "busy") {
-          setStatus("processing");
-          if (!processingStartedAtRef.current) {
-            setProcessingStartedAt(Date.now());
-          }
-        } else if (statusType === "idle") {
-          // Calculate duration before clearing
-          const startedAt = processingStartedAtRef.current;
-          if (startedAt) {
-            setLastDurationMs(Date.now() - startedAt);
-          }
-          // Only set to idle if we don't have pending messages
-          if (pendingUserMessagesRef.current.length === 0) {
-            setStatus("idle");
-            setProcessingStartedAt(null);
-          }
-        }
-        return;
-      }
-
-      // Handle session.idle - alternative idle signal
-      if (eventType === "session.idle") {
-        const idleProps = props as { sessionID?: string } | undefined;
-        if (sessionId && idleProps?.sessionID !== sessionId) {
-          return;
-        }
-        // Calculate duration before clearing
+      } else if (event.payload.state === "idle") {
         const startedAt = processingStartedAtRef.current;
         if (startedAt) {
           setLastDurationMs(Date.now() - startedAt);
@@ -665,13 +680,143 @@ export function useOpenCodeThread({
           setStatus("idle");
           setProcessingStartedAt(null);
         }
+      } else if (event.payload.state === "aborted") {
+        setStatus("idle");
+        setProcessingStartedAt(null);
+      }
+      return false; // Status events don't affect message parts
+    }
+
+    return false; // Unknown event type
+  }, []);
+
+  // Process buffered events in seq order (§5)
+  const flushBuffer = useCallback((buffer: StreamBuffer) => {
+    // Sort by seq
+    buffer.events.sort((a, b) => a.seq - b.seq);
+
+    let anyUpdates = false;
+    const processedSeqs: number[] = [];
+
+    for (const event of buffer.events) {
+      // Skip if we've already processed up to this seq
+      if (event.seq <= buffer.lastSeq) {
+        processedSeqs.push(event.seq);
+        continue;
+      }
+
+      // Check for gap
+      if (event.seq > buffer.lastSeq + 1) {
+        // Gap detected, stop processing until gap fills or times out
+        break;
+      }
+
+      // Process this event
+      if (processStreamEvent(event)) {
+        anyUpdates = true;
+      }
+      buffer.lastSeq = event.seq;
+      processedSeqs.push(event.seq);
+    }
+
+    // Remove processed events
+    buffer.events = buffer.events.filter(e => !processedSeqs.includes(e.seq));
+
+    if (anyUpdates) {
+      rebuildItemsRef.current();
+    }
+
+    return anyUpdates;
+  }, [processStreamEvent]);
+
+  // Subscribe to unified StreamEvents (§4: agent:stream_event)
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+
+    const unsubscribe = subscribeStreamEvents((event: StreamEvent) => {
+      // Filter by session
+      if (event.sessionId !== sessionId) {
         return;
       }
-      // Ignore other event types: server.heartbeat, session.created, session.updated, etc.
+
+      const streamId = event.streamId;
+
+      // Get or create buffer for this stream (§5)
+      let buffer = streamBuffersRef.current.get(streamId);
+      if (!buffer) {
+        buffer = createStreamBuffer(streamId);
+        streamBuffersRef.current.set(streamId, buffer);
+      }
+
+      // If stream is completed, ignore further events (§5)
+      if (buffer.completed) {
+        return;
+      }
+
+      // Mark completed if this is a terminal event
+      if (isCompleted(event) || isError(event)) {
+        buffer.completed = true;
+        // Clear any gap timeout
+        const timeout = gapTimeoutsRef.current.get(streamId);
+        if (timeout) {
+          clearTimeout(timeout);
+          gapTimeoutsRef.current.delete(streamId);
+        }
+      }
+
+      // Add to buffer
+      buffer.events.push(event);
+
+      // Check for gaps (§5)
+      const expectedSeq = buffer.lastSeq + 1;
+      if (event.seq > expectedSeq) {
+        // Gap detected - track it and set timeout
+        if (!buffer.gaps.includes(expectedSeq)) {
+          buffer.gaps.push(expectedSeq);
+        }
+
+        // Set gap timeout if not already set (§5: 5 second gap timeout)
+        if (!gapTimeoutsRef.current.has(streamId)) {
+          const timeout = setTimeout(() => {
+            // Gap persisted - log and continue processing
+            console.warn(
+              `[useOpenCodeThread] Stream gap timeout for ${streamId}, skipping seq ${expectedSeq}`
+            );
+            // Force lastSeq forward to skip the gap
+            const buf = streamBuffersRef.current.get(streamId);
+            if (buf) {
+              buf.lastSeq = event.seq - 1;
+              flushBuffer(buf);
+            }
+            gapTimeoutsRef.current.delete(streamId);
+          }, STREAM_GAP_TIMEOUT_MS);
+          gapTimeoutsRef.current.set(streamId, timeout);
+        }
+      } else {
+        // No gap - clear any pending timeout
+        const timeout = gapTimeoutsRef.current.get(streamId);
+        if (timeout) {
+          clearTimeout(timeout);
+          gapTimeoutsRef.current.delete(streamId);
+        }
+      }
+
+      // Attempt to flush buffer
+      flushBuffer(buffer);
     });
 
-    return unsubscribe;
-  }, [workspaceId, sessionId]); // Removed rebuildItems from deps - using ref instead
+    // Cleanup on unmount or session change
+    return () => {
+      unsubscribe();
+      // Clear all gap timeouts
+      for (const timeout of gapTimeoutsRef.current.values()) {
+        clearTimeout(timeout);
+      }
+      gapTimeoutsRef.current.clear();
+    };
+  }, [sessionId, flushBuffer, processStreamEvent]);
 
   return {
     items,
