@@ -35,13 +35,13 @@ pub use sessions::{
     CompletionReason, StreamErrorCode, ToolCallStatus, AgentProcessingState, TokenUsage,
 };
 
-// Re-export storage types and commands (§4 session-persistence spec)
+// Re-export storage types and commands (§4, §5 session-persistence spec)
 pub use storage::{
-    ThreadRecord, ThreadSummary, ThreadPrivacy, ThreadMetadata,
+    ThreadRecord, ThreadSummary, ThreadPrivacy, ThreadMetadata, ThreadIndex,
     SessionRecord, SessionStatus, SessionAgentConfig, SessionToolRun, SessionToolRunStatus,
-    MessageRecord, MessageRole, MESSAGE_SCHEMA_VERSION,
-    list_threads, load_thread, save_thread, create_session, mark_session_ended,
-    append_message, list_messages,
+    MessageRecord, MessageRole, MESSAGE_SCHEMA_VERSION, INDEX_SCHEMA_VERSION,
+    list_threads, load_thread, save_thread, delete_thread, create_session, mark_session_ended,
+    append_message, list_messages, rebuild_index,
 };
 
 /// Emit a streaming event to the frontend via Tauri's event system.
@@ -123,14 +123,16 @@ pub fn run() {
             // Local-only commands (agent harness - future)
             sessions::spawn_session,
             sessions::stop_session,
-            // Storage commands (session-persistence §4)
+            // Storage commands (session-persistence §4, §5)
             storage::list_threads,
             storage::load_thread,
             storage::save_thread,
+            storage::delete_thread,
             storage::create_session,
             storage::mark_session_ended,
             storage::append_message,
             storage::list_messages,
+            storage::rebuild_index,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -31,11 +31,11 @@ Exit Criteria
 - [x] Appending preserves order when reloaded (See §5)
 
 ## Phase 4: Index and resume
-- [ ] Build `IndexStore` and automatic rebuild when missing (See §5)
+- [x] Build `IndexStore` and automatic rebuild when missing (See §5)
 - [ ] Add resume flow and `session:resumed` event (See §5)
 
 Exit Criteria
-- [ ] Deleting `index.json` triggers rebuild on next list (See §5)
+- [x] Deleting `index.json` triggers rebuild on next list (See §5)
 - [ ] Restarting app resumes last session for a thread (manual)
 
 ## Phase 5: Optional sync queue
@@ -51,6 +51,7 @@ Exit Criteria
 - `app/src-tauri/src/storage/thread_store.rs`
 - `app/src-tauri/src/storage/session_store.rs`
 - `app/src-tauri/src/storage/message_store.rs`
+- `app/src-tauri/src/storage/index_store.rs`
 - `app/src-tauri/src/storage/sync_queue.rs`
 - `app/src/types/session.ts`
 
@@ -60,5 +61,5 @@ Exit Criteria
 - `app/src/services/sessions.ts`
 
 ## Verification Checklist
-- [ ] `bun run typecheck`
-- [ ] Manual: restart app and resume last thread
+- [x] `bun run typecheck`
+- [ ]? Manual: restart app and resume last thread

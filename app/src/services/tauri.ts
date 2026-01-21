@@ -18,6 +18,7 @@ import type {
   SessionAgentConfig,
   SessionRecord,
   SessionStatus,
+  ThreadIndex,
   ThreadRecord,
   ThreadSummary,
 } from "../types/session";
@@ -303,4 +304,14 @@ export async function appendMessage(message: MessageRecord): Promise<void> {
 /** List all messages for a thread */
 export async function listMessages(threadId: string): Promise<MessageRecord[]> {
   return invokeCommand<MessageRecord[]>("list_messages", { threadId });
+}
+
+/** Delete a thread by ID */
+export async function deleteThread(threadId: string): Promise<void> {
+  return invokeCommand("delete_thread", { threadId });
+}
+
+/** Rebuild the thread index (§5) */
+export async function rebuildIndex(): Promise<ThreadIndex> {
+  return invokeCommand<ThreadIndex>("rebuild_index");
 }

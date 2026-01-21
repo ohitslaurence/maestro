@@ -16,10 +16,12 @@ use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager, Runtime};
 use tokio::fs;
 
+pub mod index_store;
 pub mod message_store;
 pub mod session_store;
 pub mod thread_store;
 
+pub use index_store::{IndexStore, ThreadIndex, INDEX_SCHEMA_VERSION};
 pub use message_store::{MessageRecord, MessageRole, MessageStore, MESSAGE_SCHEMA_VERSION};
 pub use session_store::{
     SessionAgentConfig, SessionRecord, SessionStatus, SessionStore, SessionToolRun,
@@ -103,10 +105,11 @@ pub async fn write_json<T: Serialize>(path: &Path, value: &T) -> StorageResult<(
 /// List all thread summaries (§4: list_threads).
 ///
 /// Returns summaries sorted by updatedAt descending, with pinned threads first.
+/// Uses IndexStore for fast lookups; automatically rebuilds if missing (§5).
 #[tauri::command]
 pub async fn list_threads(app: tauri::AppHandle) -> Result<Vec<ThreadSummary>, String> {
     let root = storage_root(&app).map_err(|e| e.to_string())?;
-    let store = ThreadStore::new(root);
+    let store = IndexStore::new(root);
     store.list().await.map_err(|e| e.to_string())
 }
 
@@ -122,14 +125,26 @@ pub async fn load_thread(app: tauri::AppHandle, thread_id: String) -> Result<Thr
 ///
 /// Creates the thread if it doesn't exist, updates if it does.
 /// Returns the saved record with updated timestamp.
+/// Also updates the index (§5).
 #[tauri::command]
 pub async fn save_thread(
     app: tauri::AppHandle,
     thread: ThreadRecord,
 ) -> Result<ThreadRecord, String> {
     let root = storage_root(&app).map_err(|e| e.to_string())?;
-    let store = ThreadStore::new(root);
-    store.save(thread).await.map_err(|e| e.to_string())
+    let thread_store = ThreadStore::new(root.clone());
+    let index_store = IndexStore::new(root);
+
+    let saved = thread_store.save(thread).await.map_err(|e| e.to_string())?;
+
+    // Update the index with the new/updated thread summary
+    let summary = ThreadSummary::from(&saved);
+    index_store
+        .upsert_thread(summary)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(saved)
 }
 
 /// Create a new session (§4: create_session).
@@ -190,6 +205,41 @@ pub async fn list_messages(
     let root = storage_root(&app).map_err(|e| e.to_string())?;
     let store = MessageStore::new(root);
     store.list_by_thread(&thread_id).await.map_err(|e| e.to_string())
+}
+
+/// Delete a thread by ID (§4).
+///
+/// Removes the thread file and updates the index.
+#[tauri::command]
+pub async fn delete_thread(app: tauri::AppHandle, thread_id: String) -> Result<(), String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let thread_store = ThreadStore::new(root.clone());
+    let index_store = IndexStore::new(root);
+
+    // Delete the thread file
+    thread_store
+        .delete(&thread_id)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    // Remove from index
+    index_store
+        .remove_thread(&thread_id)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+/// Rebuild the thread index (§5).
+///
+/// Scans the threads directory and rebuilds the index from scratch.
+/// Useful when the index is out of sync or corrupted.
+#[tauri::command]
+pub async fn rebuild_index(app: tauri::AppHandle) -> Result<ThreadIndex, String> {
+    let root = storage_root(&app).map_err(|e| e.to_string())?;
+    let store = IndexStore::new(root);
+    store.rebuild().await.map_err(|e| e.to_string())
 }
 
 #[cfg(test)]
