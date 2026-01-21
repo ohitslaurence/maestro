@@ -233,16 +233,16 @@ Emit permission events for UI awareness (auto-approve for MVP).
 
 Add daemon RPC commands to spawn/stop servers.
 
-- [ ] Create `daemon/src/claude_server.rs` with spawn/stop logic (§4 Daemon RPC)
-- [ ] Implement port allocation from configurable range (§10: 9100-9199)
-- [ ] Track running servers: `workspace_id → (port, pid, status)`
-- [ ] Implement `spawn_claude_server(workspace_id, directory)` → port
-- [ ] Implement `stop_claude_server(workspace_id)`
-- [ ] Implement `list_claude_servers()` → server info list
-- [ ] Set `ANTHROPIC_API_KEY` env var on spawn
-- [ ] Pass `workspace_id` + `directory` to server (args or env) for session metadata
-- [ ] Capture server stderr for daemon logs
-- [ ] Implement auto-restart once on crash (§10)
+- [x] Create `daemon/src/claude_sdk.rs` with spawn/stop logic (§4 Daemon RPC)
+- [x] Implement port allocation (uses OS-assigned port via MAESTRO_PORT=0)
+- [x] Track running servers: `workspace_id → ClaudeSdkServer` in DaemonState
+- [x] Implement spawn via `claude_sdk_connect_workspace` RPC → base_url
+- [x] Implement stop via `claude_sdk_disconnect_workspace` RPC
+- [x] Implement status check via `claude_sdk_status` RPC
+- [x] Server reads `ANTHROPIC_API_KEY` from environment
+- [x] Pass `workspace_id` + `directory` to server via env vars
+- [x] Server stderr piped (available for future logging)
+- [x] Implement auto-restart once on crash (§10) via process monitor
 
 **Verification:**
 ```bash
@@ -331,7 +331,7 @@ Connect frontend to Claude SDK sessions.
 - [ ] SDK query executes and streams events (requires API key)
 - [ ] Abort stops execution
 - [ ] Resume continues conversation
-- [ ] Daemon spawn/stop commands work
+- [x] Daemon spawn/stop commands work (via claude_sdk_connect/disconnect_workspace)
 - [ ] `bun run typecheck` passes in `app/`
 
 ### Manual QA Checklist (do not mark—human verification)

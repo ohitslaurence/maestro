@@ -1,6 +1,7 @@
 //! Claude Agent SDK server management
 //!
 //! Spawns and manages Claude SDK servers per workspace, bridging SSE events to clients.
+//! Implements auto-restart on crash (once) per spec §10 Design Decision 2.
 
 use std::env;
 use std::io::{BufRead, BufReader};
@@ -13,8 +14,9 @@ use eventsource_client::Client as _;
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
-use tracing::{debug, info, warn};
+use tracing::{debug, error, info, warn};
 
 use crate::opencode::{OpenCodeDaemonEvent, EVENT_OPENCODE_EVENT};
 use crate::protocol::Event;
@@ -27,48 +29,17 @@ pub struct ClaudeSdkServer {
     pub base_url: String,
     #[allow(dead_code)]
     pub pid: u32,
-    child: Option<Child>,
+    child: Arc<Mutex<Option<Child>>>,
     sse_handle: Option<JoinHandle<()>>,
+    /// Handle for the process monitor task (auto-restart on crash per spec §10)
+    monitor_handle: Option<JoinHandle<()>>,
 }
 
 impl ClaudeSdkServer {
     /// Spawn a new Claude SDK server for the given workspace
     pub fn spawn(workspace_id: String, workspace_path: String) -> Result<Self, String> {
-        let server_dir = resolve_server_dir()?;
-        info!(
-            "Spawning Claude SDK server for workspace {} at {}",
-            workspace_id, workspace_path
-        );
+        let (child, pid, base_url) = spawn_server_process(&workspace_path)?;
 
-        let mut child = Command::new("bun")
-            .args(["run", "serve"])
-            .current_dir(server_dir)
-            .env("MAESTRO_WORKSPACE_DIR", &workspace_path)
-            .env("MAESTRO_HOST", "127.0.0.1")
-            .env("MAESTRO_PORT", "0")
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(|e| format!("Failed to spawn Claude SDK server: {e}"))?;
-
-        let pid = child.id();
-
-        let stdout = child
-            .stdout
-            .take()
-            .ok_or("Failed to capture stdout")?;
-        let reader = BufReader::new(stdout);
-
-        let mut base_url = None;
-        for line in reader.lines().map_while(Result::ok) {
-            debug!("Claude SDK stdout: {}", line);
-            if let Some(url) = parse_listening_url(&line) {
-                base_url = Some(url);
-                break;
-            }
-        }
-
-        let base_url = base_url.ok_or("Failed to parse server URL from stdout")?;
         info!(
             "Claude SDK server started at {} (pid: {})",
             base_url, pid
@@ -79,8 +50,9 @@ impl ClaudeSdkServer {
             workspace_path,
             base_url,
             pid,
-            child: Some(child),
+            child: Arc::new(Mutex::new(Some(child))),
             sse_handle: None,
+            monitor_handle: None,
         })
     }
 
@@ -97,9 +69,29 @@ impl ClaudeSdkServer {
         self.sse_handle = Some(handle);
     }
 
+    /// Start process monitoring for auto-restart on crash (spec §10)
+    pub fn start_process_monitor(&mut self, state: Arc<DaemonState>) {
+        let workspace_id = self.workspace_id.clone();
+        let workspace_path = self.workspace_path.clone();
+        let child_handle = Arc::clone(&self.child);
+
+        let handle = tokio::spawn(async move {
+            monitor_process(workspace_id, workspace_path, child_handle, state).await;
+        });
+
+        self.monitor_handle = Some(handle);
+    }
+
     /// Stop the SSE bridge
     pub fn stop_sse_bridge(&mut self) {
         if let Some(handle) = self.sse_handle.take() {
+            handle.abort();
+        }
+    }
+
+    /// Stop the process monitor
+    fn stop_process_monitor(&mut self) {
+        if let Some(handle) = self.monitor_handle.take() {
             handle.abort();
         }
     }
@@ -112,10 +104,14 @@ impl ClaudeSdkServer {
         );
 
         self.stop_sse_bridge();
+        self.stop_process_monitor();
 
-        if let Some(mut child) = self.child.take() {
-            let _ = child.kill();
-            let _ = child.wait();
+        // Use try_lock to avoid blocking; if locked, the monitor is handling shutdown
+        if let Ok(mut guard) = self.child.try_lock() {
+            if let Some(mut child) = guard.take() {
+                let _ = child.kill();
+                let _ = child.wait();
+            }
         }
     }
 }
@@ -141,6 +137,151 @@ fn resolve_server_dir() -> Result<PathBuf, String> {
     }
 
     Err("Claude SDK server directory not found. Set MAESTRO_CLAUDE_SDK_DIR".to_string())
+}
+
+/// Spawn the server process and wait for the listening URL.
+/// Returns (Child, pid, base_url) on success.
+fn spawn_server_process(workspace_path: &str) -> Result<(Child, u32, String), String> {
+    let server_dir = resolve_server_dir()?;
+    info!(
+        "Spawning Claude SDK server for workspace at {}",
+        workspace_path
+    );
+
+    let mut child = Command::new("bun")
+        .args(["run", "serve"])
+        .current_dir(server_dir)
+        .env("MAESTRO_WORKSPACE_DIR", workspace_path)
+        .env("MAESTRO_HOST", "127.0.0.1")
+        .env("MAESTRO_PORT", "0")
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Failed to spawn Claude SDK server: {e}"))?;
+
+    let pid = child.id();
+
+    let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
+    let reader = BufReader::new(stdout);
+
+    let mut base_url = None;
+    for line in reader.lines().map_while(Result::ok) {
+        debug!("Claude SDK stdout: {}", line);
+        if let Some(url) = parse_listening_url(&line) {
+            base_url = Some(url);
+            break;
+        }
+    }
+
+    let base_url = base_url.ok_or("Failed to parse server URL from stdout")?;
+    Ok((child, pid, base_url))
+}
+
+/// Monitor the server process and auto-restart on crash (once).
+/// Per spec §10 Design Decision 2: auto-restart once, then mark as Error.
+async fn monitor_process(
+    workspace_id: String,
+    workspace_path: String,
+    child_handle: Arc<Mutex<Option<Child>>>,
+    state: Arc<DaemonState>,
+) {
+    let mut restart_count = 0u32;
+    const MAX_RESTARTS: u32 = 1; // Auto-restart once on crash
+
+    loop {
+        // Wait for process exit
+        let exit_status = {
+            let mut guard = child_handle.lock().await;
+            if let Some(ref mut child) = *guard {
+                match child.try_wait() {
+                    Ok(Some(status)) => {
+                        // Process exited
+                        guard.take(); // Clear the child
+                        Some(status)
+                    }
+                    Ok(None) => {
+                        // Process still running
+                        None
+                    }
+                    Err(e) => {
+                        warn!("Error checking process status for {}: {}", workspace_id, e);
+                        None
+                    }
+                }
+            } else {
+                // No child process, monitor should exit
+                debug!("No child process for {}, stopping monitor", workspace_id);
+                return;
+            }
+        };
+
+        if let Some(status) = exit_status {
+            if status.success() {
+                info!(
+                    "Claude SDK server for {} exited cleanly",
+                    workspace_id
+                );
+                return;
+            }
+
+            // Process crashed
+            warn!(
+                "Claude SDK server for {} crashed with status {:?}",
+                workspace_id, status
+            );
+
+            if restart_count >= MAX_RESTARTS {
+                error!(
+                    "Claude SDK server for {} crashed {} times, marking as Error",
+                    workspace_id,
+                    restart_count + 1
+                );
+
+                // Update server status to Error in state
+                // (Note: We can't directly update status field due to ownership,
+                // but the server will be removed and require explicit re-spawn)
+                state.remove_claude_sdk_server(&workspace_id).await;
+                return;
+            }
+
+            // Attempt restart
+            restart_count += 1;
+            info!(
+                "Attempting to restart Claude SDK server for {} (attempt {})",
+                workspace_id, restart_count
+            );
+
+            // Small delay before restart
+            tokio::time::sleep(Duration::from_secs(1)).await;
+
+            match spawn_server_process(&workspace_path) {
+                Ok((new_child, new_pid, new_url)) => {
+                    info!(
+                        "Claude SDK server for {} restarted at {} (pid: {})",
+                        workspace_id, new_url, new_pid
+                    );
+
+                    // Store new child
+                    let mut guard = child_handle.lock().await;
+                    *guard = Some(new_child);
+
+                    // Note: base_url and pid are outdated in the ClaudeSdkServer struct
+                    // but SSE bridge will reconnect automatically via backoff
+                }
+                Err(e) => {
+                    error!(
+                        "Failed to restart Claude SDK server for {}: {}",
+                        workspace_id, e
+                    );
+                    state.remove_claude_sdk_server(&workspace_id).await;
+                    return;
+                }
+            }
+        }
+
+        // Check every 2 seconds
+        tokio::time::sleep(Duration::from_secs(2)).await;
+    }
 }
 
 /// Parse the listening URL from Claude SDK server stdout

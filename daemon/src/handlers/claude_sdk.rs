@@ -56,6 +56,7 @@ pub async fn handle_connect(request: &Request, state: Arc<DaemonState>) -> Strin
     let base_url = server.base_url.clone();
 
     server.start_sse_bridge(state.clone());
+    server.start_process_monitor(state.clone());
 
     state
         .store_claude_sdk_server(params.workspace_id.clone(), server)

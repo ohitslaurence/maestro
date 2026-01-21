@@ -1,4 +1,4 @@
-import { listen } from "@tauri-apps/api/event";
+import { listen } from "./bridge";
 import { useEffect, type DependencyList } from "react";
 import type { OpenCodeEvent, SessionStatus } from "../types";
 import {
