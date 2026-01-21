@@ -294,7 +294,7 @@ bun run typecheck  # No errors
 
 Connect frontend to Claude SDK sessions.
 
-- [ ] Create `useClaudeSession` hook that:
+- [x] Create `useClaudeSession` hook that:
   - Spawns server via daemon
   - Connects to SSE stream
   - Maps events to existing ThreadView format
