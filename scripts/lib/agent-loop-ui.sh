@@ -6,6 +6,7 @@
 declare -g GUM_ENABLED=false
 declare -g LOG_DIR=""
 declare -g RUN_ID=""
+declare -g RUN_DIR=""
 declare -g RUN_LOG=""
 declare -g RUN_REPORT=""
 declare -g RUN_PROMPT_PATH=""
@@ -50,9 +51,16 @@ init_ui() {
     return 1
   fi
 
-  RUN_LOG="$LOG_DIR/run-$RUN_ID.log"
-  RUN_REPORT="$LOG_DIR/run-$RUN_ID-report.tsv"
-  RUN_PROMPT_PATH="$LOG_DIR/run-$RUN_ID-prompt.txt"
+  RUN_DIR="$LOG_DIR/run-$RUN_ID"
+
+  if ! mkdir -p "$RUN_DIR"; then
+    ui_log "ERROR" "Cannot create run directory: $RUN_DIR"
+    return 1
+  fi
+
+  RUN_LOG="$RUN_DIR/run.log"
+  RUN_REPORT="$RUN_DIR/report.tsv"
+  RUN_PROMPT_PATH="$RUN_DIR/prompt.txt"
 
   # Initialize report file
   printf 'timestamp_ms\tkind\titeration\tduration_ms\texit_code\toutput_bytes\toutput_lines\toutput_path\tmessage\n' > "$RUN_REPORT"
@@ -173,10 +181,10 @@ start_iteration() {
   ITER_START_MS=$(get_epoch_ms)
   ITER_EXIT_CODE=""
   ITER_COMPLETE_DETECTED="false"
-  ITER_LOG_PATH="$LOG_DIR/run-$RUN_ID-iter-$(printf '%02d' "$iteration").log"
+  ITER_LOG_PATH="$RUN_DIR/iter-$(printf '%02d' "$iteration").log"
   ITER_OUTPUT_BYTES=""
   ITER_OUTPUT_LINES=""
-  ITER_TAIL_PATH="$LOG_DIR/run-$RUN_ID-iter-$(printf '%02d' "$iteration").tail.txt"
+  ITER_TAIL_PATH="$RUN_DIR/iter-$(printf '%02d' "$iteration").tail.txt"
   TOTAL_ITERATIONS=$iteration
 
   ui_log "ITERATION_START" "iteration=$iteration"
@@ -325,7 +333,7 @@ ui_header() {
 ui_status() {
   local line="$1"
   if [[ "$GUM_ENABLED" == "true" ]]; then
-    gum style --foreground 245 "$line"
+    gum style --foreground 245 -- "$line"
   else
     printf '%s\n' "$line"
   fi
@@ -338,7 +346,7 @@ ui_status_inline() {
   fi
   if [[ "$GUM_ENABLED" == "true" ]]; then
     local styled
-    styled=$(gum style --foreground 245 "$line" | tr -d '\n')
+    styled=$(gum style --foreground 245 -- "$line" | tr -d '\n')
     printf '\r'
     tput el 2>/dev/null || true
     printf '%s' "$styled"
@@ -441,7 +449,7 @@ show_run_header() {
   ui_status "Spec:        $spec_path"
   ui_status "Plan:        $plan_path"
   ui_status "Iterations:  $iterations"
-  ui_status "Log dir:     $LOG_DIR"
+  ui_status "Run dir:     $RUN_DIR"
   ui_status "Gum:         $GUM_ENABLED"
 
   ui_log "RUN_START" "spec=$spec_path plan=$plan_path iterations=$iterations"
@@ -541,7 +549,7 @@ write_summary_json() {
     avg_duration_ms=$((total_duration_ms / TOTAL_ITERATIONS))
   fi
 
-  local summary_path="$LOG_DIR/run-$RUN_ID-summary.json"
+  local summary_path="$RUN_DIR/summary.json"
 
   # Format nullable fields properly for JSON
   local completed_iter_json="null"

@@ -100,13 +100,14 @@ timing, and results in real time, with durable logs for post-run inspection.
 | `completion_mode` | string | yes | `strict` when exact match, `lenient` when token appears |
 
 ### Storage Schema (if any)
-- Run log: `logs/agent-loop/run-<run_id>.log`
-- Per-iteration logs: `logs/agent-loop/run-<run_id>-iter-<NN>.log`
-- Optional summary JSON: `logs/agent-loop/run-<run_id>-summary.json`
-- Run report (TSV): `logs/agent-loop/run-<run_id>-report.tsv`
-- Prompt snapshot: `logs/agent-loop/run-<run_id>-prompt.txt`
-- Per-iteration tail: `logs/agent-loop/run-<run_id>-iter-<NN>.tail.txt`
-- Analysis prompt: `logs/agent-loop/run-<run_id>-analysis-prompt.txt`
+- Run directory: `logs/agent-loop/run-<run_id>/`
+  - Run log: `logs/agent-loop/run-<run_id>/run.log`
+  - Per-iteration logs: `logs/agent-loop/run-<run_id>/iter-<NN>.log`
+  - Optional summary JSON: `logs/agent-loop/run-<run_id>/summary.json`
+  - Run report (TSV): `logs/agent-loop/run-<run_id>/report.tsv`
+  - Prompt snapshot: `logs/agent-loop/run-<run_id>/prompt.txt`
+  - Per-iteration tail: `logs/agent-loop/run-<run_id>/iter-<NN>.tail.txt`
+  - Analysis prompt: `logs/agent-loop/run-<run_id>/analysis-prompt.txt`
 
 ---
 

@@ -55,7 +55,7 @@ parse_args() {
 }
 
 find_latest_run_id() {
-  if ! compgen -G "$LOG_DIR/run-*-report.tsv" >/dev/null; then
+  if ! compgen -G "$LOG_DIR/run-*/report.tsv" >/dev/null && ! compgen -G "$LOG_DIR/run-*-report.tsv" >/dev/null; then
     printf 'Error: No run reports found in %s\n' "$LOG_DIR" >&2
     exit 1
   fi
@@ -64,17 +64,17 @@ find_latest_run_id() {
   while IFS= read -r file; do
     latest_report="$file"
     break
-  done < <(ls -t "$LOG_DIR"/run-*-report.tsv)
+  done < <(ls -t "$LOG_DIR"/run-*/report.tsv "$LOG_DIR"/run-*-report.tsv 2>/dev/null)
 
   if [[ -z "$latest_report" ]]; then
     printf 'Error: Unable to determine latest run\n' >&2
     exit 1
   fi
 
-  local base
-  base=$(basename "$latest_report")
-  RUN_ID=${base#run-}
-  RUN_ID=${RUN_ID%-report.tsv}
+  local run_dir
+  run_dir=$(dirname "$latest_report")
+  RUN_ID=${run_dir##*/}
+  RUN_ID=${RUN_ID#run-}
 }
 
 parse_report() {
@@ -115,11 +115,20 @@ main() {
     find_latest_run_id
   fi
 
-  local run_log="$LOG_DIR/run-$RUN_ID.log"
-  local run_report="$LOG_DIR/run-$RUN_ID-report.tsv"
-  local prompt_snapshot="$LOG_DIR/run-$RUN_ID-prompt.txt"
-  local summary_json="$LOG_DIR/run-$RUN_ID-summary.json"
-  local analysis_prompt_path="$LOG_DIR/run-$RUN_ID-analysis-prompt.txt"
+  local run_dir="$LOG_DIR/run-$RUN_ID"
+  local run_log="$run_dir/run.log"
+  local run_report="$run_dir/report.tsv"
+  local prompt_snapshot="$run_dir/prompt.txt"
+  local summary_json="$run_dir/summary.json"
+  local analysis_prompt_path="$run_dir/analysis-prompt.txt"
+
+  if [[ ! -f "$run_report" ]]; then
+    run_report="$LOG_DIR/run-$RUN_ID-report.tsv"
+    run_log="$LOG_DIR/run-$RUN_ID.log"
+    prompt_snapshot="$LOG_DIR/run-$RUN_ID-prompt.txt"
+    summary_json="$LOG_DIR/run-$RUN_ID-summary.json"
+    analysis_prompt_path="$LOG_DIR/run-$RUN_ID-analysis-prompt.txt"
+  fi
 
   if [[ ! -f "$run_report" ]]; then
     printf 'Error: Run report not found: %s\n' "$run_report" >&2

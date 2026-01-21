@@ -3,7 +3,7 @@
 Reference: [streaming-event-schema.md](../streaming-event-schema.md)
 
 ## Phase 1: Core types and emit helpers
-- [ ] Add `StreamEvent` TS types in `app/src/types/streaming.ts` (See §3)
+- [x] Add `StreamEvent` TS types in `app/src/types/streaming.ts` (See §3)
 - [ ] Add Rust `StreamEvent` struct + serializer in `app/src-tauri/src/sessions.rs` (See §3)
 - [ ] Add `emit_stream_event` helper in `app/src-tauri/src/lib.rs` (See §4)
 
