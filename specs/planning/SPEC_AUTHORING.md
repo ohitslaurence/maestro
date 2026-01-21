@@ -126,6 +126,9 @@ Reference: [<topic>.md](../<topic>.md)
 
 ## Verification Checklist
 - [ ] `command` or manual verification step
+
+## Notes (Optional)
+- Phase X: <note about blockers, edge cases, or follow-ups>
 ```
 
 Notes:
@@ -136,6 +139,7 @@ Notes:
 - If a phase depends on another, state it explicitly in the phase heading or first task ("Depends on: Phase X").
 - Mark completed work with `[x]` and add notes about commits or tests.
 - Required sections: Files to Create, Files to Modify, Verification Checklist (use `None` if empty).
+- Add Notes only when there is information useful to future phases (blockers, risks, edge cases, follow-ups).
 
 ## Updating the Index
 
