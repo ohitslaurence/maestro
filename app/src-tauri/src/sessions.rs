@@ -6,7 +6,8 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use crate::agent_state::{
-    emit_tool_lifecycle, AgentEvent, AgentState, AgentStateKind, InvalidTransition,
+    emit_hook_lifecycle, emit_session_error, emit_state_changed, emit_tool_lifecycle, AgentError,
+    AgentEvent, AgentState, AgentStateKind, ErrorSource, HookRunRecord, InvalidTransition,
     ToolRunRecord, TransitionResult,
 };
 
@@ -154,39 +155,56 @@ pub fn process_event_with_tool_emission<R: tauri::Runtime>(
 ) -> Result<EventProcessingResult, InvalidTransition> {
     // Clone session_id to avoid borrow conflicts
     let session_id = entry.session.id.clone();
+    let result = process_event(entry, event);
 
-    // For ToolStarted/ToolCompleted events, we need to find the record and emit
-    match event {
-        AgentEvent::ToolStarted { run_id, .. } => {
-            let run_id = run_id.clone();
-
-            // Process the event first (updates tool status to Running)
-            let result = process_event(entry, event)?;
-
-            // Find the updated record and emit lifecycle event
-            if let Some(record) = find_tool_run(&entry.state.tool_runs, &run_id) {
-                emit_tool_lifecycle(app, &session_id, record);
+    match result {
+        Ok(processed) => {
+            // Emit lifecycle events for tools/hooks first (ordering requirement)
+            match event {
+                AgentEvent::ToolStarted { run_id, .. } | AgentEvent::ToolCompleted { run_id, .. } => {
+                    if let Some(record) = find_tool_run(&entry.state.tool_runs, run_id) {
+                        emit_tool_lifecycle(app, &session_id, record);
+                    }
+                }
+                AgentEvent::HookStarted { run_id, .. }
+                | AgentEvent::HookCompleted { run_id, .. } => {
+                    if let Some(record) = find_hook_run(&entry.state.hook_runs, run_id) {
+                        emit_hook_lifecycle(app, &session_id, record);
+                    }
+                }
+                _ => {}
             }
 
-            Ok(result)
-        }
-        AgentEvent::ToolCompleted { run_id, .. } => {
-            let run_id = run_id.clone();
-
-            // Process the event first (updates tool status)
-            let result = process_event(entry, event)?;
-
-            // Find the updated record and emit lifecycle event
-            // Per spec §5: emit tool_lifecycle completion BEFORE state_changed
-            if let Some(record) = find_tool_run(&entry.state.tool_runs, &run_id) {
-                emit_tool_lifecycle(app, &session_id, record);
+            if processed.transition.new_kind == AgentStateKind::Error {
+                if let Some(error) = &entry.state.last_error {
+                    emit_session_error(app, &session_id, error);
+                }
             }
 
-            Ok(result)
+            if let Some(reason) = processed.transition.reason {
+                if processed.previous_kind != processed.transition.new_kind {
+                    emit_state_changed(
+                        app,
+                        &session_id,
+                        processed.previous_kind,
+                        processed.transition.new_kind,
+                        reason,
+                        entry.state.active_stream_id.clone(),
+                    );
+                }
+            }
+
+            Ok(processed)
         }
-        _ => {
-            // Non-tool events: just process without emission
-            process_event(entry, event)
+        Err(err) => {
+            let error = AgentError {
+                code: "state_transition_invalid".to_string(),
+                message: err.to_string(),
+                retryable: false,
+                source: ErrorSource::Orchestrator,
+            };
+            emit_session_error(app, &session_id, &error);
+            Err(err)
         }
     }
 }
@@ -194,6 +212,10 @@ pub fn process_event_with_tool_emission<R: tauri::Runtime>(
 /// Find a tool run record by run_id.
 fn find_tool_run<'a>(tool_runs: &'a [ToolRunRecord], run_id: &str) -> Option<&'a ToolRunRecord> {
     tool_runs.iter().find(|r| r.run_id == run_id)
+}
+
+fn find_hook_run<'a>(hook_runs: &'a [HookRunRecord], run_id: &str) -> Option<&'a HookRunRecord> {
+    hook_runs.iter().find(|r| r.run_id == run_id)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

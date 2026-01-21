@@ -4,6 +4,7 @@
 //! tool execution, and post-tool hooks. See specs/agent-state-machine.md for the full spec.
 
 use serde::{Deserialize, Serialize};
+use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::Emitter;
 
 // ============================================================================
@@ -139,7 +140,7 @@ pub struct AgentStateSnapshot {
 
 /// Retry target for timeout events.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum RetryTarget {
     Llm,
     Tool { run_id: String },
@@ -241,7 +242,7 @@ impl Default for HookFailurePolicy {
 
 /// Hook tool filter.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
+#[serde(tag = "type", content = "names", rename_all = "snake_case")]
 pub enum HookToolFilter {
     AnyMutating,
     ToolNames(Vec<String>),
@@ -371,12 +372,19 @@ pub struct AgentStateEventEnvelope {
 impl AgentStateEventEnvelope {
     /// Create a new envelope with auto-generated eventId and timestamp.
     pub fn new(session_id: String, payload: AgentStateEvent) -> Self {
+        let timestamp_ms = current_time_ms();
+        Self::new_with_timestamp(session_id, payload, timestamp_ms)
+    }
+
+    /// Create a new envelope with a specified timestamp.
+    pub fn new_with_timestamp(
+        session_id: String,
+        payload: AgentStateEvent,
+        timestamp_ms: u64,
+    ) -> Self {
         Self {
             event_id: format!("evt_{}", uuid::Uuid::new_v4()),
-            timestamp_ms: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_millis() as u64)
-                .unwrap_or(0),
+            timestamp_ms,
             session_id,
             payload,
         }
@@ -399,21 +407,20 @@ pub fn emit_state_changed<R: tauri::Runtime>(
     reason: StateChangeReason,
     stream_id: Option<String>,
 ) {
+    let timestamp_ms = current_time_ms();
     let payload = StateChangedPayload {
         session_id: session_id.to_string(),
         from,
         to,
         reason,
-        timestamp_ms: std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_millis() as u64)
-            .unwrap_or(0),
+        timestamp_ms,
         stream_id,
     };
 
-    let envelope = AgentStateEventEnvelope::new(
+    let envelope = AgentStateEventEnvelope::new_with_timestamp(
         session_id.to_string(),
         AgentStateEvent::StateChanged(payload),
+        timestamp_ms,
     );
 
     let _ = app.emit(AGENT_STATE_EVENT_CHANNEL, envelope);
@@ -491,7 +498,14 @@ pub fn emit_hook_lifecycle<R: tauri::Runtime>(
         AgentStateEvent::HookLifecycle(payload),
     );
 
-    let _ = app.emit(AGENT_STATE_EVENT_CHANNEL, envelope);
+	let _ = app.emit(AGENT_STATE_EVENT_CHANNEL, envelope);
+}
+
+fn current_time_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_millis() as u64)
+        .unwrap_or(0)
 }
 
 // ============================================================================
@@ -871,6 +885,9 @@ impl AgentState {
                 // Mark tool as running in tool_runs
                 if let Some(record) = self.tool_runs.iter_mut().find(|r| r.run_id == *run_id) {
                     record.status = ToolRunStatus::Running;
+                    if record.started_at_ms == 0 {
+                        record.started_at_ms = current_time_ms();
+                    }
                 }
                 Ok(TransitionResult {
                     new_kind: self.kind,
@@ -882,6 +899,9 @@ impl AgentState {
                 // Update tool record
                 if let Some(record) = self.tool_runs.iter_mut().find(|r| r.run_id == *run_id) {
                     record.status = *status;
+                    if record.finished_at_ms.is_none() {
+                        record.finished_at_ms = Some(current_time_ms());
+                    }
                 }
 
                 // Check if this was a failure
@@ -989,6 +1009,9 @@ impl AgentState {
                 // Mark hook as running
                 if let Some(record) = self.hook_runs.iter_mut().find(|r| r.run_id == *run_id) {
                     record.status = HookRunStatus::Running;
+                    if record.started_at_ms == 0 {
+                        record.started_at_ms = current_time_ms();
+                    }
                 }
                 Ok(TransitionResult {
                     new_kind: self.kind,
@@ -1000,6 +1023,9 @@ impl AgentState {
                 // Update hook record
                 if let Some(record) = self.hook_runs.iter_mut().find(|r| r.run_id == *run_id) {
                     record.status = *status;
+                    if record.finished_at_ms.is_none() {
+                        record.finished_at_ms = Some(current_time_ms());
+                    }
                 }
 
                 // Check for failure (policy handling is done by hook runner)
@@ -1102,20 +1128,38 @@ impl AgentState {
                     }
                     RetryTarget::Tool { run_id } => {
                         // Retry specific tool
+                        let record = self
+                            .tool_runs
+                            .iter_mut()
+                            .find(|r| r.run_id == *run_id)
+                            .ok_or_else(|| InvalidTransition {
+                                from: self.kind,
+                                event_type: "RetryTimeout",
+                                message: format!("Tool run {} not found", run_id),
+                            })?;
+
+                        let arguments = self
+                            .pending_tool_calls
+                            .iter()
+                            .find(|call| call.call_id == record.call_id)
+                            .map(|call| call.arguments.clone())
+                            .unwrap_or(serde_json::Value::Null);
+
+                        record.status = ToolRunStatus::Queued;
+                        record.attempt = record.attempt.saturating_add(1);
+                        record.started_at_ms = 0;
+                        record.finished_at_ms = None;
+                        record.error = None;
+
                         self.kind = AgentStateKind::ExecutingTools;
                         self.last_error = None;
-                        // Find the tool call to retry
-                        let tools: Vec<ToolCall> = self
-                            .tool_runs
-                            .iter()
-                            .filter(|r| r.run_id == *run_id)
-                            .map(|r| ToolCall {
-                                call_id: r.call_id.clone(),
-                                name: r.tool_name.clone(),
-                                arguments: serde_json::Value::Null, // Orchestrator has full args
-                                mutating: r.mutating,
-                            })
-                            .collect();
+
+                        let tools = vec![ToolCall {
+                            call_id: record.call_id.clone(),
+                            name: record.tool_name.clone(),
+                            arguments,
+                            mutating: record.mutating,
+                        }];
                         Ok(TransitionResult {
                             new_kind: AgentStateKind::ExecutingTools,
                             action: AgentAction::ExecuteTools {
@@ -1127,14 +1171,26 @@ impl AgentState {
                     }
                     RetryTarget::Hook { run_id } => {
                         // Retry specific hook
+                        let record = self
+                            .hook_runs
+                            .iter_mut()
+                            .find(|r| r.run_id == *run_id)
+                            .ok_or_else(|| InvalidTransition {
+                                from: self.kind,
+                                event_type: "RetryTimeout",
+                                message: format!("Hook run {} not found", run_id),
+                            })?;
+
+                        record.status = HookRunStatus::Queued;
+                        record.attempt = record.attempt.saturating_add(1);
+                        record.started_at_ms = 0;
+                        record.finished_at_ms = None;
+                        record.error = None;
+
+                        let tool_runs = record.tool_run_ids.clone();
+
                         self.kind = AgentStateKind::PostToolsHook;
                         self.last_error = None;
-                        let tool_runs: Vec<String> = self
-                            .hook_runs
-                            .iter()
-                            .filter(|r| r.run_id == *run_id)
-                            .flat_map(|r| r.tool_run_ids.clone())
-                            .collect();
                         Ok(TransitionResult {
                             new_kind: AgentStateKind::PostToolsHook,
                             action: AgentAction::RunPostToolHooks {
@@ -1207,6 +1263,9 @@ impl AgentState {
                 // Tool completed while stopping -> mark as canceled
                 if let Some(record) = self.tool_runs.iter_mut().find(|r| r.run_id == *run_id) {
                     record.status = ToolRunStatus::Canceled;
+                    if record.finished_at_ms.is_none() {
+                        record.finished_at_ms = Some(current_time_ms());
+                    }
                 }
                 Ok(TransitionResult {
                     new_kind: self.kind,
@@ -1218,6 +1277,9 @@ impl AgentState {
                 // Hook completed while stopping -> mark as canceled
                 if let Some(record) = self.hook_runs.iter_mut().find(|r| r.run_id == *run_id) {
                     record.status = HookRunStatus::Canceled;
+                    if record.finished_at_ms.is_none() {
+                        record.finished_at_ms = Some(current_time_ms());
+                    }
                 }
                 Ok(TransitionResult {
                     new_kind: self.kind,

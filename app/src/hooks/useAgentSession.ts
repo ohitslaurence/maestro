@@ -92,7 +92,7 @@ function reducer(state: AgentSessionState, action: Action): AgentSessionState {
       const { payload, eventId, timestampMs } = action.payload;
       if (payload.type !== "state_changed") return state;
 
-      const { to, streamId } = payload.payload;
+      const { to, streamId } = payload;
 
       // Clear tool/hook runs on certain transitions
       const clearRuns =
@@ -114,7 +114,7 @@ function reducer(state: AgentSessionState, action: Action): AgentSessionState {
       const { payload, eventId, timestampMs } = action.payload;
       if (payload.type !== "tool_lifecycle") return state;
 
-      const record = toolLifecycleToRecord(payload.payload);
+      const record = toolLifecycleToRecord(payload);
       const newToolRuns = new Map(state.toolRuns);
       newToolRuns.set(record.run_id, record);
 
@@ -130,7 +130,7 @@ function reducer(state: AgentSessionState, action: Action): AgentSessionState {
       const { payload, eventId, timestampMs } = action.payload;
       if (payload.type !== "hook_lifecycle") return state;
 
-      const record = hookLifecycleToRecord(payload.payload);
+      const record = hookLifecycleToRecord(payload);
       const newHookRuns = new Map(state.hookRuns);
       newHookRuns.set(record.run_id, record);
 
@@ -146,7 +146,7 @@ function reducer(state: AgentSessionState, action: Action): AgentSessionState {
       const { payload, eventId, timestampMs } = action.payload;
       if (payload.type !== "session_error") return state;
 
-      const { code, message, retryable, source } = payload.payload;
+      const { code, message, retryable, source } = payload;
 
       return {
         ...state,

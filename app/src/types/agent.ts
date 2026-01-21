@@ -258,10 +258,10 @@ export type SessionErrorPayload = {
 
 /** Union of all state event payloads (agent:state_event channel). */
 export type AgentStateEvent =
-  | { type: "state_changed"; payload: StateChangedPayload }
-  | { type: "tool_lifecycle"; payload: ToolLifecyclePayload }
-  | { type: "hook_lifecycle"; payload: HookLifecyclePayload }
-  | { type: "session_error"; payload: SessionErrorPayload };
+  | ({ type: "state_changed" } & StateChangedPayload)
+  | ({ type: "tool_lifecycle" } & ToolLifecyclePayload)
+  | ({ type: "hook_lifecycle" } & HookLifecyclePayload)
+  | ({ type: "session_error" } & SessionErrorPayload);
 
 /** Envelope for all state events (includes required fields per §4). */
 export type AgentStateEventEnvelope = {
