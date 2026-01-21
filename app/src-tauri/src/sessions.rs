@@ -11,6 +11,276 @@ use crate::agent_state::{
     ToolRunRecord, TransitionResult,
 };
 
+// ============================================================================
+// Unified Streaming Event Schema (specs/streaming-event-schema.md §3)
+// ============================================================================
+
+/// Current schema version for streaming events.
+pub const STREAM_SCHEMA_VERSION: &str = "1.0";
+
+/// Channel name for streaming events (§4).
+pub const STREAM_EVENT_CHANNEL: &str = "agent:stream_event";
+
+/// Event types for streaming events (§3).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum StreamEventType {
+    TextDelta,
+    ToolCallDelta,
+    ToolCallCompleted,
+    Completed,
+    Error,
+    Status,
+    ThinkingDelta,
+    ArtifactDelta,
+    Metadata,
+}
+
+// ============================================================================
+// Payload Types (§3)
+// ============================================================================
+
+/// Payload for text_delta events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TextDeltaPayload {
+    pub text: String,
+    pub role: String, // Always "assistant"
+}
+
+/// Payload for tool_call_delta events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ToolCallDeltaPayload {
+    pub call_id: String,
+    pub tool_name: String,
+    pub arguments_delta: String,
+}
+
+/// Status of a completed tool call.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum ToolCallStatus {
+    Completed,
+    Failed,
+    Canceled,
+}
+
+/// Payload for tool_call_completed events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ToolCallCompletedPayload {
+    pub call_id: String,
+    pub tool_name: String,
+    pub arguments: serde_json::Value,
+    pub output: String,
+    pub status: ToolCallStatus,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_message: Option<String>,
+}
+
+/// Reason for stream completion.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum CompletionReason {
+    Stop,
+    Length,
+    ToolError,
+    UserAbort,
+}
+
+/// Token usage statistics.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsage {
+    pub input_tokens: u64,
+    pub output_tokens: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reasoning_tokens: Option<u64>,
+}
+
+/// Payload for completed events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CompletedPayload {
+    pub reason: CompletionReason,
+    pub usage: TokenUsage,
+}
+
+/// Error codes for stream errors (§6).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum StreamErrorCode {
+    ProviderError,
+    StreamGap,
+    ProtocolError,
+    ToolError,
+    SessionAborted,
+}
+
+/// Payload for error events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ErrorPayload {
+    pub code: StreamErrorCode,
+    pub message: String,
+    pub recoverable: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub details: Option<serde_json::Value>,
+}
+
+/// Agent processing state.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AgentProcessingState {
+    Idle,
+    Processing,
+    Waiting,
+    Aborted,
+}
+
+/// Payload for status events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StatusPayload {
+    pub state: AgentProcessingState,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub detail: Option<String>,
+}
+
+/// Payload for thinking_delta events (optional).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThinkingDeltaPayload {
+    pub text: String,
+}
+
+/// Payload for artifact_delta events (optional).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ArtifactDeltaPayload {
+    pub artifact_id: String,
+    pub artifact_type: String,
+    pub content_delta: String,
+}
+
+/// Payload for metadata events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MetadataPayload {
+    pub model: String,
+    pub latency_ms: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_request_id: Option<String>,
+}
+
+/// All payload types as a tagged enum for type-safe serialization.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum StreamEventPayload {
+    TextDelta(TextDeltaPayload),
+    ToolCallDelta(ToolCallDeltaPayload),
+    ToolCallCompleted(ToolCallCompletedPayload),
+    Completed(CompletedPayload),
+    Error(ErrorPayload),
+    Status(StatusPayload),
+    ThinkingDelta(ThinkingDeltaPayload),
+    ArtifactDelta(ArtifactDeltaPayload),
+    Metadata(MetadataPayload),
+}
+
+// ============================================================================
+// StreamEvent Envelope (§3)
+// ============================================================================
+
+/// Unified streaming event envelope.
+///
+/// Per spec §3: All streaming events from harnesses are normalized to this format.
+/// The envelope provides ordering metadata (`streamId`, `seq`) and the `type`/`payload`
+/// discriminated union for event-specific data.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StreamEvent {
+    /// Schema version, always "1.0".
+    pub schema_version: String,
+    /// Unique identifier for this event.
+    pub event_id: String,
+    /// Maestro session ID.
+    pub session_id: String,
+    /// Harness that produced this event (e.g., "claude_code", "open_code").
+    pub harness: String,
+    /// Provider that generated the response (optional).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider: Option<String>,
+    /// Stable identifier for the current assistant response stream.
+    pub stream_id: String,
+    /// Monotonically increasing sequence number per streamId.
+    pub seq: u64,
+    /// Unix epoch milliseconds when event was created.
+    pub timestamp_ms: u64,
+    /// Event type discriminator.
+    #[serde(rename = "type")]
+    pub event_type: StreamEventType,
+    /// Type-specific payload data.
+    pub payload: serde_json::Value,
+    /// Provider message ID (optional).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<String>,
+    /// Parent message ID for threading (optional).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_message_id: Option<String>,
+}
+
+impl StreamEvent {
+    /// Create a new StreamEvent with required fields.
+    ///
+    /// Generates a unique `event_id` and sets `timestamp_ms` to current time.
+    pub fn new(
+        session_id: String,
+        harness: String,
+        stream_id: String,
+        seq: u64,
+        event_type: StreamEventType,
+        payload: serde_json::Value,
+    ) -> Self {
+        Self {
+            schema_version: STREAM_SCHEMA_VERSION.to_string(),
+            event_id: format!("evt_{}", uuid::Uuid::new_v4()),
+            session_id,
+            harness,
+            provider: None,
+            stream_id,
+            seq,
+            timestamp_ms: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_millis() as u64)
+                .unwrap_or(0),
+            event_type,
+            payload,
+            message_id: None,
+            parent_message_id: None,
+        }
+    }
+
+    /// Set the provider field.
+    pub fn with_provider(mut self, provider: String) -> Self {
+        self.provider = Some(provider);
+        self
+    }
+
+    /// Set the message_id field.
+    pub fn with_message_id(mut self, message_id: String) -> Self {
+        self.message_id = Some(message_id);
+        self
+    }
+
+    /// Set the parent_message_id field.
+    pub fn with_parent_message_id(mut self, parent_message_id: String) -> Self {
+        self.parent_message_id = Some(parent_message_id);
+        self
+    }
+}
+
 /// Represents an agent session
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentSession {
@@ -1105,6 +1375,229 @@ mod tests {
         let tool_run = find_tool_run(&entry.state.tool_runs, "toolrun_1");
         assert!(tool_run.is_some());
         assert_eq!(tool_run.unwrap().status, ToolRunStatus::Succeeded);
+    }
+
+    // ========================================================================
+    // StreamEvent Serialization Tests (§3)
+    // ========================================================================
+
+    #[test]
+    fn stream_event_serializes_with_camel_case_fields() {
+        let payload = serde_json::json!({ "text": "Hello", "role": "assistant" });
+        let event = StreamEvent {
+            schema_version: STREAM_SCHEMA_VERSION.to_string(),
+            event_id: "evt_test123".to_string(),
+            session_id: "sess_abc".to_string(),
+            harness: "claude_code".to_string(),
+            provider: Some("anthropic".to_string()),
+            stream_id: "stream_xyz".to_string(),
+            seq: 0,
+            timestamp_ms: 1700000000000,
+            event_type: StreamEventType::TextDelta,
+            payload,
+            message_id: None,
+            parent_message_id: None,
+        };
+
+        let json = serde_json::to_string(&event).unwrap();
+
+        // Verify camelCase field names per spec §3
+        assert!(json.contains("\"schemaVersion\":\"1.0\""));
+        assert!(json.contains("\"eventId\":\"evt_test123\""));
+        assert!(json.contains("\"sessionId\":\"sess_abc\""));
+        assert!(json.contains("\"streamId\":\"stream_xyz\""));
+        assert!(json.contains("\"timestampMs\":1700000000000"));
+        assert!(json.contains("\"type\":\"text_delta\""));
+        assert!(json.contains("\"provider\":\"anthropic\""));
+
+        // Optional fields should be absent when None
+        assert!(!json.contains("messageId"));
+        assert!(!json.contains("parentMessageId"));
+    }
+
+    #[test]
+    fn stream_event_new_generates_event_id_and_timestamp() {
+        let payload = serde_json::json!({ "text": "test", "role": "assistant" });
+        let event = StreamEvent::new(
+            "sess_test".to_string(),
+            "claude_code".to_string(),
+            "stream_1".to_string(),
+            0,
+            StreamEventType::TextDelta,
+            payload,
+        );
+
+        assert!(event.event_id.starts_with("evt_"));
+        assert!(event.timestamp_ms > 0);
+        assert_eq!(event.schema_version, "1.0");
+        assert_eq!(event.seq, 0);
+    }
+
+    #[test]
+    fn stream_event_builder_methods_work() {
+        let payload = serde_json::json!({ "text": "test", "role": "assistant" });
+        let event = StreamEvent::new(
+            "sess_test".to_string(),
+            "claude_code".to_string(),
+            "stream_1".to_string(),
+            0,
+            StreamEventType::TextDelta,
+            payload,
+        )
+        .with_provider("anthropic".to_string())
+        .with_message_id("msg_123".to_string())
+        .with_parent_message_id("msg_000".to_string());
+
+        assert_eq!(event.provider, Some("anthropic".to_string()));
+        assert_eq!(event.message_id, Some("msg_123".to_string()));
+        assert_eq!(event.parent_message_id, Some("msg_000".to_string()));
+    }
+
+    #[test]
+    fn stream_event_type_serializes_as_snake_case() {
+        // Per spec §3: Event types are snake_case strings
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::TextDelta).unwrap(),
+            "\"text_delta\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::ToolCallDelta).unwrap(),
+            "\"tool_call_delta\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::ToolCallCompleted).unwrap(),
+            "\"tool_call_completed\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::Completed).unwrap(),
+            "\"completed\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::Error).unwrap(),
+            "\"error\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::Status).unwrap(),
+            "\"status\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::ThinkingDelta).unwrap(),
+            "\"thinking_delta\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::ArtifactDelta).unwrap(),
+            "\"artifact_delta\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StreamEventType::Metadata).unwrap(),
+            "\"metadata\""
+        );
+    }
+
+    #[test]
+    fn text_delta_payload_serializes_correctly() {
+        let payload = TextDeltaPayload {
+            text: "Hello world".to_string(),
+            role: "assistant".to_string(),
+        };
+        let json = serde_json::to_string(&payload).unwrap();
+        assert_eq!(json, r#"{"text":"Hello world","role":"assistant"}"#);
+    }
+
+    #[test]
+    fn tool_call_delta_payload_serializes_with_camel_case() {
+        let payload = ToolCallDeltaPayload {
+            call_id: "tool-1".to_string(),
+            tool_name: "edit_file".to_string(),
+            arguments_delta: "{\"path\":".to_string(),
+        };
+        let json = serde_json::to_string(&payload).unwrap();
+        assert!(json.contains("\"callId\":\"tool-1\""));
+        assert!(json.contains("\"toolName\":\"edit_file\""));
+        assert!(json.contains("\"argumentsDelta\":\"{\\\"path\\\":\""));
+    }
+
+    #[test]
+    fn completed_payload_serializes_with_usage() {
+        let payload = CompletedPayload {
+            reason: CompletionReason::Stop,
+            usage: TokenUsage {
+                input_tokens: 100,
+                output_tokens: 50,
+                reasoning_tokens: Some(10),
+            },
+        };
+        let json = serde_json::to_string(&payload).unwrap();
+        assert!(json.contains("\"reason\":\"stop\""));
+        assert!(json.contains("\"inputTokens\":100"));
+        assert!(json.contains("\"outputTokens\":50"));
+        assert!(json.contains("\"reasoningTokens\":10"));
+    }
+
+    #[test]
+    fn error_payload_serializes_correctly() {
+        let payload = ErrorPayload {
+            code: StreamErrorCode::ProviderError,
+            message: "Rate limit exceeded".to_string(),
+            recoverable: true,
+            details: Some(serde_json::json!({"retry_after": 60})),
+        };
+        let json = serde_json::to_string(&payload).unwrap();
+        assert!(json.contains("\"code\":\"provider_error\""));
+        assert!(json.contains("\"message\":\"Rate limit exceeded\""));
+        assert!(json.contains("\"recoverable\":true"));
+        assert!(json.contains("\"details\":{\"retry_after\":60}"));
+    }
+
+    #[test]
+    fn status_payload_serializes_correctly() {
+        let payload = StatusPayload {
+            state: AgentProcessingState::Processing,
+            detail: Some("Generating response".to_string()),
+        };
+        let json = serde_json::to_string(&payload).unwrap();
+        assert!(json.contains("\"state\":\"processing\""));
+        assert!(json.contains("\"detail\":\"Generating response\""));
+    }
+
+    #[test]
+    fn metadata_payload_serializes_correctly() {
+        let payload = MetadataPayload {
+            model: "claude-3-5".to_string(),
+            latency_ms: 1234,
+            provider_request_id: Some("req_abc123".to_string()),
+        };
+        let json = serde_json::to_string(&payload).unwrap();
+        assert!(json.contains("\"model\":\"claude-3-5\""));
+        assert!(json.contains("\"latencyMs\":1234"));
+        assert!(json.contains("\"providerRequestId\":\"req_abc123\""));
+    }
+
+    #[test]
+    fn stream_event_deserializes_correctly() {
+        let json = r#"{
+            "schemaVersion": "1.0",
+            "eventId": "evt_123",
+            "sessionId": "sess_abc",
+            "harness": "claude_code",
+            "streamId": "stream_1",
+            "seq": 5,
+            "timestampMs": 1700000000000,
+            "type": "text_delta",
+            "payload": {"text": "Hello", "role": "assistant"}
+        }"#;
+
+        let event: StreamEvent = serde_json::from_str(json).unwrap();
+        assert_eq!(event.schema_version, "1.0");
+        assert_eq!(event.event_id, "evt_123");
+        assert_eq!(event.session_id, "sess_abc");
+        assert_eq!(event.harness, "claude_code");
+        assert_eq!(event.stream_id, "stream_1");
+        assert_eq!(event.seq, 5);
+        assert_eq!(event.timestamp_ms, 1700000000000);
+        assert_eq!(event.event_type, StreamEventType::TextDelta);
+        assert!(event.provider.is_none());
+        assert!(event.message_id.is_none());
     }
 }
 
