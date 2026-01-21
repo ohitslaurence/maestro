@@ -164,13 +164,14 @@ Map SDK messages to OpenCode-compatible events.
 
 Validate the SSE event envelope + ordering against OpenCode expectations.
 
-- [ ] Capture a golden SSE transcript for a simple prompt and a tool prompt
-- [ ] Verify payload shape is `{ type, properties }` and ordering matches spec
-- [ ] Confirm `message.updated` precedes `message.part.updated` for same message
+- [x] Capture a golden SSE transcript for a simple prompt and a tool prompt
+- [x] Verify payload shape is `{ type, properties }` and ordering matches spec
+- [x] Confirm `message.updated` precedes `message.part.updated` for same message
 
 **Verification:**
 ```bash
-# Manually inspect SSE transcript against expected OpenCode sequence
+# Run contract validation test (requires server running)
+cd daemon/claude-sdk-server && bun run test:contract
 ```
 
 ---
