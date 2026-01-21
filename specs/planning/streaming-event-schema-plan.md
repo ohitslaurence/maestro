@@ -5,12 +5,12 @@ Reference: [streaming-event-schema.md](../streaming-event-schema.md)
 ## Phase 1: Core types and emit helpers
 - [x] Add `StreamEvent` TS types in `app/src/types/streaming.ts` (See §3)
 - [x] Add Rust `StreamEvent` struct + serializer in `app/src-tauri/src/sessions.rs` (See §3)
-- [ ] Add `emit_stream_event` helper in `app/src-tauri/src/lib.rs` (See §4)
+- [x] Add `emit_stream_event` helper in `app/src-tauri/src/lib.rs` (See §4)
 
 Exit Criteria
-- [ ] `StreamEvent` types compile in both Rust and TS (See §3)
-- [ ] `emit_stream_event` emits `agent:stream_event` without panics (See §4)
-- [ ] Envelope includes `schemaVersion`, `eventId`, `streamId`, `seq` (See §3)
+- [x] `StreamEvent` types compile in both Rust and TS (See §3)
+- [x] `emit_stream_event` emits `agent:stream_event` without panics (See §4)
+- [x] Envelope includes `schemaVersion`, `eventId`, `streamId`, `seq` (See §3)
 
 ## Phase 2: Harness adapters
 - [ ] Map OpenCode stream output to `StreamEvent` in session broker (See §2, §5)

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use tauri::Emitter;
 #[cfg(target_os = "macos")]
 use tauri::Manager;
 
@@ -21,6 +22,28 @@ pub use agent_state::{
 
 // Re-export hook runner types for orchestration (§5)
 pub use hooks::{load_hooks_config, run_post_tool_hooks, HookPipelineResult};
+
+// Re-export streaming event types and emission (§4 streaming-event-schema spec)
+pub use sessions::{
+    StreamEvent, StreamEventPayload, StreamEventType, STREAM_EVENT_CHANNEL,
+    STREAM_SCHEMA_VERSION,
+    // Payload types
+    TextDeltaPayload, ToolCallDeltaPayload, ToolCallCompletedPayload, CompletedPayload,
+    ErrorPayload, StatusPayload, ThinkingDeltaPayload, ArtifactDeltaPayload, MetadataPayload,
+    // Enum types
+    CompletionReason, StreamErrorCode, ToolCallStatus, AgentProcessingState, TokenUsage,
+};
+
+/// Emit a streaming event to the frontend via Tauri's event system.
+///
+/// Per spec §4 (streaming-event-schema.md):
+/// - Channel: `agent:stream_event`
+/// - Emits the `StreamEvent` envelope defined in §3.
+///
+/// This is the primary emission point for all streaming events from harness adapters.
+pub fn emit_stream_event<R: tauri::Runtime>(app: &tauri::AppHandle<R>, event: &StreamEvent) {
+    let _ = app.emit(STREAM_EVENT_CHANNEL, event);
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
