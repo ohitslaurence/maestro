@@ -15,9 +15,12 @@ use daemon::DaemonConfig;
 // Re-export agent state event emission functions (§4)
 pub use agent_state::{
     emit_hook_lifecycle, emit_session_error, emit_state_changed, emit_tool_lifecycle,
-    AgentStateEvent, AgentStateEventEnvelope, AgentStateKind, StateChangeReason,
-    AGENT_STATE_EVENT_CHANNEL,
+    AgentStateEvent, AgentStateEventEnvelope, AgentStateKind, HookRunRecord, StateChangeReason,
+    ToolRunRecord, AGENT_STATE_EVENT_CHANNEL,
 };
+
+// Re-export hook runner types for orchestration (§5)
+pub use hooks::{load_hooks_config, run_post_tool_hooks, HookPipelineResult};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

@@ -377,6 +377,117 @@ pub fn get_failure_action(config: &HookConfig, attempt: u32) -> FailureAction {
 }
 
 // ============================================================================
+// Hook Pipeline Orchestration (§5)
+// ============================================================================
+
+/// Result of running the hook pipeline.
+#[derive(Debug, Clone)]
+pub struct HookPipelineResult {
+    /// All hook run records (with final status).
+    pub hook_runs: Vec<HookRunRecord>,
+    /// Whether the pipeline succeeded (all hooks passed or warn-continued).
+    pub success: bool,
+    /// Error if the pipeline failed due to a hook failure.
+    pub error: Option<String>,
+}
+
+/// Run the post-tool hook pipeline for a batch of completed tool runs.
+///
+/// Per spec §5.4 (Post-Tool Hook Flow):
+/// 1. Filter hooks by `HookToolFilter`
+/// 2. Execute hooks in configuration order
+/// 3. Emit `hook_lifecycle` on start/complete; apply failure policy
+/// 4. Return results for state machine to proceed
+///
+/// This function emits `hook_lifecycle` events via the provided emitter callback.
+pub async fn run_post_tool_hooks<F>(
+    hooks_config: &HooksConfig,
+    tool_runs: &[ToolRunRecord],
+    workspace_root: &PathBuf,
+    mut emit_lifecycle: F,
+) -> HookPipelineResult
+where
+    F: FnMut(&HookRunRecord),
+{
+    let mut hook_runs = Vec::new();
+
+    // Filter hooks that should run based on tool runs
+    let applicable_hooks = filter_hooks_for_batch(&hooks_config.hooks, tool_runs);
+
+    if applicable_hooks.is_empty() {
+        return HookPipelineResult {
+            hook_runs,
+            success: true,
+            error: None,
+        };
+    }
+
+    // Execute hooks sequentially (per spec §2.3: single-threaded per session)
+    for hook_config in applicable_hooks {
+        let mut record = create_hook_run_record(hook_config, tool_runs);
+        let mut attempt = 1u32;
+
+        loop {
+            record.attempt = attempt;
+
+            // Mark as running and emit start event
+            mark_hook_started(&mut record);
+            emit_lifecycle(&record);
+
+            // Execute the hook
+            let result = execute_hook(hook_config, workspace_root).await;
+
+            // Update record with result and emit completion event
+            mark_hook_completed(&mut record, &result);
+            emit_lifecycle(&record);
+
+            if result.status == HookRunStatus::Succeeded {
+                // Hook succeeded, move to next hook
+                break;
+            }
+
+            // Hook failed - check failure policy
+            let action = get_failure_action(hook_config, attempt);
+
+            match action {
+                FailureAction::FailSession => {
+                    // Terminal failure
+                    hook_runs.push(record);
+                    return HookPipelineResult {
+                        hook_runs,
+                        success: false,
+                        error: Some(format!(
+                            "Hook '{}' failed: {}",
+                            hook_config.name,
+                            result.error.unwrap_or_else(|| "unknown error".to_string())
+                        )),
+                    };
+                }
+                FailureAction::WarnContinue => {
+                    // Log warning and continue to next hook
+                    // Note: The emit_lifecycle already captured the failure
+                    break;
+                }
+                FailureAction::Retry { delay_ms } => {
+                    // Wait and retry
+                    tokio::time::sleep(Duration::from_millis(delay_ms)).await;
+                    attempt += 1;
+                    // Loop will continue with incremented attempt
+                }
+            }
+        }
+
+        hook_runs.push(record);
+    }
+
+    HookPipelineResult {
+        hook_runs,
+        success: true,
+        error: None,
+    }
+}
+
+// ============================================================================
 // Utilities
 // ============================================================================
 
@@ -794,5 +905,161 @@ mod tests {
 
         assert_eq!(result.status, HookRunStatus::Failed);
         assert!(result.error.unwrap().contains("timed out"));
+    }
+
+    // ========================================================================
+    // Hook Pipeline Tests (§5)
+    // ========================================================================
+
+    #[tokio::test]
+    async fn run_pipeline_empty_hooks_succeeds() {
+        let config = HooksConfig { hooks: vec![] };
+        let tool_runs = vec![make_tool_run("1", "edit_file", true)];
+        let workspace = std::env::temp_dir();
+
+        let mut lifecycle_events: Vec<HookRunRecord> = Vec::new();
+        let result = run_post_tool_hooks(&config, &tool_runs, &workspace, |record| {
+            lifecycle_events.push(record.clone());
+        })
+        .await;
+
+        assert!(result.success);
+        assert!(result.hook_runs.is_empty());
+        assert!(lifecycle_events.is_empty());
+    }
+
+    #[tokio::test]
+    async fn run_pipeline_single_hook_emits_lifecycle_events() {
+        let config = HooksConfig {
+            hooks: vec![HookConfig {
+                name: "test_hook".to_string(),
+                command: vec!["echo".to_string(), "hello".to_string()],
+                timeout_ms: 5000,
+                failure_policy: HookFailurePolicy::FailSession,
+                tool_filter: HookToolFilter::AnyMutating,
+            }],
+        };
+        let tool_runs = vec![make_tool_run("1", "edit_file", true)];
+        let workspace = std::env::temp_dir();
+
+        let mut lifecycle_events: Vec<HookRunRecord> = Vec::new();
+        let result = run_post_tool_hooks(&config, &tool_runs, &workspace, |record| {
+            lifecycle_events.push(record.clone());
+        })
+        .await;
+
+        assert!(result.success);
+        assert_eq!(result.hook_runs.len(), 1);
+        assert_eq!(result.hook_runs[0].status, HookRunStatus::Succeeded);
+
+        // Should have 2 lifecycle events: started and completed
+        assert_eq!(lifecycle_events.len(), 2);
+        assert_eq!(lifecycle_events[0].status, HookRunStatus::Running);
+        assert_eq!(lifecycle_events[1].status, HookRunStatus::Succeeded);
+    }
+
+    #[tokio::test]
+    async fn run_pipeline_fail_session_policy_stops_pipeline() {
+        let config = HooksConfig {
+            hooks: vec![
+                HookConfig {
+                    name: "failing_hook".to_string(),
+                    command: vec!["sh".to_string(), "-c".to_string(), "exit 1".to_string()],
+                    timeout_ms: 5000,
+                    failure_policy: HookFailurePolicy::FailSession,
+                    tool_filter: HookToolFilter::AnyMutating,
+                },
+                HookConfig {
+                    name: "second_hook".to_string(),
+                    command: vec!["echo".to_string(), "should not run".to_string()],
+                    timeout_ms: 5000,
+                    failure_policy: HookFailurePolicy::FailSession,
+                    tool_filter: HookToolFilter::AnyMutating,
+                },
+            ],
+        };
+        let tool_runs = vec![make_tool_run("1", "edit_file", true)];
+        let workspace = std::env::temp_dir();
+
+        let mut lifecycle_events: Vec<HookRunRecord> = Vec::new();
+        let result = run_post_tool_hooks(&config, &tool_runs, &workspace, |record| {
+            lifecycle_events.push(record.clone());
+        })
+        .await;
+
+        assert!(!result.success);
+        assert!(result.error.is_some());
+        assert!(result.error.unwrap().contains("failing_hook"));
+
+        // Only first hook should have run
+        assert_eq!(result.hook_runs.len(), 1);
+        assert_eq!(result.hook_runs[0].hook_name, "failing_hook");
+    }
+
+    #[tokio::test]
+    async fn run_pipeline_warn_continue_policy_continues() {
+        let config = HooksConfig {
+            hooks: vec![
+                HookConfig {
+                    name: "failing_hook".to_string(),
+                    command: vec!["sh".to_string(), "-c".to_string(), "exit 1".to_string()],
+                    timeout_ms: 5000,
+                    failure_policy: HookFailurePolicy::WarnContinue,
+                    tool_filter: HookToolFilter::AnyMutating,
+                },
+                HookConfig {
+                    name: "second_hook".to_string(),
+                    command: vec!["echo".to_string(), "success".to_string()],
+                    timeout_ms: 5000,
+                    failure_policy: HookFailurePolicy::FailSession,
+                    tool_filter: HookToolFilter::AnyMutating,
+                },
+            ],
+        };
+        let tool_runs = vec![make_tool_run("1", "edit_file", true)];
+        let workspace = std::env::temp_dir();
+
+        let mut lifecycle_events: Vec<HookRunRecord> = Vec::new();
+        let result = run_post_tool_hooks(&config, &tool_runs, &workspace, |record| {
+            lifecycle_events.push(record.clone());
+        })
+        .await;
+
+        // Pipeline succeeds because warn_continue allows continuation
+        assert!(result.success);
+        assert!(result.error.is_none());
+
+        // Both hooks should have run
+        assert_eq!(result.hook_runs.len(), 2);
+        assert_eq!(result.hook_runs[0].hook_name, "failing_hook");
+        assert_eq!(result.hook_runs[0].status, HookRunStatus::Failed);
+        assert_eq!(result.hook_runs[1].hook_name, "second_hook");
+        assert_eq!(result.hook_runs[1].status, HookRunStatus::Succeeded);
+    }
+
+    #[tokio::test]
+    async fn run_pipeline_no_matching_hooks_succeeds() {
+        let config = HooksConfig {
+            hooks: vec![HookConfig {
+                name: "git_only_hook".to_string(),
+                command: vec!["echo".to_string(), "hi".to_string()],
+                timeout_ms: 5000,
+                failure_policy: HookFailurePolicy::FailSession,
+                tool_filter: HookToolFilter::ToolNames(vec!["git_commit".to_string()]),
+            }],
+        };
+        // Tool run is edit_file, not git_commit
+        let tool_runs = vec![make_tool_run("1", "edit_file", true)];
+        let workspace = std::env::temp_dir();
+
+        let mut lifecycle_events: Vec<HookRunRecord> = Vec::new();
+        let result = run_post_tool_hooks(&config, &tool_runs, &workspace, |record| {
+            lifecycle_events.push(record.clone());
+        })
+        .await;
+
+        assert!(result.success);
+        assert!(result.hook_runs.is_empty());
+        assert!(lifecycle_events.is_empty());
     }
 }

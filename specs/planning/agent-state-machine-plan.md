@@ -33,12 +33,12 @@ Exit Criteria
 
 ## Phase 4: Post-tool hooks
 - [x] Add hook runner with policy config (See §2, §5, §6)
-- [ ] Emit `hook_lifecycle` events, handle failure policy (See §5, §6)
+- [x] Emit `hook_lifecycle` events, handle failure policy (See §5, §6)
 
 Exit Criteria
 - [x] `hooks.json` config is loaded from app data dir or hooks are disabled (See §2)
 - [x] Hook failure policy respected (`fail_session` vs `warn_continue`) (See §6)
-- [ ] `hook_lifecycle` events fire for each hook run (See §4)
+- [x] `hook_lifecycle` events fire for each hook run (See §4)
 
 ## Phase 5: Frontend wiring
 - [ ] Add TS types in `app/src/types/agent.ts` (See §3, §4)
