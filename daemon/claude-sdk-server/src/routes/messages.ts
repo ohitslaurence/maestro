@@ -7,7 +7,7 @@
 import { randomUUID } from 'crypto';
 import { Hono } from 'hono';
 import { sseEmitter } from '../events/emitter';
-import { isTextBlock, MessageMapper } from '../events/mapper';
+import { isTextBlock, isThinkingBlock, MessageMapper } from '../events/mapper';
 import { logger } from '../logger';
 import { executeQuery, isAssistantMessage, isResultMessage, type QueryResult } from '../sdk/agent';
 import { getSessionStore } from '../storage/sessions';
@@ -16,6 +16,7 @@ import {
   type ApiError,
   type MessageInfo,
   type Part,
+  type ReasoningPart,
   type SendMessageRequest,
   type SendMessageResponse,
   type TextPart,
@@ -139,9 +140,10 @@ messagesRouter.post('/:id/message', async (c) => {
   // Create mapper for SDK message → Part conversion (§3, Appendix B)
   const mapper = new MessageMapper(assistantMessageId);
 
-  // Track text accumulation for delta streaming
-  // Maps content block index to accumulated text for computing deltas
-  const textAccumulator = new Map<number, { partId: string; text: string }>();
+  // Track content accumulation for delta streaming
+  // Maps content block index to accumulated content for computing deltas
+  // Used for both text and thinking/reasoning blocks
+  const contentAccumulator = new Map<number, { partId: string; content: string }>();
 
   try {
     // Execute SDK query (§5 Main Flow steps 5-7)
@@ -173,13 +175,13 @@ messagesRouter.post('/:id/message', async (c) => {
 
           // Map text content blocks to TextPart with delta streaming (Phase 5)
           if (isTextBlock(block)) {
-            const existing = textAccumulator.get(blockIndex);
+            const existing = contentAccumulator.get(blockIndex);
 
             if (existing) {
               // Compute delta: new text since last update
-              const delta = block.text.slice(existing.text.length);
+              const delta = block.text.slice(existing.content.length);
               if (delta.length > 0) {
-                existing.text = block.text;
+                existing.content = block.text;
 
                 // Find and update the existing part
                 const partIndex = parts.findIndex((p) => p.id === existing.partId);
@@ -192,14 +194,41 @@ messagesRouter.post('/:id/message', async (c) => {
             } else {
               // First time seeing this text block - create new part
               const { part, delta } = mapper.mapTextBlock(block);
-              textAccumulator.set(blockIndex, { partId: part.id, text: block.text });
+              contentAccumulator.set(blockIndex, { partId: part.id, content: block.text });
               parts.push(part);
               await store.upsertPart(sessionId, assistantMessageId, part);
               sseEmitter.emitMessagePartUpdated(part, delta);
             }
           }
 
-          // TODO Phase 5: Map thinking blocks to ReasoningPart
+          // Map thinking content blocks to ReasoningPart with delta streaming (Phase 5)
+          if (isThinkingBlock(block)) {
+            const existing = contentAccumulator.get(blockIndex);
+
+            if (existing) {
+              // Compute delta: new content since last update
+              const delta = block.thinking.slice(existing.content.length);
+              if (delta.length > 0) {
+                existing.content = block.thinking;
+
+                // Find and update the existing part
+                const partIndex = parts.findIndex((p) => p.id === existing.partId);
+                if (partIndex !== -1 && parts[partIndex].type === 'reasoning') {
+                  (parts[partIndex] as ReasoningPart).text = block.thinking;
+                  await store.upsertPart(sessionId, assistantMessageId, parts[partIndex]);
+                  sseEmitter.emitMessagePartUpdated(parts[partIndex], delta);
+                }
+              }
+            } else {
+              // First time seeing this thinking block - create new part
+              const { part, delta } = mapper.mapThinkingBlock(block);
+              contentAccumulator.set(blockIndex, { partId: part.id, content: block.thinking });
+              parts.push(part);
+              await store.upsertPart(sessionId, assistantMessageId, part);
+              sseEmitter.emitMessagePartUpdated(part, delta);
+            }
+          }
+
           // TODO Phase 5: Map tool_use blocks to ToolPart with status transitions
           // TODO Phase 5: Map tool_result blocks to ToolPart completion
         }
