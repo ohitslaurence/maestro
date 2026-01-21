@@ -5,6 +5,7 @@ use tauri::Manager;
 
 mod agent_state;
 mod daemon;
+mod hooks;
 mod sessions;
 mod terminal;
 mod tools;
