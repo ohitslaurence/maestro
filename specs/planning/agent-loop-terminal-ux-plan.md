@@ -5,7 +5,7 @@ Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 ## Phase 1: Gum scaffolding + logging layout
 - [x] Add gum dependency checks, log directory creation, and run header output (see 2.1, 2.3, 4).
 - [x] Create UI helper module and wire into `scripts/agent-loop.sh` for headers/status lines (see 2.1, 2.3, 4.2).
-- [ ] Add spec discovery + gum filter selection with Last Updated sorting when spec path is omitted (see 2.1, 2.3, 3.1, 4.1, 5.1).
+- [x] Add spec discovery + gum filter selection with Last Updated sorting when spec path is omitted (see 2.1, 2.3, 3.1, 4.1, 5.1).
 
 ## Phase 2: Live iteration feedback
 - [ ] Wrap `claude` execution with gum spinner and capture per-iteration logs + stats (see 3.1, 3.2, 5.1).

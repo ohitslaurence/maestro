@@ -10,6 +10,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/agent-loop-ui.sh
 source "$SCRIPT_DIR/lib/agent-loop-ui.sh"
 
+# shellcheck source=lib/spec-picker.sh
+source "$SCRIPT_DIR/lib/spec-picker.sh"
+
 # -----------------------------------------------------------------------------
 # Defaults (spec §4.1)
 # -----------------------------------------------------------------------------
@@ -104,16 +107,20 @@ parse_args() {
 validate_inputs() {
   # Check if spec path is required
   if [[ -z "$spec_path" ]]; then
-    # If gum is available and not disabled, we'll use spec picker (Phase 1.3)
-    # For now, require spec path
+    # If gum is available and not disabled, use spec picker (spec §4.1, §5.1)
     if [[ "$no_gum" == "true" ]] || ! check_gum; then
       echo "Error: spec-path is required when gum is unavailable or --no-gum is set" >&2
+      list_known_specs >&2
       usage >&2
       exit 1
     else
-      echo "Error: spec-path is required (spec picker not yet implemented)" >&2
-      usage >&2
-      exit 1
+      # Launch interactive spec picker
+      if ! spec_picker; then
+        echo "Error: No spec selected" >&2
+        exit 1
+      fi
+      spec_path="$PICKED_SPEC_PATH"
+      plan_path="$PICKED_PLAN_PATH"
     fi
   fi
 
