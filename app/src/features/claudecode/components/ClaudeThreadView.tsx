@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useOpenCodeThread } from "../../opencode/hooks/useOpenCodeThread";
 import { useClaudeSession } from "../hooks/useClaudeSession";
+import { useAgentSession, isAgentWorking } from "../../../hooks/useAgentSession";
 import { ThreadMessages } from "../../opencode/components/ThreadMessages";
 import { ThreadComposer } from "../../opencode/components/ThreadComposer";
 
@@ -42,11 +43,20 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
 
   const {
     items,
-    status,
+    // threadStatus retained for Phase 2 removal - status now derived from useAgentSession
+    status: _threadStatus,
     processingStartedAt,
     lastDurationMs,
     error: threadError,
   } = useOpenCodeThread({ workspaceId, sessionId, pendingUserMessages });
+
+  // Use agent state machine for working/idle status (per state-machine-wiring.md §4, §5)
+  const { state: agentState } = useAgentSession({ sessionId: sessionId ?? undefined });
+  const isWorking = isAgentWorking(agentState.kind);
+  const hasAgentError = agentState.kind === "error";
+
+  // Derive status from agent state machine, falling back to thread status for error details
+  const status = hasAgentError ? "error" : isWorking ? "processing" : "idle";
 
   const handleSend = useCallback(
     async (message: string) => {

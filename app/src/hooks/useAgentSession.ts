@@ -180,6 +180,32 @@ export type UseAgentSessionResult = {
 };
 
 /**
+ * Derive UI-friendly status from AgentStateKind.
+ *
+ * Per state-machine-wiring.md §4, §5:
+ * - idle, ready, stopped → "idle"
+ * - starting, calling_llm, processing_response, executing_tools, post_tools_hook, stopping → "working"
+ * - error → "error"
+ */
+export function isAgentWorking(kind: AgentStateKind): boolean {
+  switch (kind) {
+    case "starting":
+    case "calling_llm":
+    case "processing_response":
+    case "executing_tools":
+    case "post_tools_hook":
+    case "stopping":
+      return true;
+    case "idle":
+    case "ready":
+    case "stopped":
+    case "error":
+    default:
+      return false;
+  }
+}
+
+/**
  * Subscribe to agent state machine events for a session.
  *
  * @param options.sessionId - Filter events for this session (optional)

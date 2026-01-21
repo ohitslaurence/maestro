@@ -11,7 +11,7 @@ Reference: [state-machine-wiring.md](../state-machine-wiring.md)
   ignoring them (see `state-machine-wiring.md` §6).
 
 ## Phase 2: Frontend session state consolidation
-- [ ] Update UI views to derive working/idle states from `useAgentSession` and
+- [x] Update UI views to derive working/idle states from `useAgentSession` and
   `AgentStateKind` rather than stream status enums (see `state-machine-wiring.md` §4, §5).
 - [ ] Remove stream-driven status tracking from `useOpenCodeThread`, keeping it focused on
   message/thread payloads only (see `state-machine-wiring.md` §2, §5).
