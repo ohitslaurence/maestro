@@ -14,12 +14,12 @@ Exit Criteria
 
 ## Phase 2: Session integration and events
 - [x] Wire session loop to state machine in `app/src-tauri/src/sessions.rs` (See §2, §4)
-- [ ] Emit `agent:state_event` from `app/src-tauri/src/lib.rs` (See §4)
+- [x] Emit `agent:state_event` from `app/src-tauri/src/lib.rs` (See §4)
 - [ ] Extend session summaries to include `AgentStateKind` (See §3)
 
 Exit Criteria
-- [ ] Spawning a session emits a `state_changed` event (`Starting` -> `Ready`) (See §4, §5)
-- [ ] `agent:state_event` includes `eventId`, `timestampMs`, and `sessionId` (See §4)
+- [x] Spawning a session emits a `state_changed` event (`Starting` -> `Ready`) (See §4, §5)
+- [x] `agent:state_event` includes `eventId`, `timestampMs`, and `sessionId` (See §4)
 - [ ] No panics when attaching to an existing session (manual smoke check)
 
 ## Phase 3: Tool lifecycle plumbing

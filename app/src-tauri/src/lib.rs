@@ -10,6 +10,13 @@ mod terminal;
 
 use daemon::DaemonConfig;
 
+// Re-export agent state event emission functions (§4)
+pub use agent_state::{
+    emit_hook_lifecycle, emit_session_error, emit_state_changed, emit_tool_lifecycle,
+    AgentStateEvent, AgentStateEventEnvelope, AgentStateKind, StateChangeReason,
+    AGENT_STATE_EVENT_CHANNEL,
+};
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let daemon_state = Arc::new(daemon::client::DaemonState::new());

@@ -4,6 +4,7 @@
 //! tool execution, and post-tool hooks. See specs/agent-state-machine.md for the full spec.
 
 use serde::{Deserialize, Serialize};
+use tauri::Emitter;
 
 // ============================================================================
 // Core State Types (§3)
@@ -365,6 +366,132 @@ pub struct AgentStateEventEnvelope {
     pub timestamp_ms: u64,
     pub session_id: String,
     pub payload: AgentStateEvent,
+}
+
+impl AgentStateEventEnvelope {
+    /// Create a new envelope with auto-generated eventId and timestamp.
+    pub fn new(session_id: String, payload: AgentStateEvent) -> Self {
+        Self {
+            event_id: format!("evt_{}", uuid::Uuid::new_v4()),
+            timestamp_ms: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_millis() as u64)
+                .unwrap_or(0),
+            session_id,
+            payload,
+        }
+    }
+}
+
+// ============================================================================
+// Event Emission (§4)
+// ============================================================================
+
+/// Channel name for agent state events.
+pub const AGENT_STATE_EVENT_CHANNEL: &str = "agent:state_event";
+
+/// Emit a state change event.
+pub fn emit_state_changed<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    session_id: &str,
+    from: AgentStateKind,
+    to: AgentStateKind,
+    reason: StateChangeReason,
+    stream_id: Option<String>,
+) {
+    let payload = StateChangedPayload {
+        session_id: session_id.to_string(),
+        from,
+        to,
+        reason,
+        timestamp_ms: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis() as u64)
+            .unwrap_or(0),
+        stream_id,
+    };
+
+    let envelope = AgentStateEventEnvelope::new(
+        session_id.to_string(),
+        AgentStateEvent::StateChanged(payload),
+    );
+
+    let _ = app.emit(AGENT_STATE_EVENT_CHANNEL, envelope);
+}
+
+/// Emit a session error event.
+pub fn emit_session_error<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    session_id: &str,
+    error: &AgentError,
+) {
+    let payload = SessionErrorPayload {
+        session_id: session_id.to_string(),
+        code: error.code.clone(),
+        message: error.message.clone(),
+        retryable: error.retryable,
+        source: error.source,
+    };
+
+    let envelope = AgentStateEventEnvelope::new(
+        session_id.to_string(),
+        AgentStateEvent::SessionError(payload),
+    );
+
+    let _ = app.emit(AGENT_STATE_EVENT_CHANNEL, envelope);
+}
+
+/// Emit a tool lifecycle event.
+pub fn emit_tool_lifecycle<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    session_id: &str,
+    record: &ToolRunRecord,
+) {
+    let payload = ToolLifecyclePayload {
+        session_id: session_id.to_string(),
+        run_id: record.run_id.clone(),
+        call_id: record.call_id.clone(),
+        tool_name: record.tool_name.clone(),
+        mutating: record.mutating,
+        status: record.status,
+        attempt: record.attempt,
+        started_at_ms: record.started_at_ms,
+        finished_at_ms: record.finished_at_ms,
+        error: record.error.clone(),
+    };
+
+    let envelope = AgentStateEventEnvelope::new(
+        session_id.to_string(),
+        AgentStateEvent::ToolLifecycle(payload),
+    );
+
+    let _ = app.emit(AGENT_STATE_EVENT_CHANNEL, envelope);
+}
+
+/// Emit a hook lifecycle event.
+pub fn emit_hook_lifecycle<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    session_id: &str,
+    record: &HookRunRecord,
+) {
+    let payload = HookLifecyclePayload {
+        session_id: session_id.to_string(),
+        run_id: record.run_id.clone(),
+        hook_name: record.hook_name.clone(),
+        tool_run_ids: record.tool_run_ids.clone(),
+        status: record.status,
+        attempt: record.attempt,
+        started_at_ms: record.started_at_ms,
+        finished_at_ms: record.finished_at_ms,
+        error: record.error.clone(),
+    };
+
+    let envelope = AgentStateEventEnvelope::new(
+        session_id.to_string(),
+        AgentStateEvent::HookLifecycle(payload),
+    );
+
+    let _ = app.emit(AGENT_STATE_EVENT_CHANNEL, envelope);
 }
 
 // ============================================================================
