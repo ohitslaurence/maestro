@@ -1,4 +1,9 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { Database } from "bun:sqlite";
+import { createHash } from "node:crypto";
+import { mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 
 type EventPayload = {
   type: string;
@@ -32,6 +37,7 @@ type SessionState = {
   activeRun: {
     abortController: AbortController;
     assistantMessageId: string;
+    assistantPartId: string;
     startedAt: number;
   } | null;
 };
@@ -42,6 +48,13 @@ const requestedPort = Number(process.env.MAESTRO_PORT ?? "0") || 0;
 const defaultModelId = process.env.MAESTRO_CLAUDE_MODEL ?? "claude-sonnet-4-20250514";
 const defaultAgent = process.env.MAESTRO_CLAUDE_AGENT ?? "claude-sdk";
 const defaultProvider = "anthropic";
+const dataRoot = process.env.MAESTRO_DATA_DIR ?? path.join(homedir(), ".maestro");
+const claudeRoot = path.join(dataRoot, "claude");
+const workspaceHash = createHash("sha256").update(workspaceDir).digest("hex");
+const workspaceDataDir = path.join(claudeRoot, workspaceHash);
+mkdirSync(workspaceDataDir, { recursive: true });
+const dbPath = path.join(workspaceDataDir, "sessions.sqlite");
+const db = new Database(dbPath);
 
 class EventHub {
   private subscribers = new Set<(eventType: string, payload: EventPayload) => void>();
@@ -60,6 +73,9 @@ class EventHub {
 
 const sessions = new Map<string, SessionState>();
 const events = new EventHub();
+
+const statements = initStorage();
+loadSessions();
 
 function emitEvent(type: string, properties?: Record<string, unknown>) {
   events.emit(type, { type, properties });
@@ -102,6 +118,329 @@ function buildSessionRecord(title?: string, parentID?: string): SessionRecord {
       updated: now,
     },
   };
+}
+
+function initStorage() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      slug TEXT NOT NULL,
+      project_id TEXT NOT NULL,
+      directory TEXT NOT NULL,
+      parent_id TEXT,
+      title TEXT NOT NULL,
+      version INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      resume_id TEXT
+    );
+    CREATE TABLE IF NOT EXISTS messages (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      role TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      completed_at INTEGER,
+      parent_id TEXT,
+      model_id TEXT,
+      provider_id TEXT,
+      agent TEXT,
+      mode TEXT,
+      system TEXT,
+      variant TEXT,
+      summary_title TEXT,
+      summary_body TEXT,
+      cost REAL,
+      tokens_input INTEGER,
+      tokens_output INTEGER,
+      tokens_reasoning INTEGER,
+      tokens_cache_read INTEGER,
+      tokens_cache_write INTEGER,
+      error_name TEXT,
+      error_payload TEXT
+    );
+    CREATE TABLE IF NOT EXISTS parts (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      message_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      text TEXT,
+      content TEXT,
+      tool TEXT,
+      call_id TEXT,
+      title TEXT,
+      input_json TEXT,
+      output TEXT,
+      error TEXT,
+      hash TEXT,
+      files_json TEXT,
+      time_start INTEGER,
+      time_end INTEGER,
+      metadata_json TEXT
+    );
+  `);
+
+  return {
+    insertSession: db.prepare(`
+      INSERT INTO sessions (
+        id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        slug=excluded.slug,
+        project_id=excluded.project_id,
+        directory=excluded.directory,
+        parent_id=excluded.parent_id,
+        title=excluded.title,
+        version=excluded.version,
+        created_at=excluded.created_at,
+        updated_at=excluded.updated_at,
+        resume_id=excluded.resume_id
+    `),
+    touchSession: db.prepare("UPDATE sessions SET updated_at=? WHERE id=?"),
+    updateSessionResume: db.prepare("UPDATE sessions SET resume_id=?, updated_at=? WHERE id=?"),
+    selectSessions: db.prepare(
+      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id FROM sessions"
+    ),
+    selectSessionById: db.prepare(
+      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id FROM sessions WHERE id=?"
+    ),
+    insertMessage: db.prepare(`
+      INSERT INTO messages (
+        id, session_id, role, created_at, completed_at, parent_id, model_id, provider_id, agent, mode,
+        system, variant, summary_title, summary_body, cost, tokens_input, tokens_output, tokens_reasoning,
+        tokens_cache_read, tokens_cache_write, error_name, error_payload
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        session_id=excluded.session_id,
+        role=excluded.role,
+        created_at=excluded.created_at,
+        completed_at=excluded.completed_at,
+        parent_id=excluded.parent_id,
+        model_id=excluded.model_id,
+        provider_id=excluded.provider_id,
+        agent=excluded.agent,
+        mode=excluded.mode,
+        system=excluded.system,
+        variant=excluded.variant,
+        summary_title=excluded.summary_title,
+        summary_body=excluded.summary_body,
+        cost=excluded.cost,
+        tokens_input=excluded.tokens_input,
+        tokens_output=excluded.tokens_output,
+        tokens_reasoning=excluded.tokens_reasoning,
+        tokens_cache_read=excluded.tokens_cache_read,
+        tokens_cache_write=excluded.tokens_cache_write,
+        error_name=excluded.error_name,
+        error_payload=excluded.error_payload
+    `),
+    updateMessageCompletion: db.prepare("UPDATE messages SET completed_at=? WHERE id=?"),
+    updateMessageError: db.prepare(
+      "UPDATE messages SET error_name=?, error_payload=?, completed_at=? WHERE id=?"
+    ),
+    insertPart: db.prepare(`
+      INSERT INTO parts (
+        id, session_id, message_id, type, text, content, tool, call_id, title, input_json, output,
+        error, hash, files_json, time_start, time_end, metadata_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        session_id=excluded.session_id,
+        message_id=excluded.message_id,
+        type=excluded.type,
+        text=excluded.text,
+        content=excluded.content,
+        tool=excluded.tool,
+        call_id=excluded.call_id,
+        title=excluded.title,
+        input_json=excluded.input_json,
+        output=excluded.output,
+        error=excluded.error,
+        hash=excluded.hash,
+        files_json=excluded.files_json,
+        time_start=excluded.time_start,
+        time_end=excluded.time_end,
+        metadata_json=excluded.metadata_json
+    `),
+  };
+}
+
+function loadSessions() {
+  const rows = statements.selectSessions.all() as Array<{
+    id: string;
+    slug: string;
+    project_id: string;
+    directory: string;
+    parent_id: string | null;
+    title: string;
+    version: number;
+    created_at: number;
+    updated_at: number;
+    resume_id: string | null;
+  }>;
+
+  for (const row of rows) {
+    const record: SessionRecord = {
+      id: row.id,
+      slug: row.slug,
+      projectID: row.project_id,
+      directory: row.directory,
+      parentID: row.parent_id ?? undefined,
+      title: row.title,
+      version: row.version,
+      time: {
+        created: row.created_at,
+        updated: row.updated_at,
+      },
+    };
+
+    sessions.set(record.id, {
+      record,
+      resumeId: row.resume_id,
+      activeRun: null,
+    });
+  }
+}
+
+function persistSession(record: SessionRecord, resumeId: string | null) {
+  statements.insertSession.run(
+    record.id,
+    record.slug,
+    record.projectID,
+    record.directory,
+    record.parentID ?? null,
+    record.title,
+    record.version,
+    record.time.created,
+    record.time.updated,
+    resumeId,
+  );
+}
+
+function touchSession(session: SessionState) {
+  session.record.time.updated = Date.now();
+  statements.touchSession.run(session.record.time.updated, session.record.id);
+}
+
+function updateSessionResume(session: SessionState) {
+  const updatedAt = Date.now();
+  session.record.time.updated = updatedAt;
+  statements.updateSessionResume.run(session.resumeId, updatedAt, session.record.id);
+}
+
+function serializeJson(value: unknown) {
+  if (value === undefined) {
+    return null;
+  }
+  return JSON.stringify(value);
+}
+
+function persistUserMessage(info: ReturnType<typeof buildUserMessageInfo>) {
+  statements.insertMessage.run(
+    info.id,
+    info.sessionID,
+    info.role,
+    info.time.created,
+    null,
+    null,
+    info.model.modelID,
+    info.model.providerID,
+    info.agent,
+    null,
+    info.system ?? null,
+    info.variant ?? null,
+    info.summary?.title ?? null,
+    info.summary?.body ?? null,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    null,
+    null,
+  );
+}
+
+function persistAssistantMessage(info: ReturnType<typeof buildAssistantMessageInfo>) {
+  statements.insertMessage.run(
+    info.id,
+    info.sessionID,
+    info.role,
+    info.time.created,
+    null,
+    info.parentID,
+    info.modelID,
+    info.providerID,
+    info.agent,
+    info.mode,
+    null,
+    null,
+    null,
+    null,
+    info.cost,
+    info.tokens.input,
+    info.tokens.output,
+    info.tokens.reasoning,
+    info.tokens.cache.read,
+    info.tokens.cache.write,
+    null,
+    null,
+  );
+}
+
+function persistTextPart(options: {
+  id: string;
+  sessionID: string;
+  messageID: string;
+  text: string;
+  timeStart: number;
+  timeEnd: number;
+}) {
+  statements.insertPart.run(
+    options.id,
+    options.sessionID,
+    options.messageID,
+    "text",
+    options.text,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    options.timeStart,
+    options.timeEnd,
+    null,
+  );
+}
+
+function extractTextFromBlocks(blocks: unknown) {
+  let fullText = "";
+  let deltaText = "";
+  let hasDelta = false;
+
+  if (!Array.isArray(blocks)) {
+    return { fullText, deltaText, hasDelta };
+  }
+
+  for (const block of blocks) {
+    if (!block || typeof block !== "object") {
+      continue;
+    }
+
+    const typedBlock = block as { type?: unknown; text?: unknown };
+    if (typedBlock.type === "text" && typeof typedBlock.text === "string") {
+      fullText += typedBlock.text;
+    }
+
+    if (typedBlock.type === "text_delta" && typeof typedBlock.text === "string") {
+      deltaText += typedBlock.text;
+      hasDelta = true;
+    }
+  }
+
+  return { fullText, deltaText, hasDelta };
 }
 
 function createSseResponse(options: { wrapWithDirectory: boolean }) {
@@ -253,17 +592,17 @@ async function handleSessionMessage(req: Request, sessionId: string) {
   const userMessageId = body.messageID ?? createId("message");
   const assistantMessageId = createId("message");
 
-  emitEvent("message.updated", {
-    info: buildUserMessageInfo({
-      sessionID: session.record.id,
-      messageID: userMessageId,
-      agent,
-      modelID,
-      prompt,
-      system: body.system,
-      variant: body.variant,
-    }),
+  const userMessageInfo = buildUserMessageInfo({
+    sessionID: session.record.id,
+    messageID: userMessageId,
+    agent,
+    modelID,
+    prompt,
+    system: body.system,
+    variant: body.variant,
   });
+  persistUserMessage(userMessageInfo);
+  emitEvent("message.updated", { info: userMessageInfo });
 
   const assistantMessageInfo = buildAssistantMessageInfo({
     sessionID: session.record.id,
@@ -273,17 +612,17 @@ async function handleSessionMessage(req: Request, sessionId: string) {
     modelID,
   });
 
-  emitEvent("message.updated", {
-    info: assistantMessageInfo,
-  });
+  persistAssistantMessage(assistantMessageInfo);
+  emitEvent("message.updated", { info: assistantMessageInfo });
 
-  session.record.time.updated = Date.now();
+  touchSession(session);
   emitSessionStatus(session.record.id, "busy");
 
   const abortController = new AbortController();
   session.activeRun = {
     abortController,
     assistantMessageId,
+    assistantPartId: createId("part"),
     startedAt: Date.now(),
   };
 
@@ -312,6 +651,8 @@ async function runClaudeQuery(options: {
 }) {
   const { session, prompt, modelID, agent, assistantMessageInfo, abortController } = options;
   let assistantText = "";
+  const partId = session.activeRun?.assistantPartId ?? createId("part");
+  const timeStart = session.activeRun?.startedAt ?? Date.now();
 
   try {
     const stream = query({
@@ -321,16 +662,61 @@ async function runClaudeQuery(options: {
         resume: session.resumeId ?? undefined,
         abortController,
         model: modelID,
+        includePartialMessages: true,
       },
     });
 
     for await (const message of stream) {
       if (message.type === "assistant") {
-        const blocks = message.message?.content ?? [];
-        for (const block of blocks) {
-          if (block.type === "text" && typeof block.text === "string") {
-            assistantText += block.text;
+        const blocks = message.message?.content;
+        const { fullText, deltaText, hasDelta } = extractTextFromBlocks(blocks);
+        let nextText = assistantText;
+        let delta = "";
+
+        if (hasDelta && deltaText) {
+          delta = deltaText;
+          nextText = assistantText + deltaText;
+        } else if (fullText) {
+          if (assistantText && fullText.startsWith(assistantText)) {
+            delta = fullText.slice(assistantText.length);
+            nextText = fullText;
+          } else if (assistantText) {
+            delta = fullText;
+            nextText = assistantText + fullText;
+          } else {
+            delta = fullText;
+            nextText = fullText;
           }
+        } else if (typeof (message as { delta?: { text?: unknown } }).delta?.text === "string") {
+          delta = (message as { delta?: { text?: string } }).delta?.text ?? "";
+          nextText = assistantText + delta;
+        }
+
+        if (delta) {
+          assistantText = nextText;
+          const timeEnd = Date.now();
+          persistTextPart({
+            id: partId,
+            sessionID: session.record.id,
+            messageID: assistantMessageInfo.id,
+            text: assistantText,
+            timeStart,
+            timeEnd,
+          });
+          emitEvent("message.part.updated", {
+            part: {
+              id: partId,
+              sessionID: session.record.id,
+              messageID: assistantMessageInfo.id,
+              type: "text",
+              text: assistantText,
+              time: {
+                start: timeStart,
+                end: timeEnd,
+              },
+            },
+            delta,
+          });
         }
       }
 
@@ -341,35 +727,27 @@ async function runClaudeQuery(options: {
       }
     }
 
-    if (assistantText.trim()) {
-      emitEvent("message.part.updated", {
-        part: {
-          id: createId("part"),
-          sessionID: session.record.id,
-          messageID: assistantMessageInfo.id,
-          type: "text",
-          text: assistantText,
-          time: {
-            start: session.activeRun?.startedAt ?? Date.now(),
-            end: Date.now(),
-          },
-        },
-        delta: assistantText,
-      });
-    }
-
+    const completedAt = Date.now();
+    statements.updateMessageCompletion.run(completedAt, assistantMessageInfo.id);
     emitEvent("message.updated", {
       info: {
         ...assistantMessageInfo,
         time: {
           created: assistantMessageInfo.time.created,
-          completed: Date.now(),
+          completed: completedAt,
         },
       },
     });
 
     emitEvent("session.idle", { sessionID: session.record.id });
   } catch (error) {
+    const completedAt = Date.now();
+    statements.updateMessageError.run(
+      "UnknownError",
+      serializeJson({ message: error instanceof Error ? error.message : String(error) }),
+      completedAt,
+      assistantMessageInfo.id,
+    );
     emitEvent("session.error", {
       sessionID: session.record.id,
       error: error instanceof Error ? error.message : String(error),
@@ -377,6 +755,7 @@ async function runClaudeQuery(options: {
   } finally {
     session.activeRun = null;
     emitSessionStatus(session.record.id, "idle");
+    updateSessionResume(session);
   }
 }
 
@@ -402,6 +781,7 @@ const server = Bun.serve({
       const result = Array.from(sessions.values())
         .map((session) => session.record)
         .filter((session) => session.time.updated >= start)
+        .sort((a, b) => b.time.updated - a.time.updated)
         .slice(0, limit);
 
       return jsonResponse(result);
@@ -422,6 +802,8 @@ const server = Bun.serve({
         activeRun: null,
       });
 
+      persistSession(record, null);
+
       emitEvent("session.created", { info: record });
 
       return jsonResponse(record);
@@ -431,7 +813,36 @@ const server = Bun.serve({
       const sessionId = pathname.split("/")[2];
       const session = sessions.get(sessionId);
       if (!session) {
-        return jsonResponse({ error: "session_not_found" }, 404);
+        const row = statements.selectSessionById.get(sessionId) as
+          | {
+              id: string;
+              slug: string;
+              project_id: string;
+              directory: string;
+              parent_id: string | null;
+              title: string;
+              version: number;
+              created_at: number;
+              updated_at: number;
+              resume_id: string | null;
+            }
+          | undefined;
+        if (!row) {
+          return jsonResponse({ error: "session_not_found" }, 404);
+        }
+        return jsonResponse({
+          id: row.id,
+          slug: row.slug,
+          projectID: row.project_id,
+          directory: row.directory,
+          parentID: row.parent_id ?? undefined,
+          title: row.title,
+          version: row.version,
+          time: {
+            created: row.created_at,
+            updated: row.updated_at,
+          },
+        });
       }
       return jsonResponse(session.record);
     }
@@ -452,6 +863,13 @@ const server = Bun.serve({
 
       if (session.activeRun) {
         session.activeRun.abortController.abort();
+        const completedAt = Date.now();
+        statements.updateMessageError.run(
+          "MessageAbortedError",
+          serializeJson({ message: "aborted" }),
+          completedAt,
+          session.activeRun.assistantMessageId,
+        );
         session.activeRun = null;
       }
 
