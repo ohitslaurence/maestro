@@ -96,20 +96,20 @@ Reference: [git-diff-ui.md](../git-diff-ui.md)
 ## Verification Checklist
 
 - [x] `bun run typecheck` passes
-- [ ] Git tab displays branch name correctly
-- [ ] Staged section shows with file count and files
-- [ ] Unstaged section shows with file count and files
-- [ ] File rows show status badge, split name/extension, directory, stats
-- [ ] Clicking file highlights it and scrolls viewer to that file
-- [ ] Scrolling viewer updates highlighted file in panel
-- [ ] Split/unified toggle changes diff rendering style
-- [ ] Toggle preference persists after page refresh
-- [ ] Arrow keys (and j/k) navigate between files
-- [ ] Home/End jump to first/last file
-- [ ] "Working tree clean" shows when no changes
-- [ ] Large changesets (50+ files) scroll smoothly
-- [ ] Empty diff shows "No changes" placeholder
-- [ ] Loading states display correctly
+- [x] Git tab displays branch name correctly
+- [x] Staged section shows with file count and files
+- [x] Unstaged section shows with file count and files
+- [x] File rows show status badge, split name/extension, directory, stats
+- [x] Clicking file highlights it and scrolls viewer to that file
+- [x] Scrolling viewer updates highlighted file in panel
+- [x] Split/unified toggle changes diff rendering style
+- [x] Toggle preference persists after page refresh
+- [x] Arrow keys (and j/k) navigate between files
+- [x] Home/End jump to first/last file
+- [x] "Working tree clean" shows when no changes
+- [x] Large changesets (50+ files) scroll smoothly
+- [x] Empty diff shows "No changes" placeholder
+- [x] Loading states display correctly
 
 ## Notes
 

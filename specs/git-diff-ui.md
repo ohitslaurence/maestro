@@ -1,6 +1,6 @@
 # Git Diff UI
 
-**Status:** Planned
+**Status:** Implemented
 **Version:** 1.1
 **Last Updated:** 2026-01-21
 
