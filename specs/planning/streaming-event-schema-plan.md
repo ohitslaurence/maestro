@@ -23,7 +23,7 @@ Exit Criteria
 - [x] `completed` emitted once per `streamId` (See §5)
 
 ## Phase 3: Frontend event hub
-- [ ] Add `agent:stream_event` hub in `app/src/services/events.ts` (See §4)
+- [x] Add `agent:stream_event` hub in `app/src/services/events.ts` (See §4)
 - [ ] Update UI reducers to consume `StreamEvent` (See §5)
 
 Exit Criteria

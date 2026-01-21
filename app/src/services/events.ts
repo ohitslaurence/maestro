@@ -5,6 +5,10 @@ import {
   AGENT_STATE_EVENT_CHANNEL,
   type AgentStateEventEnvelope,
 } from "../types/agent";
+import {
+  STREAM_EVENT_CHANNEL,
+  type StreamEvent,
+} from "../types/streaming";
 
 export type Unsubscribe = () => void;
 
@@ -243,6 +247,9 @@ const agentStateEventHub = createEventHub<AgentStateEventEnvelope>(
   AGENT_STATE_EVENT_CHANNEL,
 );
 
+// Unified streaming events (§4: agent:stream_event)
+const streamEventHub = createEventHub<StreamEvent>(STREAM_EVENT_CHANNEL);
+
 // --- Subscription helpers ---
 
 export function subscribeTerminalOutput(
@@ -306,6 +313,19 @@ export function subscribeAgentStateEvents(
   options?: SubscriptionOptions,
 ): Unsubscribe {
   return agentStateEventHub.subscribe(onEvent, options);
+}
+
+/**
+ * Subscribe to unified streaming events (§4: agent:stream_event).
+ *
+ * All harness adapters emit StreamEvent envelopes on this channel.
+ * Consumers should buffer by streamId and respect seq ordering per §5.
+ */
+export function subscribeStreamEvents(
+  onEvent: (event: StreamEvent) => void,
+  options?: SubscriptionOptions,
+): Unsubscribe {
+  return streamEventHub.subscribe(onEvent, options);
 }
 
 // --- React hook helper ---
