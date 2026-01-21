@@ -202,6 +202,8 @@ export function useClaudeSession({
       console.warn("[claude] Cannot abort: no workspace or session");
       return;
     }
+    // Optimistic UI - clear prompting state immediately
+    setIsPrompting(false);
     try {
       await claudeSdkSessionAbort(workspaceId, sessionId);
     } catch (error) {

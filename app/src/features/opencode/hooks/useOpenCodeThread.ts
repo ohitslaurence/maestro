@@ -650,10 +650,10 @@ export function useOpenCodeThread({
       if (startedAt) {
         setLastDurationMs(Date.now() - startedAt);
       }
-      if (pendingUserMessagesRef.current.length === 0) {
-        setStatus("idle");
-        setProcessingStartedAt(null);
-      }
+      // Always set idle on completion - pending messages are cleared by
+      // the ThreadView effect after status transitions to idle
+      setStatus("idle");
+      setProcessingStartedAt(null);
       return true;
     }
 
@@ -676,10 +676,9 @@ export function useOpenCodeThread({
         if (startedAt) {
           setLastDurationMs(Date.now() - startedAt);
         }
-        if (pendingUserMessagesRef.current.length === 0) {
-          setStatus("idle");
-          setProcessingStartedAt(null);
-        }
+        // Always set idle - pending messages are cleared by ThreadView effect
+        setStatus("idle");
+        setProcessingStartedAt(null);
       } else if (event.payload.state === "aborted") {
         setStatus("idle");
         setProcessingStartedAt(null);

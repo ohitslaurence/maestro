@@ -86,6 +86,8 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
   );
 
   const handleStop = useCallback(() => {
+    // Optimistic UI - clear pending messages immediately
+    setPendingUserMessages([]);
     void abort();
   }, [abort]);
 

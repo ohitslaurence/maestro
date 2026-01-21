@@ -73,6 +73,8 @@ export function useOpenCodeSession({
       console.warn("[opencode] Cannot abort: no workspace or session");
       return;
     }
+    // Optimistic UI - clear prompting state immediately
+    setIsPrompting(false);
     try {
       await opencodeSessionAbort(workspaceId, sessionId);
     } catch (error) {

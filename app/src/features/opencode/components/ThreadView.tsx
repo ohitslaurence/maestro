@@ -83,6 +83,8 @@ export function ThreadView({ workspaceId }: ThreadViewProps) {
   );
 
   const handleStop = useCallback(() => {
+    // Optimistic UI - clear pending messages immediately
+    setPendingUserMessages([]);
     void abort();
   }, [abort]);
 
