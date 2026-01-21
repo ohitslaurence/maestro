@@ -17,7 +17,14 @@ use super::claudecode_adapter::ClaudeCodeAdapter;
 use super::config::DaemonConfig;
 use super::opencode_adapter::OpenCodeAdapter;
 use super::protocol::*;
+use crate::agent_state::{
+    AgentError, AgentEvent, ErrorSource, StateChangeReason, StreamEvent as StateMachineStreamEvent,
+};
 use crate::emit_stream_event;
+use crate::sessions::{
+    process_event_with_tool_emission, new_session_registry, SharedSessionRegistry,
+    StreamEvent, StreamEventType,
+};
 
 /// Global OpenCode adapter for stream event conversion (§2, §5).
 /// Maintains ordering state (streamId + seq) across all workspaces.
@@ -52,6 +59,8 @@ pub struct DaemonState {
     pub client: RwLock<Option<Arc<DaemonClient>>>,
     pub config: RwLock<Option<DaemonConfig>>,
     pub app_handle: Mutex<Option<AppHandle>>,
+    /// Session registry for state machine wiring (state-machine-wiring.md §2)
+    pub session_registry: SharedSessionRegistry,
 }
 
 impl Default for DaemonState {
@@ -66,6 +75,7 @@ impl DaemonState {
             client: RwLock::new(None),
             config: RwLock::new(None),
             app_handle: Mutex::new(None),
+            session_registry: new_session_registry(),
         }
     }
 
@@ -115,7 +125,13 @@ impl DaemonState {
         // Disconnect existing client if any
         self.disconnect().await;
 
-        let client = match DaemonClient::connect(&config, app_handle.clone()).await {
+        let client = match DaemonClient::connect(
+            &config,
+            app_handle.clone(),
+            self.session_registry.clone(),
+        )
+        .await
+        {
             Ok(client) => {
                 emit_debug(Some(&app_handle), "connect:success", None);
                 client
@@ -165,18 +181,23 @@ impl DaemonState {
 
 impl DaemonClient {
     /// Connect to the daemon and authenticate
-    pub async fn connect(config: &DaemonConfig, app_handle: AppHandle) -> Result<Self, String> {
-        Self::connect_inner(config, Some(app_handle)).await
+    pub async fn connect(
+        config: &DaemonConfig,
+        app_handle: AppHandle,
+        session_registry: SharedSessionRegistry,
+    ) -> Result<Self, String> {
+        Self::connect_inner(config, Some(app_handle), Some(session_registry)).await
     }
 
     #[cfg(test)]
     pub async fn connect_without_app(config: &DaemonConfig) -> Result<Self, String> {
-        Self::connect_inner(config, None).await
+        Self::connect_inner(config, None, None).await
     }
 
     async fn connect_inner(
         config: &DaemonConfig,
         app_handle: Option<AppHandle>,
+        session_registry: Option<SharedSessionRegistry>,
     ) -> Result<Self, String> {
         let addr = format!("{}:{}", config.host, config.port);
 
@@ -199,7 +220,7 @@ impl DaemonClient {
         };
 
         // Start reader task
-        Self::spawn_reader(reader, pending, connected.clone(), app_handle);
+        Self::spawn_reader(reader, pending, connected.clone(), app_handle, session_registry);
 
         // Authenticate
         let auth_result: Value = client
@@ -220,6 +241,7 @@ impl DaemonClient {
         pending: Arc<Mutex<PendingRequests>>,
         connected: Arc<RwLock<bool>>,
         app_handle: Option<AppHandle>,
+        session_registry: Option<SharedSessionRegistry>,
     ) {
         tokio::spawn(async move {
             let mut line = String::new();
@@ -245,7 +267,11 @@ impl DaemonClient {
                                 Self::handle_response(&pending, &parsed).await;
                             } else if parsed.get("method").is_some() {
                                 // Event
-                                Self::handle_event(app_handle.as_ref(), &parsed);
+                                Self::handle_event(
+                                    app_handle.as_ref(),
+                                    session_registry.as_ref(),
+                                    &parsed,
+                                );
                             }
                         } else {
                             let snippet = if trimmed.len() > 200 {
@@ -309,7 +335,11 @@ impl DaemonClient {
         }
     }
 
-    fn handle_event(app_handle: Option<&AppHandle>, parsed: &Value) {
+    fn handle_event(
+        app_handle: Option<&AppHandle>,
+        session_registry: Option<&SharedSessionRegistry>,
+        parsed: &Value,
+    ) {
         let Some(handle) = app_handle else {
             return;
         };
@@ -330,8 +360,14 @@ impl DaemonClient {
             EVENT_OPENCODE => {
                 // Adapt OpenCode event to StreamEvent schema (§2, §5)
                 if let Some(stream_events) = OPENCODE_ADAPTER.adapt(&params) {
-                    for event in stream_events {
-                        emit_stream_event(handle, &event);
+                    for event in &stream_events {
+                        // Step 1: Emit agent:stream_event (state-machine-wiring.md §5 step 2)
+                        emit_stream_event(handle, event);
+
+                        // Step 2: Route through state machine (state-machine-wiring.md §5 step 3)
+                        if let Some(registry) = session_registry {
+                            route_stream_event_to_state_machine(handle, registry, event);
+                        }
                     }
                 }
                 // Also emit legacy event for backwards compatibility during migration (§9)
@@ -340,8 +376,14 @@ impl DaemonClient {
             EVENT_CLAUDECODE => {
                 // Adapt Claude Code SDK event to StreamEvent schema (§2, §5)
                 if let Some(stream_events) = CLAUDECODE_ADAPTER.adapt(&params) {
-                    for event in stream_events {
-                        emit_stream_event(handle, &event);
+                    for event in &stream_events {
+                        // Step 1: Emit agent:stream_event (state-machine-wiring.md §5 step 2)
+                        emit_stream_event(handle, event);
+
+                        // Step 2: Route through state machine (state-machine-wiring.md §5 step 3)
+                        if let Some(registry) = session_registry {
+                            route_stream_event_to_state_machine(handle, registry, event);
+                        }
                     }
                 }
                 // Also emit legacy event for backwards compatibility during migration (§9)
@@ -467,6 +509,153 @@ fn emit_debug(app_handle: Option<&AppHandle>, message: &str, data: Option<Value>
         None => json!({ "message": message }),
     };
     let _ = handle.emit("daemon:debug", payload);
+}
+
+// ============================================================================
+// State Machine Wiring (state-machine-wiring.md §2, §3, §5)
+// ============================================================================
+
+/// Map a `sessions::StreamEvent` envelope to `agent_state::StreamEvent` for state machine.
+///
+/// Per spec §3:
+/// - Every incoming `StreamEvent` results in `AgentEvent::HarnessStream`.
+/// - `stream_event.type=status` is treated as telemetry; it must not drive UI state directly.
+///
+/// Returns None for status events (telemetry only) or unrecognized types.
+fn map_to_state_machine_event(stream_event: &StreamEvent) -> Option<StateMachineStreamEvent> {
+    match stream_event.event_type {
+        StreamEventType::TextDelta => {
+            // Extract text from payload
+            let text = stream_event
+                .payload
+                .get("text")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            Some(StateMachineStreamEvent::TextDelta { content: text })
+        }
+        StreamEventType::ToolCallDelta => {
+            let call_id = stream_event
+                .payload
+                .get("callId")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let content = stream_event
+                .payload
+                .get("argumentsDelta")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            Some(StateMachineStreamEvent::ToolCallDelta { call_id, content })
+        }
+        StreamEventType::ToolCallCompleted => {
+            // Tool call completed doesn't directly drive state machine transitions
+            // The state machine handles this via ToolCompleted events from orchestrator
+            // However, we still forward it as a delta for consistency
+            let call_id = stream_event
+                .payload
+                .get("callId")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            Some(StateMachineStreamEvent::ToolCallDelta {
+                call_id,
+                content: String::new(),
+            })
+        }
+        StreamEventType::Completed => Some(StateMachineStreamEvent::Completed),
+        StreamEventType::Error => {
+            let message = stream_event
+                .payload
+                .get("message")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Unknown error")
+                .to_string();
+            Some(StateMachineStreamEvent::Error { message })
+        }
+        // Status events are telemetry; they must not drive state transitions (§3)
+        StreamEventType::Status => None,
+        // Thinking, artifact, and metadata are optional/telemetry
+        StreamEventType::ThinkingDelta | StreamEventType::ArtifactDelta | StreamEventType::Metadata => None,
+    }
+}
+
+/// Route a stream event through the state machine and emit `agent:state_event` for transitions.
+///
+/// Per spec §5 (Workflows):
+/// 1. Stream events are emitted to `agent:stream_event` (done by caller).
+/// 2. Daemon client resolves the session entry and calls the state machine.
+/// 3. State machine transitions (if applicable) and emits `agent:state_event`.
+///
+/// Per spec §5 (Edge Cases):
+/// - If the session ID is unknown, emit `session_error` with `code=session_not_found`.
+fn route_stream_event_to_state_machine(
+    handle: &AppHandle,
+    session_registry: &SharedSessionRegistry,
+    stream_event: &StreamEvent,
+) {
+    // Map to state machine event; skip if telemetry-only
+    let Some(sm_event) = map_to_state_machine_event(stream_event) else {
+        return;
+    };
+
+    let session_id = &stream_event.session_id;
+
+    // Log the event being forwarded (§7)
+    eprintln!(
+        "[state_machine_wiring] Forwarding stream event: session_id={}, stream_id={}, type={:?}, seq={}",
+        session_id, stream_event.stream_id, stream_event.event_type, stream_event.seq
+    );
+
+    // Try to get the session entry
+    // Note: This is a blocking lock in an async context. For the initial implementation,
+    // this is acceptable since stream events are processed sequentially per session.
+    // A future optimization could use try_write() with a queue for contended locks.
+    let mut registry = match session_registry.try_write() {
+        Ok(guard) => guard,
+        Err(_) => {
+            eprintln!(
+                "[state_machine_wiring] Registry lock contention for session_id={}",
+                session_id
+            );
+            return;
+        }
+    };
+
+    let entry = match registry.get_mut(session_id) {
+        Some(entry) => entry,
+        None => {
+            // Session not found - emit session_error per spec §6
+            eprintln!(
+                "[state_machine_wiring] session_not_found: session_id={}, stream_id={}",
+                session_id, stream_event.stream_id
+            );
+            let error = AgentError {
+                code: "session_not_found".to_string(),
+                message: format!("Session {} not found for stream event", session_id),
+                retryable: false,
+                source: ErrorSource::Orchestrator,
+            };
+            crate::agent_state::emit_session_error(handle, session_id, &error);
+            return;
+        }
+    };
+
+    // Create the AgentEvent::HarnessStream
+    let agent_event = AgentEvent::HarnessStream {
+        session_id: session_id.clone(),
+        stream_event: sm_event,
+    };
+
+    // Process through state machine with event emission
+    if let Err(err) = process_event_with_tool_emission(handle, entry, &agent_event) {
+        eprintln!(
+            "[state_machine_wiring] Invalid transition for session_id={}: {}",
+            session_id, err
+        );
+        // session_error is already emitted by process_event_with_tool_emission
+    }
 }
 
 #[cfg(test)]

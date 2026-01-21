@@ -11,6 +11,7 @@ Keep this file current whenever a new spec or plan is added.
 | [ROADMAP.md](./ROADMAP.md) | -- | -- | Delivery phases and milestones |
 | [agent-state-machine.md](./agent-state-machine.md) | [planning/agent-state-machine-plan.md](./planning/agent-state-machine-plan.md) | app/src-tauri/src/sessions.rs | Deterministic agent state machine + post-tool hooks |
 | [streaming-event-schema.md](./streaming-event-schema.md) | [planning/streaming-event-schema-plan.md](./planning/streaming-event-schema-plan.md) | app/src-tauri/src/sessions.rs | Unified streaming event schema |
+| [state-machine-wiring.md](./state-machine-wiring.md) | [planning/state-machine-wiring-plan.md](./planning/state-machine-wiring-plan.md) | app/src-tauri/src/daemon/client.rs | Wire stream events into agent state machine + unify UI session status |
 | [session-persistence.md](./session-persistence.md) | [planning/session-persistence-plan.md](./planning/session-persistence-plan.md) | app/src-tauri/src/storage | Local-first session persistence + sync queue |
 | [agent-loop-terminal-ux.md](./agent-loop-terminal-ux.md) | [planning/agent-loop-terminal-ux-plan.md](./planning/agent-loop-terminal-ux-plan.md) | scripts/agent-loop.sh | Gum-powered terminal UX, logging, and stats for the agent loop |
 | [git-diff-ui.md](./git-diff-ui.md) | [planning/git-diff-ui-plan.md](./planning/git-diff-ui-plan.md) | app/src/features/git | Professional git diff UI with split/unified views |

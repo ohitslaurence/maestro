@@ -683,12 +683,15 @@ export function useOpenCodeThread({
 
     // Handle status (§3)
     if (isStatus(event)) {
+      console.log("[useOpenCodeThread] Status event:", event.payload.state);
       if (event.payload.state === "processing") {
+        console.log("[useOpenCodeThread] Setting status to processing");
         setStatus("processing");
         if (!processingStartedAtRef.current) {
           setProcessingStartedAt(Date.now());
         }
       } else if (event.payload.state === "idle") {
+        console.log("[useOpenCodeThread] Setting status to IDLE");
         const startedAt = processingStartedAtRef.current;
         if (startedAt) {
           setLastDurationMs(Date.now() - startedAt);
@@ -697,6 +700,7 @@ export function useOpenCodeThread({
         setStatus("idle");
         setProcessingStartedAt(null);
       } else if (event.payload.state === "aborted") {
+        console.log("[useOpenCodeThread] Setting status to idle (aborted)");
         setStatus("idle");
         setProcessingStartedAt(null);
       }
@@ -752,8 +756,12 @@ export function useOpenCodeThread({
     }
 
     const unsubscribe = subscribeStreamEvents((event: StreamEvent) => {
+      // DEBUG: Log all events
+      console.log("[useOpenCodeThread] StreamEvent received:", event.type, event);
+
       // Filter by session
       if (event.sessionId !== sessionId) {
+        console.log("[useOpenCodeThread] Filtered out - wrong session:", event.sessionId, "expected:", sessionId);
         return;
       }
 
