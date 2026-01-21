@@ -2,6 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { OpenCodeThreadItem, OpenCodeThreadStatus } from "../../../types";
 import { subscribeOpenCodeEvents } from "../../../services/events";
 
+// === Constants for normalization ===
+const MAX_ITEMS_PER_THREAD = 500;
+const MAX_ITEM_TEXT = 20000;
+const TOOL_OUTPUT_RECENT_ITEMS = 40;
+
 type PendingUserMessage = {
   id: string;
   text: string;
@@ -18,6 +23,7 @@ export type OpenCodeThreadState = {
   items: OpenCodeThreadItem[];
   status: OpenCodeThreadStatus;
   processingStartedAt: number | null;
+  lastDurationMs: number | null;
   error?: string;
 };
 
@@ -40,6 +46,9 @@ type PartData = {
   cost?: number;
   tokens?: { input: number; output: number; reasoning: number; cache?: { read: number; write: number } };
   time?: { start?: number; end?: number };
+  // Ordering fields
+  order: number; // Timestamp-based order for deterministic sorting
+  arrivalIndex: number; // Stable index within arrival order
 };
 
 // Message metadata from message.updated events
@@ -61,7 +70,80 @@ type TrackedMessage = {
   parts: Map<string, PartData>; // For assistant messages
 };
 
-// Shallow compare two items by their key fields
+// === Streaming text merge ===
+// Intelligently merge streaming deltas with existing text
+// Handles cases where delta might be the full text, a suffix, or overlap
+function mergeStreamingText(existing: string, delta: string): string {
+  if (!delta) return existing;
+  if (!existing) return delta;
+  if (delta === existing) return existing;
+
+  // Delta contains all of existing - use delta
+  if (delta.startsWith(existing)) return delta;
+
+  // Existing contains all of delta - keep existing
+  if (existing.startsWith(delta)) return existing;
+
+  // Try to find overlap at boundary
+  const maxOverlap = Math.min(existing.length, delta.length);
+  for (let length = maxOverlap; length > 0; length--) {
+    if (existing.endsWith(delta.slice(0, length))) {
+      return `${existing}${delta.slice(length)}`;
+    }
+  }
+
+  // No overlap found - append
+  return `${existing}${delta}`;
+}
+
+// === Text truncation ===
+function truncateText(text: string, maxLength = MAX_ITEM_TEXT): string {
+  if (text.length <= maxLength) return text;
+  const sliceLength = Math.max(0, maxLength - 3);
+  return `${text.slice(0, sliceLength)}...`;
+}
+
+// === Item normalization ===
+function normalizeItem(item: OpenCodeThreadItem): OpenCodeThreadItem {
+  switch (item.kind) {
+    case "user-message":
+    case "assistant-message":
+      return { ...item, text: truncateText(item.text) };
+    case "reasoning":
+      return { ...item, text: truncateText(item.text) };
+    case "tool":
+      return {
+        ...item,
+        title: item.title ? truncateText(item.title, 200) : item.title,
+        output: item.output ? truncateText(item.output) : item.output,
+        error: item.error ? truncateText(item.error, 2000) : item.error,
+      };
+    default:
+      return item;
+  }
+}
+
+// === Thread item preparation (bounds + normalization) ===
+function prepareThreadItems(items: OpenCodeThreadItem[]): OpenCodeThreadItem[] {
+  // Normalize all items
+  const normalized = items.map(normalizeItem);
+
+  // Limit total items (keep most recent)
+  const limited = normalized.length > MAX_ITEMS_PER_THREAD
+    ? normalized.slice(-MAX_ITEMS_PER_THREAD)
+    : normalized;
+
+  // For older tool items, aggressively truncate output
+  const cutoff = Math.max(0, limited.length - TOOL_OUTPUT_RECENT_ITEMS);
+  return limited.map((item, index) => {
+    if (index >= cutoff || item.kind !== "tool") return item;
+    const output = item.output ? truncateText(item.output, 1000) : item.output;
+    if (output === item.output) return item;
+    return { ...item, output };
+  });
+}
+
+// === Shallow compare for reconciliation ===
 function itemsEqual(a: OpenCodeThreadItem, b: OpenCodeThreadItem): boolean {
   if (a.id !== b.id || a.kind !== b.kind) return false;
 
@@ -92,6 +174,7 @@ export function useOpenCodeThread({
   const [items, setItems] = useState<OpenCodeThreadItem[]>([]);
   const [status, setStatus] = useState<OpenCodeThreadStatus>("idle");
   const [processingStartedAt, setProcessingStartedAt] = useState<number | null>(null);
+  const [lastDurationMs, setLastDurationMs] = useState<number | null>(null);
   const [error, setError] = useState<string | undefined>();
 
   // Track messages by id
@@ -99,6 +182,9 @@ export function useOpenCodeThread({
 
   // Track previous items for efficient updates
   const prevItemsRef = useRef<OpenCodeThreadItem[]>([]);
+
+  // Global part arrival counter for stable ordering
+  const partArrivalCounterRef = useRef(0);
 
   // Refs for values accessed in event handlers to avoid stale closures
   const processingStartedAtRef = useRef(processingStartedAt);
@@ -124,8 +210,16 @@ export function useOpenCodeThread({
       return result;
     }
 
-    // Assistant message - process parts
+    // Assistant message - process parts in deterministic order
     const parts = Array.from(msg.parts.values());
+
+    // Sort by order (timestamp-based) then by arrivalIndex for stability
+    parts.sort((a, b) => {
+      const orderDiff = a.order - b.order;
+      if (orderDiff !== 0) return orderDiff;
+      return a.arrivalIndex - b.arrivalIndex;
+    });
+
     for (const part of parts) {
       switch (part.type) {
         case "text":
@@ -230,11 +324,14 @@ export function useOpenCodeThread({
       newItems.push(...convertMessageToItems(msg));
     }
 
+    // Apply normalization and bounds
+    const preparedItems = prepareThreadItems(newItems);
+
     // Preserve references for unchanged items to help React reconciliation
     const prevItems = prevItemsRef.current;
     const prevById = new Map(prevItems.map(item => [item.id, item]));
 
-    const mergedItems = newItems.map(newItem => {
+    const mergedItems = preparedItems.map(newItem => {
       const prevItem = prevById.get(newItem.id);
       // If prev exists and is equal, reuse the old reference
       if (prevItem && itemsEqual(prevItem, newItem)) {
@@ -246,20 +343,21 @@ export function useOpenCodeThread({
     prevItemsRef.current = mergedItems;
     setItems(mergedItems);
 
-    // Determine processing status
+    // Determine processing status from message state
     const hasIncompleteAssistant = allMessages.some(
       (m) => m.role === "assistant" && !m.time?.completed
     );
     if (hasIncompleteAssistant) {
+      // Don't override if we already have a processingStartedAt
+      if (!processingStartedAtRef.current) {
+        const assistantMsg = allMessages.find(
+          (m) => m.role === "assistant" && !m.time?.completed
+        );
+        setProcessingStartedAt(assistantMsg?.time?.created ?? Date.now());
+      }
       setStatus("processing");
-      const assistantMsg = allMessages.find(
-        (m) => m.role === "assistant" && !m.time?.completed
-      );
-      setProcessingStartedAt(assistantMsg?.time?.created ?? Date.now());
-    } else {
-      setStatus("idle");
-      setProcessingStartedAt(null);
     }
+    // Note: don't set idle here - let session.status events handle that
   }, [convertMessageToItems, pendingUserMessages, sessionId]);
 
   // Track previous session to detect real session switches
@@ -281,9 +379,11 @@ export function useOpenCodeThread({
     if (workspaceChanged || sessionSwitched) {
       messagesRef.current.clear();
       prevItemsRef.current = [];
+      partArrivalCounterRef.current = 0;
       setItems([]);
       setStatus("idle");
       setProcessingStartedAt(null);
+      setLastDurationMs(null);
       setError(undefined);
     }
   }, [workspaceId, sessionId]);
@@ -323,29 +423,51 @@ export function useOpenCodeThread({
       const eventType = innerEvent?.type;
       const props = innerEvent?.properties;
 
-      // Handle message.part.updated - streaming parts
+      // Handle message.part.updated - streaming parts with delta accumulation
       if (eventType === "message.part.updated" && props?.part) {
-        const part = props.part as PartData;
+        const rawPart = props.part as Omit<PartData, "order" | "arrivalIndex"> & { order?: number; arrivalIndex?: number };
+        const delta = props.delta as string | undefined;
 
         // Filter by session (use current sessionId from closure, but accept if no session set yet)
-        if (sessionId && part.sessionID !== sessionId) {
+        if (sessionId && rawPart.sessionID !== sessionId) {
           return;
         }
 
         // Get or create the message
-        let msg = messagesRef.current.get(part.messageID);
+        let msg = messagesRef.current.get(rawPart.messageID);
         if (!msg) {
           msg = {
-            id: part.messageID,
-            sessionID: part.sessionID,
+            id: rawPart.messageID,
+            sessionID: rawPart.sessionID,
             role: "assistant", // Parts are always from assistant
             parts: new Map(),
           };
-          messagesRef.current.set(part.messageID, msg);
+          messagesRef.current.set(rawPart.messageID, msg);
         }
 
-        // Update the part
-        msg.parts.set(part.id, part);
+        // Get existing part or create new one
+        const existingPart = msg.parts.get(rawPart.id);
+        const arrivalIndex = existingPart?.arrivalIndex ?? partArrivalCounterRef.current++;
+        const order = rawPart.time?.start ?? existingPart?.order ?? Date.now();
+
+        // Build the updated part with streaming merge
+        const updatedPart: PartData = {
+          ...rawPart,
+          order,
+          arrivalIndex,
+          // Merge streaming text if delta is present
+          text: existingPart && delta
+            ? mergeStreamingText(existingPart.text || "", delta)
+            : rawPart.text ?? existingPart?.text,
+          content: existingPart && delta && rawPart.type === "reasoning"
+            ? mergeStreamingText(existingPart.content || "", delta)
+            : rawPart.content ?? existingPart?.content,
+          output: existingPart && delta && rawPart.type === "tool"
+            ? mergeStreamingText(existingPart.output || "", delta)
+            : rawPart.output ?? existingPart?.output,
+        };
+
+        msg.parts.set(rawPart.id, updatedPart);
         rebuildItemsRef.current();
         return;
       }
@@ -406,6 +528,11 @@ export function useOpenCodeThread({
             setProcessingStartedAt(Date.now());
           }
         } else if (statusType === "idle") {
+          // Calculate duration before clearing
+          const startedAt = processingStartedAtRef.current;
+          if (startedAt) {
+            setLastDurationMs(Date.now() - startedAt);
+          }
           // Only set to idle if we don't have pending messages
           if (pendingUserMessagesRef.current.length === 0) {
             setStatus("idle");
@@ -420,6 +547,11 @@ export function useOpenCodeThread({
         const idleProps = props as { sessionID?: string } | undefined;
         if (sessionId && idleProps?.sessionID !== sessionId) {
           return;
+        }
+        // Calculate duration before clearing
+        const startedAt = processingStartedAtRef.current;
+        if (startedAt) {
+          setLastDurationMs(Date.now() - startedAt);
         }
         if (pendingUserMessagesRef.current.length === 0) {
           setStatus("idle");
@@ -437,6 +569,7 @@ export function useOpenCodeThread({
     items,
     status,
     processingStartedAt,
+    lastDurationMs,
     error,
   };
 }
