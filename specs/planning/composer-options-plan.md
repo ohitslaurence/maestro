@@ -4,10 +4,10 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Phase 1: Server - Models Endpoint
 
-- [ ] Create `GET /models` endpoint using SDK `supportedModels()` (§4)
-- [ ] Implement 5-minute TTL cache, per-workspace (§4)
-- [ ] Return `FALLBACK_MODELS` on SDK call failure (§4, §6)
-- [ ] Register route in `index.ts` (§2)
+- [x] Create `GET /models` endpoint using SDK `supportedModels()` (§4)
+- [x] Implement 5-minute TTL cache, per-workspace (§4)
+- [x] Return `FALLBACK_MODELS` on SDK call failure (§4, §6)
+- [x] Register route in `index.ts` (§2) — N/A: server is single-file; route added inline in `server.ts`
 
 ## Phase 2: Server - Thinking Support
 
@@ -52,7 +52,7 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Files to Create
 
-- `daemon/claude-server/src/routes/models.ts`
+- ~~`daemon/claude-server/src/routes/models.ts`~~ — Not needed: server is single-file (`server.ts`)
 - `app/src/features/claudecode/components/ComposerOptions.tsx`
 - `app/src/features/claudecode/components/ModelSelector.tsx`
 - `app/src/features/claudecode/components/ThinkingModeSelector.tsx`
@@ -60,11 +60,12 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Files to Modify
 
-- `daemon/claude-server/src/types.ts`
-- `daemon/claude-server/src/routes/messages.ts`
-- `daemon/claude-server/src/routes/sessions.ts`
-- `daemon/claude-server/src/sdk/agent.ts`
-- `daemon/claude-server/src/index.ts`
+- ~~`daemon/claude-server/src/types.ts`~~ — Not needed: server is single-file
+- ~~`daemon/claude-server/src/routes/messages.ts`~~ — Not needed: server is single-file
+- ~~`daemon/claude-server/src/routes/sessions.ts`~~ — Not needed: server is single-file
+- ~~`daemon/claude-server/src/sdk/agent.ts`~~ — Not needed: server is single-file
+- ~~`daemon/claude-server/src/index.ts`~~ — Not needed: server is single-file
+- `daemon/claude-server/src/server.ts` — All server changes go here
 - `app/src-tauri/src/lib.rs`
 - `app/src/services/tauri.ts`
 - `app/src/features/claudecode/hooks/useClaudeSession.ts`
