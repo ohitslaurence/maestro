@@ -3,9 +3,9 @@
 Reference: [claude-session-history.md](../claude-session-history.md)
 
 ## Phase 1: Claude server history endpoint
-- [ ] Add `GET /session/:id/message?limit=N` (default 100, max 500) to return message history with parts (See §4)
-- [ ] Return messages in chronological ascending order by `time.created` (See §3 Ordering)
-- [ ] Include all parts per message in insertion order (See §3 Ordering)
+- [x] Add `GET /session/:id/message?limit=N` (default 100, max 500) to return message history with parts (See §4)
+- [x] Return messages in chronological ascending order by `time.created` (See §3 Ordering)
+- [x] Include all parts per message in insertion order (See §3 Ordering)
 
 ## Phase 2: Daemon and Tauri wiring [BLOCKED by: Phase 1]
 - [ ] Add `claude_sdk_session_messages` RPC handler and protocol constant (See §4)

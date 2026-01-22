@@ -307,6 +307,12 @@ function initStorage() {
     selectSessionById: db.prepare(
       "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens, settings FROM sessions WHERE id=?"
     ),
+    selectMessagesBySessionId: db.prepare(
+      "SELECT id, session_id, role, created_at, completed_at, summary_title, summary_body FROM messages WHERE session_id=? ORDER BY created_at ASC LIMIT ?"
+    ),
+    selectPartsBySessionId: db.prepare(
+      "SELECT id, message_id, type, text, tool, input_json, output, error, time_start, time_end FROM parts WHERE session_id=? ORDER BY ROWID ASC"
+    ),
     insertMessage: db.prepare(`
       INSERT INTO messages (
         id, session_id, role, created_at, completed_at, parent_id, model_id, provider_id, agent, mode,
@@ -1777,6 +1783,138 @@ const server = Bun.serve({
         });
       }
       return jsonResponse(session.record);
+    }
+
+    // GET /session/:id/message - Fetch message history with parts (§4 claude-session-history)
+    if (pathname.startsWith("/session/") && pathname.endsWith("/message") && req.method === "GET") {
+      const parts = pathname.split("/");
+      const sessionId = parts[2];
+      const session = sessions.get(sessionId);
+      if (!session) {
+        // Check storage for persisted session (may not be loaded in memory)
+        const row = statements.selectSessionById.get(sessionId);
+        if (!row) {
+          return jsonResponse({ error: "session_not_found" }, 404);
+        }
+      }
+
+      // Parse limit param: default 100, max 500 (§4)
+      const limitParam = url.searchParams.get("limit");
+      let limit = 100;
+      if (limitParam) {
+        const parsed = Number(limitParam);
+        if (Number.isFinite(parsed) && parsed > 0) {
+          limit = Math.min(parsed, 500);
+        }
+      }
+
+      // Fetch messages in chronological ascending order by time.created (§3 Ordering)
+      type MessageRow = {
+        id: string;
+        session_id: string;
+        role: string;
+        created_at: number;
+        completed_at: number | null;
+        summary_title: string | null;
+        summary_body: string | null;
+      };
+      const messageRows = statements.selectMessagesBySessionId.all(sessionId, limit) as MessageRow[];
+
+      // Fetch all parts for this session in insertion order (§3 Ordering)
+      type PartRow = {
+        id: string;
+        message_id: string;
+        type: string;
+        text: string | null;
+        tool: string | null;
+        input_json: string | null;
+        output: string | null;
+        error: string | null;
+        time_start: number | null;
+        time_end: number | null;
+      };
+      const partRows = statements.selectPartsBySessionId.all(sessionId) as PartRow[];
+
+      // Group parts by message ID
+      const partsByMessage = new Map<string, PartRow[]>();
+      for (const part of partRows) {
+        const existing = partsByMessage.get(part.message_id);
+        if (existing) {
+          existing.push(part);
+        } else {
+          partsByMessage.set(part.message_id, [part]);
+        }
+      }
+
+      // Build ClaudeMessageInfo array (§3 Data Model)
+      const messages = messageRows.map((msg) => {
+        const msgParts = partsByMessage.get(msg.id) ?? [];
+        const parts = msgParts.map((p) => {
+          const part: Record<string, unknown> = {
+            id: p.id,
+            messageID: p.message_id,
+            type: p.type,
+          };
+
+          if (p.text !== null) {
+            part.text = p.text;
+          }
+          if (p.tool !== null) {
+            part.tool = p.tool;
+          }
+          if (p.input_json !== null) {
+            try {
+              part.input = JSON.parse(p.input_json);
+            } catch {
+              part.input = p.input_json;
+            }
+          }
+          if (p.output !== null) {
+            try {
+              part.output = JSON.parse(p.output);
+            } catch {
+              part.output = p.output;
+            }
+          }
+          if (p.error !== null) {
+            try {
+              part.error = JSON.parse(p.error);
+            } catch {
+              part.error = p.error;
+            }
+          }
+          if (p.time_start !== null || p.time_end !== null) {
+            part.time = {
+              ...(p.time_start !== null ? { start: p.time_start } : {}),
+              ...(p.time_end !== null ? { end: p.time_end } : {}),
+            };
+          }
+
+          return part;
+        });
+
+        const message: Record<string, unknown> = {
+          id: msg.id,
+          sessionID: msg.session_id,
+          role: msg.role,
+          time: {
+            created: msg.created_at,
+            ...(msg.completed_at !== null ? { completed: msg.completed_at } : {}),
+          },
+          parts,
+        };
+
+        if (msg.summary_title !== null || msg.summary_body !== null) {
+          message.summary = {
+            ...(msg.summary_title !== null ? { title: msg.summary_title } : {}),
+            ...(msg.summary_body !== null ? { body: msg.summary_body } : {}),
+          };
+        }
+
+        return message;
+      });
+
+      return jsonResponse(messages);
     }
 
     if (pathname.startsWith("/session/") && pathname.endsWith("/message") && req.method === "POST") {
