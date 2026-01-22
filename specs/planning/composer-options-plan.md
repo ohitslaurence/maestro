@@ -46,9 +46,9 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Phase 7: Thread View Integration [BLOCKED by: Phase 6]
 
-- [ ] Add `ComposerOptions` to `ClaudeThreadView` above composer (§2)
-- [ ] Pass selected options through to prompt call
-- [ ] Show current model/thinking state in UI
+- [x] Add `ComposerOptions` to `ClaudeThreadView` above composer (§2)
+- [x] Pass selected options through to prompt call
+- [x] Show current model/thinking state in UI
 
 ## Files to Create
 

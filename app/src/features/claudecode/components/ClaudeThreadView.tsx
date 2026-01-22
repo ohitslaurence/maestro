@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useOpenCodeThread } from "../../opencode/hooks/useOpenCodeThread";
 import { useClaudeSession } from "../hooks/useClaudeSession";
+import { useComposerOptions } from "../hooks/useComposerOptions";
 import { useAgentSession, isAgentWorking } from "../../../hooks/useAgentSession";
 import { ThreadMessages } from "../../opencode/components/ThreadMessages";
 import { ThreadComposer } from "../../opencode/components/ThreadComposer";
+import { ComposerOptions } from "./ComposerOptions";
 
 type PendingUserMessage = {
   id: string;
@@ -48,6 +50,17 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
     error: threadError,
   } = useOpenCodeThread({ workspaceId, sessionId, pendingUserMessages });
 
+  // Composer options: model selection and thinking mode (composer-options spec §2, §5)
+  const {
+    models,
+    selectedModel,
+    setSelectedModel,
+    thinkingMode,
+    setThinkingMode,
+    maxThinkingTokens,
+    disabled: composerOptionsDisabled,
+  } = useComposerOptions({ workspaceId, isConnected });
+
   // Use agent state machine for working/idle status (per state-machine-wiring.md §4, §5)
   const { state: agentState } = useAgentSession({ sessionId: sessionId ?? undefined });
   const isWorking = isAgentWorking(agentState.kind);
@@ -82,15 +95,15 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
       setPendingUserMessages(prev => [...prev, pendingMsg]);
 
       try {
-        // Pass activeSessionId explicitly in case state hasn't updated yet
-        await prompt(message, { sessionId: activeSessionId });
+        // Pass activeSessionId and maxThinkingTokens (composer-options spec §5)
+        await prompt(message, { sessionId: activeSessionId, maxThinkingTokens });
       } catch (err) {
         console.error("[ClaudeThreadView] Failed to send prompt", err);
         // Remove pending message on error
         setPendingUserMessages(prev => prev.filter(m => m.id !== pendingMsg.id));
       }
     },
-    [isConnected, sessionId, create, prompt]
+    [isConnected, sessionId, create, prompt, maxThinkingTokens]
   );
 
   const handleStop = useCallback(() => {
@@ -165,6 +178,14 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
         status={status}
         processingStartedAt={processingStartedAt}
         lastDurationMs={lastDurationMs}
+      />
+      <ComposerOptions
+        models={models}
+        selectedModel={selectedModel}
+        onModelSelect={setSelectedModel}
+        thinkingMode={thinkingMode}
+        onThinkingModeSelect={setThinkingMode}
+        disabled={composerOptionsDisabled || isProcessing}
       />
       <ThreadComposer
         onSend={handleSend}
