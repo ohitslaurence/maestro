@@ -15,13 +15,13 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 
 ## Phase 2: Update canUseTool Handler [BLOCKED by: Phase 1]
 
-- [ ] Refactor `createCanUseTool` to use `PermissionManager` (§4)
-- [ ] Add `getMessageId` callback parameter for message ID population (§4)
-- [ ] Implement `buildPermissionRequest()` helper (§4)
-- [ ] Implement `extractPatterns()` for each tool type (§3)
-- [ ] Implement `extractMetadata()` for tool-specific context (§3)
-- [ ] Handle abort signal in permission flow (§5)
-- [ ] Auto-approve safe tools, block dangerous tools for approval (§4)
+- [x] Refactor `createCanUseTool` to use `PermissionManager` (§4)
+- [x] Add `getMessageId` callback parameter for message ID population (§4)
+- [x] Implement `buildPermissionRequest()` helper (§4)
+- [x] Implement `extractPatterns()` for each tool type (§3)
+- [x] Implement `extractMetadata()` for tool-specific context (§3)
+- [x] Handle abort signal in permission flow (§5)
+- [x] Auto-approve safe tools, block dangerous tools for approval (§4)
 
 ## Phase 3: Permission Reply Endpoint [BLOCKED by: Phase 1]
 
@@ -78,6 +78,7 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 
 - `daemon/claude-server/src/permissions/manager.ts`
 - `daemon/claude-server/src/permissions/types.ts`
+- `daemon/claude-server/src/sdk/permissions.ts`
 - `daemon/claude-server/src/routes/permissions.ts`
 - `app/src/features/claudecode/components/PermissionModal.tsx`
 - `app/src/features/claudecode/components/PermissionContext.tsx`
@@ -86,7 +87,7 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 ## Files to Modify
 
 - `daemon/claude-server/src/types.ts`
-- `daemon/claude-server/src/sdk/permissions.ts`
+- `daemon/claude-server/src/server.ts`
 - `daemon/claude-server/src/events/emitter.ts`
 - `daemon/claude-server/src/index.ts`
 - `app/src-tauri/src/lib.rs`
