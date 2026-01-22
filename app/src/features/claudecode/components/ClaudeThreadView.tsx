@@ -198,6 +198,13 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
         onThinkingModeSelect={setThinkingMode}
         disabled={composerOptionsDisabled || isProcessing}
       />
+      {/* Visual indicator when awaiting tool approval (dynamic-tool-approvals spec §5, Phase 9) */}
+      {isPermissionPending && (
+        <div className="oc-thread__permission-pending">
+          <span className="oc-thread__permission-pending-icon">⏳</span>
+          <span className="oc-thread__permission-pending-text">Awaiting tool approval...</span>
+        </div>
+      )}
       <ThreadComposer
         onSend={handleSend}
         onStop={handleStop}

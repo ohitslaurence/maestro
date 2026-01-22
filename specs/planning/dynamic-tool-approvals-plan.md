@@ -95,7 +95,10 @@ Exposes `reply()`, `dismiss()`, `isReplying`, and `error` for UI integration.
 
 - [x] Add `PermissionModal` to `ClaudeThreadView`
 - [x] Disable composer input while permission pending
-- [ ] Show visual indicator when awaiting approval
+- [x] Show visual indicator when awaiting approval
+
+Note: Visual indicator implemented as a pulsing banner above the composer showing "⏳ Awaiting tool approval..."
+when `isPermissionPending` is true. Styled with warning colors and subtle animation in opencode.css.
 
 ## Files to Create
 
