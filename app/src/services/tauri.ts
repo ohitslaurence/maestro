@@ -313,12 +313,13 @@ export async function claudeSdkSessionPrompt(
   workspaceId: string,
   sessionId: string,
   message: string,
-  options?: { maxThinkingTokens?: number },
+  options?: { model?: string; maxThinkingTokens?: number },
 ): Promise<unknown> {
   return invokeCommand<unknown>("claude_sdk_session_prompt", {
     workspaceId,
     sessionId,
     message,
+    model: options?.model,
     maxThinkingTokens: options?.maxThinkingTokens,
   });
 }

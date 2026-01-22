@@ -127,7 +127,7 @@ const persistentPermissionReplies = new Map<string, Set<string>>();
 const MODELS_CACHE_TTL_MS = 5 * 60 * 1000;
 const FALLBACK_MODELS: ModelInfo[] = [
   { value: "claude-sonnet-4-20250514", displayName: "Claude Sonnet 4", description: "Fast and capable" },
-  { value: "claude-opus-4-20250514", displayName: "Claude Opus 4", description: "Most intelligent" },
+  { value: "claude-opus-4-5-20251101", displayName: "Claude Opus 4.5", description: "Most intelligent" },
   { value: "claude-haiku-3-5-20241022", displayName: "Claude Haiku 3.5", description: "Fastest" },
 ];
 let modelsCache: { models: ModelInfo[]; fetchedAt: number } | null = null;
@@ -840,6 +840,7 @@ function extractReasoningFromBlocks(blocks: unknown) {
 
 function createSseResponse(options: { wrapWithDirectory: boolean }) {
   let unsubscribe: (() => void) | null = null;
+  let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
   const stream = new ReadableStream({
     start(controller) {
       const send = (eventType: string, payload: EventPayload) => {
@@ -850,11 +851,26 @@ function createSseResponse(options: { wrapWithDirectory: boolean }) {
         controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
       };
 
+      // Send initial comment to confirm connection
+      controller.enqueue(`: connected\n\n`);
+
+      // Send heartbeat every 5 seconds to keep connection alive
+      heartbeatInterval = setInterval(() => {
+        try {
+          controller.enqueue(`: heartbeat\n\n`);
+        } catch {
+          // Stream closed, will be cleaned up in cancel()
+        }
+      }, 5000);
+
       unsubscribe = events.subscribe((eventType, payload) => {
         send(eventType, payload);
       });
     },
     cancel() {
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+      }
       if (unsubscribe) {
         unsubscribe();
       }

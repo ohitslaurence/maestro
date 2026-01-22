@@ -406,6 +406,7 @@ pub async fn claude_sdk_session_prompt(
     workspace_id: String,
     session_id: String,
     message: String,
+    model: Option<String>,
     max_thinking_tokens: Option<u32>,
     state: State<'_, Arc<DaemonState>>,
 ) -> Result<Value, String> {
@@ -416,6 +417,7 @@ pub async fn claude_sdk_session_prompt(
                 workspace_id,
                 session_id,
                 message,
+                model,
                 max_thinking_tokens,
             }),
         )

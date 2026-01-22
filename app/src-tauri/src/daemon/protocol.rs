@@ -175,6 +175,9 @@ pub struct ClaudeSdkSessionPromptParams {
     pub workspace_id: String,
     pub session_id: String,
     pub message: String,
+    /// Model ID override (composer-options spec §4)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
     /// Per-message thinking budget override (composer-options spec §3, §4)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_thinking_tokens: Option<u32>,

@@ -116,15 +116,15 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
       setPendingUserMessages(prev => [...prev, pendingMsg]);
 
       try {
-        // Pass activeSessionId and maxThinkingTokens (composer-options spec §5)
-        await prompt(message, { sessionId: activeSessionId, maxThinkingTokens });
+        // Pass activeSessionId, model, and maxThinkingTokens (composer-options spec §5)
+        await prompt(message, { sessionId: activeSessionId, model: selectedModel, maxThinkingTokens });
       } catch (err) {
         console.error("[ClaudeThreadView] Failed to send prompt", err);
         // Remove pending message on error
         setPendingUserMessages(prev => prev.filter(m => m.id !== pendingMsg.id));
       }
     },
-    [isConnected, sessionId, create, prompt, maxThinkingTokens]
+    [isConnected, sessionId, create, prompt, selectedModel, maxThinkingTokens]
   );
 
   const handleStop = useCallback(() => {
