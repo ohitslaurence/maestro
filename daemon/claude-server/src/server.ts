@@ -90,6 +90,10 @@ const pendingPermissionRequests = new Map<
   string,
   {
     sessionID: string;
+    permission: string;
+    patterns: string[];
+    metadata: Record<string, unknown>;
+    createdAt: number;
     resolve: (reply: PermissionReply) => void;
     abort: () => void;
   }
@@ -404,6 +408,9 @@ function getPersistentPermissionReplies(sessionID: string) {
 function waitForPermissionReply(options: {
   requestID: string;
   sessionID: string;
+  permission: string;
+  patterns: string[];
+  metadata: Record<string, unknown>;
   abortSignal: AbortSignal;
 }) {
   if (options.abortSignal.aborted) {
@@ -418,6 +425,10 @@ function waitForPermissionReply(options: {
     options.abortSignal.addEventListener("abort", abort, { once: true });
     pendingPermissionRequests.set(options.requestID, {
       sessionID: options.sessionID,
+      permission: options.permission,
+      patterns: options.patterns,
+      metadata: options.metadata,
+      createdAt: Date.now(),
       resolve: (reply) => {
         options.abortSignal.removeEventListener("abort", abort);
         resolve(reply);
@@ -1096,6 +1107,9 @@ async function runClaudeQuery(options: {
           const reply = await waitForPermissionReply({
             requestID: requestId,
             sessionID: session.record.id,
+            permission,
+            patterns,
+            metadata: metadata as Record<string, unknown>,
             abortSignal: abortController.signal,
           });
 
@@ -1638,6 +1652,36 @@ const server = Bun.serve({
       return jsonResponse({ ok: true });
     }
 
+    // GET /permission/pending - List pending permission requests (§4, §5)
+    if (pathname === "/permission/pending" && req.method === "GET") {
+      const sessionId = url.searchParams.get("sessionId");
+      const requests: Array<{
+        id: string;
+        sessionID: string;
+        permission: string;
+        patterns: string[];
+        metadata: Record<string, unknown>;
+        createdAt: number;
+      }> = [];
+
+      for (const [requestId, pending] of pendingPermissionRequests) {
+        if (sessionId && pending.sessionID !== sessionId) {
+          continue;
+        }
+        requests.push({
+          id: requestId,
+          sessionID: pending.sessionID,
+          permission: pending.permission,
+          patterns: pending.patterns,
+          metadata: pending.metadata,
+          createdAt: pending.createdAt,
+        });
+      }
+
+      return jsonResponse({ requests });
+    }
+
+    // POST /permission/:requestId/reply - Reply to a pending permission (§4)
     if (pathname.startsWith("/permission/") && pathname.endsWith("/reply") && req.method === "POST") {
       const parts = pathname.split("/");
       const requestID = parts[2];
@@ -1664,7 +1708,7 @@ const server = Bun.serve({
 
       pendingPermissionRequests.delete(requestID);
       pending.resolve(reply);
-      return jsonResponse(true);
+      return jsonResponse({ success: true });
     }
 
     return jsonResponse({ error: "not_found" }, 404);

@@ -25,11 +25,12 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 
 ## Phase 3: Permission Reply Endpoint [BLOCKED by: Phase 1]
 
-- [ ] Create `routes/permissions.ts` with Hono router (§4)
-- [ ] Implement `POST /permission/:requestId/reply` endpoint (§4)
-- [ ] Implement `GET /permission/pending` for reconnection (§4, §5)
-- [ ] Mount routes in server index
-- [ ] Use `findSessionForRequest()` for O(1) session lookup (§4)
+- [x] Implement `POST /permission/:requestId/reply` endpoint in server.ts (§4)
+- [x] Implement `GET /permission/pending` for reconnection (§4, §5)
+- [x] Store permission metadata in pendingPermissionRequests for pending endpoint
+
+Note: Implemented directly in server.ts following single-file pattern per CLAUDE.md guidance.
+Hono router approach deferred as codebase uses Bun.serve directly.
 
 ## Phase 4: Enhanced SSE Events [BLOCKED by: Phase 1, Phase 2]
 
@@ -79,10 +80,11 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 - `daemon/claude-server/src/permissions/manager.ts`
 - `daemon/claude-server/src/permissions/types.ts`
 - `daemon/claude-server/src/sdk/permissions.ts`
-- `daemon/claude-server/src/routes/permissions.ts`
 - `app/src/features/claudecode/components/PermissionModal.tsx`
 - `app/src/features/claudecode/components/PermissionContext.tsx`
 - `app/src/features/claudecode/hooks/usePermissions.ts`
+
+Note: `routes/permissions.ts` removed - endpoints implemented in server.ts per single-file pattern.
 
 ## Files to Modify
 
