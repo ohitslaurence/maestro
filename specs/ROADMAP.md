@@ -1,110 +1,103 @@
-# Orchestrator Roadmap
+# Maestro Roadmap
 
-## Architecture Reminder
+**Last Updated:** 2026-01-22
 
-```
-┌─────────────────────┐                  ┌─────────────────────────────────┐
-│   macOS (Tauri)     │                  │         VPS (Tailscale)         │
-│                     │                  │                                 │
-│  React + xterm.js   │     TCP          │  maestro-daemon                 │
-│  Rust Proxy Layer   │◄────────────────►│    ├── Terminal PTY             │
-│  (thin client)      │   JSON-RPC       │    ├── Git Operations           │
-│                     │                  │    ├── Session Manager          │
-└─────────────────────┘                  │    └── Agent Harnesses          │
-                                         └─────────────────────────────────┘
-```
-
-**The daemon runs remotely on VPS. The Mac app is a thin client.**
+See [VISION.md](./VISION.md) for the full product vision.
 
 ---
 
-## Phase 0: Setup (Complete)
+## Current State
+
+**Foundation complete.** Daemon runs on VPS, Mac app connects as thin client. Terminal PTY works. Session discovery works. Basic styling in place.
+
+**Agent harness work in progress.** Claude SDK server specced, partially implemented. OpenCode integration working but needs polish.
+
+---
+
+## Phase A: Foundation (Complete)
+
 - [x] Initialize git repo
-- [x] Create spec document
-- [x] Add CodexMonitor as git subtree (`reference/codex-monitor/`)
-- [x] Scaffold Tauri app (`app/`)
-- [x] Get app running locally on Mac
-- [x] Create README.md and AGENTS.md
+- [x] Scaffold Tauri app
+- [x] Feature-sliced architecture
+- [x] Tauri IPC wrapper
+- [x] Event hub pattern
+- [x] Resizable panels
+- [x] Terminal UI (xterm.js)
+- [x] Daemon implementation (TCP JSON-RPC)
+- [x] Tauri proxy layer to daemon
+- [x] Frontend daemon integration
+- [x] macOS glass effect
+- [x] Design token system
 
-## Phase 1: Deep Analysis (Complete)
-- [x] Analyze CodexMonitor architecture
-- [x] Document IPC patterns, state management, event flow
-- [x] Document terminal implementation (PTY + xterm.js)
-- [x] Document git integration
-- [x] Document diff rendering (@pierre/diffs)
-- [x] Document remote backend daemon (JSON-RPC)
-- [x] Document UI patterns (feature-sliced architecture)
-- [x] Create recommendations (copy/adapt/skip/build)
+## Phase B: Agent Harnesses (Current)
 
-**Output:** `specs/CODEX_MONITOR_ANALYSIS.md`
+**Goal:** Full chat experience with Claude Code and OpenCode.
 
-## Phase 2: Frontend Scaffolding (Complete)
-- [x] Feature-sliced architecture (Task 005)
-- [x] Tauri IPC wrapper (Task 002)
-- [x] Event hub pattern (Task 003)
-- [x] Resizable panels (Task 006)
-- [x] Basic layout (sidebar + main panel)
-- [x] Terminal UI (xterm.js + TerminalPanel)
-- [x] Git UI components (GitStatusPanel, DiffViewer)
-- [x] Sessions feature extraction
+- [x] Claude SDK server spec
+- [x] Claude SDK UI spec
+- [x] Streaming event schema spec
+- [x] State machine wiring spec
+- [ ] **Claude SDK server implementation** ← next
+- [ ] **Claude SDK UI integration**
+- [ ] Model selection (composer options)
+- [ ] Extended thinking toggle
+- [ ] Dynamic tool approvals
+- [ ] OpenCode thread UI polish
 
-**Note:** Current terminal/git code runs locally in Tauri. This was scaffolding to validate the UI patterns. For the real architecture, these operations must run on the VPS daemon.
+**Blocking issues:**
+- Need to validate Claude Agent SDK integration end-to-end
+- Permission flow UX not finalized
 
-## Phase 3: Remote Daemon (Complete)
+## Phase C: Git Polish
 
-**Critical path complete.** Daemon runs on VPS, Mac app connects as thin client.
+**Goal:** Full git workflow without leaving the app.
 
-- [x] **Daemon implementation** (Task 014 - DONE)
-  - [x] TCP listener with JSON-RPC protocol
-  - [x] Token authentication
-  - [x] Session discovery/management
-  - [x] Terminal PTY (reuse portable-pty logic)
-  - [x] Git operations (reuse sessions.rs git code)
-  - [x] Event streaming to clients
+- [ ] Git panel in main layout (status + diff)
+- [ ] Split/unified diff viewer
+- [ ] Stage/unstage individual files
+- [ ] Commit flow (message composer, gritty integration)
+- [ ] History browser
+- [ ] Branch indicator in session info
 
-- [x] **Tauri proxy layer** (Task 015 - DONE)
-  - [x] Connect to daemon on startup
-  - [x] Proxy terminal commands to daemon
-  - [x] Proxy git commands to daemon
-  - [x] Forward daemon events to React
+## Phase D: Workspaces & Projects
 
-- [x] **Frontend daemon integration** (Task 016 - DONE)
-  - [x] Update services to use new command/event names
-  - [x] Add daemon connection hook and UI
-  - [x] Update session/terminal hooks for new formats
-  - [x] Settings modal for daemon configuration
+**Goal:** Organize work by workspace (personal/work) and project.
 
-- [x] **End-to-end testing**
-  - [x] Run daemon on VPS/local
-  - [x] Connect Tauri app
-  - [x] Verify terminal works
-  - [x] Verify session list works
+- [ ] Workspace data model + persistence
+- [ ] Workspace switcher in sidebar
+- [ ] Project list per workspace
+- [ ] Recent/favorite projects
+- [ ] Auto-discover projects from workspace root
 
-## Phase 3.5: App Shell Polish (Current)
+## Phase E: Spec System
 
-- [x] macOS glass effect (windowEffects: hudWindow)
-- [x] Design token system (surfaces, text, borders, spacing)
-- [x] Traffic light spacing fixed
-- [x] Sidebar header draggable
-- [ ] Git panel integration into main UI
-- [ ] Session info display (path, git status indicator)
+**Goal:** First-class spec-driven development.
 
-## Phase 4: Git Integration Polish
-- [ ] Commit history panel
-- [ ] File tree with change indicators
-- [ ] Session switching with buffer restore
+- [ ] Scan specs/ folder for existing specs
+- [ ] Spec viewer (markdown render + task list)
+- [ ] "New Spec" command → agent interview flow
+- [ ] Spec templates (customizable per project)
+- [ ] Plan progress tracking (tasks completed)
 
-## Phase 5: Agent Protocol Integration
-- [x] Research Claude Code SDK (Task 007)
-- [x] Research Open Code server protocol (Task 008)
-- [ ] Implement Claude Code harness
-- [ ] Implement Open Code harness
-- [ ] Spawn agents from UI
+## Phase F: Native Agent Loop
 
-## Phase 6: Advanced Orchestration
+**Goal:** Automated agent iteration with full visibility.
+
+- [ ] Agent loop engine (Rust or Bun subprocess)
+- [ ] Loop configuration UI (spec, model, iterations)
+- [ ] Real-time iteration monitoring
+- [ ] Live output streaming
+- [ ] Completion detection
+- [ ] Postmortem generation (Opus analysis)
+- [ ] Run history + replay
+
+## Phase G: Advanced Orchestration
+
+**Goal:** Multi-agent, multi-project coordination.
+
 - [ ] Multi-project workspace support
 - [ ] Git worktree management
-- [ ] Ralph Wiggins loop implementation
+- [ ] Sub-agent spawning
 - [ ] Task queue system
 - [ ] Meta-orchestrator agent
 
@@ -112,19 +105,12 @@
 
 ## Immediate Next Steps
 
-1. **Git panel in UI** - Show git status/diffs for selected session
-2. **Session info** - Display path, git branch indicator in sidebar
-3. **Agent harness integration** - Start implementing Claude Code harness
-4. **Spawn agents** - UI to start new agent sessions
+1. **Claude SDK server** - Complete implementation, test with curl
+2. **Wire frontend** - Connect Claude provider to thread UI
+3. **Git panel** - Add to main layout, show for selected session
+4. **Workspace model** - Design persistence, add switcher
 
-## Task Specs
-
-Completed:
-- `DONE-001` through `DONE-016` - See `specs/TASKS/`
-
-Next candidates:
-- Git panel integration (Phase 3.5)
-- Claude Code harness (Phase 5)
+---
 
 ## Commands Reference
 
@@ -138,9 +124,31 @@ cd app && bun run tauri build
 # Type check
 cd app && bun run typecheck
 
-# Run daemon (VPS) - after implementation
-maestro-daemon --listen 0.0.0.0:4733 --token "$MAESTRO_TOKEN"
+# Run daemon (VPS)
+cd daemon && cargo run -- --listen 0.0.0.0:4733 --token "$MAESTRO_TOKEN"
+
+# Run daemon locally (no auth)
+cd daemon && cargo run -- --listen 127.0.0.1:55433 --insecure-no-auth
 
 # Update CodexMonitor reference
 git subtree pull --prefix=reference/codex-monitor https://github.com/Dimillian/CodexMonitor.git main --squash
 ```
+
+---
+
+## Spec Index
+
+Core specs driving current work:
+
+| Spec | Status | Phase |
+|------|--------|-------|
+| [VISION.md](./VISION.md) | Active | -- |
+| [claude-sdk-server.md](./claude-sdk-server.md) | Draft | B |
+| [claude-sdk-ui.md](./claude-sdk-ui.md) | Draft | B |
+| [composer-options.md](./composer-options.md) | Draft | B |
+| [dynamic-tool-approvals.md](./dynamic-tool-approvals.md) | Draft | B |
+| [git-diff-ui.md](./git-diff-ui.md) | Draft | C |
+| [session-persistence.md](./session-persistence.md) | Draft | D |
+| [agent-loop-terminal-ux.md](./agent-loop-terminal-ux.md) | Draft | F |
+
+See [README.md](./README.md) for full spec index with plans and code locations.
