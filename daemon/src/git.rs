@@ -238,9 +238,7 @@ pub fn get_diff(path: &Path) -> Result<GitDiffResult, String> {
                 .collect();
 
             let diff = format!(
-                "diff --git a/{} b/{}\nnew file mode 100644\n--- /dev/null\n+++ b/{}\n@@ -0,0 +1,{} @@\n{}",
-                file_path,
-                file_path,
+                "diff --git a/{0} b/{0}\nnew file mode 100644\nindex 0000000..0000000\n--- /dev/null\n+++ b/{0}\n@@ -0,0 +1,{1} @@\n{2}",
                 file_path,
                 line_count,
                 diff_lines.join("\n")

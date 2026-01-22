@@ -99,14 +99,20 @@ const DiffCard = memo(function DiffCard({
         </span>
         <span className="diff-viewer-path">{entry.path}</span>
       </div>
-      {entry.diff.trim() && fileDiff ? (
-        <div className="diff-viewer-output diff-viewer-output-flat">
-          <FileDiff
-            fileDiff={fileDiff}
-            options={diffOptions}
-            style={{ width: "100%", maxWidth: "100%", minWidth: 0 }}
-          />
-        </div>
+      {entry.diff.trim() ? (
+        fileDiff ? (
+          <div className="diff-viewer-output diff-viewer-output-flat">
+            <FileDiff
+              fileDiff={fileDiff}
+              options={diffOptions}
+              style={{ width: "100%", maxWidth: "100%", minWidth: 0 }}
+            />
+          </div>
+        ) : (
+          <div className="diff-viewer-output diff-viewer-raw">
+            <pre>{entry.diff}</pre>
+          </div>
+        )
       ) : (
         <div className="diff-viewer-placeholder">No changes</div>
       )}

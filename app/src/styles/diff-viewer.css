@@ -334,6 +334,21 @@
   padding: 0;
 }
 
+.diff-viewer-raw {
+  padding: var(--space-3);
+  background: var(--surface-panel);
+}
+
+.diff-viewer-raw pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 .diff-viewer-placeholder {
   padding: var(--space-4);
   color: var(--text-tertiary);
