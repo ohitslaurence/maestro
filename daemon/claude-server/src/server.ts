@@ -1,4 +1,4 @@
-import { query } from "@anthropic-ai/claude-agent-sdk";
+import { query, type PermissionMode } from "@anthropic-ai/claude-agent-sdk";
 import { Database } from "bun:sqlite";
 import { createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -57,7 +57,11 @@ const requestedPort = Number(process.env.MAESTRO_PORT ?? "0") || 0;
 const defaultModelId = process.env.MAESTRO_CLAUDE_MODEL ?? "claude-sonnet-4-20250514";
 const defaultAgent = process.env.MAESTRO_CLAUDE_AGENT ?? "claude-sdk";
 const defaultProvider = "anthropic";
-const defaultPermissionMode = process.env.MAESTRO_CLAUDE_PERMISSION_MODE;
+const validPermissionModes: PermissionMode[] = ['default', 'acceptEdits', 'bypassPermissions', 'plan', 'delegate', 'dontAsk'];
+const envPermissionMode = process.env.MAESTRO_CLAUDE_PERMISSION_MODE;
+const defaultPermissionMode: PermissionMode | undefined = envPermissionMode && validPermissionModes.includes(envPermissionMode as PermissionMode)
+  ? (envPermissionMode as PermissionMode)
+  : undefined;
 const defaultSettingSources = ["user", "project", "local"] as const;
 const defaultSystemPrompt = { type: "preset", preset: "claude_code" } as const;
 const defaultTools = { type: "preset", preset: "claude_code" } as const;
@@ -810,6 +814,7 @@ function buildUserMessageInfo(options: {
     },
     summary: {
       title: options.prompt,
+      body: null as string | null,
       diffs: [],
     },
     agent: options.agent,
@@ -858,6 +863,17 @@ function buildAssistantMessageInfo(options: {
   };
 }
 
+type MessageRequestBody = {
+  messageID?: string;
+  model?: string;
+  agent?: string;
+  noReply?: boolean;
+  system?: string;
+  variant?: string;
+  parts?: PartInput[];
+  maxThinkingTokens?: number;
+};
+
 async function handleSessionMessage(req: Request, sessionId: string) {
   const session = sessions.get(sessionId);
   if (!session) {
@@ -868,29 +884,20 @@ async function handleSessionMessage(req: Request, sessionId: string) {
     return jsonResponse({ error: "session_busy" }, 409);
   }
 
-  let body: {
-    messageID?: string;
-    model?: string;
-    agent?: string;
-    noReply?: boolean;
-    system?: string;
-    variant?: string;
-    parts?: PartInput[];
-    maxThinkingTokens?: number;
-  } | null = null;
-
+  let rawBody: MessageRequestBody | null = null;
   try {
-    body = (await req.json()) as typeof body;
+    rawBody = (await req.json()) as MessageRequestBody;
   } catch {
-    body = null;
+    rawBody = null;
   }
 
-  if (!body || !Array.isArray(body.parts)) {
+  if (!rawBody || !Array.isArray(rawBody.parts)) {
     return jsonResponse({ error: "invalid_request" }, 400);
   }
 
-  const promptParts = body.parts.filter((part) => part.type === "text" && typeof part.text === "string");
-  const prompt = promptParts.map((part) => part.text).join("\n").trim();
+  const body = rawBody;
+  const promptParts = body.parts!.filter((part: PartInput) => part.type === "text" && typeof part.text === "string");
+  const prompt = promptParts.map((part: PartInput) => part.text).join("\n").trim();
 
   if (!prompt) {
     return jsonResponse({ error: "empty_prompt" }, 400);
@@ -1079,7 +1086,7 @@ async function runClaudeQuery(options: {
         systemPrompt: defaultSystemPrompt,
         tools: defaultTools,
         ...(defaultPermissionMode ? { permissionMode: defaultPermissionMode } : {}),
-        canUseTool: async (toolName: string, input: unknown) => {
+        canUseTool: async (toolName: string, input: Record<string, unknown>) => {
           if (toolName === "AskUserQuestion") {
             return {
               behavior: "deny",
@@ -1563,9 +1570,10 @@ const server = Bun.serve({
     }
 
     if (pathname === "/session" && req.method === "POST") {
-      let body: { parentID?: string; title?: string; permission?: string; maxThinkingTokens?: number } | null = null;
+      type SessionCreateBody = { parentID?: string; title?: string; permission?: string; maxThinkingTokens?: number };
+      let body: SessionCreateBody | null = null;
       try {
-        body = (await req.json()) as typeof body;
+        body = (await req.json()) as SessionCreateBody;
       } catch {
         body = null;
       }
@@ -1698,9 +1706,10 @@ const server = Bun.serve({
         return jsonResponse({ error: "invalid_request" }, 400);
       }
 
-      let body: { reply?: PermissionReply; message?: string } | null = null;
+      type PermissionReplyBody = { reply?: PermissionReply; message?: string };
+      let body: PermissionReplyBody | null = null;
       try {
-        body = (await req.json()) as typeof body;
+        body = (await req.json()) as PermissionReplyBody;
       } catch {
         body = null;
       }

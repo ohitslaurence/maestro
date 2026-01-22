@@ -122,8 +122,8 @@ Note: `routes/permissions.ts` removed - endpoints implemented in server.ts per s
 
 ### Implementation Checklist
 
-- [ ] `cd daemon/claude-server && bun run typecheck`
-- [ ] `cd app && bun run typecheck`
+- [x] `cd daemon/claude-server && bun run typecheck`
+- [x] `cd app && bun run typecheck`
 - [ ] Permission request blocks SDK execution
 - [ ] Reply endpoint resolves pending permission
 - [ ] "Always" reply adds pattern to approved set (exact match)
