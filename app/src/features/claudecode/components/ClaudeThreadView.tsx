@@ -2,10 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useOpenCodeThread } from "../../opencode/hooks/useOpenCodeThread";
 import { useClaudeSession } from "../hooks/useClaudeSession";
 import { useComposerOptions } from "../hooks/useComposerOptions";
+import { usePermissions } from "../hooks/usePermissions";
 import { useAgentSession, isAgentWorking } from "../../../hooks/useAgentSession";
 import { ThreadMessages } from "../../opencode/components/ThreadMessages";
 import { ThreadComposer } from "../../opencode/components/ThreadComposer";
 import { ComposerOptions } from "./ComposerOptions";
+import { PermissionModal } from "./PermissionModal";
 
 type PendingUserMessage = {
   id: string;
@@ -60,6 +62,13 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
     maxThinkingTokens,
     disabled: composerOptionsDisabled,
   } = useComposerOptions({ workspaceId, isConnected });
+
+  // Permission requests: queue-based handling (dynamic-tool-approvals spec §5, §UI Components)
+  const {
+    currentRequest: permissionRequest,
+    reply: replyToPermission,
+    dismiss: dismissPermission,
+  } = usePermissions({ workspaceId, sessionId });
 
   // Use agent state machine for working/idle status (per state-machine-wiring.md §4, §5)
   const { state: agentState } = useAgentSession({ sessionId: sessionId ?? undefined });
@@ -193,6 +202,12 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
         canStop={canStop}
         disabled={disabled}
         isProcessing={isProcessing}
+      />
+      {/* Permission modal for tool approvals (dynamic-tool-approvals spec §UI Components) */}
+      <PermissionModal
+        request={permissionRequest}
+        onReply={replyToPermission}
+        onClose={dismissPermission}
       />
     </div>
   );
