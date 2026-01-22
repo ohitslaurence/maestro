@@ -75,6 +75,9 @@ pub const METHOD_CLAUDE_SDK_SESSION_CREATE: &str = "claude_sdk_session_create";
 pub const METHOD_CLAUDE_SDK_SESSION_PROMPT: &str = "claude_sdk_session_prompt";
 pub const METHOD_CLAUDE_SDK_SESSION_ABORT: &str = "claude_sdk_session_abort";
 pub const METHOD_CLAUDE_SDK_MODELS: &str = "claude_sdk_models";
+// Claude SDK permission methods (dynamic-tool-approvals spec §4)
+pub const METHOD_CLAUDE_SDK_PERMISSION_REPLY: &str = "claude_sdk_permission_reply";
+pub const METHOD_CLAUDE_SDK_PERMISSION_PENDING: &str = "claude_sdk_permission_pending";
 
 // --- Request params ---
 
@@ -173,6 +176,29 @@ pub struct ClaudeSdkSessionPromptParams {
     /// Per-message thinking budget override (composer-options spec §3, §4)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_thinking_tokens: Option<u32>,
+}
+
+// --- Claude SDK permission params (dynamic-tool-approvals spec §4) ---
+
+/// Reply to a pending permission request
+#[derive(Debug, Serialize)]
+pub struct ClaudeSdkPermissionReplyParams {
+    pub workspace_id: String,
+    pub request_id: String,
+    /// Reply type: "once" (allow once), "always" (always allow), "reject" (deny)
+    pub reply: String,
+    /// Optional message for deny feedback
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+/// Get pending permission requests
+#[derive(Debug, Serialize)]
+pub struct ClaudeSdkPermissionPendingParams {
+    pub workspace_id: String,
+    /// Optional session_id filter
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub session_id: Option<String>,
 }
 
 // --- Response types ---

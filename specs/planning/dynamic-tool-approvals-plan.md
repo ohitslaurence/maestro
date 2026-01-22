@@ -45,9 +45,13 @@ and maps internal reply format (once/reject/always) to spec format (allow/deny/a
 
 ## Phase 5: Tauri Commands [BLOCKED by: Phase 3]
 
-- [ ] Add `claude_sdk_permission_reply` command
-- [ ] Add `claude_sdk_permission_pending` command
-- [ ] Update Rust types for permission events
+- [x] Add `claude_sdk_permission_reply` command
+- [x] Add `claude_sdk_permission_pending` command
+- [x] Update Rust types for permission events
+
+Note: Commands added to both daemon (protocol.rs, handlers/claude_sdk.rs, handlers/mod.rs) and
+Tauri app (daemon/protocol.rs, daemon/commands.rs, lib.rs). Both proxied through daemon's JSON-RPC
+layer to Claude SDK server HTTP endpoints.
 
 ## Phase 6: Frontend Service Layer [BLOCKED by: Phase 5]
 

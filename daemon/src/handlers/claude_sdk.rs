@@ -314,3 +314,85 @@ pub async fn handle_models(request: &Request, state: &DaemonState) -> String {
         }
     }
 }
+
+/// Handle claude_sdk_permission_reply request (dynamic-tool-approvals spec §4)
+pub async fn handle_permission_reply(request: &Request, state: &DaemonState) -> String {
+    let params: ClaudeSdkPermissionReplyParams =
+        match serde_json::from_value(request.params.clone()) {
+            Ok(p) => p,
+            Err(e) => {
+                return serde_json::to_string(&ErrorResponse::new(
+                    request.id,
+                    INVALID_PARAMS,
+                    format!("Invalid params: {e}"),
+                ))
+                .unwrap();
+            }
+        };
+
+    let base_url = match state.get_claude_sdk_server(&params.workspace_id).await {
+        Some(url) => url,
+        None => {
+            return serde_json::to_string(&ErrorResponse::new(
+                request.id,
+                CLAUDE_SDK_NOT_CONNECTED,
+                "Claude SDK not connected for this workspace",
+            ))
+            .unwrap();
+        }
+    };
+
+    let path = format!("/permission/{}/reply", params.request_id);
+    let mut body = json!({ "reply": params.reply });
+    if let Some(msg) = params.message {
+        body["message"] = json!(msg);
+    }
+
+    match OpenCodeRegistry::proxy_post(&base_url, &path, Some(body), None).await {
+        Ok(result) => serde_json::to_string(&SuccessResponse::new(request.id, result)).unwrap(),
+        Err(e) => {
+            serde_json::to_string(&ErrorResponse::new(request.id, CLAUDE_SDK_ERROR, e)).unwrap()
+        }
+    }
+}
+
+/// Handle claude_sdk_permission_pending request (dynamic-tool-approvals spec §4)
+pub async fn handle_permission_pending(request: &Request, state: &DaemonState) -> String {
+    let params: ClaudeSdkPermissionPendingParams =
+        match serde_json::from_value(request.params.clone()) {
+            Ok(p) => p,
+            Err(e) => {
+                return serde_json::to_string(&ErrorResponse::new(
+                    request.id,
+                    INVALID_PARAMS,
+                    format!("Invalid params: {e}"),
+                ))
+                .unwrap();
+            }
+        };
+
+    let base_url = match state.get_claude_sdk_server(&params.workspace_id).await {
+        Some(url) => url,
+        None => {
+            return serde_json::to_string(&ErrorResponse::new(
+                request.id,
+                CLAUDE_SDK_NOT_CONNECTED,
+                "Claude SDK not connected for this workspace",
+            ))
+            .unwrap();
+        }
+    };
+
+    // Build path with optional session_id query parameter
+    let path = match params.session_id {
+        Some(sid) => format!("/permission/pending?sessionId={}", sid),
+        None => "/permission/pending".to_string(),
+    };
+
+    match OpenCodeRegistry::proxy_get(&base_url, &path, None).await {
+        Ok(result) => serde_json::to_string(&SuccessResponse::new(request.id, result)).unwrap(),
+        Err(e) => {
+            serde_json::to_string(&ErrorResponse::new(request.id, CLAUDE_SDK_ERROR, e)).unwrap()
+        }
+    }
+}

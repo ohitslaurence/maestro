@@ -451,5 +451,45 @@ pub async fn claude_sdk_models(
         .await
 }
 
+/// Reply to a pending permission request (dynamic-tool-approvals spec §4)
+#[tauri::command]
+pub async fn claude_sdk_permission_reply(
+    workspace_id: String,
+    request_id: String,
+    reply: String,
+    message: Option<String>,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_PERMISSION_REPLY,
+            Some(ClaudeSdkPermissionReplyParams {
+                workspace_id,
+                request_id,
+                reply,
+                message,
+            }),
+        )
+        .await
+}
+
+/// Get pending permission requests (dynamic-tool-approvals spec §4)
+#[tauri::command]
+pub async fn claude_sdk_permission_pending(
+    workspace_id: String,
+    session_id: Option<String>,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_PERMISSION_PENDING,
+            Some(ClaudeSdkPermissionPendingParams {
+                workspace_id,
+                session_id,
+            }),
+        )
+        .await
+}
+
 // Helper to use serde_json::Value without importing in this file
 use serde_json::Value;

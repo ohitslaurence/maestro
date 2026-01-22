@@ -130,6 +130,9 @@ pub fn run() {
             daemon::claude_sdk_session_prompt,
             daemon::claude_sdk_session_abort,
             daemon::claude_sdk_models,
+            // Claude SDK permission commands (dynamic-tool-approvals spec §4)
+            daemon::claude_sdk_permission_reply,
+            daemon::claude_sdk_permission_pending,
             // Local-only commands (agent harness - future)
             sessions::spawn_session,
             sessions::stop_session,
