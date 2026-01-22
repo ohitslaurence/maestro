@@ -491,5 +491,25 @@ pub async fn claude_sdk_permission_pending(
         .await
 }
 
+/// Update session settings (session-settings spec §4)
+#[tauri::command]
+pub async fn claude_sdk_session_settings_update(
+    workspace_id: String,
+    session_id: String,
+    settings: Value,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_SESSION_SETTINGS_UPDATE,
+            Some(ClaudeSdkSessionSettingsUpdateParams {
+                workspace_id,
+                session_id,
+                settings,
+            }),
+        )
+        .await
+}
+
 // Helper to use serde_json::Value without importing in this file
 use serde_json::Value;

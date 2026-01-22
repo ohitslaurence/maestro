@@ -45,6 +45,7 @@ pub async fn dispatch(
         METHOD_CLAUDE_SDK_MODELS => claude_sdk::handle_models(request, &state).await,
         METHOD_CLAUDE_SDK_PERMISSION_REPLY => claude_sdk::handle_permission_reply(request, &state).await,
         METHOD_CLAUDE_SDK_PERMISSION_PENDING => claude_sdk::handle_permission_pending(request, &state).await,
+        METHOD_CLAUDE_SDK_SESSION_SETTINGS_UPDATE => claude_sdk::handle_session_settings_update(request, &state).await,
         _ => {
             let resp = ErrorResponse::new(
                 request.id,

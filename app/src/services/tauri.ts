@@ -15,6 +15,7 @@ import type {
   PermissionReplyResponse,
   SessionInfo,
   SessionInfoResult,
+  SessionSettingsUpdate,
   TerminalSession,
 } from "../types";
 import type {
@@ -363,6 +364,19 @@ export async function claudeSdkPermissionPending(
   return invokeCommand<PermissionPendingResponse>("claude_sdk_permission_pending", {
     workspaceId,
     sessionId,
+  });
+}
+
+/** Update session settings (session-settings spec §4) */
+export async function claudeSdkSessionSettingsUpdate(
+  workspaceId: string,
+  sessionId: string,
+  settings: SessionSettingsUpdate,
+): Promise<unknown> {
+  return invokeCommand<unknown>("claude_sdk_session_settings_update", {
+    workspaceId,
+    sessionId,
+    settings,
   });
 }
 

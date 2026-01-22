@@ -353,6 +353,42 @@ impl OpenCodeRegistry {
             .await
             .map_err(|e| format!("Failed to parse response: {e}"))
     }
+
+    /// Proxy PATCH request to OpenCode server (session-settings spec §4)
+    pub async fn proxy_patch(
+        base_url: &str,
+        path: &str,
+        body: Option<Value>,
+        headers: Option<Vec<(&str, &str)>>,
+    ) -> Result<Value, String> {
+        let client = Self::http_client();
+        let url = format!("{}{}", base_url, path);
+
+        let mut req = client.patch(&url);
+        if let Some(hdrs) = headers {
+            for (k, v) in hdrs {
+                req = req.header(k, v);
+            }
+        }
+        if let Some(body) = body {
+            req = req.json(&body);
+        }
+
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| format!("HTTP request failed: {e}"))?;
+
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let body = resp.text().await.unwrap_or_default();
+            return Err(format!("HTTP {status} from server: {body}"));
+        }
+
+        resp.json::<Value>()
+            .await
+            .map_err(|e| format!("Failed to parse response: {e}"))
+    }
 }
 
 #[cfg(test)]

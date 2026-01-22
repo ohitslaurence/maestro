@@ -78,6 +78,8 @@ pub const METHOD_CLAUDE_SDK_MODELS: &str = "claude_sdk_models";
 // Claude SDK permission methods (dynamic-tool-approvals spec §4)
 pub const METHOD_CLAUDE_SDK_PERMISSION_REPLY: &str = "claude_sdk_permission_reply";
 pub const METHOD_CLAUDE_SDK_PERMISSION_PENDING: &str = "claude_sdk_permission_pending";
+// Claude SDK session settings methods (session-settings spec §4)
+pub const METHOD_CLAUDE_SDK_SESSION_SETTINGS_UPDATE: &str = "claude_sdk_session_settings_update";
 
 // --- Request params ---
 
@@ -199,6 +201,17 @@ pub struct ClaudeSdkPermissionPendingParams {
     /// Optional session_id filter
     #[serde(skip_serializing_if = "Option::is_none")]
     pub session_id: Option<String>,
+}
+
+// --- Claude SDK session settings params (session-settings spec §4) ---
+
+/// Update session settings
+#[derive(Debug, Serialize)]
+pub struct ClaudeSdkSessionSettingsUpdateParams {
+    pub workspace_id: String,
+    pub session_id: String,
+    /// Partial settings to merge (session-settings spec §4.1)
+    pub settings: Value,
 }
 
 // --- Response types ---

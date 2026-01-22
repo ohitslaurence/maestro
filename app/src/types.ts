@@ -243,3 +243,55 @@ export type PermissionReplyResponse = {
 export type PermissionPendingResponse = {
   requests: PermissionRequest[];
 };
+
+// --- Session Settings types (session-settings spec §3) ---
+
+/** System prompt configuration modes */
+export type SystemPromptMode = "default" | "append" | "custom";
+
+/** System prompt configuration */
+export type SystemPromptConfig = {
+  mode: SystemPromptMode;
+  content?: string;  // Required for 'append' and 'custom' modes
+};
+
+/** Session settings for Claude SDK sessions (session-settings spec §3.1) */
+export type SessionSettings = {
+  maxTurns: number;                    // Default: 100, Range: 1-1000
+  systemPrompt: SystemPromptConfig;    // Default: { mode: 'default' }
+  disallowedTools?: string[];          // Blocklist (removed from defaults)
+};
+
+/** Partial settings for update requests (session-settings spec §4.1) */
+export type SessionSettingsUpdate = {
+  maxTurns?: number | null;            // null = reset to default
+  systemPrompt?: {
+    mode?: SystemPromptMode;
+    content?: string | null;           // null = reset to default
+  } | null;
+  disallowedTools?: string[] | null;   // null = reset to default
+};
+
+/** Default session settings (session-settings spec §3.1) */
+export const DEFAULT_SESSION_SETTINGS: SessionSettings = {
+  maxTurns: 100,
+  systemPrompt: { mode: "default" },
+  disallowedTools: undefined,
+};
+
+/** Available Claude tools for blocklist UI (session-settings spec Appendix) */
+export const CLAUDE_TOOLS = [
+  { id: "Read", name: "Read", description: "Read file contents", category: "files" },
+  { id: "Write", name: "Write", description: "Write file contents", category: "files" },
+  { id: "Edit", name: "Edit", description: "Edit file contents", category: "files" },
+  { id: "Glob", name: "Glob", description: "Find files by pattern", category: "files" },
+  { id: "Grep", name: "Grep", description: "Search file contents", category: "files" },
+  { id: "Bash", name: "Bash", description: "Run shell commands", category: "system" },
+  { id: "Task", name: "Task", description: "Spawn subagents", category: "agents" },
+  { id: "TodoWrite", name: "TodoWrite", description: "Track tasks", category: "agents" },
+  { id: "WebFetch", name: "WebFetch", description: "Fetch web pages", category: "web" },
+  { id: "WebSearch", name: "WebSearch", description: "Search the web", category: "web" },
+] as const;
+
+/** Tool metadata type */
+export type ClaudeTool = (typeof CLAUDE_TOOLS)[number];

@@ -30,15 +30,15 @@ Reference: [session-settings.md](../session-settings.md)
 
 ## Phase 4: Tauri Commands [BLOCKED by: Phase 2]
 
-- [ ] Add `claude_sdk_session_settings_update` command
-- [ ] Add settings to `claude_sdk_session_get` response
-- [ ] Update Rust types for `SessionSettings`
+- [x] Add `claude_sdk_session_settings_update` command
+- [x] Add settings to `claude_sdk_session_get` response
+- [x] Update Rust types for `SessionSettings`
 
 ## Phase 5: Frontend Service Layer [BLOCKED by: Phase 4]
 
-- [ ] Add `claudeSdkSessionSettingsUpdate` service function
-- [ ] Add TypeScript types for `SessionSettings`, `SystemPromptConfig`
-- [ ] Add `CLAUDE_TOOLS` constant with tool metadata (§Appendix)
+- [x] Add `claudeSdkSessionSettingsUpdate` service function
+- [x] Add TypeScript types for `SessionSettings`, `SystemPromptConfig`
+- [x] Add `CLAUDE_TOOLS` constant with tool metadata (§Appendix)
 
 ## Phase 6: useSessionSettings Hook [BLOCKED by: Phase 5]
 
