@@ -32,6 +32,12 @@ type UseOpenCodeThreadOptions = {
   workspaceId: string | null;
   sessionId: string | null;
   pendingUserMessages?: PendingUserMessage[];
+  /**
+   * External history to hydrate thread state (claude-session-history spec §5 Main Flow).
+   * When provided, replaces current thread state with loaded history.
+   * Used by ClaudeThreadView when user selects a session from the list.
+   */
+  externalHistory?: ApiMessageResponse[] | null;
 };
 
 /**
@@ -81,8 +87,8 @@ type TrackedMessage = {
   parts: Map<string, PartData>; // For assistant messages
 };
 
-// API response types for history loading
-type ApiPartResponse = {
+// API response types for history loading (exported for external history hydration)
+export type ApiPartResponse = {
   id: string;
   type: string;
   text?: string;
@@ -100,7 +106,7 @@ type ApiPartResponse = {
   time?: { start?: number; end?: number };
 };
 
-type ApiMessageResponse = {
+export type ApiMessageResponse = {
   id: string;
   sessionID?: string;
   role: "user" | "assistant";
@@ -209,6 +215,7 @@ export function useOpenCodeThread({
   workspaceId,
   sessionId,
   pendingUserMessages = [],
+  externalHistory,
 }: UseOpenCodeThreadOptions): OpenCodeThreadState {
   const [items, setItems] = useState<OpenCodeThreadItem[]>([]);
   const [processingStartedAt, setProcessingStartedAt] = useState<number | null>(null);
@@ -526,6 +533,62 @@ export function useOpenCodeThread({
       loadHistory(workspaceId, sessionId);
     }
   }, [workspaceId, sessionId, loadHistory]);
+
+  // Hydrate from external history when provided (claude-session-history spec §5 Main Flow)
+  // This REPLACES current thread state with the loaded history.
+  useEffect(() => {
+    if (!externalHistory || !Array.isArray(externalHistory) || externalHistory.length === 0) {
+      return;
+    }
+
+    // Clear existing messages and replace with external history
+    messagesRef.current.clear();
+    partArrivalCounterRef.current = 0;
+
+    for (const apiMsg of externalHistory) {
+      const tracked: TrackedMessage = {
+        id: apiMsg.id,
+        sessionID: apiMsg.sessionID || sessionId || "",
+        role: apiMsg.role,
+        time: apiMsg.time,
+        userText: apiMsg.role === "user" ? apiMsg.summary?.title : undefined,
+        parts: new Map(),
+      };
+
+      // Convert API parts to tracked parts
+      if (apiMsg.parts && Array.isArray(apiMsg.parts)) {
+        for (const apiPart of apiMsg.parts) {
+          const order = apiPart.time?.start ?? apiMsg.time?.created ?? Date.now();
+          const arrivalIndex = partArrivalCounterRef.current++;
+          tracked.parts.set(apiPart.id, {
+            id: apiPart.id,
+            messageID: apiMsg.id,
+            sessionID: apiMsg.sessionID || sessionId || "",
+            type: apiPart.type,
+            text: apiPart.text,
+            content: apiPart.content,
+            tool: apiPart.tool,
+            callID: apiPart.callID,
+            title: apiPart.title,
+            input: apiPart.input,
+            output: apiPart.output,
+            error: apiPart.error,
+            hash: apiPart.hash,
+            files: apiPart.files,
+            cost: apiPart.cost,
+            tokens: apiPart.tokens,
+            time: apiPart.time,
+            order,
+            arrivalIndex,
+          });
+        }
+      }
+
+      messagesRef.current.set(apiMsg.id, tracked);
+    }
+
+    rebuildItemsRef.current();
+  }, [externalHistory, sessionId]);
 
   // Keep rebuildItems in a ref to avoid subscription churn
   const rebuildItemsRef = useRef(rebuildItems);

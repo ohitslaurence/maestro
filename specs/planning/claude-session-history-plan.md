@@ -12,11 +12,11 @@ Reference: [claude-session-history.md](../claude-session-history.md)
 - [x] Add `claudeSdkSessionMessages` wrapper in `app/src/services/tauri.ts` (See §4)
 
 ## Phase 3: UI session list and resume flow [BLOCKED by: Phase 2]
-- [ ] Add `useClaudeSessions` hook to fetch list + selection state (See §2, §5)
-- [ ] Add `ClaudeSessionList` UI and wire selection into `ClaudeThreadView` (See §2, §5)
-- [ ] Update `useOpenCodeThread` to replace thread state on history load; preserve composer draft (See §5 Main Flow)
-- [ ] Implement AbortController for concurrent session selection (See §5 Concurrent Selection)
-- [ ] Handle edge cases: empty session, external deletion (See §5 Edge Cases)
+- [x] Add `useClaudeSessions` hook to fetch list + selection state (See §2, §5)
+- [x] Add `ClaudeSessionList` UI and wire selection into `ClaudeThreadView` (See §2, §5)
+- [x] Update `useOpenCodeThread` to replace thread state on history load; preserve composer draft (See §5 Main Flow)
+- [x] Implement AbortController for concurrent session selection (See §5 Concurrent Selection)
+- [x] Handle edge cases: empty session, external deletion (See §5 Edge Cases)
 
 ## Files to Create
 - `app/src/features/claudecode/components/ClaudeSessionList.tsx`
@@ -33,7 +33,7 @@ Reference: [claude-session-history.md](../claude-session-history.md)
 
 ## Verification Checklist
 ### Implementation Checklist
-- [ ] `cd app && bun run typecheck`
+- [x] `cd app && bun run typecheck` (only pre-existing diffsWorker.ts error)
 
 ### Manual QA Checklist (do not mark—human verification)
 - [ ]? UI Feature Validation:

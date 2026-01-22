@@ -1,16 +1,42 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useOpenCodeThread } from "../../opencode/hooks/useOpenCodeThread";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useOpenCodeThread, type ApiMessageResponse } from "../../opencode/hooks/useOpenCodeThread";
 import { useClaudeSession } from "../hooks/useClaudeSession";
+import { useClaudeSessions, type ClaudeMessageInfo } from "../hooks/useClaudeSessions";
 import { useComposerOptions } from "../hooks/useComposerOptions";
 import { usePermissions } from "../hooks/usePermissions";
 import { useSessionSettings } from "../hooks/useSessionSettings";
 import { useAgentSession, isAgentWorking } from "../../../hooks/useAgentSession";
 import { ThreadMessages } from "../../opencode/components/ThreadMessages";
 import { ThreadComposer } from "../../opencode/components/ThreadComposer";
+import { ClaudeSessionList } from "./ClaudeSessionList";
 import { ComposerOptions } from "./ComposerOptions";
 import { PermissionModal } from "./PermissionModal";
 import { SessionSettingsButton } from "./SessionSettingsButton";
 import { SessionSettingsModal } from "./SessionSettingsModal";
+
+/**
+ * Convert ClaudeMessageInfo to ApiMessageResponse for useOpenCodeThread hydration.
+ * The types are compatible but have different field names in some cases.
+ */
+function convertHistoryToApiFormat(history: ClaudeMessageInfo[]): ApiMessageResponse[] {
+  return history.map((msg) => ({
+    id: msg.id,
+    sessionID: msg.sessionID,
+    role: msg.role,
+    time: msg.time,
+    summary: msg.summary,
+    parts: msg.parts?.map((part) => ({
+      id: part.id,
+      type: part.type,
+      text: part.text,
+      tool: part.tool,
+      input: part.input as Record<string, unknown> | undefined,
+      output: typeof part.output === "string" ? part.output : part.output ? JSON.stringify(part.output) : undefined,
+      error: typeof part.error === "string" ? part.error : part.error ? JSON.stringify(part.error) : undefined,
+      time: part.time,
+    })),
+  }));
+}
 
 type PendingUserMessage = {
   id: string;
@@ -38,6 +64,7 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
     connectionError,
     connect,
     sessionId,
+    setSessionId,
     create,
     prompt,
     abort,
@@ -48,12 +75,39 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
     autoConnect: true,
   });
 
+  // Session list and history management (claude-session-history spec §2, §5)
+  const {
+    sessions,
+    selectedSessionId,
+    isLoading: isLoadingSessions,
+    error: sessionsError,
+    history,
+    isLoadingHistory,
+    historyError,
+    selectSession,
+    refresh: refreshSessions,
+  } = useClaudeSessions({ workspaceId, isConnected });
+
+  // Convert history to API format for useOpenCodeThread (§5 Main Flow)
+  const externalHistory = useMemo(() => {
+    if (!history) return null;
+    return convertHistoryToApiFormat(history);
+  }, [history]);
+
+  // Use selected session or current active session
+  const effectiveSessionId = selectedSessionId ?? sessionId;
+
   const {
     items,
     processingStartedAt,
     lastDurationMs,
     error: threadError,
-  } = useOpenCodeThread({ workspaceId, sessionId, pendingUserMessages });
+  } = useOpenCodeThread({
+    workspaceId,
+    sessionId: effectiveSessionId,
+    pendingUserMessages,
+    externalHistory,
+  });
 
   // Composer options: model selection and thinking mode (composer-options spec §2, §5)
   const {
@@ -71,7 +125,7 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
     currentRequest: permissionRequest,
     reply: replyToPermission,
     dismiss: dismissPermission,
-  } = usePermissions({ workspaceId, sessionId });
+  } = usePermissions({ workspaceId, sessionId: effectiveSessionId });
 
   // Session settings (session-settings spec §5, §6)
   const {
@@ -79,16 +133,36 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
     isUpdating: isSettingsUpdating,
     error: settingsError,
     updateSettings,
-  } = useSessionSettings({ workspaceId, sessionId });
+  } = useSessionSettings({ workspaceId, sessionId: effectiveSessionId });
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   // Use agent state machine for working/idle status (per state-machine-wiring.md §4, §5)
-  const { state: agentState } = useAgentSession({ sessionId: sessionId ?? undefined });
+  const { state: agentState } = useAgentSession({ sessionId: effectiveSessionId ?? undefined });
   const isWorking = isAgentWorking(agentState.kind);
   const hasAgentError = agentState.kind === "error";
 
   // Derive status from agent state machine, falling back to thread status for error details
   const status = hasAgentError ? "error" : isWorking ? "processing" : "idle";
+
+  // Handle session selection from list (claude-session-history spec §5 Main Flow)
+  const handleSelectSession = useCallback((sessionId: string | null) => {
+    selectSession(sessionId);
+    // Also update the active session in useClaudeSession
+    if (sessionId) {
+      setSessionId(sessionId);
+    }
+  }, [selectSession, setSessionId]);
+
+  // Handle new session creation from session list
+  const handleNewSession = useCallback(async () => {
+    // Clear selection and create a new session
+    selectSession(null);
+    const newId = await create();
+    if (newId) {
+      // Refresh list to include the new session
+      void refreshSessions();
+    }
+  }, [selectSession, create, refreshSessions]);
 
   const handleSend = useCallback(
     async (message: string) => {
@@ -97,14 +171,16 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
         return;
       }
 
-      // Create session if needed
-      let activeSessionId = sessionId;
+      // Use effective session or create if needed
+      let activeSessionId = effectiveSessionId;
       if (!activeSessionId) {
         activeSessionId = await create();
         if (!activeSessionId) {
           console.error("[ClaudeThreadView] Failed to create session");
           return;
         }
+        // Refresh list after creating session
+        void refreshSessions();
       }
 
       // Add pending user message for immediate UI feedback
@@ -124,7 +200,7 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
         setPendingUserMessages(prev => prev.filter(m => m.id !== pendingMsg.id));
       }
     },
-    [isConnected, sessionId, create, prompt, selectedModel, maxThinkingTokens]
+    [isConnected, effectiveSessionId, create, prompt, selectedModel, maxThinkingTokens, refreshSessions]
   );
 
   const handleStop = useCallback(() => {
@@ -199,11 +275,25 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
 
   return (
     <div className="oc-thread">
+      {/* Session list sidebar (claude-session-history spec §2, §5) */}
+      <ClaudeSessionList
+        sessions={sessions}
+        selectedSessionId={selectedSessionId}
+        isLoading={isLoadingSessions}
+        error={sessionsError || historyError}
+        onSelect={handleSelectSession}
+        onNewSession={handleNewSession}
+        onRefresh={refreshSessions}
+      />
+      {/* Loading indicator for history (§5 Main Flow) */}
+      {isLoadingHistory && (
+        <div className="oc-thread__loading">Loading session history...</div>
+      )}
       {/* Session header with settings button (session-settings spec §Appendix) */}
       <div className="oc-thread__header">
         <SessionSettingsButton
           onClick={handleOpenSettings}
-          disabled={!isConnected || !sessionId}
+          disabled={!isConnected || !effectiveSessionId}
         />
       </div>
       {error && (
