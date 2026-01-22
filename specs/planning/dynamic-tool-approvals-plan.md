@@ -79,12 +79,17 @@ CSS styles added to daemon.css including `.permission-modal`, `.permission-conte
 
 ## Phase 8: usePermissions Hook [BLOCKED by: Phase 7]
 
-- [ ] Create `usePermissions` hook with queue-based state (§UI Components, §5)
-- [ ] Subscribe to `permission.asked` SSE events (§UI Components)
-- [ ] Implement `reply()` callback (§UI Components)
-- [ ] Implement `dismiss()` for deny with default message (§UI Components)
-- [ ] Handle pending permission fetch on reconnect (§5)
-- [ ] Support concurrent permissions via queue (§5)
+- [x] Create `usePermissions` hook with queue-based state (§UI Components, §5)
+- [x] Subscribe to `permission.asked` SSE events (§UI Components)
+- [x] Implement `reply()` callback (§UI Components)
+- [x] Implement `dismiss()` for deny with default message (§UI Components)
+- [x] Handle pending permission fetch on reconnect (§5)
+- [x] Support concurrent permissions via queue (§5)
+
+Note: Hook created at `app/src/features/claudecode/hooks/usePermissions.ts`. Subscribes to
+`daemon:opencode_event` channel filtering for `permission.asked` and `permission.replied` event types.
+Queue-based state handles concurrent permissions. Reconnect fetches pending via `claudeSdkPermissionPending`.
+Exposes `reply()`, `dismiss()`, `isReplying`, and `error` for UI integration.
 
 ## Phase 9: Thread View Integration [BLOCKED by: Phase 8]
 
