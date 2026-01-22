@@ -79,6 +79,13 @@ pub fn get_status(path: &Path) -> Result<GitStatusResult, String> {
         if let Some((add, del)) = unstaged_stats.get(&file.path) {
             file.additions = *add;
             file.deletions = *del;
+        } else if file.status == "untracked" {
+            // For untracked files, count lines as additions
+            let full_path = path.join(&file.path);
+            if let Ok(content) = std::fs::read_to_string(&full_path) {
+                file.additions = content.lines().count() as i32;
+                file.deletions = 0;
+            }
         }
     }
 
@@ -197,6 +204,59 @@ pub fn get_diff(path: &Path) -> Result<GitDiffResult, String> {
                 path: file_path,
                 diff,
             });
+        }
+    }
+
+    // Get untracked files and show their full content as additions
+    let untracked_output = Command::new("git")
+        .args(["ls-files", "--others", "--exclude-standard"])
+        .current_dir(path)
+        .output()
+        .map_err(|e| format!("Failed to list untracked files: {e}"))?;
+
+    let untracked_paths: Vec<String> = String::from_utf8_lossy(&untracked_output.stdout)
+        .lines()
+        .filter(|s| !s.is_empty())
+        .map(|s| s.to_string())
+        .collect();
+
+    for file_path in untracked_paths {
+        if truncated {
+            if !truncated_files.contains(&file_path) {
+                truncated_files.push(file_path);
+            }
+            continue;
+        }
+
+        // Read file content and format as a diff (all additions)
+        let full_path = path.join(&file_path);
+        if let Ok(content) = std::fs::read_to_string(&full_path) {
+            let line_count = content.lines().count();
+            let diff_lines: Vec<String> = content
+                .lines()
+                .map(|line| format!("+{}", line))
+                .collect();
+
+            let diff = format!(
+                "diff --git a/{} b/{}\nnew file mode 100644\n--- /dev/null\n+++ b/{}\n@@ -0,0 +1,{} @@\n{}",
+                file_path,
+                file_path,
+                file_path,
+                line_count,
+                diff_lines.join("\n")
+            );
+
+            let diff_size = diff.len();
+            if total_size + diff_size > MAX_DIFF_SIZE {
+                truncated = true;
+                truncated_files.push(file_path);
+            } else {
+                total_size += diff_size;
+                files.push(GitFileDiff {
+                    path: file_path,
+                    diff,
+                });
+            }
         }
     }
 
