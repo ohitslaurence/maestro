@@ -162,12 +162,18 @@ fn spawn_server_process(workspace_path: &str) -> Result<(Child, u32, String), St
     debug!("[claude_sdk] Env: MAESTRO_WORKSPACE_DIR={}", workspace_path);
     debug!("[claude_sdk] Env: MAESTRO_HOST=127.0.0.1 MAESTRO_PORT=0");
 
+    // Use env var if set, otherwise default to acceptEdits (auto-approve file operations)
+    let permission_mode = env::var("MAESTRO_CLAUDE_PERMISSION_MODE")
+        .unwrap_or_else(|_| "acceptEdits".to_string());
+    debug!("[claude_sdk] Env: MAESTRO_CLAUDE_PERMISSION_MODE={}", permission_mode);
+
     let mut child = Command::new("bun")
         .args(["run", "serve"])
         .current_dir(&server_dir)
         .env("MAESTRO_WORKSPACE_DIR", workspace_path)
         .env("MAESTRO_HOST", "127.0.0.1")
         .env("MAESTRO_PORT", "0")
+        .env("MAESTRO_CLAUDE_PERMISSION_MODE", permission_mode)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
