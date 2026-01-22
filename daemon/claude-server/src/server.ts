@@ -19,6 +19,12 @@ type PartInput = {
 
 type PermissionReply = "once" | "always" | "reject";
 
+type ModelInfo = {
+  value: string;
+  displayName: string;
+  description: string;
+};
+
 type SessionRecord = {
   id: string;
   slug: string;
@@ -89,6 +95,15 @@ const pendingPermissionRequests = new Map<
 >();
 const persistentPermissionReplies = new Map<string, Set<string>>();
 
+// Models cache (5-minute TTL per spec §4)
+const MODELS_CACHE_TTL_MS = 5 * 60 * 1000;
+const FALLBACK_MODELS: ModelInfo[] = [
+  { value: "claude-sonnet-4-20250514", displayName: "Claude Sonnet 4", description: "Fast and capable" },
+  { value: "claude-opus-4-20250514", displayName: "Claude Opus 4", description: "Most intelligent" },
+  { value: "claude-haiku-3-5-20241022", displayName: "Claude Haiku 3.5", description: "Fastest" },
+];
+let modelsCache: { models: ModelInfo[]; fetchedAt: number } | null = null;
+
 const statements = initStorage();
 loadSessions();
 
@@ -120,6 +135,21 @@ function createId(prefix: string) {
 function permissionKey(permission: string, patterns: string[]) {
   const normalizedPatterns = [...patterns].map((pattern) => pattern.trim()).filter(Boolean).sort();
   return `${permission}:${normalizedPatterns.join(",")}`;
+}
+
+function getModels(): ModelInfo[] {
+  const now = Date.now();
+  if (modelsCache && now - modelsCache.fetchedAt < MODELS_CACHE_TTL_MS) {
+    console.log("[models] cache hit");
+    return modelsCache.models;
+  }
+  console.log("[models] cache miss, returning fallback");
+  return FALLBACK_MODELS;
+}
+
+function updateModelsCache(models: ModelInfo[]) {
+  modelsCache = { models, fetchedAt: Date.now() };
+  console.log("[models] cache updated");
 }
 
 function buildSessionRecord(title?: string, parentID?: string): SessionRecord {
@@ -1273,6 +1303,13 @@ async function runClaudeQuery(options: {
       },
     });
 
+    // Fetch supported models to populate cache (non-blocking)
+    stream.supportedModels().then((models) => {
+      updateModelsCache(models);
+    }).catch((err) => {
+      console.log("[models] failed to fetch from SDK:", err?.message ?? err);
+    });
+
     for await (const message of stream) {
       if (message.type === "assistant") {
         const blocks = message.message?.content;
@@ -1455,6 +1492,10 @@ const server = Bun.serve({
 
     if (pathname === "/global/event" && req.method === "GET") {
       return createSseResponse({ wrapWithDirectory: true });
+    }
+
+    if (pathname === "/models" && req.method === "GET") {
+      return jsonResponse(getModels());
     }
 
     if (pathname === "/session" && req.method === "GET") {
