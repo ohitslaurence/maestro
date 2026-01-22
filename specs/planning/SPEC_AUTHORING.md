@@ -41,6 +41,17 @@ When a spec references an external SDK/library:
 - Keep the spec stable: no task lists or checkboxes here.
 - Write each section so it can be implemented independently; avoid hidden dependencies between sections.
 
+## Spec Status Updates (Required During Implementation)
+
+Implementing agents must keep the spec header current as work progresses.
+
+- Draft: Spec exists, no implementation plan.
+- Planned: Plan exists, work not started.
+- In Progress: Any plan task started or completed.
+- Implemented: All agent-completable plan tasks complete and verification steps passed.
+
+Whenever you change status, also update **Last Updated**.
+
 ## Spec Structure (Template)
 
 ```
@@ -160,6 +171,7 @@ Notes:
   call out which steps apply to each phase in the phase notes.
 - Manual QA items must use `[ ]?` and should not be checked by agents. Human reviewers own these items.
 - Mark completed work with `[x]` and add notes about commits or tests.
+- When checking plan tasks, update the spec **Status** and **Last Updated**.
 - Required sections: Files to Create, Files to Modify, Verification Checklist (use `None` if empty).
 - Add Notes only when there is information useful to future phases (blockers, risks, edge cases, follow-ups).
 - If UI validation is required, reference the runbook in `AGENTS.md` and include `bun run ui:smoke` as an implementation checklist step.

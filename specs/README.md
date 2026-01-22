@@ -39,3 +39,4 @@ Keep this file current whenever a new spec or plan is added.
 
 - Plans live in `specs/planning/` and should be linked here once created.
 - Specs live in `specs/` and remain stable; plans evolve as work is completed.
+- Implementing agents must update spec **Status** and **Last Updated** as plan work progresses.

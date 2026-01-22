@@ -4,36 +4,38 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 
 ## Phase 1: Permission Manager Infrastructure
 
-- [ ] Create `PermissionRequest` and `PermissionReply` types (§1)
-- [ ] Create `PermissionManager` class with pending request storage (§2)
-- [ ] Implement `request()` method that returns blocking Promise (§2)
-- [ ] Implement `reply()` method that resolves/rejects pending Promise (§2)
-- [ ] Implement `isApproved()` for "always" pattern checking (§2)
-- [ ] Implement `clearSession()` for cleanup (§2)
-- [ ] Add timeout handling for stale permissions (§Timeout)
+- [ ] Create `PermissionRequest`, `PermissionReplyRequest`, `PendingPermission` types (§3)
+- [ ] Create `PermissionManager` class with pending request storage (§4)
+- [ ] Implement `request()` method that returns blocking Promise (§4)
+- [ ] Implement `reply()` method that resolves/rejects pending Promise (§4)
+- [ ] Implement `isApproved()` for "always" pattern checking with exact string match (§4)
+- [ ] Implement `findSessionForRequest()` with O(1) reverse lookup map (§4)
+- [ ] Implement `clearSession()` for cleanup (§4)
+- [ ] Add timeout handling for stale permissions (§6)
 
 ## Phase 2: Update canUseTool Handler [BLOCKED by: Phase 1]
 
-- [ ] Refactor `createCanUseTool` to use `PermissionManager` (§2)
-- [ ] Implement `buildPermissionRequest()` helper (§2)
-- [ ] Implement `extractPatterns()` for each tool type (§2)
-- [ ] Implement `extractMetadata()` for tool-specific context (§2)
-- [ ] Handle abort signal in permission flow (§2)
-- [ ] Auto-approve safe tools, block dangerous tools for approval (§2)
+- [ ] Refactor `createCanUseTool` to use `PermissionManager` (§4)
+- [ ] Add `getMessageId` callback parameter for message ID population (§4)
+- [ ] Implement `buildPermissionRequest()` helper (§4)
+- [ ] Implement `extractPatterns()` for each tool type (§3)
+- [ ] Implement `extractMetadata()` for tool-specific context (§3)
+- [ ] Handle abort signal in permission flow (§5)
+- [ ] Auto-approve safe tools, block dangerous tools for approval (§4)
 
 ## Phase 3: Permission Reply Endpoint [BLOCKED by: Phase 1]
 
-- [ ] Create `routes/permissions.ts` with Hono router (§2)
-- [ ] Implement `POST /permission/:requestId/reply` endpoint (§2)
-- [ ] Implement `GET /permission/pending` for reconnection (§2)
-- [ ] Mount routes in server index (§2)
-- [ ] Add session lookup for request ID
+- [ ] Create `routes/permissions.ts` with Hono router (§4)
+- [ ] Implement `POST /permission/:requestId/reply` endpoint (§4)
+- [ ] Implement `GET /permission/pending` for reconnection (§4, §5)
+- [ ] Mount routes in server index
+- [ ] Use `findSessionForRequest()` for O(1) session lookup (§4)
 
-## Phase 4: Enhanced SSE Events [BLOCKED by: Phase 2]
+## Phase 4: Enhanced SSE Events [BLOCKED by: Phase 1, Phase 2]
 
-- [ ] Update `PermissionAskedEvent` to include full `PermissionRequest` (§3)
-- [ ] Ensure `permission.replied` events include reply type (§3)
-- [ ] Emit events from `PermissionManager` methods (§2)
+- [ ] Update `PermissionAskedEvent` to include full `PermissionRequest` (§4)
+- [ ] Ensure `permission.replied` events include reply type (§4)
+- [ ] Emit events from `PermissionManager` methods (§4)
 
 ## Phase 5: Tauri Commands [BLOCKED by: Phase 3]
 
@@ -45,30 +47,31 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 
 - [ ] Add `claudeSdkPermissionReply` service function
 - [ ] Add `claudeSdkPermissionPending` service function
-- [ ] Add TypeScript types for `PermissionRequest`
+- [ ] Add TypeScript types for `PermissionRequest` (§3)
 
 ## Phase 7: UI Components [BLOCKED by: Phase 6]
 
-- [ ] Create `PermissionModal.tsx` component (§4)
-- [ ] Create `PermissionContext.tsx` for tool-specific rendering (§4)
-- [ ] Implement Edit context with diff viewer (§4)
-- [ ] Implement Bash context with command display (§4)
-- [ ] Implement Write/Read context with file path (§4)
-- [ ] Implement WebFetch context with URL (§4)
+- [ ] Create `PermissionModal.tsx` component (§UI Components)
+- [ ] Create `PermissionContext.tsx` for tool-specific rendering (§UI Components)
+- [ ] Implement Edit context with diff viewer (§UI Components)
+- [ ] Implement Bash context with command display (§UI Components)
+- [ ] Implement Write/Read context with file path (§UI Components)
+- [ ] Implement WebFetch context with URL (§UI Components)
 - [ ] Style modal with existing design tokens
 
 ## Phase 8: usePermissions Hook [BLOCKED by: Phase 7]
 
-- [ ] Create `usePermissions` hook (§4)
-- [ ] Subscribe to `permission.asked` SSE events (§4)
-- [ ] Implement `reply()` callback (§4)
-- [ ] Implement `dismiss()` for deny with default message (§4)
-- [ ] Handle pending permission on reconnect (§4)
+- [ ] Create `usePermissions` hook with queue-based state (§UI Components, §5)
+- [ ] Subscribe to `permission.asked` SSE events (§UI Components)
+- [ ] Implement `reply()` callback (§UI Components)
+- [ ] Implement `dismiss()` for deny with default message (§UI Components)
+- [ ] Handle pending permission fetch on reconnect (§5)
+- [ ] Support concurrent permissions via queue (§5)
 
 ## Phase 9: Thread View Integration [BLOCKED by: Phase 8]
 
-- [ ] Add `PermissionModal` to `ClaudeThreadView` (§5)
-- [ ] Disable composer input while permission pending (§5)
+- [ ] Add `PermissionModal` to `ClaudeThreadView`
+- [ ] Disable composer input while permission pending
 - [ ] Show visual indicator when awaiting approval
 
 ## Files to Create
@@ -98,9 +101,10 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 - [ ] `cd app && bun run typecheck`
 - [ ] Permission request blocks SDK execution
 - [ ] Reply endpoint resolves pending permission
-- [ ] "Always" reply adds pattern to approved set
+- [ ] "Always" reply adds pattern to approved set (exact match)
 - [ ] Abort cancels pending permissions
 - [ ] Timeout rejects stale permissions
+- [ ] Concurrent permissions queue correctly in UI
 
 ### Manual QA Checklist (do not mark—human verification)
 
@@ -108,13 +112,23 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 - [ ]? Modal shows appropriate context (command, diff, file path)
 - [ ]? "Allow Once" proceeds and completes tool
 - [ ]? "Deny" stops tool execution with message
-- [ ]? "Always Allow" prevents future prompts for same pattern
+- [ ]? "Always Allow" prevents future prompts for same exact pattern
 - [ ]? Reconnecting client sees pending permission
+- [ ]? Multiple concurrent permissions show sequentially
+
+### UI Feature Validation
+
+- [ ] `cd daemon && cargo run -- --listen 127.0.0.1:55433 --insecure-no-auth`
+- [ ] `cd app && bun run dev -- --host 127.0.0.1 --port 1420`
+- [ ] `cd app && bun scripts/ui-permissions.ts`
 
 ## Notes
 
-- Phase 1: Use `crypto.randomUUID()` for request IDs. Store in `Map<sessionId, Map<requestId, PendingPermission>>`.
-- Phase 2: Dangerous tools list: `['Write', 'Edit', 'Bash', 'WebFetch', 'WebSearch']`. Safe tools auto-approve.
+- Phase 1: Use `crypto.randomUUID()` for request IDs. Store in `Map<sessionId, Map<requestId, PendingPermission>>` with reverse `Map<requestId, sessionId>` for O(1) lookup.
+- Phase 2: Dangerous tools: `['Write', 'Edit', 'Bash', 'WebFetch', 'WebSearch']`. Safe tools auto-approve. `getMessageId` callback solves the messageId population issue from the original spec.
 - Phase 4: The enhanced `PermissionAskedEvent` includes full request object, not just ID and tool name.
 - Phase 7: Diff viewer can reuse existing `DiffViewer` component from git feature if available.
+- Phase 8: Hook uses queue (`pendingQueue`) not single state to handle concurrent tool permissions.
 - Phase 9: Consider adding a "permission pending" indicator in the thread (e.g., pulsing badge).
+- Pattern matching: Uses exact string equality, not glob patterns. Clarified in §3 and §10.
+- Session cleanup: `clearSession()` called when session ends or disconnects (§4).
