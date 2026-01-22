@@ -258,11 +258,14 @@ fn spawn_server_process(workspace_path: &str, port: u16) -> Result<(Child, u32, 
     if base_url.is_none() {
         error!("[claude_sdk] Stdout closed after {} lines without finding listening URL", line_count);
 
-        // Capture stderr for error diagnosis
+        // Capture stderr for error diagnosis and detect port binding errors (spec §5 Edge Cases)
+        let mut stderr_output = String::new();
         if let Some(stderr) = stderr {
             let stderr_reader = BufReader::new(stderr);
             for (i, line) in stderr_reader.lines().map_while(Result::ok).enumerate() {
                 error!("[claude_sdk] stderr[{}]: {}", i + 1, line);
+                stderr_output.push_str(&line);
+                stderr_output.push('\n');
             }
         }
 
@@ -271,6 +274,17 @@ fn spawn_server_process(workspace_path: &str, port: u16) -> Result<(Child, u32, 
             Ok(Some(status)) => error!("[claude_sdk] Process exited with: {}", status),
             Ok(None) => error!("[claude_sdk] Process still running but no output"),
             Err(e) => error!("[claude_sdk] Failed to check process status: {}", e),
+        }
+
+        // Detect port binding errors from stderr (spec §5 Edge Cases: EADDRINUSE handling)
+        // Bun reports port conflicts with messages like "address already in use" or "EADDRINUSE"
+        let stderr_lower = stderr_output.to_lowercase();
+        if stderr_lower.contains("eaddrinuse")
+            || stderr_lower.contains("address already in use")
+            || stderr_lower.contains("address in use")
+            || stderr_lower.contains("port is already")
+        {
+            return Err(format!("EADDRINUSE: port {} is already in use", port));
         }
 
         return Err("Failed to parse server URL from stdout".to_string());
