@@ -82,6 +82,7 @@ pub const METHOD_CLAUDE_SDK_SESSION_LIST: &str = "claude_sdk_session_list";
 pub const METHOD_CLAUDE_SDK_SESSION_CREATE: &str = "claude_sdk_session_create";
 pub const METHOD_CLAUDE_SDK_SESSION_PROMPT: &str = "claude_sdk_session_prompt";
 pub const METHOD_CLAUDE_SDK_SESSION_ABORT: &str = "claude_sdk_session_abort";
+pub const METHOD_CLAUDE_SDK_SESSION_MESSAGES: &str = "claude_sdk_session_messages";
 pub const METHOD_CLAUDE_SDK_MODELS: &str = "claude_sdk_models";
 // Claude SDK permission methods (dynamic-tool-approvals spec §4)
 pub const METHOD_CLAUDE_SDK_PERMISSION_REPLY: &str = "claude_sdk_permission_reply";
@@ -179,6 +180,17 @@ pub struct OpenCodeSessionAbortParams {
 pub struct OpenCodeSessionMessagesParams {
     pub workspace_id: String,
     pub session_id: String,
+}
+
+// --- Claude SDK session messages params (claude-session-history spec §4) ---
+
+#[derive(Debug, Deserialize)]
+pub struct ClaudeSdkSessionMessagesParams {
+    pub workspace_id: String,
+    pub session_id: String,
+    /// Optional limit on messages returned (default 100, max 500)
+    #[serde(default)]
+    pub limit: Option<u32>,
 }
 
 // --- Claude SDK request params (composer-options spec §4) ---

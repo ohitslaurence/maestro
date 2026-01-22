@@ -335,6 +335,19 @@ export async function claudeSdkSessionAbort(
   });
 }
 
+/** Get messages for a Claude SDK session (claude-session-history spec §4) */
+export async function claudeSdkSessionMessages(
+  workspaceId: string,
+  sessionId: string,
+  limit?: number,
+): Promise<unknown> {
+  return invokeCommand<unknown>("claude_sdk_session_messages", {
+    workspaceId,
+    sessionId,
+    limit,
+  });
+}
+
 /** Fetch available models from Claude SDK server (composer-options spec §4) */
 export async function claudeSdkModels(
   workspaceId: string,

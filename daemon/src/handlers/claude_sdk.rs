@@ -273,6 +273,47 @@ pub async fn handle_session_prompt(request: &Request, state: &DaemonState) -> St
     }
 }
 
+/// Handle claude_sdk_session_messages request (claude-session-history spec §4)
+pub async fn handle_session_messages(request: &Request, state: &DaemonState) -> String {
+    let params: ClaudeSdkSessionMessagesParams =
+        match serde_json::from_value(request.params.clone()) {
+            Ok(p) => p,
+            Err(e) => {
+                return serde_json::to_string(&ErrorResponse::new(
+                    request.id,
+                    INVALID_PARAMS,
+                    format!("Invalid params: {e}"),
+                ))
+                .unwrap();
+            }
+        };
+
+    let base_url = match state.get_claude_sdk_server(&params.workspace_id).await {
+        Some(url) => url,
+        None => {
+            return serde_json::to_string(&ErrorResponse::new(
+                request.id,
+                CLAUDE_SDK_NOT_CONNECTED,
+                "Claude SDK not connected for this workspace",
+            ))
+            .unwrap();
+        }
+    };
+
+    // Build path with optional limit query parameter (default 100, max 500 per spec §4)
+    let path = match params.limit {
+        Some(limit) => format!("/session/{}/message?limit={}", params.session_id, limit.min(500)),
+        None => format!("/session/{}/message", params.session_id),
+    };
+
+    match OpenCodeRegistry::proxy_get(&base_url, &path, None).await {
+        Ok(result) => serde_json::to_string(&SuccessResponse::new(request.id, result)).unwrap(),
+        Err(e) => {
+            serde_json::to_string(&ErrorResponse::new(request.id, CLAUDE_SDK_ERROR, e)).unwrap()
+        }
+    }
+}
+
 /// Handle claude_sdk_session_abort request
 pub async fn handle_session_abort(request: &Request, state: &DaemonState) -> String {
     let params: OpenCodeSessionAbortParams = match serde_json::from_value(request.params.clone()) {

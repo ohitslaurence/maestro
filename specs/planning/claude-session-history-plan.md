@@ -8,8 +8,8 @@ Reference: [claude-session-history.md](../claude-session-history.md)
 - [x] Include all parts per message in insertion order (See §3 Ordering)
 
 ## Phase 2: Daemon and Tauri wiring [BLOCKED by: Phase 1]
-- [ ] Add `claude_sdk_session_messages` RPC handler and protocol constant (See §4)
-- [ ] Add `claudeSdkSessionMessages` wrapper in `app/src/services/tauri.ts` (See §4)
+- [x] Add `claude_sdk_session_messages` RPC handler and protocol constant (See §4)
+- [x] Add `claudeSdkSessionMessages` wrapper in `app/src/services/tauri.ts` (See §4)
 
 ## Phase 3: UI session list and resume flow [BLOCKED by: Phase 2]
 - [ ] Add `useClaudeSessions` hook to fetch list + selection state (See §2, §5)
