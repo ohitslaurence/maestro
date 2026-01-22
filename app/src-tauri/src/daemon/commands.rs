@@ -551,7 +551,10 @@ pub async fn register_session(
             status: SessionStatus::Running,
             agent_state: AgentStateKind::Ready,
         },
-        state: AgentState::default(),
+        state: AgentState {
+            kind: AgentStateKind::Ready,
+            ..Default::default()
+        },
     };
 
     let mut registry = state.session_registry.write().await;
