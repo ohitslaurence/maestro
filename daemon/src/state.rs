@@ -7,6 +7,28 @@ use crate::opencode::OpenCodeServer;
 use crate::protocol::SessionInfo;
 use crate::terminal::TerminalHandle;
 
+/// Server status for restart resilience (spec §3)
+#[derive(Debug, Clone)]
+pub enum ServerStatus {
+    /// Process spawned, awaiting health check
+    Starting,
+    /// Health check passed (GET /health returns 200)
+    Ready,
+    /// Restart threshold exceeded
+    Error(String),
+}
+
+/// Runtime tracking for Claude SDK server restart resilience (spec §3)
+#[derive(Debug, Clone)]
+pub struct ClaudeServerRuntime {
+    pub workspace_id: String,
+    pub port: u16,
+    pub base_url: String,
+    /// Consecutive failures; resets on successful Ready
+    pub restart_count: u32,
+    pub status: ServerStatus,
+}
+
 /// Unique client identifier
 pub type ClientId = u64;
 
@@ -35,6 +57,9 @@ pub struct DaemonState {
 
     /// Active Claude SDK servers (workspaceId → ClaudeSdkServer)
     pub claude_sdk_servers: RwLock<HashMap<String, ClaudeSdkServer>>,
+
+    /// Claude SDK server runtime state for restart resilience (spec §3)
+    pub claude_server_runtimes: RwLock<HashMap<String, ClaudeServerRuntime>>,
 }
 
 /// Channel for sending events to a client
@@ -56,6 +81,7 @@ impl DaemonState {
             next_client_id: Mutex::new(1),
             opencode_servers: RwLock::new(HashMap::new()),
             claude_sdk_servers: RwLock::new(HashMap::new()),
+            claude_server_runtimes: RwLock::new(HashMap::new()),
         }
     }
 
@@ -225,5 +251,59 @@ impl DaemonState {
         } else {
             false
         }
+    }
+
+    /// Store or update Claude server runtime state (spec §3)
+    pub async fn store_claude_server_runtime(&self, runtime: ClaudeServerRuntime) {
+        self.claude_server_runtimes
+            .write()
+            .await
+            .insert(runtime.workspace_id.clone(), runtime);
+    }
+
+    /// Get Claude server runtime by workspace ID (spec §4)
+    pub async fn get_claude_server_runtime(&self, workspace_id: &str) -> Option<ClaudeServerRuntime> {
+        self.claude_server_runtimes
+            .read()
+            .await
+            .get(workspace_id)
+            .cloned()
+    }
+
+    /// Update Claude server runtime status (spec §5)
+    pub async fn update_claude_server_status(&self, workspace_id: &str, status: ServerStatus) {
+        if let Some(runtime) = self.claude_server_runtimes.write().await.get_mut(workspace_id) {
+            runtime.status = status;
+        }
+    }
+
+    /// Update Claude server runtime base_url and port (spec §5 Edge Cases)
+    pub async fn update_claude_server_url(&self, workspace_id: &str, port: u16, base_url: String) {
+        if let Some(runtime) = self.claude_server_runtimes.write().await.get_mut(workspace_id) {
+            runtime.port = port;
+            runtime.base_url = base_url;
+        }
+    }
+
+    /// Increment Claude server restart count (spec §5)
+    pub async fn increment_claude_server_restart_count(&self, workspace_id: &str) -> u32 {
+        if let Some(runtime) = self.claude_server_runtimes.write().await.get_mut(workspace_id) {
+            runtime.restart_count += 1;
+            runtime.restart_count
+        } else {
+            0
+        }
+    }
+
+    /// Reset Claude server restart count on successful Ready (spec §3)
+    pub async fn reset_claude_server_restart_count(&self, workspace_id: &str) {
+        if let Some(runtime) = self.claude_server_runtimes.write().await.get_mut(workspace_id) {
+            runtime.restart_count = 0;
+        }
+    }
+
+    /// Remove Claude server runtime state
+    pub async fn remove_claude_server_runtime(&self, workspace_id: &str) {
+        self.claude_server_runtimes.write().await.remove(workspace_id);
     }
 }
