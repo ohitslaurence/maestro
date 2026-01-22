@@ -315,6 +315,27 @@ pub struct OpenCodeStatusResult {
     pub base_url: Option<String>,
 }
 
+/// Claude SDK server status for restart resilience (spec §4)
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum ClaudeSdkServerStatus {
+    /// Process spawned, awaiting health check
+    Starting,
+    /// Health check passed
+    Ready,
+    /// Restart threshold exceeded
+    Error { message: String },
+}
+
+/// Response for claude_sdk_status (spec §4)
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClaudeSdkStatusResult {
+    pub connected: bool,
+    pub base_url: Option<String>,
+    pub status: Option<ClaudeSdkServerStatus>,
+}
+
 // --- Event params ---
 
 #[derive(Debug, Serialize)]

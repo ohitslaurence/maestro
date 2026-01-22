@@ -16,7 +16,7 @@ Reference: [claude-sdk-restart-resilience.md](../claude-sdk-restart-resilience.m
 ## Phase 3: Failure handling and logging [BLOCKED by: Phase 2]
 - [x] After 2 consecutive failures, set status to `Error` and stop auto-retry (See §5 step 6, §6)
 - [ ] Log port allocation, health-check results, and restart attempts with workspace ID (See §7)
-- [ ] Ensure `claude_sdk_status` returns current `status` and `base_url` (See §4)
+- [x] Ensure `claude_sdk_status` returns current `status` and `base_url` (See §4)
 
 ## Files to Create
 - None

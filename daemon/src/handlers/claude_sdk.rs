@@ -9,6 +9,7 @@ use crate::claude_sdk::ClaudeSdkServer;
 use crate::opencode::OpenCodeRegistry;
 use crate::protocol::*;
 use crate::state::{ClaudeServerRuntime, DaemonState, ServerStatus};
+use tracing::debug;
 
 /// Handle claude_sdk_connect_workspace request
 pub async fn handle_connect(request: &Request, state: Arc<DaemonState>) -> String {
@@ -113,7 +114,8 @@ pub async fn handle_disconnect(request: &Request, state: &DaemonState) -> String
     serde_json::to_string(&SuccessResponse::new(request.id, json!({"ok": removed}))).unwrap()
 }
 
-/// Handle claude_sdk_status request
+/// Handle claude_sdk_status request (spec §4)
+/// Returns current status, base_url, and connection state from runtime tracking.
 pub async fn handle_status(request: &Request, state: &DaemonState) -> String {
     let params: OpenCodeWorkspaceParams = match serde_json::from_value(request.params.clone()) {
         Ok(p) => p,
@@ -127,14 +129,27 @@ pub async fn handle_status(request: &Request, state: &DaemonState) -> String {
         }
     };
 
-    let base_url = state.get_claude_sdk_server(&params.workspace_id).await;
-    let connected = base_url.is_some();
+    // Get runtime state which tracks status across restarts (spec §4)
+    let runtime = state.get_claude_server_runtime(&params.workspace_id).await;
+    let connected = runtime.is_some();
+
+    let (base_url, status) = match runtime {
+        Some(rt) => {
+            debug!(
+                "[claude_sdk] Status query for {}: status={:?} base_url={}",
+                params.workspace_id, rt.status, rt.base_url
+            );
+            (Some(rt.base_url), Some(ClaudeSdkServerStatus::from(&rt.status)))
+        }
+        None => (None, None),
+    };
 
     serde_json::to_string(&SuccessResponse::new(
         request.id,
-        OpenCodeStatusResult {
+        ClaudeSdkStatusResult {
             connected,
             base_url,
+            status,
         },
     ))
     .unwrap()

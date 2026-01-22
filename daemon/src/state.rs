@@ -7,6 +7,8 @@ use crate::opencode::OpenCodeServer;
 use crate::protocol::SessionInfo;
 use crate::terminal::TerminalHandle;
 
+use crate::protocol::ClaudeSdkServerStatus;
+
 /// Server status for restart resilience (spec §3)
 #[derive(Debug, Clone)]
 pub enum ServerStatus {
@@ -16,6 +18,18 @@ pub enum ServerStatus {
     Ready,
     /// Restart threshold exceeded
     Error(String),
+}
+
+impl From<&ServerStatus> for ClaudeSdkServerStatus {
+    fn from(status: &ServerStatus) -> Self {
+        match status {
+            ServerStatus::Starting => ClaudeSdkServerStatus::Starting,
+            ServerStatus::Ready => ClaudeSdkServerStatus::Ready,
+            ServerStatus::Error(msg) => ClaudeSdkServerStatus::Error {
+                message: msg.clone(),
+            },
+        }
+    }
 }
 
 /// Runtime tracking for Claude SDK server restart resilience (spec §3)
