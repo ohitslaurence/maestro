@@ -9,7 +9,7 @@ use std::net::TcpListener;
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use eventsource_client::Client as _;
 use futures::StreamExt;
@@ -21,7 +21,7 @@ use tracing::{debug, error, info, warn};
 
 use crate::opencode::{OpenCodeDaemonEvent, EVENT_OPENCODE_EVENT};
 use crate::protocol::Event;
-use crate::state::DaemonState;
+use crate::state::{DaemonState, ServerStatus};
 
 /// Find an available port by binding to port 0 and returning the assigned port.
 /// Per spec §5 step 1: Daemon allocates an available port.
@@ -36,6 +36,10 @@ fn find_available_port() -> Result<u16, String> {
     Ok(port)
 }
 
+/// Health-check configuration per spec §5 step 3
+const HEALTH_CHECK_INTERVAL_MS: u64 = 100;
+const HEALTH_CHECK_TIMEOUT_SECS: u64 = 30;
+
 /// Claude SDK server instance for a workspace
 pub struct ClaudeSdkServer {
     pub workspace_id: String,
@@ -48,6 +52,8 @@ pub struct ClaudeSdkServer {
     sse_handle: Option<JoinHandle<()>>,
     /// Handle for the process monitor task (auto-restart on crash per spec §10)
     monitor_handle: Option<JoinHandle<()>>,
+    /// Handle for the health-check task (spec §5 step 3)
+    health_check_handle: Option<JoinHandle<()>>,
 }
 
 impl ClaudeSdkServer {
@@ -72,6 +78,7 @@ impl ClaudeSdkServer {
             child: Arc::new(Mutex::new(Some(child))),
             sse_handle: None,
             monitor_handle: None,
+            health_check_handle: None,
         })
     }
 
@@ -86,6 +93,27 @@ impl ClaudeSdkServer {
         });
 
         self.sse_handle = Some(handle);
+    }
+
+    /// Start health-check polling to transition Starting → Ready (spec §5 step 3).
+    /// On success (200 OK), transitions status to Ready and starts SSE bridge.
+    pub fn start_health_check(&mut self, state: Arc<DaemonState>) {
+        let base_url = self.base_url.clone();
+        let workspace_id = self.workspace_id.clone();
+        let workspace_path = self.workspace_path.clone();
+
+        let handle = tokio::spawn(async move {
+            run_health_check(base_url, workspace_id, workspace_path, state).await;
+        });
+
+        self.health_check_handle = Some(handle);
+    }
+
+    /// Stop the health-check task
+    fn stop_health_check(&mut self) {
+        if let Some(handle) = self.health_check_handle.take() {
+            handle.abort();
+        }
     }
 
     /// Start process monitoring for auto-restart on crash (spec §10)
@@ -125,6 +153,7 @@ impl ClaudeSdkServer {
 
         self.stop_sse_bridge();
         self.stop_process_monitor();
+        self.stop_health_check();
 
         // Use try_lock to avoid blocking; if locked, the monitor is handling shutdown
         if let Ok(mut guard) = self.child.try_lock() {
@@ -394,6 +423,101 @@ fn parse_listening_url(line: &str) -> Option<String> {
         }
     }
     None
+}
+
+/// Health-check polling to transition Starting → Ready (spec §5 step 3).
+/// Polls GET {base_url}/health at 100ms intervals, times out after 30s.
+/// On success, transitions status to Ready, resets restart_count, and starts SSE bridge.
+async fn run_health_check(
+    base_url: String,
+    workspace_id: String,
+    workspace_path: String,
+    state: Arc<DaemonState>,
+) {
+    let health_url = format!("{}/health", base_url);
+    let start = Instant::now();
+    let timeout = Duration::from_secs(HEALTH_CHECK_TIMEOUT_SECS);
+    let interval = Duration::from_millis(HEALTH_CHECK_INTERVAL_MS);
+
+    info!(
+        "[claude_sdk] Starting health-check polling for {} at {}",
+        workspace_id, health_url
+    );
+
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(5))
+        .build()
+        .unwrap_or_default();
+
+    loop {
+        if start.elapsed() > timeout {
+            error!(
+                "[claude_sdk] Health-check timeout for {} after {:?}",
+                workspace_id, timeout
+            );
+            state
+                .update_claude_server_status(
+                    &workspace_id,
+                    ServerStatus::Error("Health check timeout".to_string()),
+                )
+                .await;
+            return;
+        }
+
+        match client.get(&health_url).send().await {
+            Ok(response) if response.status().is_success() => {
+                info!(
+                    "[claude_sdk] Health-check passed for {} (status={})",
+                    workspace_id,
+                    response.status()
+                );
+
+                // Transition to Ready and reset restart count (spec §3, §5 step 3)
+                state
+                    .update_claude_server_status(&workspace_id, ServerStatus::Ready)
+                    .await;
+                state.reset_claude_server_restart_count(&workspace_id).await;
+
+                // Start SSE bridge now that server is ready
+                // We need to get a mutable reference to the server to start the bridge
+                let mut servers = state.claude_sdk_servers.write().await;
+                if let Some(server) = servers.get_mut(&workspace_id) {
+                    let bridge_state = Arc::clone(&state);
+                    let bridge_base_url = base_url.clone();
+                    let bridge_workspace_id = workspace_id.clone();
+                    let bridge_workspace_path = workspace_path.clone();
+
+                    let handle = tokio::spawn(async move {
+                        run_sse_bridge(
+                            bridge_base_url,
+                            bridge_workspace_id,
+                            bridge_workspace_path,
+                            bridge_state,
+                        )
+                        .await;
+                    });
+                    server.sse_handle = Some(handle);
+                }
+
+                return;
+            }
+            Ok(response) => {
+                debug!(
+                    "[claude_sdk] Health-check not ready for {} (status={})",
+                    workspace_id,
+                    response.status()
+                );
+            }
+            Err(e) => {
+                debug!(
+                    "[claude_sdk] Health-check error for {}: {}",
+                    workspace_id, e
+                );
+            }
+        }
+
+        tokio::time::sleep(interval).await;
+    }
 }
 
 const BACKOFF_DELAYS: &[Duration] = &[

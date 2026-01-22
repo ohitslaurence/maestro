@@ -8,7 +8,7 @@ use tracing::{error, info};
 use crate::claude_sdk::ClaudeSdkServer;
 use crate::opencode::OpenCodeRegistry;
 use crate::protocol::*;
-use crate::state::DaemonState;
+use crate::state::{ClaudeServerRuntime, DaemonState, ServerStatus};
 
 /// Handle claude_sdk_connect_workspace request
 pub async fn handle_connect(request: &Request, state: Arc<DaemonState>) -> String {
@@ -54,8 +54,21 @@ pub async fn handle_connect(request: &Request, state: Arc<DaemonState>) -> Strin
     };
 
     let base_url = server.base_url.clone();
+    let port = server.port;
 
-    server.start_sse_bridge(state.clone());
+    // Create runtime state with Starting status (spec §5 step 2)
+    let runtime = ClaudeServerRuntime {
+        workspace_id: params.workspace_id.clone(),
+        port,
+        base_url: base_url.clone(),
+        restart_count: 0,
+        status: ServerStatus::Starting,
+    };
+    state.store_claude_server_runtime(runtime).await;
+
+    // Start health-check polling instead of SSE bridge directly (spec §5 step 3)
+    // SSE bridge will be started by health-check once server is Ready
+    server.start_health_check(state.clone());
     server.start_process_monitor(state.clone());
 
     state
@@ -63,7 +76,7 @@ pub async fn handle_connect(request: &Request, state: Arc<DaemonState>) -> Strin
         .await;
 
     info!(
-        "Claude SDK workspace {} connected at {}",
+        "Claude SDK workspace {} spawned at {} (awaiting health check)",
         params.workspace_id, base_url
     );
 
