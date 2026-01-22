@@ -94,7 +94,7 @@ Exposes `reply()`, `dismiss()`, `isReplying`, and `error` for UI integration.
 ## Phase 9: Thread View Integration [BLOCKED by: Phase 8]
 
 - [x] Add `PermissionModal` to `ClaudeThreadView`
-- [ ] Disable composer input while permission pending
+- [x] Disable composer input while permission pending
 - [ ] Show visual indicator when awaiting approval
 
 ## Files to Create

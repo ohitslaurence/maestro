@@ -142,7 +142,9 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
 
   const isProcessing = status === "processing" || isPrompting;
   const canStop = status === "processing";
-  const disabled = !workspaceId || !isConnected;
+  // Disable composer while permission pending (dynamic-tool-approvals spec §5)
+  const isPermissionPending = permissionRequest !== null;
+  const disabled = !workspaceId || !isConnected || isPermissionPending;
   const error = connectionError || threadError;
 
   // Show connecting state
