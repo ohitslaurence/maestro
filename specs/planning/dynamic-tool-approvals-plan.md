@@ -5,13 +5,13 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 ## Phase 1: Permission Manager Infrastructure
 
 - [x] Create `PermissionRequest`, `PermissionReplyRequest`, `PendingPermission` types (§3)
-- [ ] Create `PermissionManager` class with pending request storage (§4)
-- [ ] Implement `request()` method that returns blocking Promise (§4)
-- [ ] Implement `reply()` method that resolves/rejects pending Promise (§4)
-- [ ] Implement `isApproved()` for "always" pattern checking with exact string match (§4)
-- [ ] Implement `findSessionForRequest()` with O(1) reverse lookup map (§4)
-- [ ] Implement `clearSession()` for cleanup (§4)
-- [ ] Add timeout handling for stale permissions (§6)
+- [x] Create `PermissionManager` class with pending request storage (§4)
+- [x] Implement `request()` method that returns blocking Promise (§4)
+- [x] Implement `reply()` method that resolves/rejects pending Promise (§4)
+- [x] Implement `isApproved()` for "always" pattern checking with exact string match (§4)
+- [x] Implement `findSessionForRequest()` with O(1) reverse lookup map (§4)
+- [x] Implement `clearSession()` for cleanup (§4)
+- [x] Add timeout handling for stale permissions (§6)
 
 ## Phase 2: Update canUseTool Handler [BLOCKED by: Phase 1]
 
