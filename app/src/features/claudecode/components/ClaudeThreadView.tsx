@@ -3,11 +3,14 @@ import { useOpenCodeThread } from "../../opencode/hooks/useOpenCodeThread";
 import { useClaudeSession } from "../hooks/useClaudeSession";
 import { useComposerOptions } from "../hooks/useComposerOptions";
 import { usePermissions } from "../hooks/usePermissions";
+import { useSessionSettings } from "../hooks/useSessionSettings";
 import { useAgentSession, isAgentWorking } from "../../../hooks/useAgentSession";
 import { ThreadMessages } from "../../opencode/components/ThreadMessages";
 import { ThreadComposer } from "../../opencode/components/ThreadComposer";
 import { ComposerOptions } from "./ComposerOptions";
 import { PermissionModal } from "./PermissionModal";
+import { SessionSettingsButton } from "./SessionSettingsButton";
+import { SessionSettingsModal } from "./SessionSettingsModal";
 
 type PendingUserMessage = {
   id: string;
@@ -70,6 +73,15 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
     dismiss: dismissPermission,
   } = usePermissions({ workspaceId, sessionId });
 
+  // Session settings (session-settings spec §5, §6)
+  const {
+    settings: sessionSettings,
+    isUpdating: isSettingsUpdating,
+    error: settingsError,
+    updateSettings,
+  } = useSessionSettings({ workspaceId, sessionId });
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
   // Use agent state machine for working/idle status (per state-machine-wiring.md §4, §5)
   const { state: agentState } = useAgentSession({ sessionId: sessionId ?? undefined });
   const isWorking = isAgentWorking(agentState.kind);
@@ -125,6 +137,14 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
     void connect();
   }, [connect]);
 
+  const handleOpenSettings = useCallback(() => {
+    setIsSettingsModalOpen(true);
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setIsSettingsModalOpen(false);
+  }, []);
+
   // Track previous status to detect transitions
   const prevStatusRef = useRef(status);
 
@@ -179,6 +199,13 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
 
   return (
     <div className="oc-thread">
+      {/* Session header with settings button (session-settings spec §Appendix) */}
+      <div className="oc-thread__header">
+        <SessionSettingsButton
+          onClick={handleOpenSettings}
+          disabled={!isConnected || !sessionId}
+        />
+      </div>
       {error && (
         <div className="oc-thread__error">
           {error}
@@ -217,6 +244,15 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
         request={permissionRequest}
         onReply={replyToPermission}
         onClose={dismissPermission}
+      />
+      {/* Session settings modal (session-settings spec §Appendix) */}
+      <SessionSettingsModal
+        isOpen={isSettingsModalOpen}
+        settings={sessionSettings}
+        isUpdating={isSettingsUpdating}
+        error={settingsError}
+        onSave={updateSettings}
+        onClose={handleCloseSettings}
       />
     </div>
   );

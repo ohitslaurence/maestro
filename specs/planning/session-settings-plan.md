@@ -49,36 +49,36 @@ Reference: [session-settings.md](../session-settings.md)
 
 ## Phase 7: UI Components - Modal Shell [BLOCKED by: Phase 6]
 
-- [ ] Create `SessionSettingsModal.tsx` container (§Appendix)
-- [ ] Create `SessionSettingsButton.tsx` gear icon
-- [ ] Add modal trigger to session header
-- [ ] Implement section layout
+- [x] Create `SessionSettingsModal.tsx` container (§Appendix)
+- [x] Create `SessionSettingsButton.tsx` gear icon
+- [x] Add modal trigger to session header
+- [x] Implement section layout
 
 ## Phase 8: UI Components - Execution Section [BLOCKED by: Phase 7]
 
-- [ ] Add max turns input field (§Appendix)
-- [ ] Validate range (1-1000)
-- [ ] Show helper text explaining the setting
+- [x] Add max turns input field (§Appendix)
+- [x] Validate range (1-1000)
+- [x] Show helper text explaining the setting
 
 ## Phase 9: UI Components - System Prompt Section [BLOCKED by: Phase 7]
 
-- [ ] Create `SystemPromptEditor.tsx` component
-- [ ] Implement mode toggle (default/append/custom) (§Appendix)
-- [ ] Add textarea for append/custom content
-- [ ] Disable textarea when mode is 'default'
+- [x] Create `SystemPromptEditor.tsx` component (inline in SessionSettingsModal)
+- [x] Implement mode toggle (default/append/custom) (§Appendix)
+- [x] Add textarea for append/custom content
+- [x] Disable textarea when mode is 'default'
 
 ## Phase 10: UI Components - Tools Section [BLOCKED by: Phase 7]
 
-- [ ] Create `ToolSelector.tsx` component
-- [ ] Display tool checkboxes by category (§Appendix)
-- [ ] Implement blocklist selection (checked = disabled)
-- [ ] Show tool descriptions on hover
+- [x] Create `ToolSelector.tsx` component (inline in SessionSettingsModal)
+- [x] Display tool checkboxes by category (§Appendix)
+- [x] Implement blocklist selection (checked = disabled)
+- [x] Show tool descriptions on hover
 
 ## Phase 11: Thread View Integration [BLOCKED by: Phase 7]
 
-- [ ] Add `SessionSettingsButton` to session header in `ClaudeThreadView`
-- [ ] Wire modal open/close state
-- [ ] Refresh session data after settings update
+- [x] Add `SessionSettingsButton` to session header in `ClaudeThreadView`
+- [x] Wire modal open/close state
+- [x] Refresh session data after settings update (via useSessionSettings hook)
 
 ## Files to Create
 
@@ -105,7 +105,7 @@ Reference: [session-settings.md](../session-settings.md)
 ### Implementation Checklist
 
 - [ ] `cd daemon/claude-server && bun run typecheck`
-- [ ] `cd app && bun run typecheck`
+- [x] `cd app && bun run typecheck`
 - [ ] Settings persist in session storage
 - [ ] PATCH endpoint updates settings correctly
 - [ ] `maxTurns` is passed to SDK options
