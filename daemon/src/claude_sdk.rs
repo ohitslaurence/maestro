@@ -117,14 +117,16 @@ impl ClaudeSdkServer {
     }
 
     /// Start process monitoring for auto-restart on crash (spec §10)
+    /// Per spec §5 step 5: monitor also handles SSE bridge restart when base_url changes
     pub fn start_process_monitor(&mut self, state: Arc<DaemonState>) {
         let workspace_id = self.workspace_id.clone();
         let workspace_path = self.workspace_path.clone();
         let port = self.port;
+        let base_url = self.base_url.clone();
         let child_handle = Arc::clone(&self.child);
 
         let handle = tokio::spawn(async move {
-            monitor_process(workspace_id, workspace_path, port, child_handle, state).await;
+            monitor_process(workspace_id, workspace_path, port, base_url, child_handle, state).await;
         });
 
         self.monitor_handle = Some(handle);
@@ -282,15 +284,18 @@ fn spawn_server_process(workspace_path: &str, port: u16) -> Result<(Child, u32, 
 /// Monitor the server process and auto-restart on crash (once).
 /// Per spec §10 Design Decision 2: auto-restart once, then mark as Error.
 /// Per spec §5 step 4: On restart, try same port first; if EADDRINUSE, allocate new port.
+/// Per spec §5 step 5: On restart, if base_url changed, tear down old SSE bridge and start new one.
 async fn monitor_process(
     workspace_id: String,
     workspace_path: String,
     initial_port: u16,
+    initial_base_url: String,
     child_handle: Arc<Mutex<Option<Child>>>,
     state: Arc<DaemonState>,
 ) {
     let mut restart_count = 0u32;
     let mut current_port = initial_port;
+    let mut current_base_url = initial_base_url;
     const MAX_RESTARTS: u32 = 1; // Auto-restart once on crash
 
     loop {
@@ -396,8 +401,51 @@ async fn monitor_process(
                     let mut guard = child_handle.lock().await;
                     *guard = Some(new_child);
 
+                    // Check if base_url changed (per spec §5 step 5)
+                    let url_changed = new_url != current_base_url;
+                    if url_changed {
+                        info!(
+                            "[claude_sdk] base_url changed for {}: {} -> {}",
+                            workspace_id, current_base_url, new_url
+                        );
+                    }
+                    current_base_url = new_url.clone();
+
                     // Update runtime state with new port/url if changed (per spec §5 Edge Cases)
-                    state.update_claude_server_url(&workspace_id, current_port, new_url).await;
+                    state.update_claude_server_url(&workspace_id, current_port, new_url.clone()).await;
+
+                    // Per spec §5 step 5: If base_url changed, restart SSE bridge
+                    // We do this by stopping the old bridge and starting health check which will start new bridge
+                    if url_changed {
+                        info!(
+                            "[claude_sdk] Restarting SSE bridge for {} due to base_url change",
+                            workspace_id
+                        );
+
+                        // Stop old SSE bridge
+                        {
+                            let mut servers = state.claude_sdk_servers.write().await;
+                            if let Some(server) = servers.get_mut(&workspace_id) {
+                                server.stop_sse_bridge();
+                            }
+                        }
+
+                        // Start new health check which will start new SSE bridge on Ready
+                        let health_state = Arc::clone(&state);
+                        let health_base_url = new_url;
+                        let health_workspace_id = workspace_id.clone();
+                        let health_workspace_path = workspace_path.clone();
+
+                        tokio::spawn(async move {
+                            run_health_check(
+                                health_base_url,
+                                health_workspace_id,
+                                health_workspace_path,
+                                health_state,
+                            )
+                            .await;
+                        });
+                    }
                 }
                 Err(e) => {
                     error!(
