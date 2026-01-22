@@ -1658,6 +1658,11 @@ const server = Bun.serve({
     const url = new URL(req.url);
     const pathname = url.pathname;
 
+    // Health check endpoint for daemon restart resilience (§5 step 3)
+    if (pathname === "/health" && req.method === "GET") {
+      return jsonResponse({ status: "ok" });
+    }
+
     if (pathname === "/event" && req.method === "GET") {
       return createSseResponse({ wrapWithDirectory: false });
     }
