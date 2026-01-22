@@ -6,6 +6,9 @@ pub mod sessions;
 pub mod terminal;
 
 use std::sync::Arc;
+use std::time::Instant;
+
+use tracing::{debug, info, warn};
 
 use crate::protocol::*;
 use crate::state::{ClientId, DaemonState};
@@ -16,7 +19,13 @@ pub async fn dispatch(
     state: Arc<DaemonState>,
     client_id: ClientId,
 ) -> String {
-    match request.method.as_str() {
+    let start = Instant::now();
+    let method = request.method.as_str();
+    let id = request.id;
+
+    debug!("[dispatch] → id={} method={} client={}", id, method, client_id);
+
+    let response = match method {
         METHOD_AUTH => auth::handle(request, &state).await,
         METHOD_LIST_SESSIONS => sessions::handle_list(request, &state).await,
         METHOD_SESSION_INFO => sessions::handle_info(request, &state).await,
@@ -47,6 +56,7 @@ pub async fn dispatch(
         METHOD_CLAUDE_SDK_PERMISSION_PENDING => claude_sdk::handle_permission_pending(request, &state).await,
         METHOD_CLAUDE_SDK_SESSION_SETTINGS_UPDATE => claude_sdk::handle_session_settings_update(request, &state).await,
         _ => {
+            warn!("[dispatch] Unknown method: {}", method);
             let resp = ErrorResponse::new(
                 request.id,
                 INVALID_PARAMS,
@@ -54,5 +64,16 @@ pub async fn dispatch(
             );
             serde_json::to_string(&resp).unwrap()
         }
+    };
+
+    let elapsed = start.elapsed();
+    let is_error = response.contains("\"error\"");
+
+    if is_error {
+        info!("[dispatch] ← id={} method={} error elapsed={:?}", id, method, elapsed);
+    } else {
+        debug!("[dispatch] ← id={} method={} ok elapsed={:?}", id, method, elapsed);
     }
+
+    response
 }

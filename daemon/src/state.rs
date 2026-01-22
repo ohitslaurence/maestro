@@ -148,12 +148,14 @@ impl DaemonState {
         self.terminal_owners.read().await.get(key).copied()
     }
 
-    /// Broadcast a message to all connected clients
-    pub async fn broadcast_to_all_clients(&self, msg: String) {
+    /// Broadcast a message to all connected clients. Returns number of clients.
+    pub async fn broadcast_to_all_clients(&self, msg: String) -> usize {
         let clients = self.clients.read().await;
+        let count = clients.len();
         for tx in clients.values() {
             let _ = tx.send(msg.clone());
         }
+        count
     }
 
     /// Store an OpenCode server

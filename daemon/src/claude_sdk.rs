@@ -124,21 +124,27 @@ impl Drop for ClaudeSdkServer {
 
 fn resolve_server_dir() -> Result<PathBuf, String> {
     if let Ok(dir) = env::var("MAESTRO_CLAUDE_SERVER_DIR") {
+        debug!("[claude_sdk] Using MAESTRO_CLAUDE_SERVER_DIR: {}", dir);
         return Ok(PathBuf::from(dir));
     }
 
     let cwd = env::current_dir().map_err(|e| format!("Failed to read cwd: {e}"))?;
+    debug!("[claude_sdk] Resolving server dir from cwd: {}", cwd.display());
+
     let candidates = [
         cwd.join("daemon/claude-server"),
         cwd.join("claude-server"),
     ];
 
-    for candidate in candidates {
+    for candidate in &candidates {
+        debug!("[claude_sdk] Checking candidate: {} (exists={})", candidate.display(), candidate.exists());
         if candidate.exists() {
-            return Ok(candidate);
+            info!("[claude_sdk] Found server directory: {}", candidate.display());
+            return Ok(candidate.clone());
         }
     }
 
+    error!("[claude_sdk] Server directory not found. Checked: {:?}", candidates.iter().map(|p| p.display().to_string()).collect::<Vec<_>>());
     Err("Claude server directory not found. Set MAESTRO_CLAUDE_SERVER_DIR".to_string())
 }
 
@@ -147,36 +153,55 @@ fn resolve_server_dir() -> Result<PathBuf, String> {
 fn spawn_server_process(workspace_path: &str) -> Result<(Child, u32, String), String> {
     let server_dir = resolve_server_dir()?;
     info!(
-        "Spawning Claude SDK server for workspace at {}",
-        workspace_path
+        "[claude_sdk] Spawning server: workspace={} server_dir={}",
+        workspace_path,
+        server_dir.display()
     );
+
+    debug!("[claude_sdk] Running: bun run serve");
+    debug!("[claude_sdk] Env: MAESTRO_WORKSPACE_DIR={}", workspace_path);
+    debug!("[claude_sdk] Env: MAESTRO_HOST=127.0.0.1 MAESTRO_PORT=0");
 
     let mut child = Command::new("bun")
         .args(["run", "serve"])
-        .current_dir(server_dir)
+        .current_dir(&server_dir)
         .env("MAESTRO_WORKSPACE_DIR", workspace_path)
         .env("MAESTRO_HOST", "127.0.0.1")
         .env("MAESTRO_PORT", "0")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .map_err(|e| format!("Failed to spawn Claude SDK server: {e}"))?;
+        .map_err(|e| {
+            error!("[claude_sdk] Failed to spawn: {}", e);
+            format!("Failed to spawn Claude SDK server: {e}")
+        })?;
 
     let pid = child.id();
+    info!("[claude_sdk] Server process started with pid={}", pid);
 
     let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
     let reader = BufReader::new(stdout);
 
+    debug!("[claude_sdk] Reading stdout to find listening URL...");
     let mut base_url = None;
+    let mut line_count = 0;
     for line in reader.lines().map_while(Result::ok) {
-        debug!("Claude SDK stdout: {}", line);
+        line_count += 1;
+        info!("[claude_sdk] stdout[{}]: {}", line_count, line);
         if let Some(url) = parse_listening_url(&line) {
+            info!("[claude_sdk] Found listening URL: {}", url);
             base_url = Some(url);
             break;
         }
     }
 
-    let base_url = base_url.ok_or("Failed to parse server URL from stdout")?;
+    if base_url.is_none() {
+        error!("[claude_sdk] Stdout closed after {} lines without finding listening URL", line_count);
+        return Err("Failed to parse server URL from stdout".to_string());
+    }
+
+    let base_url = base_url.unwrap();
+    info!("[claude_sdk] Server ready at {} (pid={})", base_url, pid);
     Ok((child, pid, base_url))
 }
 
@@ -319,23 +344,24 @@ async fn run_sse_bridge(
     let mut attempt = 0usize;
 
     loop {
-        info!("Starting Claude SDK SSE stream for workspace {}", workspace_id);
+        info!("[claude_sdk] SSE bridge starting: workspace={} url={}/event attempt={}",
+              workspace_id, base_url, attempt);
 
         match run_sse_stream(&base_url, &workspace_id, &workspace_path, &state).await {
             Ok(()) => {
-                info!("Claude SDK SSE stream ended cleanly for {}", workspace_id);
+                info!("[claude_sdk] SSE stream ended cleanly: workspace={}", workspace_id);
                 break;
             }
             Err(e) => {
-                warn!(
-                    "Claude SDK SSE disconnected for {}: {}, reconnecting...",
-                    workspace_id, e
-                );
-
                 let delay = BACKOFF_DELAYS
                     .get(attempt)
                     .copied()
                     .unwrap_or(BACKOFF_DELAYS[BACKOFF_DELAYS.len() - 1]);
+
+                warn!(
+                    "[claude_sdk] SSE disconnected: workspace={} error={} retry_delay={:?}",
+                    workspace_id, e, delay
+                );
 
                 tokio::time::sleep(delay).await;
                 attempt = (attempt + 1).min(BACKOFF_DELAYS.len() - 1);
@@ -351,6 +377,7 @@ async fn run_sse_stream(
     state: &Arc<DaemonState>,
 ) -> Result<(), String> {
     let url = format!("{}/event", base_url);
+    debug!("[claude_sdk] Connecting to SSE: {}", url);
 
     let client = eventsource_client::ClientBuilder::for_url(&url)
         .map_err(|e| format!("Failed to create SSE client: {e}"))?
@@ -359,25 +386,41 @@ async fn run_sse_stream(
         .build();
 
     let mut stream = client.stream();
+    let mut event_count = 0u64;
+    info!("[claude_sdk] SSE stream connected: workspace={}", workspace_id);
 
     while let Some(event_result) = stream.next().await {
         match event_result {
             Ok(event) => {
                 if let eventsource_client::SSE::Event(sse_event) = event {
+                    event_count += 1;
+                    let event_type = &sse_event.event_type;
+
                     let event_data: Value = match serde_json::from_str(&sse_event.data) {
                         Ok(v) => v,
                         Err(e) => {
-                            debug!(
-                                "Failed to parse Claude SDK SSE data as JSON: {} - {}",
-                                e, sse_event.data
+                            warn!(
+                                "[claude_sdk] SSE parse error: type={} error={} data={}",
+                                event_type, e, sse_event.data
                             );
                             continue;
                         }
                     };
 
+                    // Extract session_id if present for logging
+                    let session_id = event_data.get("sessionId")
+                        .or_else(|| event_data.get("session_id"))
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("unknown");
+
+                    debug!(
+                        "[claude_sdk] SSE event #{}: type={} session={} workspace={}",
+                        event_count, event_type, session_id, workspace_id
+                    );
+
                     let daemon_event = OpenCodeDaemonEvent {
                         workspace_id: workspace_id.to_string(),
-                        event_type: sse_event.event_type,
+                        event_type: event_type.clone(),
                         event: event_data,
                     };
 
@@ -385,15 +428,18 @@ async fn run_sse_stream(
                     let msg =
                         serde_json::to_string(&event).unwrap_or_else(|_| "{}".to_string());
 
-                    state.broadcast_to_all_clients(msg).await;
+                    let client_count = state.broadcast_to_all_clients(msg).await;
+                    debug!("[claude_sdk] Broadcast to {} clients", client_count);
                 }
             }
             Err(e) => {
+                error!("[claude_sdk] SSE stream error: {} (after {} events)", e, event_count);
                 return Err(format!("Claude SDK SSE stream error: {e}"));
             }
         }
     }
 
+    info!("[claude_sdk] SSE stream closed after {} events", event_count);
     Ok(())
 }
 

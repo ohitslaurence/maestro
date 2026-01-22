@@ -5,6 +5,7 @@ import {
   claudeSdkSessionCreate,
   claudeSdkSessionPrompt,
   claudeSdkSessionAbort,
+  registerSession,
 } from "../../../services/tauri";
 
 type UseClaudeSessionOptions = {
@@ -153,7 +154,7 @@ export function useClaudeSession({
 
   const create = useCallback(
     async (title?: string): Promise<string | null> => {
-      if (!workspaceId) {
+      if (!workspaceId || !workspacePath) {
         console.warn("[claude] Cannot create session: no workspace");
         return null;
       }
@@ -167,6 +168,15 @@ export function useClaudeSession({
           title
         )) as SessionCreateResult;
         const newId = result.id;
+
+        // Register in local state machine registry so events can be routed
+        await registerSession({
+          sessionId: newId,
+          name: title ?? "Untitled",
+          projectPath: workspacePath,
+          harness: "claude_code",
+        });
+
         setSessionId(newId);
         return newId;
       } catch (error) {
@@ -174,7 +184,7 @@ export function useClaudeSession({
         return null;
       }
     },
-    [workspaceId, isConnected]
+    [workspaceId, workspacePath, isConnected]
   );
 
   const prompt = useCallback(

@@ -103,6 +103,8 @@ pub fn run() {
             // Session commands (proxied to daemon)
             daemon::list_sessions,
             daemon::session_info,
+            // Session registry commands (local state machine)
+            daemon::register_session,
             // Terminal commands (proxied to daemon)
             daemon::terminal_open,
             daemon::terminal_write,

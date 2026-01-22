@@ -380,6 +380,26 @@ export async function claudeSdkSessionSettingsUpdate(
   });
 }
 
+// --- Session Registry commands (state machine wiring) ---
+
+export type HarnessType = "claude_code" | "open_code";
+
+export interface RegisterSessionParams {
+  sessionId: string;
+  name: string;
+  projectPath: string;
+  harness: HarnessType;
+}
+
+/**
+ * Register a session in the local state machine registry.
+ * Must be called after creating a session via the daemon so that
+ * stream events can be routed to the state machine.
+ */
+export async function registerSession(params: RegisterSessionParams): Promise<void> {
+  return invokeCommand("register_session", { params });
+}
+
 // --- Storage commands (session-persistence §4) ---
 
 /** List all thread summaries */

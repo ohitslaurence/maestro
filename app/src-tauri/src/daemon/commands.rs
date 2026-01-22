@@ -1,11 +1,13 @@
 use std::sync::Arc;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tauri::State;
 
 use super::client::DaemonState;
 use super::config::DaemonConfig;
 use super::protocol::*;
+use crate::agent_state::{AgentState, AgentStateKind};
+use crate::sessions::{AgentHarness, AgentSession, SessionEntry, SessionStatus};
 
 // --- Connection Management Commands ---
 
@@ -513,3 +515,47 @@ pub async fn claude_sdk_session_settings_update(
 
 // Helper to use serde_json::Value without importing in this file
 use serde_json::Value;
+
+// --- Session Registry Commands ---
+
+/// Parameters for registering a session in the local state machine registry.
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RegisterSessionParams {
+    pub session_id: String,
+    pub name: String,
+    pub project_path: String,
+    pub harness: String, // "claude_code" or "open_code"
+}
+
+/// Register a session in the local state machine registry.
+/// This must be called after creating a session via the daemon so that
+/// stream events can be routed to the state machine.
+#[tauri::command]
+pub async fn register_session(
+    params: RegisterSessionParams,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<(), String> {
+    let harness = match params.harness.as_str() {
+        "claude_code" => AgentHarness::ClaudeCode,
+        "open_code" => AgentHarness::OpenCode,
+        _ => return Err(format!("Unknown harness type: {}", params.harness)),
+    };
+
+    let entry = SessionEntry {
+        session: AgentSession {
+            id: params.session_id.clone(),
+            name: params.name,
+            harness,
+            project_path: params.project_path,
+            status: SessionStatus::Running,
+            agent_state: AgentStateKind::Ready,
+        },
+        state: AgentState::default(),
+    };
+
+    let mut registry = state.session_registry.write().await;
+    registry.insert(params.session_id, entry);
+
+    Ok(())
+}
