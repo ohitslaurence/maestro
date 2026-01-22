@@ -1,90 +1,103 @@
 # Session Settings Spec
 
-## Overview
+**Status:** Planned
+**Version:** 1.0
+**Last Updated:** 2026-01-22
+
+---
+
+## 1. Overview
+
+### Purpose
 
 Expose configuration options for Claude SDK sessions beyond the current minimal set (title, modelId, permission). Users need control over sampling parameters, iteration limits, system prompts, and tool configuration.
 
-**Goal**: Give users the same control they have with Claude Code CLI flags, but through the UI.
+### Goals
 
-## Current State
+- Give users the same control they have with Claude Code CLI flags, but through the UI
+- Session-level settings that override workspace defaults
+- Settings persist across session resume and server restart
 
-### Session Fields (Maestro)
+### Non-Goals
+
+- Per-agent named configurations (OpenCode pattern)
+- MCP server configuration (deferred to future phase)
+- System prompt presets (deferred; use append/custom modes only)
+
+### References
+
+| File | Purpose |
+|------|---------|
+| `daemon/claude-server/src/types.ts` | Current `Session` and `CreateSessionRequest` interfaces to extend |
+| `daemon/claude-server/src/sdk/agent.ts` | `buildSdkOptions()` function to wire settings into SDK calls |
+| `daemon/claude-server/src/routes/sessions.ts` | Existing session routes; add PATCH endpoint here |
+| `daemon/claude-server/src/storage/sessions.ts` | Session storage implementation to persist settings |
+| `daemon/claude-server/src/index.ts` | Server entry point for route registration |
+| `app/src/services/tauri.ts` | Tauri service layer to add settings commands |
+| `app/src-tauri/src/lib.rs` | Rust Tauri commands for `claude_sdk_session_settings_update` |
+| `app/src/features/claudecode/components/ClaudeThreadView.tsx` | Session header where settings button will be added |
+
+---
+
+## 2. Architecture
+
+### Components
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Frontend (React)                         │
+├─────────────────────────────────────────────────────────────────┤
+│  SessionSettingsButton → SessionSettingsModal                   │
+│       ↓                        ↓                                │
+│  useSessionSettings ←→ claudeSdkSessionSettingsUpdate()         │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓ Tauri IPC
+┌─────────────────────────────────────────────────────────────────┐
+│                      Tauri (Rust)                               │
+├─────────────────────────────────────────────────────────────────┤
+│  claude_sdk_session_settings_update command                     │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓ HTTP
+┌─────────────────────────────────────────────────────────────────┐
+│                   Claude Server (Bun)                           │
+├─────────────────────────────────────────────────────────────────┤
+│  PATCH /session/:id/settings → SessionStorage → SDK options     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Dependencies
+
+- Claude SDK: `@anthropic-ai/claude-code` for `customSystemPrompt`, `appendSystemPrompt`, `allowedTools`, `disallowedTools`
+- Existing session management infrastructure
+
+### Module/Folder Layout
+
+```
+daemon/claude-server/src/
+├── types.ts              # SessionSettings type additions
+├── routes/sessions.ts    # PATCH endpoint
+├── sdk/agent.ts          # buildSdkOptions() updates
+└── storage/sessions.ts   # Settings persistence
+
+app/src/features/claudecode/
+├── components/
+│   ├── SessionSettingsModal.tsx
+│   ├── SessionSettingsButton.tsx
+│   ├── SystemPromptEditor.tsx
+│   └── ToolSelector.tsx
+└── hooks/
+    └── useSessionSettings.ts
+```
+
+---
+
+## 3. Data Model
+
+### Core Types
 
 ```typescript
 // daemon/claude-server/src/types.ts
-interface Session {
-  id: string;
-  workspaceId: string;
-  directory: string;
-  title: string;
-  parentId?: string;
-  resumeId?: string;
-  modelId?: string;
-  createdAt: number;
-  updatedAt: number;
-  status: SessionStatus;
-  permission: PermissionMode;  // default | acceptEdits | bypassPermissions
-  summary?: string;
-}
 
-interface CreateSessionRequest {
-  title: string;
-  parentId?: string;
-  permission?: PermissionMode;
-  modelId?: string;
-}
-```
-
-### SDK Options (hardcoded)
-
-```typescript
-// daemon/claude-server/src/sdk/agent.ts
-return {
-  cwd: session.directory,
-  permissionMode: session.permission,
-  maxTurns: 100,  // Hardcoded!
-  model: session.modelId,
-  // No temperature, topP, systemPrompt, tools, etc.
-};
-```
-
-### What's Missing
-
-| Setting | CLI Flag | SDK Option | Maestro |
-|---------|----------|------------|---------|
-| Temperature | N/A | N/A (SDK handles) | Not exposed |
-| Max turns | `--max-turns` | `maxTurns` | Hardcoded 100 |
-| System prompt | `--system-prompt` | `customSystemPrompt` | Not exposed |
-| Append prompt | `--append-system-prompt` | `appendSystemPrompt` | Not exposed |
-| Allowed tools | `--allowedTools` | `allowedTools` | Not exposed |
-| Disallowed tools | `--disallowedTools` | `disallowedTools` | Not exposed |
-| MCP servers | `--mcp-config` | `mcpServers` | Not exposed |
-
-## OpenCode Reference
-
-OpenCode uses hierarchical config with per-agent settings:
-
-```typescript
-// external/opencode/packages/opencode/src/agent/agent.ts
-Agent.Info {
-  name: string;
-  model?: { providerID, modelID };
-  prompt?: string;           // System prompt
-  temperature?: number;
-  topP?: number;
-  steps?: number;            // Max iterations
-  permission: Ruleset;       // Fine-grained permissions
-  options: Record<string, unknown>;
-}
-```
-
-Key insight: OpenCode separates **agents** (named configurations) from **sessions** (runtime instances). We can adopt a simpler model: session-level settings that override defaults.
-
-## Design
-
-### 1. Extended Session Model
-
-```typescript
 interface Session {
   // Existing fields
   id: string;
@@ -100,42 +113,107 @@ interface Session {
   permission: PermissionMode;
   summary?: string;
 
-  // NEW: Extended settings
+  // NEW: Extended settings (always present, defaults applied)
   settings: SessionSettings;
 }
 
 interface SessionSettings {
-  // Sampling
-  maxTurns?: number;              // Default: 100
-
-  // System prompt
-  systemPrompt?: SystemPromptConfig;
-
-  // Tools
-  allowedTools?: string[];        // Whitelist (if set, only these)
-  disallowedTools?: string[];     // Blacklist (removed from defaults)
-
-  // MCP (future)
-  mcpServers?: McpServerConfig[];
+  maxTurns: number;                    // Default: 100, Range: 1-1000
+  systemPrompt: SystemPromptConfig;    // Default: { mode: 'default' }
+  disallowedTools?: string[];          // Blocklist (removed from defaults)
 }
 
-type SystemPromptConfig =
-  | { type: 'default' }                        // Use SDK default
-  | { type: 'preset'; preset: string }         // Named preset (claude_code, etc.)
-  | { type: 'custom'; prompt: string }         // Full custom prompt
-  | { type: 'append'; append: string };        // Append to default
+// Simplified from union type for clarity
+interface SystemPromptConfig {
+  mode: 'default' | 'append' | 'custom';
+  content?: string;  // Required for 'append' and 'custom' modes
+}
 
-interface McpServerConfig {
-  name: string;
-  type: 'stdio' | 'sse' | 'http';
-  command?: string;
-  args?: string[];
-  url?: string;
-  headers?: Record<string, string>;
+// Default settings applied when not provided
+const DEFAULT_SESSION_SETTINGS: SessionSettings = {
+  maxTurns: 100,
+  systemPrompt: { mode: 'default' },
+  disallowedTools: undefined,
+};
+```
+
+**Design decisions:**
+- `disallowedTools` only (no `allowedTools`): Blocklist-only simplifies the model. Most sessions want all tools; allowlist is rarely useful.
+- `SystemPromptConfig` uses a single interface with mode field instead of union type for easier validation.
+- Empty array `disallowedTools: []` is equivalent to `undefined` (no tools blocked).
+
+### Storage Schema
+
+Settings are stored inline with the session in SQLite. No separate table needed.
+
+```sql
+-- Sessions table already exists; settings stored as JSON in settings column
+ALTER TABLE sessions ADD COLUMN settings TEXT DEFAULT '{}';
+```
+
+---
+
+## 4. Interfaces
+
+### Public APIs
+
+#### PATCH /session/:id/settings
+
+Update session settings. Partial updates supported.
+
+**Request:**
+```typescript
+interface UpdateSessionSettingsRequest {
+  settings: Partial<SessionSettings>;
 }
 ```
 
-### 2. Create Session Request (extended)
+**Merge semantics:**
+- `undefined` field = leave unchanged
+- `null` field = reset to default
+- Provided value = set to value
+
+**Validation:**
+- `maxTurns`: Must be integer 1-1000
+- `systemPrompt.content`: Required when mode is 'append' or 'custom'
+- `disallowedTools`: Array of strings; invalid tool names are silently ignored (SDK handles unknown tools)
+
+**Example request:**
+```json
+{
+  "settings": {
+    "maxTurns": 50,
+    "systemPrompt": {
+      "mode": "append",
+      "content": "Always use TypeScript."
+    },
+    "disallowedTools": ["WebSearch"]
+  }
+}
+```
+
+**Response:** Updated `Session` object with merged settings.
+
+**Error responses:**
+- `400 Bad Request`: Invalid settings (maxTurns out of range, missing content for append/custom)
+- `404 Not Found`: Session not found
+
+#### GET /session/:id
+
+Now includes settings in response:
+
+```json
+{
+  "id": "session-123",
+  "title": "My Session",
+  "settings": {
+    "maxTurns": 100,
+    "systemPrompt": { "mode": "default" }
+  }
+}
+```
+
+#### POST /session (extended)
 
 ```typescript
 interface CreateSessionRequest {
@@ -143,24 +221,13 @@ interface CreateSessionRequest {
   parentId?: string;
   permission?: PermissionMode;
   modelId?: string;
-
-  // NEW
-  settings?: Partial<SessionSettings>;
+  settings?: Partial<SessionSettings>;  // NEW: Optional initial settings
 }
 ```
 
-### 3. Update Session Settings Endpoint (new)
+When `parentId` is set (fork), child session inherits parent's settings unless overridden in request.
 
-```typescript
-// PATCH /session/:id/settings
-interface UpdateSessionSettingsRequest {
-  settings: Partial<SessionSettings>;
-}
-
-// Response: updated Session
-```
-
-### 4. SDK Options Builder (updated)
+### Internal APIs
 
 ```typescript
 // daemon/claude-server/src/sdk/agent.ts
@@ -169,8 +236,8 @@ function buildSdkOptions(
   messageOverrides?: MessageOverrides,
   resumeId?: string,
   abortController?: AbortController
-) {
-  const settings = session.settings || {};
+): SdkOptions {
+  const settings = session.settings;
 
   return {
     cwd: session.directory,
@@ -182,50 +249,169 @@ function buildSdkOptions(
     canUseTool: createCanUseTool(session.id, session.permission),
     hooks: buildHooksConfig(session.id),
 
-    // NEW: From session settings
-    maxTurns: settings.maxTurns ?? 100,
+    // From session settings
+    maxTurns: settings.maxTurns,
     ...buildSystemPromptOptions(settings.systemPrompt),
-    ...buildToolOptions(settings.allowedTools, settings.disallowedTools),
-    ...(settings.mcpServers && { mcpServers: buildMcpConfig(settings.mcpServers) }),
+    ...(settings.disallowedTools?.length && { disallowedTools: settings.disallowedTools }),
   };
 }
 
-function buildSystemPromptOptions(config?: SystemPromptConfig) {
-  if (!config || config.type === 'default') {
-    return {};
+function buildSystemPromptOptions(config: SystemPromptConfig): Record<string, string> {
+  switch (config.mode) {
+    case 'default':
+      return {};
+    case 'append':
+      return { appendSystemPrompt: config.content! };
+    case 'custom':
+      return { customSystemPrompt: config.content! };
   }
-  if (config.type === 'preset') {
-    // SDK doesn't have preset support yet, use custom
-    return { customSystemPrompt: PRESETS[config.preset] };
-  }
-  if (config.type === 'custom') {
-    return { customSystemPrompt: config.prompt };
-  }
-  if (config.type === 'append') {
-    return { appendSystemPrompt: config.append };
-  }
-  return {};
-}
-
-function buildToolOptions(allowed?: string[], disallowed?: string[]) {
-  const opts: Record<string, unknown> = {};
-  if (allowed?.length) {
-    opts.allowedTools = allowed;
-  }
-  if (disallowed?.length) {
-    opts.disallowedTools = disallowed;
-  }
-  return opts;
 }
 ```
 
-### 5. UI Components
+### Events
 
-#### SessionSettingsModal
+**SSE event on settings change:**
 
-Modal for configuring session settings, accessible from:
-- Session header (gear icon)
-- New session dialog (advanced section)
+```typescript
+// Emitted when PATCH /session/:id/settings succeeds
+interface SessionUpdatedEvent {
+  type: 'session.updated';
+  sessionId: string;
+  session: Session;  // Full session object with new settings
+}
+```
+
+---
+
+## 5. Workflows
+
+### Main Flow: Update Settings
+
+```
+User clicks gear icon in session header
+    ↓
+SessionSettingsModal opens with current settings
+    ↓
+User modifies settings (maxTurns, systemPrompt, tools)
+    ↓
+User clicks "Save Settings"
+    ↓
+useSessionSettings.updateSettings(patch)
+    ↓
+Optimistic UI update
+    ↓
+PATCH /session/:id/settings
+    ↓
+Server validates and merges settings
+    ↓
+Server persists to storage
+    ↓
+Server emits session.updated SSE event
+    ↓
+Response returns updated session
+    ↓
+UI confirms save (or rolls back on error)
+```
+
+### Edge Cases
+
+**Settings update during active turn:**
+- Settings are read at turn start. Changes mid-turn apply to the *next* turn.
+- No interruption of current agent execution.
+
+**Concurrent PATCH requests:**
+- Last-write-wins. No optimistic locking.
+- Server merges each request independently against current state.
+
+**Session fork (parentId set):**
+- Child inherits parent's settings at fork time.
+- Subsequent parent changes do not affect child.
+
+---
+
+## 6. Error Handling
+
+### Error Types
+
+| Error | HTTP Status | Cause |
+|-------|-------------|-------|
+| `INVALID_MAX_TURNS` | 400 | maxTurns outside 1-1000 range |
+| `MISSING_PROMPT_CONTENT` | 400 | systemPrompt mode is append/custom but content is empty |
+| `SESSION_NOT_FOUND` | 404 | Session ID does not exist |
+| `STORAGE_ERROR` | 500 | Failed to persist settings |
+
+### Recovery Strategy
+
+- Validation errors: Return immediately with error details; no state change.
+- Storage errors: Return 500; client should retry with exponential backoff.
+- UI: Roll back optimistic update on any error; show toast with error message.
+
+---
+
+## 7. Observability
+
+### Logs
+
+```
+[INFO] Session settings updated: sessionId=abc123 maxTurns=50 systemPromptMode=append
+[WARN] Invalid tool in disallowedTools: toolName=FakeToolXYZ sessionId=abc123
+[ERROR] Failed to persist session settings: sessionId=abc123 error=...
+```
+
+### Metrics
+
+- `session_settings_updates_total`: Counter of settings update requests
+- `session_settings_validation_errors_total`: Counter by error type
+
+### Traces
+
+No additional tracing beyond existing session request traces.
+
+---
+
+## 8. Security and Privacy
+
+### AuthZ/AuthN
+
+- Settings endpoint uses same auth as existing session endpoints.
+- No additional permissions required; user can modify settings for any session they can access.
+
+### Data Handling
+
+- System prompt content may contain sensitive instructions; stored encrypted with session data.
+- No PII in settings fields.
+
+---
+
+## 9. Migration or Rollout
+
+### Compatibility Notes
+
+- Existing sessions have no `settings` field. On read, apply `DEFAULT_SESSION_SETTINGS`.
+- No database migration required if using lazy initialization.
+- Alternative: Run migration to add `settings` column with default JSON.
+
+### Rollout Plan
+
+1. Deploy server with new endpoint (backward compatible; settings optional).
+2. Deploy UI with settings modal.
+3. (Optional) Run migration to backfill settings column.
+
+---
+
+## 10. Open Questions
+
+1. **Workspace defaults**: Should workspaces have default settings that sessions inherit? (Deferred)
+
+2. **Settings templates**: Should users be able to save/load settings presets? (Deferred)
+
+3. **Per-message overrides**: Should settings be overridable per-message (like model/thinking in composer-options)? (Deferred)
+
+---
+
+## Appendix: UI Components
+
+### SessionSettingsModal
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -234,8 +420,7 @@ Modal for configuring session settings, accessible from:
 │                                                         │
 │  ┌─ Execution ────────────────────────────────────────┐ │
 │  │                                                     │ │
-│  │  Max Turns    [100        ]  (iterations before    │ │
-│  │                               stopping)            │ │
+│  │  Max Turns    [100        ]  (1-1000)              │ │
 │  │                                                     │ │
 │  └─────────────────────────────────────────────────────┘ │
 │                                                         │
@@ -252,9 +437,8 @@ Modal for configuring session settings, accessible from:
 │                                                         │
 │  ┌─ Tools ────────────────────────────────────────────┐ │
 │  │                                                     │ │
-│  │  [✓] Read    [✓] Write   [✓] Edit                  │ │
-│  │  [✓] Bash    [✓] Glob    [✓] Grep                  │ │
-│  │  [✓] WebFetch [✓] WebSearch [✓] Task               │ │
+│  │  Disable specific tools:                           │ │
+│  │  [ ] Bash    [ ] WebFetch   [ ] WebSearch          │ │
 │  │                                                     │ │
 │  └─────────────────────────────────────────────────────┘ │
 │                                                         │
@@ -262,39 +446,9 @@ Modal for configuring session settings, accessible from:
 └─────────────────────────────────────────────────────────┘
 ```
 
-#### SessionSettingsButton
+### Tool List
 
-Small gear icon in session header:
-
-```tsx
-interface SessionSettingsButtonProps {
-  session: Session;
-  onOpenSettings: () => void;
-}
-```
-
-#### useSessionSettings Hook
-
-```typescript
-interface UseSessionSettingsReturn {
-  settings: SessionSettings;
-  updateSettings: (patch: Partial<SessionSettings>) => Promise<void>;
-  isUpdating: boolean;
-  error: string | null;
-}
-
-function useSessionSettings(sessionId: string): UseSessionSettingsReturn {
-  // Fetch current settings
-  // Provide update function that PATCHes /session/:id/settings
-  // Optimistic updates with rollback on error
-}
-```
-
-### 6. Tool Configuration
-
-#### Available Tools
-
-From Claude SDK, the built-in tools are:
+Available tools for blocklist configuration:
 
 ```typescript
 const CLAUDE_TOOLS = [
@@ -310,167 +464,3 @@ const CLAUDE_TOOLS = [
   { id: 'WebSearch', name: 'WebSearch', description: 'Search the web', category: 'web' },
 ] as const;
 ```
-
-#### Tool Selector Component
-
-```tsx
-interface ToolSelectorProps {
-  allowedTools?: string[];
-  disallowedTools?: string[];
-  onChange: (allowed?: string[], disallowed?: string[]) => void;
-}
-
-// Two modes:
-// 1. Allowlist mode: Only checked tools are allowed
-// 2. Blocklist mode: All tools except unchecked are allowed
-```
-
-### 7. System Prompt Presets
-
-For future expansion, define named presets:
-
-```typescript
-const SYSTEM_PROMPT_PRESETS: Record<string, string> = {
-  default: '', // Use SDK default
-  concise: 'Be extremely concise. Minimize explanations.',
-  verbose: 'Explain your reasoning in detail.',
-  cautious: 'Always ask before making changes. Never assume.',
-  autonomous: 'Work independently. Only ask when truly blocked.',
-};
-```
-
-### 8. Persistence
-
-Session settings are stored with the session in the server's session storage:
-
-```typescript
-// daemon/claude-server/src/storage/sessions.ts
-interface StoredSession extends Session {
-  settings: SessionSettings;
-}
-```
-
-Settings persist across:
-- Session resume
-- Server restart (if file-based storage)
-- Client reconnection
-
-## Implementation Plan
-
-### Phase 1: Core Settings (MVP)
-
-1. **Server**: Add `settings` field to Session type
-2. **Server**: Add `PATCH /session/:id/settings` endpoint
-3. **Server**: Wire `maxTurns` to SDK options
-4. **UI**: Add settings button to session header
-5. **UI**: Create basic SessionSettingsModal (maxTurns only)
-
-### Phase 2: System Prompt
-
-1. **Server**: Wire `customSystemPrompt` and `appendSystemPrompt`
-2. **UI**: Add system prompt section to modal
-3. **UI**: Toggle between default/append/custom modes
-
-### Phase 3: Tool Configuration
-
-1. **Server**: Wire `allowedTools` and `disallowedTools`
-2. **UI**: Add tool checkboxes to modal
-3. **UI**: Allowlist vs blocklist mode toggle
-
-### Phase 4: MCP Servers (Future)
-
-1. **Server**: Wire `mcpServers` config
-2. **UI**: Add MCP server configuration section
-3. **UI**: Server status indicators
-
-## Files to Create/Modify
-
-| File | Action |
-|------|--------|
-| `daemon/claude-server/src/types.ts` | UPDATE: Add SessionSettings |
-| `daemon/claude-server/src/routes/sessions.ts` | UPDATE: Add PATCH endpoint |
-| `daemon/claude-server/src/sdk/agent.ts` | UPDATE: Wire settings to SDK |
-| `daemon/claude-server/src/storage/sessions.ts` | UPDATE: Store settings |
-| `app/src/features/claudecode/components/SessionSettingsModal.tsx` | NEW |
-| `app/src/features/claudecode/components/SessionSettingsButton.tsx` | NEW |
-| `app/src/features/claudecode/components/ToolSelector.tsx` | NEW |
-| `app/src/features/claudecode/components/SystemPromptEditor.tsx` | NEW |
-| `app/src/features/claudecode/hooks/useSessionSettings.ts` | NEW |
-| `app/src/services/tauri.ts` | UPDATE: Add settings commands |
-
-## API Reference
-
-### PATCH /session/:id/settings
-
-Update session settings.
-
-**Request:**
-```json
-{
-  "settings": {
-    "maxTurns": 50,
-    "systemPrompt": {
-      "type": "append",
-      "append": "Always use TypeScript."
-    },
-    "disallowedTools": ["WebSearch"]
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "id": "session-123",
-  "title": "My Session",
-  "settings": {
-    "maxTurns": 50,
-    "systemPrompt": {
-      "type": "append",
-      "append": "Always use TypeScript."
-    },
-    "disallowedTools": ["WebSearch"]
-  }
-}
-```
-
-### GET /session/:id
-
-Now includes settings in response:
-
-```json
-{
-  "id": "session-123",
-  "title": "My Session",
-  "settings": {
-    "maxTurns": 100,
-    "systemPrompt": { "type": "default" }
-  }
-}
-```
-
-## Success Criteria
-
-- [ ] Users can set max turns per session
-- [ ] Users can append custom instructions to system prompt
-- [ ] Users can disable specific tools
-- [ ] Settings persist across session resume
-- [ ] Settings modal accessible from session header
-- [ ] Default settings work without configuration
-
-## Open Questions
-
-1. **Workspace defaults**: Should workspaces have default settings that sessions inherit?
-
-2. **Settings templates**: Should users be able to save/load settings presets?
-
-3. **Per-message overrides**: Should settings be overridable per-message (like model/thinking in composer-options)?
-
-4. **MCP scope**: When we add MCP, should it be per-session or per-workspace?
-
-## References
-
-- Claude SDK options: `daemon/claude-server/node_modules/@anthropic-ai/claude-code/sdk.d.ts`
-- OpenCode agent config: `external/opencode/packages/opencode/src/agent/agent.ts`
-- OpenCode config system: `external/opencode/packages/opencode/src/config/config.ts`
-- Current session types: `daemon/claude-server/src/types.ts`
