@@ -104,7 +104,7 @@ Reference: [session-settings.md](../session-settings.md)
 
 ### Implementation Checklist
 
-- [ ] `cd daemon/claude-server && bun run typecheck`
+- [x] `cd daemon/claude-server && bun run typecheck`
 - [x] `cd app && bun run typecheck`
 - [ ] Settings persist in session storage
 - [ ] PATCH endpoint updates settings correctly
