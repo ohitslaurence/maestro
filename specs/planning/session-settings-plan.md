@@ -4,13 +4,13 @@ Reference: [session-settings.md](../session-settings.md)
 
 ## Phase 1: Server - Data Model
 
-- [ ] Add `SessionSettings` interface with `maxTurns`, `systemPrompt`, `disallowedTools` fields (§3.1)
-- [ ] Add `SystemPromptConfig` interface with mode field (§3.1)
-- [ ] Add `DEFAULT_SESSION_SETTINGS` constant (§3.1)
-- [ ] Add `settings` field to `Session` interface (§3.1)
-- [ ] Update `CreateSessionRequest` to accept `settings` (§4.1)
-- [ ] Update session storage to persist settings (§3.2)
-- [ ] Apply default settings when not provided
+- [x] Add `SessionSettings` interface with `maxTurns`, `systemPrompt`, `disallowedTools` fields (§3.1)
+- [x] Add `SystemPromptConfig` interface with mode field (§3.1)
+- [x] Add `DEFAULT_SESSION_SETTINGS` constant (§3.1)
+- [x] Add `settings` field to `Session` interface (§3.1)
+- [x] Update `CreateSessionRequest` to accept `settings` (§4.1)
+- [x] Update session storage to persist settings (§3.2)
+- [x] Apply default settings when not provided
 
 ## Phase 2: Server - Settings Endpoint
 

@@ -25,6 +25,24 @@ type ModelInfo = {
   description: string;
 };
 
+// Session Settings types (§3.1)
+type SystemPromptConfig = {
+  mode: 'default' | 'append' | 'custom';
+  content?: string;  // Required for 'append' and 'custom' modes
+};
+
+type SessionSettings = {
+  maxTurns: number;                    // Default: 100, Range: 1-1000
+  systemPrompt: SystemPromptConfig;    // Default: { mode: 'default' }
+  disallowedTools?: string[];          // Blocklist (removed from defaults)
+};
+
+const DEFAULT_SESSION_SETTINGS: SessionSettings = {
+  maxTurns: 100,
+  systemPrompt: { mode: 'default' },
+  disallowedTools: undefined,
+};
+
 type SessionRecord = {
   id: string;
   slug: string;
@@ -37,6 +55,7 @@ type SessionRecord = {
     created: number;
     updated: number;
   };
+  settings: SessionSettings;  // Extended settings (§3.1)
 };
 
 type SessionState = {
@@ -161,9 +180,30 @@ function updateModelsCache(models: ModelInfo[]) {
   console.log("[models] cache updated");
 }
 
-function buildSessionRecord(title?: string, parentID?: string): SessionRecord {
+function buildSessionRecord(title?: string, parentID?: string, settings?: Partial<SessionSettings>): SessionRecord {
   const now = Date.now();
   const finalTitle = title && title.trim().length > 0 ? title.trim() : `Session ${sessions.size + 1}`;
+
+  // Apply provided settings over defaults (§4.1)
+  const mergedSettings: SessionSettings = {
+    maxTurns: typeof settings?.maxTurns === 'number' && settings.maxTurns >= 1 && settings.maxTurns <= 1000
+      ? settings.maxTurns
+      : DEFAULT_SESSION_SETTINGS.maxTurns,
+    systemPrompt: settings?.systemPrompt && typeof settings.systemPrompt === 'object'
+      ? {
+          mode: ['default', 'append', 'custom'].includes(settings.systemPrompt.mode)
+            ? settings.systemPrompt.mode
+            : 'default',
+          content: typeof settings.systemPrompt.content === 'string'
+            ? settings.systemPrompt.content
+            : undefined,
+        }
+      : { ...DEFAULT_SESSION_SETTINGS.systemPrompt },
+    disallowedTools: Array.isArray(settings?.disallowedTools)
+      ? settings.disallowedTools.filter((t): t is string => typeof t === 'string')
+      : undefined,
+  };
+
   return {
     id: createId("session"),
     slug: slugify(finalTitle),
@@ -176,6 +216,7 @@ function buildSessionRecord(title?: string, parentID?: string): SessionRecord {
       created: now,
       updated: now,
     },
+    settings: mergedSettings,
   };
 }
 
@@ -192,7 +233,8 @@ function initStorage() {
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       resume_id TEXT,
-      max_thinking_tokens INTEGER
+      max_thinking_tokens INTEGER,
+      settings TEXT DEFAULT '{}'
     );
     CREATE TABLE IF NOT EXISTS messages (
       id TEXT PRIMARY KEY,
@@ -242,8 +284,8 @@ function initStorage() {
   return {
     insertSession: db.prepare(`
       INSERT INTO sessions (
-        id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens, settings
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         slug=excluded.slug,
         project_id=excluded.project_id,
@@ -254,15 +296,16 @@ function initStorage() {
         created_at=excluded.created_at,
         updated_at=excluded.updated_at,
         resume_id=excluded.resume_id,
-        max_thinking_tokens=excluded.max_thinking_tokens
+        max_thinking_tokens=excluded.max_thinking_tokens,
+        settings=excluded.settings
     `),
     touchSession: db.prepare("UPDATE sessions SET updated_at=? WHERE id=?"),
     updateSessionResume: db.prepare("UPDATE sessions SET resume_id=?, updated_at=? WHERE id=?"),
     selectSessions: db.prepare(
-      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens FROM sessions"
+      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens, settings FROM sessions"
     ),
     selectSessionById: db.prepare(
-      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens FROM sessions WHERE id=?"
+      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens, settings FROM sessions WHERE id=?"
     ),
     insertMessage: db.prepare(`
       INSERT INTO messages (
@@ -326,6 +369,37 @@ function initStorage() {
   };
 }
 
+// Parse settings from JSON string with defaults applied (§3.1 lazy initialization)
+function parseSessionSettings(settingsJson: string | null): SessionSettings {
+  if (!settingsJson) {
+    return { ...DEFAULT_SESSION_SETTINGS };
+  }
+
+  try {
+    const parsed = JSON.parse(settingsJson) as Partial<SessionSettings>;
+    return {
+      maxTurns: typeof parsed.maxTurns === 'number' && parsed.maxTurns >= 1 && parsed.maxTurns <= 1000
+        ? parsed.maxTurns
+        : DEFAULT_SESSION_SETTINGS.maxTurns,
+      systemPrompt: parsed.systemPrompt && typeof parsed.systemPrompt === 'object'
+        ? {
+            mode: ['default', 'append', 'custom'].includes(parsed.systemPrompt.mode)
+              ? parsed.systemPrompt.mode
+              : 'default',
+            content: typeof parsed.systemPrompt.content === 'string'
+              ? parsed.systemPrompt.content
+              : undefined,
+          }
+        : { ...DEFAULT_SESSION_SETTINGS.systemPrompt },
+      disallowedTools: Array.isArray(parsed.disallowedTools)
+        ? parsed.disallowedTools.filter((t): t is string => typeof t === 'string')
+        : undefined,
+    };
+  } catch {
+    return { ...DEFAULT_SESSION_SETTINGS };
+  }
+}
+
 function loadSessions() {
   const rows = statements.selectSessions.all() as Array<{
     id: string;
@@ -339,6 +413,7 @@ function loadSessions() {
     updated_at: number;
     resume_id: string | null;
     max_thinking_tokens: number | null;
+    settings: string | null;
   }>;
 
   for (const row of rows) {
@@ -354,6 +429,7 @@ function loadSessions() {
         created: row.created_at,
         updated: row.updated_at,
       },
+      settings: parseSessionSettings(row.settings),
     };
 
     sessions.set(record.id, {
@@ -378,6 +454,7 @@ function persistSession(record: SessionRecord, resumeId: string | null, maxThink
     record.time.updated,
     resumeId,
     maxThinkingTokens ?? null,
+    JSON.stringify(record.settings),
   );
 }
 
@@ -1570,7 +1647,13 @@ const server = Bun.serve({
     }
 
     if (pathname === "/session" && req.method === "POST") {
-      type SessionCreateBody = { parentID?: string; title?: string; permission?: string; maxThinkingTokens?: number };
+      type SessionCreateBody = {
+        parentID?: string;
+        title?: string;
+        permission?: string;
+        maxThinkingTokens?: number;
+        settings?: Partial<SessionSettings>;  // Optional initial settings (§4.1)
+      };
       let body: SessionCreateBody | null = null;
       try {
         body = (await req.json()) as SessionCreateBody;
@@ -1582,7 +1665,20 @@ const server = Bun.serve({
         ? body.maxThinkingTokens
         : undefined;
 
-      const record = buildSessionRecord(body?.title, body?.parentID);
+      // When parentId is set (fork), child inherits parent's settings unless overridden (§4.1)
+      let inheritedSettings: Partial<SessionSettings> | undefined;
+      if (body?.parentID) {
+        const parentSession = sessions.get(body.parentID);
+        if (parentSession) {
+          inheritedSettings = parentSession.record.settings;
+        }
+      }
+
+      // Merge: defaults <- parent (if fork) <- request settings
+      const requestSettings = body?.settings;
+      const mergedSettings = requestSettings ?? inheritedSettings;
+
+      const record = buildSessionRecord(body?.title, body?.parentID, mergedSettings);
       sessions.set(record.id, {
         record,
         resumeId: null,
@@ -1590,7 +1686,7 @@ const server = Bun.serve({
         activeRun: null,
       });
 
-      console.log(`[session] modelId=default maxThinkingTokens=${maxThinkingTokens ?? "undefined"}`);
+      console.log(`[session] modelId=default maxThinkingTokens=${maxThinkingTokens ?? "undefined"} settings=${JSON.stringify(record.settings)}`);
       persistSession(record, null, maxThinkingTokens);
 
       emitEvent("session.created", {
@@ -1617,6 +1713,7 @@ const server = Bun.serve({
               created_at: number;
               updated_at: number;
               resume_id: string | null;
+              settings: string | null;
             }
           | undefined;
         if (!row) {
@@ -1634,6 +1731,7 @@ const server = Bun.serve({
             created: row.created_at,
             updated: row.updated_at,
           },
+          settings: parseSessionSettings(row.settings),  // Include settings in response (§4.1)
         });
       }
       return jsonResponse(session.record);
