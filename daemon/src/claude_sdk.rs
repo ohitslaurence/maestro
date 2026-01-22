@@ -180,6 +180,7 @@ fn spawn_server_process(workspace_path: &str) -> Result<(Child, u32, String), St
     info!("[claude_sdk] Server process started with pid={}", pid);
 
     let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
+    let stderr = child.stderr.take();
     let reader = BufReader::new(stdout);
 
     debug!("[claude_sdk] Reading stdout to find listening URL...");
@@ -197,6 +198,22 @@ fn spawn_server_process(workspace_path: &str) -> Result<(Child, u32, String), St
 
     if base_url.is_none() {
         error!("[claude_sdk] Stdout closed after {} lines without finding listening URL", line_count);
+
+        // Capture stderr for error diagnosis
+        if let Some(stderr) = stderr {
+            let stderr_reader = BufReader::new(stderr);
+            for (i, line) in stderr_reader.lines().map_while(Result::ok).enumerate() {
+                error!("[claude_sdk] stderr[{}]: {}", i + 1, line);
+            }
+        }
+
+        // Check if process exited
+        match child.try_wait() {
+            Ok(Some(status)) => error!("[claude_sdk] Process exited with: {}", status),
+            Ok(None) => error!("[claude_sdk] Process still running but no output"),
+            Err(e) => error!("[claude_sdk] Failed to check process status: {}", e),
+        }
+
         return Err("Failed to parse server URL from stdout".to_string());
     }
 
