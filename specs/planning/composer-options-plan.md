@@ -13,8 +13,8 @@ Reference: [composer-options.md](../composer-options.md)
 
 - [x] Add `maxThinkingTokens` field to `Session` type (§3)
 - [x] Update `CreateSessionRequest` to accept `maxThinkingTokens` (§4)
-- [ ] Update `SendMessageRequest` to accept `maxThinkingTokens` override (§4)
-- [ ] Wire `maxThinkingTokens` in `buildSdkOptions()` (§4)
+- [x] Update `SendMessageRequest` to accept `maxThinkingTokens` override (§4)
+- [x] Wire `maxThinkingTokens` in `buildSdkOptions()` (§4)
 - [ ] Add `modelId` and `maxThinkingTokens` to SSE events (§4)
 
 ## Phase 3: Tauri Commands [BLOCKED by: Phase 1, 2]

@@ -859,6 +859,7 @@ async function handleSessionMessage(req: Request, sessionId: string) {
     system?: string;
     variant?: string;
     parts?: PartInput[];
+    maxThinkingTokens?: number;
   } | null = null;
 
   try {
@@ -882,6 +883,15 @@ async function handleSessionMessage(req: Request, sessionId: string) {
   const agent = body.agent ?? defaultAgent;
   const userMessageId = body.messageID ?? createId("message");
   const assistantMessageId = createId("message");
+
+  // Per-message thinking override (§4): message override > session default > undefined
+  const messageMaxThinkingTokens = typeof body.maxThinkingTokens === "number" && body.maxThinkingTokens > 0
+    ? body.maxThinkingTokens
+    : undefined;
+  const effectiveMaxThinkingTokens = messageMaxThinkingTokens ?? session.maxThinkingTokens;
+  if (messageMaxThinkingTokens !== undefined) {
+    console.log(`[message] thinking override: ${messageMaxThinkingTokens}`);
+  }
 
   const userMessageInfo = buildUserMessageInfo({
     sessionID: session.record.id,
@@ -924,6 +934,7 @@ async function handleSessionMessage(req: Request, sessionId: string) {
     agent,
     assistantMessageInfo,
     abortController,
+    maxThinkingTokens: effectiveMaxThinkingTokens,
   });
 
   return jsonResponse({
@@ -939,8 +950,9 @@ async function runClaudeQuery(options: {
   agent: string;
   assistantMessageInfo: ReturnType<typeof buildAssistantMessageInfo>;
   abortController: AbortController;
+  maxThinkingTokens?: number;
 }) {
-  const { session, prompt, modelID, agent, assistantMessageInfo, abortController } = options;
+  const { session, prompt, modelID, agent, assistantMessageInfo, abortController, maxThinkingTokens } = options;
   let assistantText = "";
   let reasoningText = "";
   const partId = session.activeRun?.assistantPartId ?? createId("part");
@@ -1041,6 +1053,7 @@ async function runClaudeQuery(options: {
         resume: session.resumeId ?? undefined,
         abortController,
         model: modelID,
+        maxThinkingTokens,
         includePartialMessages: true,
         settingSources: [...defaultSettingSources],
         systemPrompt: defaultSystemPrompt,
