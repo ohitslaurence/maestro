@@ -1518,21 +1518,27 @@ const server = Bun.serve({
     }
 
     if (pathname === "/session" && req.method === "POST") {
-      let body: { parentID?: string; title?: string; permission?: string } | null = null;
+      let body: { parentID?: string; title?: string; permission?: string; maxThinkingTokens?: number } | null = null;
       try {
         body = (await req.json()) as typeof body;
       } catch {
         body = null;
       }
 
+      const maxThinkingTokens = typeof body?.maxThinkingTokens === "number" && body.maxThinkingTokens > 0
+        ? body.maxThinkingTokens
+        : undefined;
+
       const record = buildSessionRecord(body?.title, body?.parentID);
       sessions.set(record.id, {
         record,
         resumeId: null,
+        maxThinkingTokens,
         activeRun: null,
       });
 
-      persistSession(record, null);
+      console.log(`[session] modelId=default maxThinkingTokens=${maxThinkingTokens ?? "undefined"}`);
+      persistSession(record, null, maxThinkingTokens);
 
       emitEvent("session.created", { info: record });
 
