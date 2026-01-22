@@ -39,10 +39,10 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Phase 6: Hook Integration [BLOCKED by: Phase 5]
 
-- [ ] Update `useClaudeSession` to include model/thinking state
-- [ ] Create `useComposerOptions` hook (§2)
-- [ ] Fetch models on session connect via `GET /models`
-- [ ] Wire state to prompt function
+- [x] Update `useClaudeSession` to include model/thinking state
+- [x] Create `useComposerOptions` hook (§2)
+- [x] Fetch models on session connect via `GET /models`
+- [x] Wire state to prompt function
 
 ## Phase 7: Thread View Integration [BLOCKED by: Phase 6]
 

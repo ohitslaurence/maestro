@@ -29,7 +29,7 @@ export type ClaudeSessionState = {
   sessionId: string | null;
   setSessionId: (id: string | null) => void;
   create: (title?: string) => Promise<string | null>;
-  prompt: (message: string, overrideSessionId?: string) => Promise<void>;
+  prompt: (message: string, options?: { sessionId?: string; maxThinkingTokens?: number }) => Promise<void>;
   abort: () => Promise<void>;
   isPrompting: boolean;
 };
@@ -178,15 +178,17 @@ export function useClaudeSession({
   );
 
   const prompt = useCallback(
-    async (message: string, overrideSessionId?: string): Promise<void> => {
-      const targetSessionId = overrideSessionId ?? sessionId;
+    async (message: string, options?: { sessionId?: string; maxThinkingTokens?: number }): Promise<void> => {
+      const targetSessionId = options?.sessionId ?? sessionId;
       if (!workspaceId || !targetSessionId) {
         console.warn("[claude] Cannot prompt: no workspace or session");
         return;
       }
       setIsPrompting(true);
       try {
-        await claudeSdkSessionPrompt(workspaceId, targetSessionId, message);
+        await claudeSdkSessionPrompt(workspaceId, targetSessionId, message, {
+          maxThinkingTokens: options?.maxThinkingTokens,
+        });
       } catch (error) {
         console.error("[claude] Failed to send prompt", error);
         throw error;

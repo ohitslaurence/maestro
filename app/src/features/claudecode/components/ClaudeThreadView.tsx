@@ -83,7 +83,7 @@ export function ClaudeThreadView({ workspaceId }: ClaudeThreadViewProps) {
 
       try {
         // Pass activeSessionId explicitly in case state hasn't updated yet
-        await prompt(message, activeSessionId);
+        await prompt(message, { sessionId: activeSessionId });
       } catch (err) {
         console.error("[ClaudeThreadView] Failed to send prompt", err);
         // Remove pending message on error
