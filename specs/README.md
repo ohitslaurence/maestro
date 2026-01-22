@@ -22,6 +22,8 @@ Keep this file current whenever a new spec or plan is added.
 | [git-diff-ui.md](./git-diff-ui.md) | [planning/git-diff-ui-plan.md](./planning/git-diff-ui-plan.md) | app/src/features/git | Professional git diff UI with split/unified views |
 | [claude-sdk-server.md](./claude-sdk-server.md) | [planning/claude-sdk-server-plan.md](./planning/claude-sdk-server-plan.md) | daemon/claude-server | Per-workspace HTTP server wrapping Claude Agent SDK |
 | [claude-sdk-ui.md](./claude-sdk-ui.md) | [planning/claude-sdk-ui-plan.md](./planning/claude-sdk-ui-plan.md) | app/src/features/claudecode | Claude SDK session UI and conversation flow |
+| [claude-session-history.md](./claude-session-history.md) | [planning/claude-session-history-plan.md](./planning/claude-session-history-plan.md) | app/src/features/claudecode | Claude session list, history hydration, and resume UI |
+| [claude-sdk-restart-resilience.md](./claude-sdk-restart-resilience.md) | [planning/claude-sdk-restart-resilience-plan.md](./planning/claude-sdk-restart-resilience-plan.md) | daemon/src/claude_sdk.rs | Workspace-tied Claude server restart resilience |
 | [composer-options.md](./composer-options.md) | [planning/composer-options-plan.md](./planning/composer-options-plan.md) | app/src/features/claudecode | Model selection and extended thinking controls |
 | [dynamic-tool-approvals.md](./dynamic-tool-approvals.md) | [planning/dynamic-tool-approvals-plan.md](./planning/dynamic-tool-approvals-plan.md) | daemon/claude-server | Interactive permission flow for tool execution |
 | [session-settings.md](./session-settings.md) | [planning/session-settings-plan.md](./planning/session-settings-plan.md) | daemon/claude-server | Session configuration: max turns, system prompt, tools |
