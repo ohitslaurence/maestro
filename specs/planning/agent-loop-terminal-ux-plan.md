@@ -3,7 +3,7 @@
 Reference: [agent-loop-terminal-ux.md](../agent-loop-terminal-ux.md)
 
 ## Phase 1: Gum scaffolding + logging layout
-- [x] Add gum de  pendency checks, log directory creation, and run header output (see 2.1, 2.3, 4).
+- [x] Add gum dependency checks, log directory creation, and run header output (see 2.1, 2.3, 4).
 - [x] Create UI helper module and wire into `scripts/agent-loop.sh` for headers/status lines (see 2.1, 2.3, 4.2).
 - [x] Add spec discovery + gum filter selection with Last Updated sorting when spec path is omitted (see 2.1, 2.3, 3.1, 4.1, 5.1).
 - [x] Add `--model` flag with default `opus` and log it in run metadata (see 3.1, 4.1).
