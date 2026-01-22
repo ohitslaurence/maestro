@@ -7,6 +7,7 @@ import type {
   GitFileDiff,
   GitLogResult,
   GitStatusResult,
+  ModelInfo,
   OpenCodeConnectResult,
   OpenCodeStatusResult,
   SessionInfo,
@@ -303,16 +304,18 @@ export async function claudeSdkSessionCreate(
   return invokeCommand<unknown>("claude_sdk_session_create", { workspaceId, title });
 }
 
-/** Send a prompt to a Claude SDK session */
+/** Send a prompt to a Claude SDK session (composer-options spec §4) */
 export async function claudeSdkSessionPrompt(
   workspaceId: string,
   sessionId: string,
   message: string,
+  options?: { maxThinkingTokens?: number },
 ): Promise<unknown> {
   return invokeCommand<unknown>("claude_sdk_session_prompt", {
     workspaceId,
     sessionId,
     message,
+    maxThinkingTokens: options?.maxThinkingTokens,
   });
 }
 
@@ -325,6 +328,13 @@ export async function claudeSdkSessionAbort(
     workspaceId,
     sessionId,
   });
+}
+
+/** Fetch available models from Claude SDK server (composer-options spec §4) */
+export async function claudeSdkModels(
+  workspaceId: string,
+): Promise<ModelInfo[]> {
+  return invokeCommand<ModelInfo[]>("claude_sdk_models", { workspaceId });
 }
 
 // --- Storage commands (session-persistence §4) ---

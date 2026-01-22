@@ -175,3 +175,24 @@ export type OpenCodeThreadItem =
     };
 
 export type OpenCodeThreadStatus = "idle" | "processing" | "error";
+
+// --- Claude SDK types (composer-options spec §3, §4) ---
+
+/** Model information from SDK's supportedModels() */
+export type ModelInfo = {
+  value: string;       // e.g., "claude-sonnet-4-20250514"
+  displayName: string; // e.g., "Claude Sonnet 4"
+  description: string;
+};
+
+/** Thinking mode presets (spec §3) */
+export type ThinkingMode = "off" | "low" | "medium" | "high" | "max";
+
+/** Maps thinking modes to maxThinkingTokens values (spec §3) */
+export const THINKING_BUDGETS: Record<ThinkingMode, number | undefined> = {
+  off: undefined,  // SDK default (no thinking)
+  low: 4_000,
+  medium: 10_000,
+  high: 16_000,
+  max: 32_000,
+};

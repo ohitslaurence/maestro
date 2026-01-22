@@ -25,9 +25,9 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Phase 4: Frontend Service Layer [BLOCKED by: Phase 3]
 
-- [ ] Update `claudeSdkSessionPrompt` service to accept `maxThinkingTokens` option
-- [ ] Add `claudeSdkModels` service function
-- [ ] Add `ThinkingMode` type and `THINKING_BUDGETS` mapping (§3)
+- [x] Update `claudeSdkSessionPrompt` service to accept `maxThinkingTokens` option
+- [x] Add `claudeSdkModels` service function
+- [x] Add `ThinkingMode` type and `THINKING_BUDGETS` mapping (§3)
 
 ## Phase 5: UI Components [BLOCKED by: Phase 4]
 
