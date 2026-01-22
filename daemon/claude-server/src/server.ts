@@ -42,6 +42,7 @@ type SessionRecord = {
 type SessionState = {
   record: SessionRecord;
   resumeId: string | null;
+  maxThinkingTokens?: number;
   activeRun: {
     abortController: AbortController;
     assistantMessageId: string;
@@ -182,7 +183,8 @@ function initStorage() {
       version INTEGER NOT NULL,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
-      resume_id TEXT
+      resume_id TEXT,
+      max_thinking_tokens INTEGER
     );
     CREATE TABLE IF NOT EXISTS messages (
       id TEXT PRIMARY KEY,
@@ -232,8 +234,8 @@ function initStorage() {
   return {
     insertSession: db.prepare(`
       INSERT INTO sessions (
-        id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         slug=excluded.slug,
         project_id=excluded.project_id,
@@ -243,15 +245,16 @@ function initStorage() {
         version=excluded.version,
         created_at=excluded.created_at,
         updated_at=excluded.updated_at,
-        resume_id=excluded.resume_id
+        resume_id=excluded.resume_id,
+        max_thinking_tokens=excluded.max_thinking_tokens
     `),
     touchSession: db.prepare("UPDATE sessions SET updated_at=? WHERE id=?"),
     updateSessionResume: db.prepare("UPDATE sessions SET resume_id=?, updated_at=? WHERE id=?"),
     selectSessions: db.prepare(
-      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id FROM sessions"
+      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens FROM sessions"
     ),
     selectSessionById: db.prepare(
-      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id FROM sessions WHERE id=?"
+      "SELECT id, slug, project_id, directory, parent_id, title, version, created_at, updated_at, resume_id, max_thinking_tokens FROM sessions WHERE id=?"
     ),
     insertMessage: db.prepare(`
       INSERT INTO messages (
@@ -327,6 +330,7 @@ function loadSessions() {
     created_at: number;
     updated_at: number;
     resume_id: string | null;
+    max_thinking_tokens: number | null;
   }>;
 
   for (const row of rows) {
@@ -347,12 +351,13 @@ function loadSessions() {
     sessions.set(record.id, {
       record,
       resumeId: row.resume_id,
+      maxThinkingTokens: row.max_thinking_tokens ?? undefined,
       activeRun: null,
     });
   }
 }
 
-function persistSession(record: SessionRecord, resumeId: string | null) {
+function persistSession(record: SessionRecord, resumeId: string | null, maxThinkingTokens?: number) {
   statements.insertSession.run(
     record.id,
     record.slug,
@@ -364,6 +369,7 @@ function persistSession(record: SessionRecord, resumeId: string | null) {
     record.time.created,
     record.time.updated,
     resumeId,
+    maxThinkingTokens ?? null,
   );
 }
 

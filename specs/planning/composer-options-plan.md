@@ -11,7 +11,7 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Phase 2: Server - Thinking Support
 
-- [ ] Add `maxThinkingTokens` field to `Session` type (§3)
+- [x] Add `maxThinkingTokens` field to `Session` type (§3)
 - [ ] Update `CreateSessionRequest` to accept `maxThinkingTokens` (§4)
 - [ ] Update `SendMessageRequest` to accept `maxThinkingTokens` override (§4)
 - [ ] Wire `maxThinkingTokens` in `buildSdkOptions()` (§4)
