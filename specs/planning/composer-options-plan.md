@@ -31,11 +31,11 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Phase 5: UI Components [BLOCKED by: Phase 4]
 
-- [ ] Create `ModelSelector.tsx` dropdown component (§2)
-- [ ] Create `ThinkingModeSelector.tsx` dropdown component (§2)
-- [ ] Create `ComposerOptions.tsx` container component (§2)
-- [ ] Style components to match existing design tokens
-- [ ] Disable dropdowns during message streaming (§5)
+- [x] Create `ModelSelector.tsx` dropdown component (§2)
+- [x] Create `ThinkingModeSelector.tsx` dropdown component (§2)
+- [x] Create `ComposerOptions.tsx` container component (§2)
+- [x] Style components to match existing design tokens
+- [x] Disable dropdowns during message streaming (§5)
 
 ## Phase 6: Hook Integration [BLOCKED by: Phase 5]
 
