@@ -34,9 +34,14 @@ Hono router approach deferred as codebase uses Bun.serve directly.
 
 ## Phase 4: Enhanced SSE Events [BLOCKED by: Phase 1, Phase 2]
 
-- [ ] Update `PermissionAskedEvent` to include full `PermissionRequest` (§4)
-- [ ] Ensure `permission.replied` events include reply type (§4)
-- [ ] Emit events from `PermissionManager` methods (§4)
+- [x] Update `PermissionAskedEvent` to include full `PermissionRequest` (§4)
+- [x] Ensure `permission.replied` events include reply type (§4)
+- [x] Emit events from `PermissionManager` methods (§4)
+
+Note: Events emitted inline in canUseTool handler per single-file pattern. `permission.asked` now
+includes full PermissionRequest (id, sessionId, messageId, tool, permission, input, patterns,
+metadata, suggestions, createdAt). `permission.replied` uses spec field naming (sessionId, requestId)
+and maps internal reply format (once/reject/always) to spec format (allow/deny/always).
 
 ## Phase 5: Tauri Commands [BLOCKED by: Phase 3]
 

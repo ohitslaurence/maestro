@@ -1095,14 +1095,21 @@ async function runClaudeQuery(options: {
           }
 
           const requestId = createId("permission");
-          emitEvent("permission.asked", {
+          const messageId = assistantMessageInfo.id;
+          // Build full PermissionRequest per spec §3
+          const permissionRequest = {
             id: requestId,
-            sessionID: session.record.id,
+            sessionId: session.record.id,
+            messageId,
+            tool: toolName,
             permission,
+            input: input as Record<string, unknown>,
             patterns,
             metadata,
-            always: patterns,
-          });
+            suggestions: [] as Array<{ type: string; patterns: string[]; description: string }>,
+            createdAt: Date.now(),
+          };
+          emitEvent("permission.asked", { request: permissionRequest });
 
           const reply = await waitForPermissionReply({
             requestID: requestId,
@@ -1118,10 +1125,12 @@ async function runClaudeQuery(options: {
             sessionPermissions.add(replyKey);
           }
 
+          // Map internal reply format to spec reply format (§4)
+          const specReply = reply === "once" ? "allow" : reply === "reject" ? "deny" : reply;
           emitEvent("permission.replied", {
-            sessionID: session.record.id,
-            requestID: requestId,
-            reply,
+            sessionId: session.record.id,
+            requestId,
+            reply: specReply,
           });
 
           if (reply === "reject") {
