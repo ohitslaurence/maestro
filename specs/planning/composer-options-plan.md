@@ -19,9 +19,9 @@ Reference: [composer-options.md](../composer-options.md)
 
 ## Phase 3: Tauri Commands [BLOCKED by: Phase 1, 2]
 
-- [ ] Add `max_thinking_tokens` param to `claude_sdk_session_prompt` command (§4)
+- [x] Add `max_thinking_tokens` param to `claude_sdk_session_prompt` command (§4)
 - [ ] Add `claude_sdk_models` command to fetch available models (§4)
-- [ ] Update Rust types for new params
+- [x] Update Rust types for new params
 
 ## Phase 4: Frontend Service Layer [BLOCKED by: Phase 3]
 

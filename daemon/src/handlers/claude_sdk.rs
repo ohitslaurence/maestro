@@ -199,17 +199,18 @@ pub async fn handle_session_create(request: &Request, state: &DaemonState) -> St
 
 /// Handle claude_sdk_session_prompt request
 pub async fn handle_session_prompt(request: &Request, state: &DaemonState) -> String {
-    let params: OpenCodeSessionPromptParams = match serde_json::from_value(request.params.clone()) {
-        Ok(p) => p,
-        Err(e) => {
-            return serde_json::to_string(&ErrorResponse::new(
-                request.id,
-                INVALID_PARAMS,
-                format!("Invalid params: {e}"),
-            ))
-            .unwrap();
-        }
-    };
+    let params: ClaudeSdkSessionPromptParams =
+        match serde_json::from_value(request.params.clone()) {
+            Ok(p) => p,
+            Err(e) => {
+                return serde_json::to_string(&ErrorResponse::new(
+                    request.id,
+                    INVALID_PARAMS,
+                    format!("Invalid params: {e}"),
+                ))
+                .unwrap();
+            }
+        };
 
     let base_url = match state.get_claude_sdk_server(&params.workspace_id).await {
         Some(url) => url,
@@ -224,12 +225,17 @@ pub async fn handle_session_prompt(request: &Request, state: &DaemonState) -> St
     };
 
     let path = format!("/session/{}/message", params.session_id);
-    let body = json!({
+    // Build request body per composer-options spec §4: SendMessageRequest
+    let mut body = json!({
         "parts": [{
             "type": "text",
             "text": params.message
         }]
     });
+    // Add maxThinkingTokens if provided (per-message override)
+    if let Some(tokens) = params.max_thinking_tokens {
+        body["maxThinkingTokens"] = json!(tokens);
+    }
 
     match OpenCodeRegistry::proxy_post(&base_url, &path, Some(body), None).await {
         Ok(result) => serde_json::to_string(&SuccessResponse::new(request.id, result)).unwrap(),

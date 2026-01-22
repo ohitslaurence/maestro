@@ -175,6 +175,18 @@ pub struct OpenCodeSessionMessagesParams {
     pub session_id: String,
 }
 
+// --- Claude SDK request params (composer-options spec §4) ---
+
+#[derive(Debug, Deserialize)]
+pub struct ClaudeSdkSessionPromptParams {
+    pub workspace_id: String,
+    pub session_id: String,
+    pub message: String,
+    /// Per-message thinking budget override (composer-options spec §3, §4)
+    #[serde(default)]
+    pub max_thinking_tokens: Option<u32>,
+}
+
 // --- Response types ---
 
 #[derive(Debug, Serialize)]

@@ -404,15 +404,17 @@ pub async fn claude_sdk_session_prompt(
     workspace_id: String,
     session_id: String,
     message: String,
+    max_thinking_tokens: Option<u32>,
     state: State<'_, Arc<DaemonState>>,
 ) -> Result<Value, String> {
     state
         .call(
             METHOD_CLAUDE_SDK_SESSION_PROMPT,
-            Some(OpenCodeSessionPromptParams {
+            Some(ClaudeSdkSessionPromptParams {
                 workspace_id,
                 session_id,
                 message,
+                max_thinking_tokens,
             }),
         )
         .await
