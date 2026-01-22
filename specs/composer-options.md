@@ -1,55 +1,89 @@
 # Composer Options Spec
 
-## Overview
+**Status:** Planned
+**Version:** 1.0
+**Last Updated:** 2026-01-22
+
+---
+
+## 1. Overview
+
+### Purpose
 
 Add model selection and extended thinking controls to the chat composer, enabling users to configure each prompt before sending.
 
-**Goal**: Match Claude Code CLI flexibility—users can pick model and thinking mode per-message, not just per-session.
+### Goals
 
-## Current State
+- Match Claude Code CLI flexibility: users can pick model and thinking mode per-message
+- Provide simple preset thinking levels (not raw token sliders)
+- Fetch available models dynamically from SDK
 
-| Layer | Model Selection | Thinking Budget |
-|-------|-----------------|-----------------|
-| **Server** | `session.modelId` passed to SDK | Not wired |
-| **UI** | No selector | No UI |
-| **Hook** | Hardcoded in `create()` | N/A |
+### Non-Goals
 
-## SDK Capabilities (Verified)
+- Per-message model override (deferred to reduce complexity; model is session-level only)
+- Cost estimation UI (requires cost-token-transparency spec)
+- Custom thinking token values (presets only)
 
-The `@anthropic-ai/claude-code` SDK exposes (from `sdk.d.ts`):
+### References
 
-```typescript
-export type Options = {
-  model?: string;
-  maxThinkingTokens?: number;  // ✅ Thinking budget supported!
-  // ...
-};
+| File | Purpose |
+|------|---------|
+| `daemon/claude-server/src/types.ts` | Session and request types to extend |
+| `daemon/claude-server/src/sdk/agent.ts` | Wire `maxThinkingTokens` into SDK options |
+| `daemon/claude-server/src/routes/messages.ts` | Accept per-message thinking override |
+| `daemon/claude-server/src/routes/sessions.ts` | Session creation with new params |
+| `daemon/claude-server/src/index.ts` | Register `/models` route |
+| `app/src-tauri/src/lib.rs` | Tauri commands with new params |
+| `app/src/services/tauri.ts` | TypeScript service signatures |
+| `app/src/features/claudecode/hooks/useClaudeSession.ts` | Model/thinking state |
+| `app/src/features/claudecode/components/ClaudeThreadView.tsx` | Integrate ComposerOptions |
+| `daemon/claude-server/node_modules/@anthropic-ai/claude-code/sdk.d.ts` | Verify SDK types |
 
-// Runtime control methods on Query:
-setModel(model?: string): Promise<void>;
-supportedModels(): Promise<ModelInfo[]>;  // ✅ Dynamic model list!
+---
+
+## 2. Architecture
+
+### Components
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   UI Composer   │────▶│  Tauri Command  │────▶│  Claude Server  │
+│  (dropdowns)    │     │  (prompt call)  │     │  (SDK wrapper)  │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                                               │
+        │ fetch models                                  │
+        └──────────────────────────────────────────────▶│
 ```
 
-**Key findings:**
-- `maxThinkingTokens` directly controls thinking budget
-- `supportedModels()` returns available models dynamically
-- `setModel()` allows changing model mid-session
+### Dependencies
 
-## OpenCode Reference
+- `@anthropic-ai/claude-code` SDK: `supportedModels()`, `maxThinkingTokens` option
+- Existing session management in `daemon/claude-server`
 
-OpenCode uses **variants** that map to provider-specific options:
+### Module/Folder Layout
 
-```typescript
-// external/opencode/packages/opencode/src/provider/transform.ts
-high: { thinking: { type: 'enabled', budgetTokens: 16000 } },
-max:  { thinking: { type: 'enabled', budgetTokens: 31999 } },
+```
+daemon/claude-server/src/
+├── routes/
+│   ├── models.ts       # NEW: /models endpoint
+│   └── messages.ts     # UPDATE: accept overrides
+└── sdk/
+    └── agent.ts        # UPDATE: wire thinking tokens
+
+app/src/features/claudecode/
+├── components/
+│   ├── ComposerOptions.tsx        # NEW
+│   ├── ModelSelector.tsx          # NEW
+│   └── ThinkingModeSelector.tsx   # NEW
+└── hooks/
+    └── useComposerOptions.ts      # NEW
 ```
 
-We'll adopt a similar UX pattern (preset levels, not raw token slider).
+---
 
-## Design
+## 3. Data Model
 
-### 1. Data Model
+### Core Types
 
 #### Session (extended)
 
@@ -57,23 +91,27 @@ We'll adopt a similar UX pattern (preset levels, not raw token slider).
 interface Session {
   // ... existing fields
   modelId?: string;              // Already exists
-  maxThinkingTokens?: number;    // NEW: 0 = off, or token budget
+  maxThinkingTokens?: number;    // NEW: thinking budget
 }
 ```
+
+**Semantics for `maxThinkingTokens`:**
+- `undefined`: Inherit from session default (or SDK default if session has none)
+- `0` or omitted in SDK call: No extended thinking
+- `number > 0`: Thinking budget in tokens
 
 #### Per-Message Override
 
 ```typescript
 interface SendMessageRequest {
   parts: MessagePartInput[];
-  modelId?: string;              // NEW: override session model
   maxThinkingTokens?: number;    // NEW: override session thinking
 }
 ```
 
-### 2. Available Models
+Note: `modelId` is session-level only (not per-message) to reduce complexity.
 
-Fetch dynamically via `supportedModels()` on session init:
+#### Model Info
 
 ```typescript
 // SDK provides this structure
@@ -82,32 +120,15 @@ type ModelInfo = {
   displayName: string; // e.g., "Claude Sonnet 4"
   description: string;
 };
-
-// Fallback if fetch fails
-const FALLBACK_MODELS: ModelInfo[] = [
-  { value: 'claude-sonnet-4-20250514', displayName: 'Claude Sonnet 4', description: 'Fast and capable' },
-  { value: 'claude-opus-4-20250514', displayName: 'Claude Opus 4', description: 'Most intelligent' },
-  { value: 'claude-haiku-3-5-20241022', displayName: 'Claude Haiku 3.5', description: 'Fastest' },
-];
 ```
 
-### 3. Thinking Modes
-
-Map user-friendly levels to token budgets:
-
-| Mode | `maxThinkingTokens` | Description |
-|------|---------------------|-------------|
-| `off` | `undefined` (omit) | No extended thinking |
-| `low` | 4,000 | Light reasoning |
-| `medium` | 10,000 | Moderate reasoning |
-| `high` | 16,000 | Standard extended thinking |
-| `max` | 32,000 | Maximum thinking budget |
+#### Thinking Modes
 
 ```typescript
 type ThinkingMode = 'off' | 'low' | 'medium' | 'high' | 'max';
 
 const THINKING_BUDGETS: Record<ThinkingMode, number | undefined> = {
-  off: undefined,
+  off: undefined,  // SDK default (no thinking)
   low: 4_000,
   medium: 10_000,
   high: 16_000,
@@ -115,59 +136,50 @@ const THINKING_BUDGETS: Record<ThinkingMode, number | undefined> = {
 };
 ```
 
-### 4. UI Components
+| Mode | `maxThinkingTokens` | Description |
+|------|---------------------|-------------|
+| `off` | `undefined` | No extended thinking |
+| `low` | 4,000 | Light reasoning |
+| `medium` | 10,000 | Moderate reasoning |
+| `high` | 16,000 | Standard extended thinking |
+| `max` | 32,000 | Maximum thinking budget |
 
-#### ComposerOptions (new component)
+### Storage Schema
 
-Compact options bar above the textarea:
+No new storage; settings live in session state (already persisted).
 
-```
-┌──────────────────────────────────────────────────────────┐
-│ [Sonnet 4 ▾]  [💭 High ▾]                               │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│  Type your message...                                    │
-│                                                          │
-│                                            [Send ↵]      │
-└──────────────────────────────────────────────────────────┘
-```
+---
 
-- **Model dropdown**: Shows current model, click to change
-- **Thinking dropdown**: Shows thinking mode (off/low/medium/high/max)
+## 4. Interfaces
 
-#### Model Selector Dropdown
+### Public APIs
 
-```tsx
-interface ModelSelectorProps {
-  value: string;
-  onChange: (modelId: string) => void;
-  models: ModelInfo[];
-  loading?: boolean;
-}
+#### GET /models
 
-// Renders as compact dropdown
-// Shows model displayName
-// Fetches models via supportedModels() on mount
-```
-
-#### Thinking Mode Selector
-
-```tsx
-interface ThinkingModeSelectorProps {
-  value: ThinkingMode;
-  onChange: (mode: ThinkingMode) => void;
-}
-
-// Renders as dropdown with options:
-// Off, Low (4k), Medium (10k), High (16k), Max (32k)
-```
-
-### 5. Server Changes
-
-#### Session Create (update)
+Returns available models from SDK.
 
 ```typescript
-// POST /session
+// Response: ModelInfo[]
+[
+  { value: 'claude-sonnet-4-20250514', displayName: 'Claude Sonnet 4', description: 'Fast and capable' },
+  { value: 'claude-opus-4-20250514', displayName: 'Claude Opus 4', description: 'Most intelligent' },
+]
+```
+
+**Caching:** 5-minute TTL, per-workspace. On cache miss, call `supportedModels()`. On SDK call failure, return `FALLBACK_MODELS`.
+
+**Fallback models:**
+```typescript
+const FALLBACK_MODELS: ModelInfo[] = [
+  { value: 'claude-sonnet-4-20250514', displayName: 'Claude Sonnet 4', description: 'Fast and capable' },
+  { value: 'claude-opus-4-20250514', displayName: 'Claude Opus 4', description: 'Most intelligent' },
+  { value: 'claude-haiku-3-5-20241022', displayName: 'Claude Haiku 3.5', description: 'Fastest' },
+];
+```
+
+#### POST /session
+
+```typescript
 interface CreateSessionRequest {
   title: string;
   parentId?: string;
@@ -177,36 +189,35 @@ interface CreateSessionRequest {
 }
 ```
 
-#### Message Send (update)
+#### POST /session/:id/message
 
 ```typescript
-// POST /session/:id/message
 interface SendMessageRequest {
   parts: MessagePartInput[];
-  modelId?: string;            // NEW: per-message override
   maxThinkingTokens?: number;  // NEW: per-message override
 }
 ```
 
-#### SDK Options Builder (update)
+### Internal APIs
+
+#### buildSdkOptions()
 
 ```typescript
 // daemon/claude-server/src/sdk/agent.ts
 function buildSdkOptions(
   session: Session,
-  messageOverrides?: { modelId?: string; maxThinkingTokens?: number },
+  messageOverrides?: { maxThinkingTokens?: number },
   resumeId?: string,
   abortController?: AbortController
 ) {
-  const modelId = messageOverrides?.modelId ?? session.modelId;
   const maxThinkingTokens = messageOverrides?.maxThinkingTokens ?? session.maxThinkingTokens;
 
   return {
     cwd: session.directory,
     permissionMode: mapPermissionMode(session.permission),
     maxTurns: 100,
-    model: modelId,
-    maxThinkingTokens,  // SDK accepts this directly
+    model: session.modelId,
+    maxThinkingTokens,  // SDK accepts directly
     abortController,
     resume: resumeId,
     canUseTool: createCanUseTool(session.id, session.permission),
@@ -215,171 +226,134 @@ function buildSdkOptions(
 }
 ```
 
-#### Models Endpoint (new)
+### Events
+
+SSE events should include model info for display:
 
 ```typescript
-// GET /models
-// Returns available models from SDK
-app.get('/models', async (c) => {
-  // Call supportedModels() on active query or cache from init
-  const models = await getSupportedModels();
-  return c.json(models);
-});
-```
-
-### 6. Hook Changes
-
-#### useClaudeSession (update)
-
-```typescript
-export type ClaudeSessionState = {
-  // ... existing
-
-  // Model & thinking
-  modelId: string;
-  setModelId: (id: string) => void;
-  thinkingMode: ThinkingMode;
-  setThinkingMode: (mode: ThinkingMode) => void;
-
-  // Available models (fetched from SDK)
-  models: ModelInfo[];
-  modelsLoading: boolean;
-
-  // Updated prompt signature
-  prompt: (message: string, options?: {
-    modelId?: string;
-    maxThinkingTokens?: number;
-  }) => Promise<void>;
-};
-```
-
-#### useComposerOptions (new hook)
-
-```typescript
-interface UseComposerOptionsReturn {
-  // Current values (session defaults)
-  modelId: string;
-  thinkingMode: ThinkingMode;
-
-  // Handlers
-  setModelId: (id: string) => void;
-  setThinkingMode: (mode: ThinkingMode) => void;
-
-  // Available options
-  models: ModelInfo[];
-  modelsLoading: boolean;
-
-  // Derived
-  maxThinkingTokens: number | undefined; // Computed from thinkingMode
+// Add to session:started or message:started event
+{
+  type: 'session:started',
+  modelId: 'claude-sonnet-4-20250514',
+  maxThinkingTokens: 16000,
+  // ...existing fields
 }
 ```
 
-### 7. Tauri Commands (update)
+---
 
-```rust
-#[tauri::command]
-async fn claude_sdk_session_prompt(
-    state: State<'_, AppState>,
-    workspace_id: String,
-    session_id: String,
-    message: String,
-    model_id: Option<String>,           // NEW
-    max_thinking_tokens: Option<u32>,   // NEW
-) -> Result<(), String>
+## 5. Workflows
 
-#[tauri::command]
-async fn claude_sdk_models(
-    state: State<'_, AppState>,
-    workspace_id: String,
-) -> Result<Vec<ModelInfo>, String>  // NEW: fetch available models
-```
+### Main Flow: Model Selection
 
-### 8. Service Layer (update)
+1. User opens session → UI calls `GET /models` (or uses cached)
+2. Models populate dropdown with current session model selected
+3. User selects different model → session update via existing session update endpoint
+4. Next message uses new model
 
-```typescript
-// app/src/services/tauri.ts
-export async function claudeSdkSessionPrompt(
-  workspaceId: string,
-  sessionId: string,
-  message: string,
-  options?: {
-    modelId?: string;
-    maxThinkingTokens?: number;
-  }
-): Promise<void> {
-  return invoke('claude_sdk_session_prompt', {
-    workspaceId,
-    sessionId,
-    message,
-    modelId: options?.modelId,
-    maxThinkingTokens: options?.maxThinkingTokens,
-  });
-}
+### Main Flow: Thinking Mode Selection
 
-export async function claudeSdkModels(
-  workspaceId: string
-): Promise<ModelInfo[]> {
-  return invoke('claude_sdk_models', { workspaceId });
-}
-```
+1. User selects thinking mode from dropdown (off/low/medium/high/max)
+2. UI maps mode → `maxThinkingTokens` via `THINKING_BUDGETS`
+3. On send: `maxThinkingTokens` included in message request
+4. SDK receives budget and allocates thinking accordingly
 
-## Implementation Plan
+### Edge Cases
 
-### Phase 1: Model Selection (MVP)
+#### Model Unavailable Mid-Session
 
-1. **Server**: Add `/models` endpoint, accept `modelId` in message request
-2. **UI**: Add model dropdown to composer (fetch models on mount)
-3. **Hook**: Wire model selection to prompt call
-4. **Tauri**: Add `model_id` param + new models command
+If selected model becomes unavailable (API key change, deprecation):
+- SDK will error on message send
+- UI shows error, user can select different model
+- No automatic fallback (user must explicitly choose)
 
-### Phase 2: Thinking Mode
+#### Thinking Mode on Non-Thinking Model
 
-1. **Server**: Wire `maxThinkingTokens` to SDK options
-2. **UI**: Add thinking mode dropdown to composer
-3. **Hook**: Map ThinkingMode → maxThinkingTokens
+All Claude models support extended thinking. If SDK rejects `maxThinkingTokens`:
+- Error surfaces to user
+- UI does not disable thinking selector (SDK is source of truth)
 
-### Phase 3: Persistence & Defaults
+#### Controls During Streaming
 
-1. **Session defaults**: Store last-used model/thinking per session
-2. **Workspace defaults**: Store preferred model per workspace
+Disable model/thinking dropdowns while message is streaming. Re-enable on stream complete or error.
 
-## Files to Modify
+### Retry/Backoff
 
-| File | Changes |
-|------|---------|
-| `daemon/claude-server/src/types.ts` | Update request types |
-| `daemon/claude-server/src/sdk/agent.ts` | Wire `maxThinkingTokens` |
-| `daemon/claude-server/src/routes/messages.ts` | Accept message overrides |
-| `daemon/claude-server/src/routes/models.ts` | NEW: models endpoint |
-| `app/src-tauri/src/lib.rs` | Add params + new command |
-| `app/src/services/tauri.ts` | Update service signatures |
-| `app/src/features/claudecode/hooks/useClaudeSession.ts` | Add model/thinking state |
-| `app/src/features/claudecode/components/ClaudeThreadView.tsx` | Add ComposerOptions |
-| `app/src/features/claudecode/components/ComposerOptions.tsx` | NEW |
-| `app/src/features/claudecode/components/ModelSelector.tsx` | NEW |
-| `app/src/features/claudecode/components/ThinkingModeSelector.tsx` | NEW |
+N/A — uses existing message retry logic.
 
-## Open Questions
+---
 
-1. **Model caching**: Cache `supportedModels()` result? How long? Per-session or global?
+## 6. Error Handling
 
-2. **Thinking token display**: Should we show thinking token usage separately in the UI? (Prerequisite: spec #2 cost-token-transparency)
+### Error Types
 
-3. **OpenCode parity**: OpenCode doesn't expose thinking for Claude (only model variants). Do we want parity, or leverage SDK capabilities?
+| Error | Cause | Response |
+|-------|-------|----------|
+| `models_fetch_failed` | `supportedModels()` SDK call fails | Return `FALLBACK_MODELS` |
+| `invalid_model` | SDK rejects model ID | 400 with message |
+| `invalid_thinking_budget` | SDK rejects token value | 400 with message |
 
-## Success Criteria
+### Recovery Strategy
 
-- [ ] User can select model from dropdown before sending message
-- [ ] Models are fetched dynamically from SDK
-- [ ] User can select thinking mode (off/low/medium/high/max)
-- [ ] Model + thinking settings persist for session
-- [ ] Per-message overrides work correctly
-- [ ] UI updates to show current model/thinking state
+- Model fetch: Use fallback models, log warning
+- Invalid model/budget: Surface error to user, don't send message
 
-## References
+---
 
-- **Claude SDK types**: `daemon/claude-server/node_modules/@anthropic-ai/claude-code/sdk.d.ts`
-- OpenCode model handling: `external/opencode/packages/opencode/src/provider/`
-- OpenCode transform (thinking): `external/opencode/packages/opencode/src/provider/transform.ts`
-- Current server types: `daemon/claude-server/src/types.ts`
-- Current SDK wrapper: `daemon/claude-server/src/sdk/agent.ts`
+## 7. Observability
+
+### Logs
+
+- `[models] cache hit/miss` — track model fetch frequency
+- `[session] modelId={id} maxThinkingTokens={n}` — on session create/update
+- `[message] thinking override: {n}` — when per-message override used
+
+### Metrics
+
+Deferred to future observability spec.
+
+### Traces
+
+N/A for MVP.
+
+---
+
+## 8. Security and Privacy
+
+### AuthZ/AuthN
+
+No additional auth required. Model availability determined by user's API key (SDK handles).
+
+### Data Handling
+
+Model selection stored in session state (already encrypted at rest if applicable).
+
+---
+
+## 9. Migration or Rollout
+
+### Compatibility Notes
+
+- Existing sessions without `maxThinkingTokens`: treated as `undefined` (SDK default)
+- No migration needed; new fields are optional
+
+### Rollout Plan
+
+1. Deploy server changes (backwards compatible)
+2. Deploy UI changes
+3. No feature flag needed
+
+---
+
+## 10. Open Questions
+
+1. ~~Model caching strategy~~ — Resolved: 5-min TTL, per-workspace
+
+2. **Thinking token display**: Show thinking token usage separately in UI? (Requires cost-token-transparency spec)
+
+3. ~~OpenCode parity~~ — Resolved: We expose thinking controls (OpenCode doesn't for Claude). This is a differentiator.
+
+4. **Default model**: What model to pre-select for new sessions? Options:
+   - First in `supportedModels()` list
+   - Last-used model per workspace (requires persistence)
+   - Hardcoded default (e.g., Sonnet 4)

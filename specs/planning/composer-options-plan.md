@@ -2,52 +2,51 @@
 
 Reference: [composer-options.md](../composer-options.md)
 
-## Phase 1: Server - Model Selection
+## Phase 1: Server - Models Endpoint
 
-- [ ] Add `maxThinkingTokens` field to `Session` type (§1)
-- [ ] Update `CreateSessionRequest` to accept `maxThinkingTokens` (§5)
-- [ ] Update `SendMessageRequest` to accept `modelId` and `maxThinkingTokens` overrides (§5)
-- [ ] Wire `maxThinkingTokens` in `buildSdkOptions()` (§5)
-- [ ] Create `GET /models` endpoint using SDK `supportedModels()` (§5)
-- [ ] Cache model list with TTL (avoid repeated SDK calls)
+- [ ] Create `GET /models` endpoint using SDK `supportedModels()` (§4)
+- [ ] Implement 5-minute TTL cache, per-workspace (§4)
+- [ ] Return `FALLBACK_MODELS` on SDK call failure (§4, §6)
+- [ ] Register route in `index.ts` (§2)
 
-## Phase 2: Server - Message Overrides
+## Phase 2: Server - Thinking Support
 
-- [ ] Update `POST /session/:id/message` to accept `modelId` override (§5)
-- [ ] Update `POST /session/:id/message` to accept `maxThinkingTokens` override (§5)
-- [ ] Pass overrides through to `buildSdkOptions()` (§5)
-- [ ] Emit model info in SSE events for UI display
+- [ ] Add `maxThinkingTokens` field to `Session` type (§3)
+- [ ] Update `CreateSessionRequest` to accept `maxThinkingTokens` (§4)
+- [ ] Update `SendMessageRequest` to accept `maxThinkingTokens` override (§4)
+- [ ] Wire `maxThinkingTokens` in `buildSdkOptions()` (§4)
+- [ ] Add `modelId` and `maxThinkingTokens` to SSE events (§4)
 
 ## Phase 3: Tauri Commands [BLOCKED by: Phase 1, 2]
 
-- [ ] Add `model_id` param to `claude_sdk_session_prompt` command (§7)
-- [ ] Add `max_thinking_tokens` param to `claude_sdk_session_prompt` command (§7)
-- [ ] Add `claude_sdk_models` command to fetch available models (§7)
+- [ ] Add `max_thinking_tokens` param to `claude_sdk_session_prompt` command (§4)
+- [ ] Add `claude_sdk_models` command to fetch available models (§4)
 - [ ] Update Rust types for new params
 
 ## Phase 4: Frontend Service Layer [BLOCKED by: Phase 3]
 
-- [ ] Update `claudeSdkSessionPrompt` service to accept options (§8)
-- [ ] Add `claudeSdkModels` service function (§8)
+- [ ] Update `claudeSdkSessionPrompt` service to accept `maxThinkingTokens` option
+- [ ] Add `claudeSdkModels` service function
 - [ ] Add `ThinkingMode` type and `THINKING_BUDGETS` mapping (§3)
 
 ## Phase 5: UI Components [BLOCKED by: Phase 4]
 
-- [ ] Create `ModelSelector.tsx` dropdown component (§4)
-- [ ] Create `ThinkingModeSelector.tsx` dropdown component (§4)
-- [ ] Create `ComposerOptions.tsx` container component (§4)
+- [ ] Create `ModelSelector.tsx` dropdown component (§2)
+- [ ] Create `ThinkingModeSelector.tsx` dropdown component (§2)
+- [ ] Create `ComposerOptions.tsx` container component (§2)
 - [ ] Style components to match existing design tokens
+- [ ] Disable dropdowns during message streaming (§5)
 
 ## Phase 6: Hook Integration [BLOCKED by: Phase 5]
 
-- [ ] Update `useClaudeSession` to include model/thinking state (§6)
-- [ ] Create `useComposerOptions` hook (§6)
-- [ ] Fetch models on session connect
+- [ ] Update `useClaudeSession` to include model/thinking state
+- [ ] Create `useComposerOptions` hook (§2)
+- [ ] Fetch models on session connect via `GET /models`
 - [ ] Wire state to prompt function
 
 ## Phase 7: Thread View Integration [BLOCKED by: Phase 6]
 
-- [ ] Add `ComposerOptions` to `ClaudeThreadView` above composer (§4)
+- [ ] Add `ComposerOptions` to `ClaudeThreadView` above composer (§2)
 - [ ] Pass selected options through to prompt call
 - [ ] Show current model/thinking state in UI
 
@@ -80,17 +79,23 @@ Reference: [composer-options.md](../composer-options.md)
 - [ ] Server returns model list from `/models` endpoint
 - [ ] Model selection persists for session
 - [ ] Thinking mode maps correctly to `maxThinkingTokens`
-- [ ] Per-message overrides work in prompt request
+- [ ] Per-message thinking override works in prompt request
+- [ ] UI Feature Validation:
+  - [ ] `cd daemon && cargo run -- --listen 127.0.0.1:55433 --insecure-no-auth`
+  - [ ] `cd app && bun run dev -- --host 127.0.0.1 --port 1420`
+  - [ ] `cd app && bun scripts/ui-composer-options.ts`
 
 ### Manual QA Checklist (do not mark—human verification)
 
 - [ ]? Model dropdown displays available models
-- [ ]? Thinking mode selector shows all options
+- [ ]? Thinking mode selector shows all options (off/low/medium/high/max)
 - [ ]? Selected model appears in SSE events
 - [ ]? Extended thinking produces reasoning blocks in response
+- [ ]? Dropdowns disabled during streaming
 
 ## Notes
 
-- Phase 1: SDK's `supportedModels()` requires an active query context. May need to call during session init or cache globally.
+- Phase 1: SDK's `supportedModels()` requires an active query context. Call during first message or cache globally on server init.
 - Phase 5: Design tokens for dropdowns should match existing select components if any exist.
-- The spec assumes SDK accepts `maxThinkingTokens` directly (verified in sdk.d.ts line 241).
+- Per-message model override removed from scope (§1 Non-Goals). Model is session-level only.
+- `undefined` vs `0` semantics clarified in §3: `undefined` = inherit, `0` = no thinking.
