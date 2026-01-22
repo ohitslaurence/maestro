@@ -295,8 +295,11 @@ fn spawn_server_process(workspace_path: &str, port: u16) -> Result<(Child, u32, 
     Ok((child, pid, base_url))
 }
 
-/// Monitor the server process and auto-restart on crash (once).
-/// Per spec §10 Design Decision 2: auto-restart once, then mark as Error.
+/// Maximum consecutive failures before marking server as Error (spec §5 step 6)
+const MAX_CONSECUTIVE_FAILURES: u32 = 2;
+
+/// Monitor the server process and auto-restart on crash.
+/// Per spec §5 step 6: After 2 consecutive failures, set status to Error and stop auto-retry.
 /// Per spec §5 step 4: On restart, try same port first; if EADDRINUSE, allocate new port.
 /// Per spec §5 step 5: On restart, if base_url changed, tear down old SSE bridge and start new one.
 async fn monitor_process(
@@ -307,10 +310,8 @@ async fn monitor_process(
     child_handle: Arc<Mutex<Option<Child>>>,
     state: Arc<DaemonState>,
 ) {
-    let mut restart_count = 0u32;
     let mut current_port = initial_port;
     let mut current_base_url = initial_base_url;
-    const MAX_RESTARTS: u32 = 1; // Auto-restart once on crash
 
     loop {
         // Wait for process exit
@@ -354,24 +355,34 @@ async fn monitor_process(
                 workspace_id, status
             );
 
-            if restart_count >= MAX_RESTARTS {
+            // Increment restart count in runtime state (spec §5 step 6)
+            let restart_count = state.increment_claude_server_restart_count(&workspace_id).await;
+            info!(
+                "[claude_sdk] Restart count for {}: {} (max: {})",
+                workspace_id, restart_count, MAX_CONSECUTIVE_FAILURES
+            );
+
+            if restart_count >= MAX_CONSECUTIVE_FAILURES {
                 error!(
-                    "Claude SDK server for {} crashed {} times, marking as Error",
-                    workspace_id,
-                    restart_count + 1
+                    "[claude_sdk] Server {} reached {} consecutive failures, marking as Error",
+                    workspace_id, restart_count
                 );
 
-                // Update server status to Error in state
-                // (Note: We can't directly update status field due to ownership,
-                // but the server will be removed and require explicit re-spawn)
-                state.remove_claude_sdk_server(&workspace_id).await;
+                // Update server status to Error (spec §5 step 6, §6)
+                state
+                    .update_claude_server_status(
+                        &workspace_id,
+                        ServerStatus::Error(format!(
+                            "Server crashed {} consecutive times",
+                            restart_count
+                        )),
+                    )
+                    .await;
                 return;
             }
 
-            // Attempt restart
-            restart_count += 1;
             info!(
-                "Attempting to restart Claude SDK server for {} (attempt {})",
+                "[claude_sdk] Attempting restart for {} (attempt {})",
                 workspace_id, restart_count
             );
 
@@ -518,16 +529,33 @@ async fn run_health_check(
 
     loop {
         if start.elapsed() > timeout {
+            // Increment restart count on health-check timeout (spec §5 step 6)
+            let restart_count = state.increment_claude_server_restart_count(&workspace_id).await;
             error!(
-                "[claude_sdk] Health-check timeout for {} after {:?}",
-                workspace_id, timeout
+                "[claude_sdk] Health-check timeout for {} after {:?} (failure count: {})",
+                workspace_id, timeout, restart_count
             );
-            state
-                .update_claude_server_status(
-                    &workspace_id,
-                    ServerStatus::Error("Health check timeout".to_string()),
-                )
-                .await;
+
+            if restart_count >= MAX_CONSECUTIVE_FAILURES {
+                // Set status to Error and stop auto-retry (spec §5 step 6, §6)
+                state
+                    .update_claude_server_status(
+                        &workspace_id,
+                        ServerStatus::Error(format!(
+                            "Health check timeout after {} consecutive failures",
+                            restart_count
+                        )),
+                    )
+                    .await;
+            } else {
+                // Keep as Starting to allow monitor to attempt restart
+                state
+                    .update_claude_server_status(
+                        &workspace_id,
+                        ServerStatus::Error("Health check timeout".to_string()),
+                    )
+                    .await;
+            }
             return;
         }
 
