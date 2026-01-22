@@ -196,3 +196,50 @@ export const THINKING_BUDGETS: Record<ThinkingMode, number | undefined> = {
   high: 16_000,
   max: 32_000,
 };
+
+// --- Permission types (dynamic-tool-approvals spec §3) ---
+
+/** Tool-specific context for permission UI */
+export type PermissionMetadata = {
+  description?: string;   // Human-readable description
+  filePath?: string;      // File operations
+  diff?: string;          // Edit: unified diff
+  command?: string;       // Bash command
+  url?: string;           // WebFetch URL
+  query?: string;         // WebSearch query
+};
+
+/** SDK-provided suggestion for "Always Allow" */
+export type PermissionSuggestion = {
+  type: "addRules" | "addDirectories";
+  patterns: string[];
+  description: string;
+};
+
+/** Permission request from the SDK (dynamic-tool-approvals spec §3) */
+export type PermissionRequest = {
+  id: string;                          // UUID
+  sessionId: string;
+  messageId: string;                   // Current assistant message ID
+  tool: string;                        // Tool name (Read, Write, Bash, etc.)
+  permission: string;                  // Permission type (read, write, bash, etc.)
+  input: Record<string, unknown>;      // Tool input (filepath, command, etc.)
+  patterns: string[];                  // Affected patterns (exact strings)
+  metadata: PermissionMetadata;        // Tool-specific context
+  suggestions: PermissionSuggestion[]; // SDK-provided "always allow" patterns
+  createdAt: number;
+};
+
+/** Reply type for permission requests */
+export type PermissionReply = "allow" | "deny" | "always";
+
+/** Response from permission reply endpoint */
+export type PermissionReplyResponse = {
+  success: boolean;
+  error?: string;
+};
+
+/** Response from pending permissions endpoint */
+export type PermissionPendingResponse = {
+  requests: PermissionRequest[];
+};

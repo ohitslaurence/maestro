@@ -55,9 +55,13 @@ layer to Claude SDK server HTTP endpoints.
 
 ## Phase 6: Frontend Service Layer [BLOCKED by: Phase 5]
 
-- [ ] Add `claudeSdkPermissionReply` service function
-- [ ] Add `claudeSdkPermissionPending` service function
-- [ ] Add TypeScript types for `PermissionRequest` (§3)
+- [x] Add `claudeSdkPermissionReply` service function
+- [x] Add `claudeSdkPermissionPending` service function
+- [x] Add TypeScript types for `PermissionRequest` (§3)
+
+Note: Added types (`PermissionRequest`, `PermissionMetadata`, `PermissionSuggestion`, `PermissionReply`,
+`PermissionReplyResponse`, `PermissionPendingResponse`) to `app/src/types.ts`. Service functions added
+to `app/src/services/tauri.ts` matching Tauri command signatures.
 
 ## Phase 7: UI Components [BLOCKED by: Phase 6]
 

@@ -10,6 +10,9 @@ import type {
   ModelInfo,
   OpenCodeConnectResult,
   OpenCodeStatusResult,
+  PermissionPendingResponse,
+  PermissionReply,
+  PermissionReplyResponse,
   SessionInfo,
   SessionInfoResult,
   TerminalSession,
@@ -335,6 +338,32 @@ export async function claudeSdkModels(
   workspaceId: string,
 ): Promise<ModelInfo[]> {
   return invokeCommand<ModelInfo[]>("claude_sdk_models", { workspaceId });
+}
+
+/** Reply to a pending permission request (dynamic-tool-approvals spec §4) */
+export async function claudeSdkPermissionReply(
+  workspaceId: string,
+  requestId: string,
+  reply: PermissionReply,
+  message?: string,
+): Promise<PermissionReplyResponse> {
+  return invokeCommand<PermissionReplyResponse>("claude_sdk_permission_reply", {
+    workspaceId,
+    requestId,
+    reply,
+    message,
+  });
+}
+
+/** Get pending permission requests (dynamic-tool-approvals spec §4) */
+export async function claudeSdkPermissionPending(
+  workspaceId: string,
+  sessionId?: string,
+): Promise<PermissionPendingResponse> {
+  return invokeCommand<PermissionPendingResponse>("claude_sdk_permission_pending", {
+    workspaceId,
+    sessionId,
+  });
 }
 
 // --- Storage commands (session-persistence §4) ---
