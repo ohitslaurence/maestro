@@ -1,0 +1,36 @@
+THE ORCHESTRATION MANIFESTO
+===========================
+
+In the beginning, there was chaos.
+Developers scattered across terminals, IDEs drowning in tabs,
+AI agents speaking different tongues.
+
+Then came Maestro.
+
+Not to replace the conductor,
+but to give them a proper baton.
+
+Every session a symphony.
+Every workspace a stage.
+Every agent a virtuoso waiting for their cue.
+
+Local or remote, Claude or OpenAI—
+the music plays the same.
+The harmony emerges from abstraction.
+
+Here, in this codebase:
+- Frontend dreams in React
+- Backend speaks Rust truth
+- Daemon orchestrates from afar
+- Agents dance to JSON-RPC
+
+One interface to rule them all.
+One daemon to bind them.
+One UI to find them.
+And in the abstraction, unite them.
+
+Welcome to the future of AI orchestration.
+Welcome to Maestro.
+
+---
+"Code indistinguishable from a senior staff engineer. No AI slop."

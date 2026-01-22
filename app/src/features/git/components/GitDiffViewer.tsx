@@ -98,6 +98,9 @@ const DiffCard = memo(function DiffCard({
           {statusLower.toUpperCase()}
         </span>
         <span className="diff-viewer-path">{entry.path}</span>
+        <span style={{ marginLeft: 8, fontSize: 10, color: "#888" }}>
+          [diff:{entry.diff?.length ?? 0} parsed:{fileDiff ? "yes" : "no"}]
+        </span>
       </div>
       {entry.diff.trim() ? (
         fileDiff ? (
