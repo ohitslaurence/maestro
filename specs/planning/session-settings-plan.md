@@ -42,10 +42,10 @@ Reference: [session-settings.md](../session-settings.md)
 
 ## Phase 6: useSessionSettings Hook [BLOCKED by: Phase 5]
 
-- [ ] Create `useSessionSettings` hook
-- [ ] Fetch current settings from session
-- [ ] Implement `updateSettings` with optimistic update (§5.1)
-- [ ] Handle error rollback (§6.2)
+- [x] Create `useSessionSettings` hook
+- [x] Fetch current settings from session
+- [x] Implement `updateSettings` with optimistic update (§5.1)
+- [x] Handle error rollback (§6.2)
 
 ## Phase 7: UI Components - Modal Shell [BLOCKED by: Phase 6]
 
