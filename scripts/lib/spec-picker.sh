@@ -105,14 +105,17 @@ discover_specs() {
 
 # Format spec entry for display in gum filter
 # Input: spec_path|plan_path|title|spec_status|last_updated
-# Output: [spec_status] title (last_updated)
+# Output: [spec_status] title (last_updated) - filename
 format_spec_display() {
   local entry="$1"
-  local spec_title spec_status spec_last_updated
+  local spec_path spec_title spec_status spec_last_updated
 
+  spec_path=$(echo "$entry" | cut -d'|' -f1)
   spec_title=$(echo "$entry" | cut -d'|' -f3)
   spec_status=$(echo "$entry" | cut -d'|' -f4)
   spec_last_updated=$(echo "$entry" | cut -d'|' -f5)
+  local spec_file
+  spec_file=$(basename "$spec_path")
 
   local display=""
   if [[ -n "$spec_status" ]]; then
@@ -122,6 +125,7 @@ format_spec_display() {
   if [[ -n "$spec_last_updated" ]]; then
     display+=" ($spec_last_updated)"
   fi
+  display+=" - $spec_file"
 
   printf '%s' "$display"
 }
