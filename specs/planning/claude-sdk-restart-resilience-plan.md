@@ -9,7 +9,7 @@ Reference: [claude-sdk-restart-resilience.md](../claude-sdk-restart-resilience.m
 
 ## Phase 2: Restart behavior updates [BLOCKED by: Phase 1]
 - [x] Implement health-check polling (100ms interval, 30s timeout) to transition `Starting` → `Ready` (See §5 step 3)
-- [ ] On unexpected exit, set status to `Starting`, wait 1s, respawn with same port (See §5 step 4)
+- [x] On unexpected exit, set status to `Starting`, wait 1s, respawn with same port (See §5 step 4)
 - [ ] On EADDRINUSE, allocate new port and update `base_url` (See §5 Edge Cases)
 - [ ] Restart SSE bridge when `base_url` changes (See §5 step 5)
 

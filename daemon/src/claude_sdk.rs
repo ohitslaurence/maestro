@@ -356,7 +356,12 @@ async fn monitor_process(
                 workspace_id, restart_count
             );
 
-            // Small delay before restart (per spec §5 step 4: wait 1s)
+            // Per spec §5 step 4: Set status to Starting before respawn
+            state
+                .update_claude_server_status(&workspace_id, ServerStatus::Starting)
+                .await;
+
+            // Per spec §5 step 4: Wait 1s before respawn
             tokio::time::sleep(Duration::from_secs(1)).await;
 
             // Try same port first (per spec §5 step 4)
