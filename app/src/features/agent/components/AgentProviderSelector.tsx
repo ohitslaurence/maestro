@@ -7,8 +7,8 @@ type AgentProviderSelectorProps = {
 };
 
 const PROVIDERS: { id: AgentHarness; label: string }[] = [
-  { id: "open_code", label: "OpenCode" },
   { id: "claude_code", label: "Claude" },
+  { id: "open_code", label: "OpenCode" },
 ];
 
 export function AgentProviderSelector({

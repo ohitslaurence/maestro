@@ -15,7 +15,7 @@ type AgentViewProps = {
  * on the selected provider.
  */
 export function AgentView({ workspaceId }: AgentViewProps) {
-  const [provider, setProvider] = useState<AgentHarness>("open_code");
+  const [provider, setProvider] = useState<AgentHarness>("claude_code");
 
   const handleProviderChange = useCallback((newProvider: AgentHarness) => {
     setProvider(newProvider);
