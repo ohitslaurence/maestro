@@ -65,13 +65,17 @@ to `app/src/services/tauri.ts` matching Tauri command signatures.
 
 ## Phase 7: UI Components [BLOCKED by: Phase 6]
 
-- [ ] Create `PermissionModal.tsx` component (§UI Components)
-- [ ] Create `PermissionContext.tsx` for tool-specific rendering (§UI Components)
-- [ ] Implement Edit context with diff viewer (§UI Components)
-- [ ] Implement Bash context with command display (§UI Components)
-- [ ] Implement Write/Read context with file path (§UI Components)
-- [ ] Implement WebFetch context with URL (§UI Components)
-- [ ] Style modal with existing design tokens
+- [x] Create `PermissionModal.tsx` component (§UI Components)
+- [x] Create `PermissionContext.tsx` for tool-specific rendering (§UI Components)
+- [x] Implement Edit context with diff viewer (§UI Components)
+- [x] Implement Bash context with command display (§UI Components)
+- [x] Implement Write/Read context with file path (§UI Components)
+- [x] Implement WebFetch context with URL (§UI Components)
+- [x] Style modal with existing design tokens
+
+Note: PermissionContext implemented inline in PermissionModal.tsx as `PermissionContextDisplay` function.
+Tool-specific contexts (Edit/diff, Bash/command, Write/path, WebFetch/url, WebSearch/query) all implemented.
+CSS styles added to daemon.css including `.permission-modal`, `.permission-context`, and `.btn--danger` classes.
 
 ## Phase 8: usePermissions Hook [BLOCKED by: Phase 7]
 

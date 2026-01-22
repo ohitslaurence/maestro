@@ -413,6 +413,146 @@
 }
 
 /* =============================================================================
+   Danger Button
+   ============================================================================= */
+
+.btn--danger {
+  background: var(--status-error);
+  color: white;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: var(--status-error);
+  filter: brightness(1.1);
+}
+
+/* =============================================================================
+   Permission Modal
+   ============================================================================= */
+
+.permission-modal {
+  max-width: 520px;
+}
+
+.permission-modal__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.permission-modal__icon {
+  font-size: var(--text-lg);
+}
+
+.permission-modal__tool {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.permission-modal__tool-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.permission-modal__tool-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-card);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+}
+
+.permission-modal__suggestions {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.permission-modal__suggestions-label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-2);
+}
+
+.permission-modal__suggestions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.permission-modal__suggestions-list li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--surface-card);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+}
+
+.permission-modal__suggestions-list code {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.permission-modal__suggestion-desc {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.permission-modal__footer {
+  justify-content: space-between;
+}
+
+/* Permission Context Display */
+
+.permission-context {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.permission-context p {
+  margin: 0 0 var(--space-2);
+}
+
+.permission-context code {
+  font-family: var(--font-mono);
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-card);
+  border-radius: var(--radius-sm);
+}
+
+.permission-context__diff,
+.permission-context__command,
+.permission-context__raw {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: var(--space-3);
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  overflow-x: auto;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+.permission-context__diff {
+  color: var(--text-secondary);
+}
+
+.permission-context__command {
+  color: var(--status-warning);
+}
+
+/* =============================================================================
    Welcome Button Override
    ============================================================================= */
 
