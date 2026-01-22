@@ -23,10 +23,10 @@ Reference: [session-settings.md](../session-settings.md)
 
 ## Phase 3: Server - SDK Integration [BLOCKED by: Phase 1]
 
-- [ ] Wire `maxTurns` from settings to `buildSdkOptions()` (§4.2)
-- [ ] Wire `customSystemPrompt` for custom mode (§4.2)
-- [ ] Wire `appendSystemPrompt` for append mode (§4.2)
-- [ ] Wire `disallowedTools` from settings (§4.2)
+- [x] Wire `maxTurns` from settings to `buildSdkOptions()` (§4.2)
+- [x] Wire `customSystemPrompt` for custom mode (§4.2)
+- [x] Wire `appendSystemPrompt` for append mode (§4.2)
+- [x] Wire `disallowedTools` from settings (§4.2)
 
 ## Phase 4: Tauri Commands [BLOCKED by: Phase 2]
 

@@ -793,6 +793,18 @@ function extractTextFromBlocks(blocks: unknown) {
   return { fullText, deltaText, hasDelta };
 }
 
+// Build system prompt options based on mode (§4.2)
+function buildSystemPromptOptions(config: SystemPromptConfig): Record<string, string> {
+  switch (config.mode) {
+    case 'default':
+      return {};
+    case 'append':
+      return { appendSystemPrompt: config.content! };
+    case 'custom':
+      return { customSystemPrompt: config.content! };
+  }
+}
+
 function extractReasoningFromBlocks(blocks: unknown) {
   let fullText = "";
   let deltaText = "";
@@ -1149,6 +1161,9 @@ async function runClaudeQuery(options: {
     });
   };
 
+  // Build SDK options from session settings (§4.2)
+  const settings = session.record.settings;
+
   try {
     const stream = query({
       prompt,
@@ -1163,6 +1178,12 @@ async function runClaudeQuery(options: {
         systemPrompt: defaultSystemPrompt,
         tools: defaultTools,
         ...(defaultPermissionMode ? { permissionMode: defaultPermissionMode } : {}),
+
+        // From session settings (§4.2)
+        maxTurns: settings.maxTurns,
+        ...buildSystemPromptOptions(settings.systemPrompt),
+        ...(settings.disallowedTools?.length ? { disallowedTools: settings.disallowedTools } : {}),
+
         canUseTool: async (toolName: string, input: Record<string, unknown>) => {
           if (toolName === "AskUserQuestion") {
             return {
