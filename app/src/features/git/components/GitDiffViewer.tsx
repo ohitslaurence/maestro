@@ -62,12 +62,17 @@ const DiffCard = memo(function DiffCard({
   );
 
   const fileDiff = useMemo((): FileDiffMetadata | null => {
+    console.log(`[DiffCard] path=${entry.path} diff.length=${entry.diff?.length ?? 0}`);
     if (!entry.diff.trim()) {
+      console.log(`[DiffCard] ${entry.path}: empty diff`);
       return null;
     }
+    console.log(`[DiffCard] ${entry.path}: diff preview:`, entry.diff.slice(0, 200));
     const patch = parsePatchFiles(entry.diff);
+    console.log(`[DiffCard] ${entry.path}: parsed patch:`, patch);
     const parsed = patch[0]?.files[0];
     if (!parsed) {
+      console.log(`[DiffCard] ${entry.path}: no parsed file`);
       return null;
     }
     const normalizedName = normalizePatchName(parsed.name || entry.path);
