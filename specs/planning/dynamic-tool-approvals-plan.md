@@ -4,7 +4,7 @@ Reference: [dynamic-tool-approvals.md](../dynamic-tool-approvals.md)
 
 ## Phase 1: Permission Manager Infrastructure
 
-- [ ] Create `PermissionRequest`, `PermissionReplyRequest`, `PendingPermission` types (§3)
+- [x] Create `PermissionRequest`, `PermissionReplyRequest`, `PendingPermission` types (§3)
 - [ ] Create `PermissionManager` class with pending request storage (§4)
 - [ ] Implement `request()` method that returns blocking Promise (§4)
 - [ ] Implement `reply()` method that resolves/rejects pending Promise (§4)
