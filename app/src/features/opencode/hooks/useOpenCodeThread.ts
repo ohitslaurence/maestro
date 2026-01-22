@@ -557,6 +557,7 @@ export function useOpenCodeThread({
         id: messageId,
         sessionID: event.sessionId,
         role: "assistant",
+        time: { created: event.timestampMs || Date.now() },
         parts: new Map(),
       };
       messagesRef.current.set(messageId, msg);
