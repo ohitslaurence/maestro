@@ -1,5 +1,5 @@
-export function workerFactory() {
-  return new Worker(new URL("@pierre/diffs/worker", import.meta.url), {
-    type: "module",
-  });
+import WorkerUrl from "@pierre/diffs/worker/worker.js?worker&url";
+
+export function workerFactory(): Worker {
+  return new Worker(WorkerUrl, { type: "module" });
 }
