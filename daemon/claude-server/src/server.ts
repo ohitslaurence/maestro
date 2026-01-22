@@ -766,12 +766,18 @@ function createSseResponse(options: { wrapWithDirectory: boolean }) {
   });
 }
 
-function emitSessionStatus(sessionID: string, status: "idle" | "busy" | "retry") {
+function emitSessionStatus(
+  sessionID: string,
+  status: "idle" | "busy" | "retry",
+  options?: { modelId?: string; maxThinkingTokens?: number }
+) {
   emitEvent("session.status", {
     sessionID,
     status: {
       type: status,
     },
+    ...(options?.modelId ? { modelId: options.modelId } : {}),
+    ...(options?.maxThinkingTokens !== undefined ? { maxThinkingTokens: options.maxThinkingTokens } : {}),
   });
 }
 
@@ -917,7 +923,10 @@ async function handleSessionMessage(req: Request, sessionId: string) {
   emitEvent("message.updated", { info: assistantMessageInfo });
 
   touchSession(session);
-  emitSessionStatus(session.record.id, "busy");
+  emitSessionStatus(session.record.id, "busy", {
+    modelId: modelID,
+    maxThinkingTokens: effectiveMaxThinkingTokens,
+  });
 
   const abortController = new AbortController();
   session.activeRun = {
@@ -1553,7 +1562,10 @@ const server = Bun.serve({
       console.log(`[session] modelId=default maxThinkingTokens=${maxThinkingTokens ?? "undefined"}`);
       persistSession(record, null, maxThinkingTokens);
 
-      emitEvent("session.created", { info: record });
+      emitEvent("session.created", {
+        info: record,
+        maxThinkingTokens,
+      });
 
       return jsonResponse(record);
     }
