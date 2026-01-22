@@ -1796,6 +1796,128 @@ const server = Bun.serve({
       return jsonResponse({ requests });
     }
 
+    // PATCH /session/:id/settings - Update session settings (§4.1)
+    if (pathname.startsWith("/session/") && pathname.endsWith("/settings") && req.method === "PATCH") {
+      const parts = pathname.split("/");
+      const sessionId = parts[2];
+      const session = sessions.get(sessionId);
+      if (!session) {
+        return jsonResponse({ error: "session_not_found", code: "SESSION_NOT_FOUND" }, 404);
+      }
+
+      type UpdateSettingsBody = {
+        settings?: {
+          maxTurns?: number | null;
+          systemPrompt?: { mode?: string; content?: string | null } | null;
+          disallowedTools?: string[] | null;
+        };
+      };
+
+      let body: UpdateSettingsBody | null = null;
+      try {
+        body = (await req.json()) as UpdateSettingsBody;
+      } catch {
+        body = null;
+      }
+
+      if (!body || typeof body.settings !== "object") {
+        return jsonResponse({ error: "invalid_request" }, 400);
+      }
+
+      const patch = body.settings;
+      const current = session.record.settings;
+      const errors: string[] = [];
+
+      // Merge semantics per §4.1:
+      // - undefined = leave unchanged
+      // - null = reset to default
+      // - value = set to value
+
+      // maxTurns validation
+      let maxTurns = current.maxTurns;
+      if (patch.maxTurns === null) {
+        maxTurns = DEFAULT_SESSION_SETTINGS.maxTurns;
+      } else if (patch.maxTurns !== undefined) {
+        if (typeof patch.maxTurns !== "number" || !Number.isInteger(patch.maxTurns) || patch.maxTurns < 1 || patch.maxTurns > 1000) {
+          errors.push("maxTurns must be an integer between 1 and 1000");
+        } else {
+          maxTurns = patch.maxTurns;
+        }
+      }
+
+      // systemPrompt validation
+      let systemPrompt = current.systemPrompt;
+      if (patch.systemPrompt === null) {
+        systemPrompt = { ...DEFAULT_SESSION_SETTINGS.systemPrompt };
+      } else if (patch.systemPrompt !== undefined) {
+        const sp = patch.systemPrompt;
+        const mode = sp.mode as 'default' | 'append' | 'custom' | undefined;
+        if (mode && !['default', 'append', 'custom'].includes(mode)) {
+          errors.push("systemPrompt.mode must be 'default', 'append', or 'custom'");
+        } else {
+          const effectiveMode = mode ?? current.systemPrompt.mode;
+          // Content handling: null resets, undefined keeps, value sets
+          let content: string | undefined;
+          if (sp.content === null) {
+            content = undefined;
+          } else if (sp.content !== undefined) {
+            content = sp.content;
+          } else {
+            content = current.systemPrompt.content;
+          }
+
+          // Validate content required for append/custom modes (§4.1)
+          if ((effectiveMode === 'append' || effectiveMode === 'custom') && (!content || content.trim() === '')) {
+            errors.push("systemPrompt.content is required when mode is 'append' or 'custom'");
+          } else {
+            systemPrompt = { mode: effectiveMode, content };
+          }
+        }
+      }
+
+      // disallowedTools validation
+      let disallowedTools = current.disallowedTools;
+      if (patch.disallowedTools === null) {
+        disallowedTools = undefined;
+      } else if (patch.disallowedTools !== undefined) {
+        if (!Array.isArray(patch.disallowedTools)) {
+          errors.push("disallowedTools must be an array of strings");
+        } else {
+          // Invalid tool names are silently ignored (SDK handles unknown tools) per §4.1
+          disallowedTools = patch.disallowedTools.filter((t): t is string => typeof t === "string");
+          // Empty array is equivalent to undefined (no tools blocked) per §3.1
+          if (disallowedTools.length === 0) {
+            disallowedTools = undefined;
+          }
+        }
+      }
+
+      if (errors.length > 0) {
+        return jsonResponse({
+          error: errors[0],
+          code: errors[0].includes("maxTurns") ? "INVALID_MAX_TURNS" : "MISSING_PROMPT_CONTENT",
+          details: errors,
+        }, 400);
+      }
+
+      // Apply merged settings
+      session.record.settings = { maxTurns, systemPrompt, disallowedTools };
+      session.record.time.updated = Date.now();
+
+      // Persist to storage
+      persistSession(session.record, session.resumeId, session.maxThinkingTokens);
+
+      console.log(`[session] settings updated: sessionId=${sessionId} maxTurns=${maxTurns} systemPromptMode=${systemPrompt.mode}`);
+
+      // Emit session.updated SSE event (§4.3)
+      emitEvent("session.updated", {
+        sessionId: session.record.id,
+        session: session.record,
+      });
+
+      return jsonResponse(session.record);
+    }
+
     // POST /permission/:requestId/reply - Reply to a pending permission (§4)
     if (pathname.startsWith("/permission/") && pathname.endsWith("/reply") && req.method === "POST") {
       const parts = pathname.split("/");

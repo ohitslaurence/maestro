@@ -14,12 +14,12 @@ Reference: [session-settings.md](../session-settings.md)
 
 ## Phase 2: Server - Settings Endpoint
 
-- [ ] Create `PATCH /session/:id/settings` endpoint (§4.1)
-- [ ] Implement merge semantics: undefined=unchanged, null=reset (§4.1)
-- [ ] Validate `maxTurns` range 1-1000 (§4.1)
-- [ ] Validate `systemPrompt.content` required for append/custom modes (§4.1)
-- [ ] Emit `session.updated` SSE event on change (§4.3)
-- [ ] Return updated session in response
+- [x] Create `PATCH /session/:id/settings` endpoint (§4.1)
+- [x] Implement merge semantics: undefined=unchanged, null=reset (§4.1)
+- [x] Validate `maxTurns` range 1-1000 (§4.1)
+- [x] Validate `systemPrompt.content` required for append/custom modes (§4.1)
+- [x] Emit `session.updated` SSE event on change (§4.3)
+- [x] Return updated session in response
 
 ## Phase 3: Server - SDK Integration [BLOCKED by: Phase 1]
 
