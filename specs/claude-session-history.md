@@ -11,6 +11,18 @@
 Expose persisted Claude SDK sessions in the Maestro UI so users can browse past
 sessions, rehydrate message history, and resume work without losing context.
 
+### References
+| File | Reason |
+| --- | --- |
+| `daemon/claude-server/src/server.ts` | Add `/session/:id/message` endpoint; existing session patterns |
+| `daemon/src/handlers/claude_sdk.rs` | Add RPC handler; existing `claude_sdk_session_list` pattern |
+| `daemon/src/protocol.rs` | Add protocol constant for new RPC method |
+| `app/src/services/tauri.ts` | Add Tauri wrapper; existing `claudeSdkSessionList` pattern |
+| `app/src/features/claudecode/components/ClaudeThreadView.tsx` | Wire session selection |
+| `app/src/features/claudecode/hooks/useClaudeSession.ts` | Extend session state management |
+| `app/src/features/opencode/hooks/useOpenCodeThread.ts` | Accept Claude history format |
+| `specs/streaming-event-schema.md` | Event schema for `message.updated`, etc. |
+
 ### Goals
 - List Claude sessions per workspace from the daemon-managed Claude SDK server.
 - Select a session to load message history into the existing thread UI.
@@ -87,8 +99,10 @@ daemon/claude-server/src/server.ts
 ```typescript
 type ClaudeSessionSummary = {
   id: string;
+  /** Auto-generated from first user message (truncated to 80 chars); empty string if no messages yet */
   title: string;
   parentID?: string;
+  /** Epoch milliseconds, UTC */
   time: { created: number; updated: number };
   settings: { maxTurns: number; systemPrompt: { mode: string }; disallowedTools?: string[] };
 };
@@ -97,8 +111,10 @@ type ClaudeMessageInfo = {
   id: string;
   sessionID: string;
   role: "user" | "assistant";
+  /** Epoch milliseconds, UTC */
   time: { created: number; completed?: number };
   summary?: { title?: string; body?: string | null };
+  /** Empty array for messages with no parts yet; omitted only for lightweight list views */
   parts?: ClaudePart[];
 };
 
@@ -115,6 +131,10 @@ type ClaudePart = {
 };
 ```
 
+### Ordering
+Messages returned by `/session/:id/message` are ordered **chronologically ascending**
+by `time.created` (oldest first). Parts within a message follow insertion order.
+
 ### Storage Schema (if any)
 No UI storage changes. The Claude SDK server continues to persist sessions and
 messages in `~/.maestro/claude/<workspace-hash>/sessions.sqlite`.
@@ -127,11 +147,14 @@ messages in `~/.maestro/claude/<workspace-hash>/sessions.sqlite`.
 | Layer | Interface | Purpose |
 | --- | --- | --- |
 | Claude server | `GET /session` | List sessions for the workspace |
-| Claude server | `GET /session/:id/message` | Return message + part history for a session |
+| Claude server | `GET /session/:id/message?limit=N` | Return message + part history (default 100, max 500) |
 | Daemon RPC | `claude_sdk_session_list` | Proxy session list to the UI |
 | Daemon RPC | `claude_sdk_session_messages` | Proxy session history to the UI |
 | Tauri | `claudeSdkSessionList(workspaceId)` | UI session list fetch |
 | Tauri | `claudeSdkSessionMessages(workspaceId, sessionId)` | UI history fetch |
+
+Note: `claudeSdkSessionPrompt` (used to send prompts to an existing session) is defined
+in `specs/claude-sdk-ui.md` and reused here for resume functionality.
 
 ### Internal APIs
 - `OpenCodeRegistry::proxy_get(base_url, "/session/:id/message")` in the daemon.
@@ -148,11 +171,16 @@ The UI continues to consume SSE events via `agent:stream_event`, including:
 ### Main Flow
 1. User selects a workspace and switches provider to Claude.
 2. ClaudeThreadView renders a Claude-only session list and calls `claudeSdkSessionList`.
-3. User selects a session; UI calls `claudeSdkSessionMessages` and hydrates
-   `useOpenCodeThread` with message history.
-4. User sends a new prompt; UI calls `claudeSdkSessionPrompt` using the selected
-   session ID.
+3. User selects a session; UI calls `claudeSdkSessionMessages` and **replaces** the
+   current thread state in `useOpenCodeThread` with the loaded history. Any unsent
+   draft text is preserved in the composer; pending requests are cancelled.
+4. User sends a new prompt; UI calls `claudeSdkSessionPrompt` (from `specs/claude-sdk-ui.md`)
+   using the selected session ID.
 5. Streaming events append to the hydrated thread as normal.
+
+### Concurrent Selection
+If the user clicks a new session while history is loading, the in-flight request is
+cancelled (AbortController) and the new session load proceeds.
 
 ### Edge Cases
 
@@ -162,6 +190,8 @@ The UI continues to consume SSE events via `agent:stream_event`, including:
 | Session not found (404) | Remove from list and prompt to refresh |
 | Server disconnected | Show reconnect error and disable selection |
 | History load fails | Show error banner and allow retry |
+| Empty session (0 messages) | Load succeeds with empty thread; ready for first prompt |
+| Session deleted externally | Next list refresh removes it; if selected, show "session unavailable" |
 
 ### Retry/Backoff (if any)
 Manual retry from the UI; SSE reconnection remains handled by the daemon.
@@ -216,5 +246,5 @@ Message history is fetched from the daemon over IPC only and kept in memory.
 ---
 
 ## 10. Open Questions
-1. Do we need a per-session retention limit in the UI to cap history size?
-2. Should history loading be paginated or full by default?
+1. Should the UI offer "load more" pagination for sessions exceeding the default 100-message limit?
+2. Should session list auto-refresh on SSE reconnect, or require manual refresh?

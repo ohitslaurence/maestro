@@ -3,8 +3,9 @@
 Reference: [claude-session-history.md](../claude-session-history.md)
 
 ## Phase 1: Claude server history endpoint
-- [ ] Add `GET /session/:id/message` to return message history with parts (See §4)
-- [ ] Ensure history payload aligns with `ClaudeMessageInfo` ordering (See §3, §5)
+- [ ] Add `GET /session/:id/message?limit=N` (default 100, max 500) to return message history with parts (See §4)
+- [ ] Return messages in chronological ascending order by `time.created` (See §3 Ordering)
+- [ ] Include all parts per message in insertion order (See §3 Ordering)
 
 ## Phase 2: Daemon and Tauri wiring [BLOCKED by: Phase 1]
 - [ ] Add `claude_sdk_session_messages` RPC handler and protocol constant (See §4)
@@ -13,7 +14,9 @@ Reference: [claude-session-history.md](../claude-session-history.md)
 ## Phase 3: UI session list and resume flow [BLOCKED by: Phase 2]
 - [ ] Add `useClaudeSessions` hook to fetch list + selection state (See §2, §5)
 - [ ] Add `ClaudeSessionList` UI and wire selection into `ClaudeThreadView` (See §2, §5)
-- [ ] Update `useOpenCodeThread` history loader to use Claude history API (See §5)
+- [ ] Update `useOpenCodeThread` to replace thread state on history load; preserve composer draft (See §5 Main Flow)
+- [ ] Implement AbortController for concurrent session selection (See §5 Concurrent Selection)
+- [ ] Handle edge cases: empty session, external deletion (See §5 Edge Cases)
 
 ## Files to Create
 - `app/src/features/claudecode/components/ClaudeSessionList.tsx`
