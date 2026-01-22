@@ -329,13 +329,19 @@ async fn monitor_process(
                         None
                     }
                     Err(e) => {
-                        warn!("Error checking process status for {}: {}", workspace_id, e);
+                        warn!(
+                            "[claude_sdk] Error checking process status for {}: {}",
+                            workspace_id, e
+                        );
                         None
                     }
                 }
             } else {
                 // No child process, monitor should exit
-                debug!("No child process for {}, stopping monitor", workspace_id);
+                debug!(
+                    "[claude_sdk] No child process for {}, stopping monitor",
+                    workspace_id
+                );
                 return;
             }
         };
@@ -552,10 +558,7 @@ async fn run_health_check(
             } else {
                 // Keep as Starting to allow monitor to attempt restart
                 state
-                    .update_claude_server_status(
-                        &workspace_id,
-                        ServerStatus::Error("Health check timeout".to_string()),
-                    )
+                    .update_claude_server_status(&workspace_id, ServerStatus::Starting)
                     .await;
             }
             return;
