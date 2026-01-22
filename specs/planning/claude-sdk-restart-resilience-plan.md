@@ -4,7 +4,7 @@ Reference: [claude-sdk-restart-resilience.md](../claude-sdk-restart-resilience.m
 
 ## Phase 1: Runtime tracking and port assignment
 - [x] Add `ClaudeServerRuntime` struct with `port`, `base_url`, `restart_count`, `status` to `DaemonState` (See §3)
-- [ ] Allocate an available port on initial spawn and pass via `MAESTRO_PORT` (See §5 step 1)
+- [x] Allocate an available port on initial spawn and pass via `MAESTRO_PORT` (See §5 step 1)
 - [ ] Add `/health` endpoint to `daemon/claude-server/src/server.ts` returning 200 OK (See §5 step 3)
 
 ## Phase 2: Restart behavior updates [BLOCKED by: Phase 1]

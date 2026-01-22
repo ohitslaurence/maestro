@@ -5,6 +5,7 @@
 
 use std::env;
 use std::io::{BufRead, BufReader};
+use std::net::TcpListener;
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Arc;
@@ -22,11 +23,25 @@ use crate::opencode::{OpenCodeDaemonEvent, EVENT_OPENCODE_EVENT};
 use crate::protocol::Event;
 use crate::state::DaemonState;
 
+/// Find an available port by binding to port 0 and returning the assigned port.
+/// Per spec §5 step 1: Daemon allocates an available port.
+fn find_available_port() -> Result<u16, String> {
+    let listener = TcpListener::bind("127.0.0.1:0")
+        .map_err(|e| format!("Failed to bind to ephemeral port: {e}"))?;
+    let port = listener
+        .local_addr()
+        .map_err(|e| format!("Failed to get local addr: {e}"))?
+        .port();
+    // Listener is dropped here, releasing the port for the server to use
+    Ok(port)
+}
+
 /// Claude SDK server instance for a workspace
 pub struct ClaudeSdkServer {
     pub workspace_id: String,
     pub workspace_path: String,
     pub base_url: String,
+    pub port: u16,
     #[allow(dead_code)]
     pub pid: u32,
     child: Arc<Mutex<Option<Child>>>,
@@ -36,19 +51,23 @@ pub struct ClaudeSdkServer {
 }
 
 impl ClaudeSdkServer {
-    /// Spawn a new Claude SDK server for the given workspace
+    /// Spawn a new Claude SDK server for the given workspace.
+    /// Per spec §5 step 1: Daemon allocates an available port and spawns with MAESTRO_PORT.
     pub fn spawn(workspace_id: String, workspace_path: String) -> Result<Self, String> {
-        let (child, pid, base_url) = spawn_server_process(&workspace_path)?;
+        let port = find_available_port()?;
+        info!("[claude_sdk] Allocated port {} for workspace {}", port, workspace_id);
+        let (child, pid, base_url) = spawn_server_process(&workspace_path, port)?;
 
         info!(
-            "Claude SDK server started at {} (pid: {})",
-            base_url, pid
+            "Claude SDK server started at {} (pid: {}, port: {})",
+            base_url, pid, port
         );
 
         Ok(Self {
             workspace_id,
             workspace_path,
             base_url,
+            port,
             pid,
             child: Arc::new(Mutex::new(Some(child))),
             sse_handle: None,
@@ -73,10 +92,11 @@ impl ClaudeSdkServer {
     pub fn start_process_monitor(&mut self, state: Arc<DaemonState>) {
         let workspace_id = self.workspace_id.clone();
         let workspace_path = self.workspace_path.clone();
+        let port = self.port;
         let child_handle = Arc::clone(&self.child);
 
         let handle = tokio::spawn(async move {
-            monitor_process(workspace_id, workspace_path, child_handle, state).await;
+            monitor_process(workspace_id, workspace_path, port, child_handle, state).await;
         });
 
         self.monitor_handle = Some(handle);
@@ -149,18 +169,20 @@ fn resolve_server_dir() -> Result<PathBuf, String> {
 }
 
 /// Spawn the server process and wait for the listening URL.
+/// Per spec §5 step 1: pass the allocated port via MAESTRO_PORT.
 /// Returns (Child, pid, base_url) on success.
-fn spawn_server_process(workspace_path: &str) -> Result<(Child, u32, String), String> {
+fn spawn_server_process(workspace_path: &str, port: u16) -> Result<(Child, u32, String), String> {
     let server_dir = resolve_server_dir()?;
     info!(
-        "[claude_sdk] Spawning server: workspace={} server_dir={}",
+        "[claude_sdk] Spawning server: workspace={} server_dir={} port={}",
         workspace_path,
-        server_dir.display()
+        server_dir.display(),
+        port
     );
 
     debug!("[claude_sdk] Running: bun run serve");
     debug!("[claude_sdk] Env: MAESTRO_WORKSPACE_DIR={}", workspace_path);
-    debug!("[claude_sdk] Env: MAESTRO_HOST=127.0.0.1 MAESTRO_PORT=0");
+    debug!("[claude_sdk] Env: MAESTRO_HOST=127.0.0.1 MAESTRO_PORT={}", port);
 
     // Use env var if set, otherwise default to acceptEdits (auto-approve file operations)
     let permission_mode = env::var("MAESTRO_CLAUDE_PERMISSION_MODE")
@@ -172,7 +194,7 @@ fn spawn_server_process(workspace_path: &str) -> Result<(Child, u32, String), St
         .current_dir(&server_dir)
         .env("MAESTRO_WORKSPACE_DIR", workspace_path)
         .env("MAESTRO_HOST", "127.0.0.1")
-        .env("MAESTRO_PORT", "0")
+        .env("MAESTRO_PORT", port.to_string())
         .env("MAESTRO_CLAUDE_PERMISSION_MODE", permission_mode)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -230,13 +252,16 @@ fn spawn_server_process(workspace_path: &str) -> Result<(Child, u32, String), St
 
 /// Monitor the server process and auto-restart on crash (once).
 /// Per spec §10 Design Decision 2: auto-restart once, then mark as Error.
+/// Per spec §5 step 4: On restart, try same port first; if EADDRINUSE, allocate new port.
 async fn monitor_process(
     workspace_id: String,
     workspace_path: String,
+    initial_port: u16,
     child_handle: Arc<Mutex<Option<Child>>>,
     state: Arc<DaemonState>,
 ) {
     let mut restart_count = 0u32;
+    let mut current_port = initial_port;
     const MAX_RESTARTS: u32 = 1; // Auto-restart once on crash
 
     loop {
@@ -302,22 +327,43 @@ async fn monitor_process(
                 workspace_id, restart_count
             );
 
-            // Small delay before restart
+            // Small delay before restart (per spec §5 step 4: wait 1s)
             tokio::time::sleep(Duration::from_secs(1)).await;
 
-            match spawn_server_process(&workspace_path) {
+            // Try same port first (per spec §5 step 4)
+            let spawn_result = spawn_server_process(&workspace_path, current_port);
+            let spawn_result = match spawn_result {
+                Ok(result) => Ok(result),
+                Err(e) if e.contains("EADDRINUSE") || e.contains("address already in use") => {
+                    // Port in use, allocate new port (per spec §5 Edge Cases)
+                    info!(
+                        "[claude_sdk] Port {} in use, allocating new port for {}",
+                        current_port, workspace_id
+                    );
+                    match find_available_port() {
+                        Ok(new_port) => {
+                            current_port = new_port;
+                            spawn_server_process(&workspace_path, new_port)
+                        }
+                        Err(port_err) => Err(port_err),
+                    }
+                }
+                Err(e) => Err(e),
+            };
+
+            match spawn_result {
                 Ok((new_child, new_pid, new_url)) => {
                     info!(
-                        "Claude SDK server for {} restarted at {} (pid: {})",
-                        workspace_id, new_url, new_pid
+                        "Claude SDK server for {} restarted at {} (pid: {}, port: {})",
+                        workspace_id, new_url, new_pid, current_port
                     );
 
                     // Store new child
                     let mut guard = child_handle.lock().await;
                     *guard = Some(new_child);
 
-                    // Note: base_url and pid are outdated in the ClaudeSdkServer struct
-                    // but SSE bridge will reconnect automatically via backoff
+                    // Update runtime state with new port/url if changed (per spec §5 Edge Cases)
+                    state.update_claude_server_url(&workspace_id, current_port, new_url).await;
                 }
                 Err(e) => {
                     error!(
