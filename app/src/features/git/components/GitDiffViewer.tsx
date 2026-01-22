@@ -62,17 +62,12 @@ const DiffCard = memo(function DiffCard({
   );
 
   const fileDiff = useMemo((): FileDiffMetadata | null => {
-    console.log(`[DiffCard] path=${entry.path} diff.length=${entry.diff?.length ?? 0}`);
     if (!entry.diff.trim()) {
-      console.log(`[DiffCard] ${entry.path}: empty diff`);
       return null;
     }
-    console.log(`[DiffCard] ${entry.path}: diff preview:`, entry.diff.slice(0, 200));
     const patch = parsePatchFiles(entry.diff);
-    console.log(`[DiffCard] ${entry.path}: parsed patch:`, patch);
     const parsed = patch[0]?.files[0];
     if (!parsed) {
-      console.log(`[DiffCard] ${entry.path}: no parsed file`);
       return null;
     }
     const normalizedName = normalizePatchName(parsed.name || entry.path);
@@ -98,17 +93,14 @@ const DiffCard = memo(function DiffCard({
           {statusLower.toUpperCase()}
         </span>
         <span className="diff-viewer-path">{entry.path}</span>
-        <span style={{ marginLeft: 8, fontSize: 10, color: "#888" }}>
-          [diff:{entry.diff?.length ?? 0} parsed:{fileDiff ? "yes" : "no"}]
-        </span>
       </div>
       {entry.diff.trim() ? (
         fileDiff ? (
-          <div className="diff-viewer-output diff-viewer-output-flat" style={{ minHeight: 100, border: "1px dashed red" }}>
+          <div className="diff-viewer-output diff-viewer-output-flat">
             <FileDiff
               fileDiff={fileDiff}
               options={diffOptions}
-              style={{ width: "100%", maxWidth: "100%", minWidth: 0, minHeight: 80 }}
+              style={{ width: "100%", maxWidth: "100%", minWidth: 0 }}
             />
           </div>
         ) : (
