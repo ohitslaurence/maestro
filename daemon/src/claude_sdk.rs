@@ -65,8 +65,8 @@ impl ClaudeSdkServer {
         let (child, pid, base_url) = spawn_server_process(&workspace_path, port)?;
 
         info!(
-            "Claude SDK server started at {} (pid: {}, port: {})",
-            base_url, pid, port
+            "[claude_sdk] Server started for workspace {}: base_url={} pid={} port={}",
+            workspace_id, base_url, pid, port
         );
 
         Ok(Self {
@@ -343,15 +343,15 @@ async fn monitor_process(
         if let Some(status) = exit_status {
             if status.success() {
                 info!(
-                    "Claude SDK server for {} exited cleanly",
+                    "[claude_sdk] Server exited cleanly: workspace={}",
                     workspace_id
                 );
                 return;
             }
 
-            // Process crashed
+            // Process crashed - log with workspace ID and exit status per spec §7
             warn!(
-                "Claude SDK server for {} crashed with status {:?}",
+                "[claude_sdk] Server crashed: workspace={} exit_status={:?}",
                 workspace_id, status
             );
 
@@ -417,9 +417,10 @@ async fn monitor_process(
 
             match spawn_result {
                 Ok((new_child, new_pid, new_url)) => {
+                    // Log restart success with workspace ID per spec §7
                     info!(
-                        "Claude SDK server for {} restarted at {} (pid: {}, port: {})",
-                        workspace_id, new_url, new_pid, current_port
+                        "[claude_sdk] Server restarted: workspace={} base_url={} pid={} port={} attempt={}",
+                        workspace_id, new_url, new_pid, current_port, restart_count
                     );
 
                     // Store new child
@@ -473,9 +474,10 @@ async fn monitor_process(
                     }
                 }
                 Err(e) => {
+                    // Log restart failure with workspace ID per spec §7
                     error!(
-                        "Failed to restart Claude SDK server for {}: {}",
-                        workspace_id, e
+                        "[claude_sdk] Restart failed: workspace={} error={} attempt={}",
+                        workspace_id, e, restart_count
                     );
                     state.remove_claude_sdk_server(&workspace_id).await;
                     return;
