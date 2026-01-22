@@ -18,9 +18,16 @@ Unlike CodexMonitor (which we reference heavily), Maestro is agent-harness agnos
 - `app/src-tauri/src/main.rs`: app entry point
 - `app/src-tauri/src/sessions.rs`: agent session management
 
+### Daemon (Rust + Bun)
+- `daemon/src/`: Rust daemon (JSON-RPC server, session management, git ops)
+- `daemon/claude-server/`: Claude SDK server (Bun) - **single-file implementation**
+  - `src/server.ts`: Complete server with SQLite storage, SSE events, permissions
+  - Spawned by daemon per workspace
+  - Do NOT create alternative implementations
+
 ### Specs & Reference
-- `specs/orchestrator.md`: main architecture spec
-- `specs/ROADMAP.md`: development phases
+- `specs/VISION.md`: product vision and north star
+- `specs/ROADMAP.md`: development phases and current status
 - `reference/codex-monitor/`: CodexMonitor subtree (read-only reference)
 
 ## Architecture Guidelines
@@ -194,3 +201,28 @@ git subtree pull --prefix=reference/codex-monitor https://github.com/Dimillian/C
 - Agent sessions are isolated per workspace/project
 - Remote daemon mode allows running agents on VPS while controlling from Mac
 - Future: mobile web UI via same daemon API
+
+## Anti-Patterns to Avoid
+
+### No Duplicate Implementations
+Before creating a new module/service:
+1. Search for existing implementations (`Glob`, `Grep`)
+2. Check specs for canonical locations
+3. If similar code exists, extend it rather than creating alternatives
+
+**Bad**: Creating `daemon/claude-server-v2/` when `daemon/claude-server/` already exists
+**Good**: Extending `daemon/claude-server/src/server.ts` with new features
+
+### No Modular Rewrites Without Consolidation
+If refactoring a single-file implementation into modules:
+1. Delete the old implementation
+2. Update all path references in specs
+3. Verify daemon/tauri code points to new location
+
+### Check Path Resolution
+The daemon resolves the Claude server via:
+```rust
+// daemon/src/claude_sdk.rs
+let candidates = [cwd.join("daemon/claude-server"), cwd.join("claude-server")];
+```
+Any new server location must match these patterns or update the resolution logic.

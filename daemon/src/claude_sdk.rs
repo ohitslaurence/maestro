@@ -123,12 +123,15 @@ impl Drop for ClaudeSdkServer {
 }
 
 fn resolve_server_dir() -> Result<PathBuf, String> {
-    if let Ok(dir) = env::var("MAESTRO_CLAUDE_SDK_DIR") {
+    if let Ok(dir) = env::var("MAESTRO_CLAUDE_SERVER_DIR") {
         return Ok(PathBuf::from(dir));
     }
 
     let cwd = env::current_dir().map_err(|e| format!("Failed to read cwd: {e}"))?;
-    let candidates = [cwd.join("daemon/claude-sdk"), cwd.join("claude-sdk")];
+    let candidates = [
+        cwd.join("daemon/claude-server"),
+        cwd.join("claude-server"),
+    ];
 
     for candidate in candidates {
         if candidate.exists() {
@@ -136,7 +139,7 @@ fn resolve_server_dir() -> Result<PathBuf, String> {
         }
     }
 
-    Err("Claude SDK server directory not found. Set MAESTRO_CLAUDE_SDK_DIR".to_string())
+    Err("Claude server directory not found. Set MAESTRO_CLAUDE_SERVER_DIR".to_string())
 }
 
 /// Spawn the server process and wait for the listening URL.

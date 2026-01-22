@@ -11,7 +11,7 @@ Development happens on the VPS where the daemon runs. The Claude SDK server can 
 ### Running the Claude SDK Server Standalone (Phases 1-8)
 
 ```bash
-cd daemon/claude-sdk-server
+cd daemon/claude-server
 bun run src/index.ts --port 9100 --directory /path/to/test/project
 
 # In another terminal
@@ -44,7 +44,7 @@ The daemon is already running on the VPS. Use the deploy script to restart after
 
 Set up the Bun/TypeScript project structure and basic HTTP server.
 
-- [x] Create `daemon/claude-sdk-server/` directory structure (§2)
+- [x] Create `daemon/claude-server/` directory structure (§2)
 - [x] Initialize Bun project with `package.json`, `tsconfig.json`
 - [x] Add dependencies: `@anthropic-ai/claude-code`, `hono`, `uuid`
 - [x] Implement `src/index.ts` with Hono HTTP server on configurable port
@@ -54,7 +54,7 @@ Set up the Bun/TypeScript project structure and basic HTTP server.
 
 **Verification:**
 ```bash
-cd daemon/claude-sdk-server && bun install && bun run src/index.ts
+cd daemon/claude-server && bun install && bun run src/index.ts
 curl http://localhost:9100/health  # → { "ok": true }
 ```
 
@@ -171,7 +171,7 @@ Validate the SSE event envelope + ordering against OpenCode expectations.
 **Verification:**
 ```bash
 # Run contract validation test (requires server running)
-cd daemon/claude-sdk-server && bun run test:contract
+cd daemon/claude-server && bun run test:contract
 ```
 
 ---
@@ -308,19 +308,19 @@ Connect frontend to Claude SDK sessions.
 
 ## Files to Create
 
-- `daemon/claude-sdk-server/package.json`
-- `daemon/claude-sdk-server/tsconfig.json`
-- `daemon/claude-sdk-server/src/index.ts`
-- `daemon/claude-sdk-server/src/types.ts`
-- `daemon/claude-sdk-server/src/routes/sessions.ts`
-- `daemon/claude-sdk-server/src/routes/messages.ts`
-- `daemon/claude-sdk-server/src/routes/events.ts`
-- `daemon/claude-sdk-server/src/sdk/agent.ts`
-- `daemon/claude-sdk-server/src/sdk/hooks.ts`
-- `daemon/claude-sdk-server/src/sdk/permissions.ts`
-- `daemon/claude-sdk-server/src/events/emitter.ts`
-- `daemon/claude-sdk-server/src/events/mapper.ts`
-- `daemon/claude-sdk-server/src/storage/sessions.ts`
+- `daemon/claude-server/package.json`
+- `daemon/claude-server/tsconfig.json`
+- `daemon/claude-server/src/index.ts`
+- `daemon/claude-server/src/types.ts`
+- `daemon/claude-server/src/routes/sessions.ts`
+- `daemon/claude-server/src/routes/messages.ts`
+- `daemon/claude-server/src/routes/events.ts`
+- `daemon/claude-server/src/sdk/agent.ts`
+- `daemon/claude-server/src/sdk/hooks.ts`
+- `daemon/claude-server/src/sdk/permissions.ts`
+- `daemon/claude-server/src/events/emitter.ts`
+- `daemon/claude-server/src/events/mapper.ts`
+- `daemon/claude-server/src/storage/sessions.ts`
 - `daemon/src/claude_server.rs` (or integrate into existing daemon module)
 
 ## Files to Modify
@@ -332,7 +332,7 @@ Connect frontend to Claude SDK sessions.
 ## Verification Checklist
 
 ### Implementation Checklist
-- [x] `cd daemon/claude-sdk-server && bun run src/index.ts` starts without error
+- [x] `cd daemon/claude-server && bun run src/index.ts` starts without error
 - [x] `curl http://localhost:9100/health` returns `{ "ok": true }`
 - [x] `curl http://localhost:9100/session` returns `[]`
 - [x] Session CRUD works via curl
