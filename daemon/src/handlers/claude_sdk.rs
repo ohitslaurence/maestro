@@ -280,3 +280,37 @@ pub async fn handle_session_abort(request: &Request, state: &DaemonState) -> Str
         }
     }
 }
+
+/// Handle claude_sdk_models request (composer-options spec §4)
+pub async fn handle_models(request: &Request, state: &DaemonState) -> String {
+    let params: OpenCodeWorkspaceParams = match serde_json::from_value(request.params.clone()) {
+        Ok(p) => p,
+        Err(e) => {
+            return serde_json::to_string(&ErrorResponse::new(
+                request.id,
+                INVALID_PARAMS,
+                format!("Invalid params: {e}"),
+            ))
+            .unwrap();
+        }
+    };
+
+    let base_url = match state.get_claude_sdk_server(&params.workspace_id).await {
+        Some(url) => url,
+        None => {
+            return serde_json::to_string(&ErrorResponse::new(
+                request.id,
+                CLAUDE_SDK_NOT_CONNECTED,
+                "Claude SDK not connected for this workspace",
+            ))
+            .unwrap();
+        }
+    };
+
+    match OpenCodeRegistry::proxy_get(&base_url, "/models", None).await {
+        Ok(result) => serde_json::to_string(&SuccessResponse::new(request.id, result)).unwrap(),
+        Err(e) => {
+            serde_json::to_string(&ErrorResponse::new(request.id, CLAUDE_SDK_ERROR, e)).unwrap()
+        }
+    }
+}

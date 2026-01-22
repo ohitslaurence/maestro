@@ -437,5 +437,19 @@ pub async fn claude_sdk_session_abort(
         .await
 }
 
+/// Fetch available models from Claude SDK server (composer-options spec §4)
+#[tauri::command]
+pub async fn claude_sdk_models(
+    workspace_id: String,
+    state: State<'_, Arc<DaemonState>>,
+) -> Result<Value, String> {
+    state
+        .call(
+            METHOD_CLAUDE_SDK_MODELS,
+            Some(OpenCodeWorkspaceParams { workspace_id }),
+        )
+        .await
+}
+
 // Helper to use serde_json::Value without importing in this file
 use serde_json::Value;

@@ -42,6 +42,7 @@ pub async fn dispatch(
         METHOD_CLAUDE_SDK_SESSION_CREATE => claude_sdk::handle_session_create(request, &state).await,
         METHOD_CLAUDE_SDK_SESSION_PROMPT => claude_sdk::handle_session_prompt(request, &state).await,
         METHOD_CLAUDE_SDK_SESSION_ABORT => claude_sdk::handle_session_abort(request, &state).await,
+        METHOD_CLAUDE_SDK_MODELS => claude_sdk::handle_models(request, &state).await,
         _ => {
             let resp = ErrorResponse::new(
                 request.id,

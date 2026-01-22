@@ -74,6 +74,7 @@ pub const METHOD_CLAUDE_SDK_SESSION_LIST: &str = "claude_sdk_session_list";
 pub const METHOD_CLAUDE_SDK_SESSION_CREATE: &str = "claude_sdk_session_create";
 pub const METHOD_CLAUDE_SDK_SESSION_PROMPT: &str = "claude_sdk_session_prompt";
 pub const METHOD_CLAUDE_SDK_SESSION_ABORT: &str = "claude_sdk_session_abort";
+pub const METHOD_CLAUDE_SDK_MODELS: &str = "claude_sdk_models";
 
 // --- Request params ---
 

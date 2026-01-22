@@ -129,6 +129,7 @@ pub fn run() {
             daemon::claude_sdk_session_create,
             daemon::claude_sdk_session_prompt,
             daemon::claude_sdk_session_abort,
+            daemon::claude_sdk_models,
             // Local-only commands (agent harness - future)
             sessions::spawn_session,
             sessions::stop_session,
